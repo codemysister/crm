@@ -1,0 +1,53 @@
+@import url('https://fonts.googleapis.com/css2?family=Sen:wght@400;500;600;700;800&display=swap');
+@layer tailwind-base, primereact, tailwind-utilities;
+
+@layer tailwind-base {
+  @tailwind base;
+}
+
+@layer tailwind-utilities {
+  @tailwind components;
+  @tailwind utilities;
+}
+
+@layer utilities {
+  .glass {
+    background: rgba(255, 255, 255, 0.158); /* Warna latar belakang dengan transparansi */
+    backdrop-filter: blur(10px); /* Efek blur untuk tampilan kaca */
+  }
+
+  .dark .p-paginator .p-paginator-pages .p-paginator-page {
+    color: white;
+  }
+
+    .dark .p-paginator .p-paginator-first,
+    .dark .p-paginator .p-paginator-prev,
+    .dark .p-paginator .p-paginator-next,
+    .dark .p-paginator .p-paginator-last {
+      color: white;
+    }
+
+    .p-datatable .p-datatable-header {
+      border-top-left-radius: 0.5rem;
+      border-top-right-radius: 0.5rem;
+    }
+
+    .dark .p-datatable .p-datatable-header {
+      background-color: transparent;
+    }
+
+    .dark .p-datatable .p-sortable-column.p-highlight .p-sortable-column-icon,
+    .dark .p-datatable .p-sortable-column .p-sortable-column-icon {
+      color: white;
+    }
+     
+
+}
+
+
+
+body{
+  font-family: 'Sen', sans-serif;
+}
+
+
