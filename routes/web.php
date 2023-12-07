@@ -1,6 +1,8 @@
 <?php
 
+use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\RoleController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -16,23 +18,44 @@ use Inertia\Inertia;
 |
 */
 
-Route::get('/', function () {
-    return Inertia::render('Welcome', [
-        'canLogin' => Route::has('login'),
-        'canRegister' => Route::has('register'),
-        'laravelVersion' => Application::VERSION,
-        'phpVersion' => PHP_VERSION,
-    ]);
+// Route::get('/', function () {
+//     return Inertia::render('Welcome', [
+//         'canLogin' => Route::has('login'),
+//         'canRegister' => Route::has('register'),
+//         'laravelVersion' => Application::VERSION,
+//         'phpVersion' => PHP_VERSION,
+//     ]);
+// });
+
+Route::redirect('/', '/login', 301);
+
+Route::get('/tes', function(){
+    return Inertia::render('tes');
 });
 
 Route::get('/dashboard', function () {
-    return Inertia::render('Dashboard');
+    return Inertia::render('Dashboard/Index');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+    
+    // Roles
+    Route::get('/role-permission', [RoleController::class, 'index'])->name('role-permission.view');
+    Route::post('/role', [RoleController::class, 'store'])->name('role.store');
+    Route::get('/api/role', [RoleController::class, 'apiGetRole'])->name('api.role');
+    Route::put('/api/role/{id}', [RoleController::class, 'apiUpdateRole'])->name('api.role.update');
+    Route::delete('/api/role/{id}', [RoleController::class, 'apiDeleteRole'])->name('api.role.delete');
+
+    // Permission
+    Route::get('/permission', [PermissionController::class, 'index'])->name('permission.view');
+    Route::post('/permission', [PermissionController::class, 'store'])->name('permission.store');
+    Route::get('/api/permission', [PermissionController::class, 'apiGetPermission'])->name('api.permission');
+    Route::get('/api/permission', [PermissionController::class, 'apiGetPermission'])->name('api.permission');
+    Route::put('/api/permission/{id}', [PermissionController::class, 'apiUpdatePermission'])->name('api.permission.update');
+    Route::delete('/api/permission/{id}', [PermissionController::class, 'apiDeletePermission'])->name('api.permission.delete');
 });
 
 require __DIR__.'/auth.php';

@@ -15,8 +15,12 @@
         @viteReactRefresh
         @vite(['resources/js/app.jsx', "resources/js/Pages/{$page['component']}.jsx"])
         @inertiaHead
+    
+        <script src="{{ asset('assets/js/cryptojs-aes.min.js') }}"></script>
+        <script src="{{ asset('assets/js/cryptojs-aes-format.js') }}"></script>
     </head>
     <body class="font-sans antialiased">
         @inertia
+        
     </body>
 </html>
