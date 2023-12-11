@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Nullix\CryptoJsAes\CryptoJsAes;
 use Spatie\Permission\Models\Permission;
+use Spatie\Permission\Models\Role;
 
 class PermissionController extends Controller
 {
@@ -18,27 +19,23 @@ class PermissionController extends Controller
 
     public function apiGetPermission(){
         $permissions = Permission::all();
-     
-        $permissionsEncrypted = CryptoJsAes::encrypt($permissions, env('VITE_ENCRYPTION_KEY'));
-        return response()->json($permissionsEncrypted);
+
+        return response()->json($permissions);
     }
 
     public function apiUpdatePermission(Request $request, $id)
     {
         $permission = Permission::find($id)->update(request()->all());
-
-        return response()->json([
-            "message" => "berhasil"
-        ]);
     }
 
     public function apiDeletePermission($id){
-        $permission = Permission::find($id)->delete();
-        return response()->json([
-            "message" => "berhasil"
-        ]);      
+        $permission = Permission::find($id)->delete();    
     }
-
+    
+    public function permissionSync(Request $request, $id){
+        $role = Role::find($id);
+        $role->syncPermissions($request->data);   
+    }
     /**
      * Show the form for creating a new resource.
      */
@@ -54,7 +51,7 @@ class PermissionController extends Controller
     {
         Permission::create([
             'name' => $request->name,
-            'guard_name' => $request->guard_name
+            'group_name' => $request->group_name
         ]);
     }
 

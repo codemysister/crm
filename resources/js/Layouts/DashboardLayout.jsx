@@ -582,7 +582,7 @@ export default function DashboardLayout({ user, children }) {
             {/* End Mobile sidebar */}
 
 
-            <div className="flex flex-col flex-1 w-full">
+            <div className="flex flex-col flex-1 w-full md:w-3/5">
                 <header className="z-10 py-4 bg-white shadow-lg dark:bg-transparent">
                     <div className="container flex items-center justify-between h-full px-6 mx-auto text-purple-600 dark:text-purple-300">
 

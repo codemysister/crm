@@ -12,7 +12,7 @@
 
 @layer utilities {
   .glass {
-    background: rgba(255, 255, 255, 0.158); /* Warna latar belakang dengan transparansi */
+    background: rgba(184, 181, 181, 0.158); /* Warna latar belakang dengan transparansi */
     backdrop-filter: blur(10px); /* Efek blur untuk tampilan kaca */
   }
 
@@ -41,6 +41,32 @@
       color: white;
     }
      
+    .dark .p-datatable .p-datatable-header {
+      border:none;
+    }
+
+    .dark .p-fluid .p-inputtext {
+      width: 100%;
+      color:rgb(175, 175, 175);
+      border: none;
+    }
+
+    .p-fluid .p-inputtext{
+      border: none;
+    }
+    
+    .dark .p-datatable-thead tr{
+      box-shadow: 0px 2px 3px rgba(0, 0, 0, 0.267);
+    }
+
+    .dark .shadow-custome{
+      box-shadow: 0px 2px 3px rgba(0, 0, 0, 0.267);
+    }
+    
+    .dark .paginator-custome{
+      box-shadow: 0px -2px 3px rgba(0, 0, 0, 0.267);
+      border: none;
+    }
 
 }
 

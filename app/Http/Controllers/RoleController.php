@@ -7,6 +7,7 @@ use Defuse\Crypto\Key;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Crypt;
 use Inertia\Inertia;
+use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 use Nullix\CryptoJsAes\CryptoJsAes;
 
@@ -17,8 +18,13 @@ class RoleController extends Controller
      */
     public function index()
     {
-        $roles = Role::all();
-        return Inertia::render("Role/Index", compact('roles'));
+        $rolesDefault = Role::with('permissions')->get();
+      
+        foreach($rolesDefault as $roles){
+            $roles['permissionIds'] = $roles->permissions->pluck('id')->toArray();
+        }
+        $permissionsDefault = Permission::all();
+        return Inertia::render("RolePermission/Index", compact('rolesDefault', 'permissionsDefault'));
     }
     /**
      * Store a newly created resource in storage.
@@ -34,18 +40,18 @@ class RoleController extends Controller
 
     public function apiGetRole()
     {
-        $roles = Role::all();
-       
-        $rolesEncrypted = CryptoJsAes::encrypt($roles, env('VITE_ENCRYPTION_KEY'));
-        return response()->json($rolesEncrypted);
+        $roles = Role::with('permissions')->get();
+        foreach($roles as $role){
+            $role['permissionIds'] = $role->permissions->pluck('id')->toArray();
+        }
+        return response()->json([
+            'roles' => $roles
+        ]);
     }
 
     public function apiUpdateRole(Request $request, $id)
     {
         $role = Role::find($id)->update(request()->all());
-        return response()->json([
-            "message" => "berhasil"
-        ]);
     }
 
 

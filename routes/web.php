@@ -56,6 +56,10 @@ Route::middleware('auth')->group(function () {
     Route::get('/api/permission', [PermissionController::class, 'apiGetPermission'])->name('api.permission');
     Route::put('/api/permission/{id}', [PermissionController::class, 'apiUpdatePermission'])->name('api.permission.update');
     Route::delete('/api/permission/{id}', [PermissionController::class, 'apiDeletePermission'])->name('api.permission.delete');
+    
+    // Roles & Permission sync
+    Route::put('/role-permission-sync/{id}', [PermissionController::class, 'permissionSync'])->name('permission.sync');
+
 });
 
 require __DIR__.'/auth.php';
