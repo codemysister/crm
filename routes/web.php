@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\PermissionController;
+use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RoleController;
 use Illuminate\Foundation\Application;
@@ -59,6 +60,13 @@ Route::middleware('auth')->group(function () {
     
     // Roles & Permission sync
     Route::put('/role-permission-sync/{id}', [PermissionController::class, 'permissionSync'])->name('permission.sync');
+    
+    // Product
+    Route::get('/product', [ProductController::class, 'index'])->name('product.view');
+    Route::post('/product', [ProductController::class, 'store'])->name('product.store');
+    Route::put('/product/{product:uuid}', [ProductController::class, 'update'])->name('product.update');
+    Route::delete('/product/{product:uuid}', [ProductController::class, 'destroy'])->name('product.destroy');
+    Route::get('/api/product', [ProductController::class, 'apiGetProducts'])->name('api.product');
 
 });
 

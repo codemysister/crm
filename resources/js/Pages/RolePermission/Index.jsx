@@ -145,9 +145,6 @@ const Index = ({auth, rolesDefault, permissionsDefault}) => {
         return <InputText type="text" className="rounded-lg text-center border-gray-300 dark:bg-gray-700 dark:text-white" value={options.value} onChange={(e) => options.editorCallback(e.target.value)} />;
     };
 
-    const rowEditorInitIcon = () => {
-        return <svg className="fill-slate-500 dark:fill-white" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" ><path d="M8.707 19.707 18 10.414 13.586 6l-9.293 9.293a1.003 1.003 0 0 0-.263.464L3 21l5.242-1.03c.176-.044.337-.135.465-.263zM21 7.414a2 2 0 0 0 0-2.828L19.414 3a2 2 0 0 0-2.828 0L15 4.586 19.414 9 21 7.414z"></path></svg>
-    }
 
     const rowEditorSaveIcon = () => {
         return <svg className="fill-slate-500 dark:fill-white" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="m10 15.586-3.293-3.293-1.414 1.414L10 18.414l9.707-9.707-1.414-1.414z"></path></svg>
@@ -163,7 +160,8 @@ const Index = ({auth, rolesDefault, permissionsDefault}) => {
     }
  
     const buttonDelete = (data, type) => {
-        return <button onClick={() => {
+        
+        return <Button icon="pi pi-trash" rounded outlined severity="danger" onClick={() => {
             confirmDialog({
                 message: 'Apakah Anda yakin untuk menghapus ini?',
                 header: 'Konfirmasi hapus',
@@ -181,8 +179,8 @@ const Index = ({auth, rolesDefault, permissionsDefault}) => {
                     showSuccess('Hapus');
                 },
             });
-        }}><svg className='fill-red-300' xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" ><path d="M6 7H5v13a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7H6zm10.618-3L15 2H9L7.382 4H3v2h18V4z"></path></svg>
-        </button>
+        }}>
+        </Button>
     }
 
 
@@ -244,12 +242,15 @@ const Index = ({auth, rolesDefault, permissionsDefault}) => {
 
     const renderHeader = () => {
         return (
-            <div className="dark:glass flex justify-content-end rounded-lg">
+            <div className="flex flex-row justify-left gap-2 align-items-center items-end">
+            <div className="w-[30%]">
                 <span className="p-input-icon-left">
-                    <i className="pi pi-search" />
-                    <InputText className='dark:bg-transparent dark:text-white' value={globalFilterValue} onChange={onGlobalFilterChange} placeholder="Keyword Search" />
+                    <i className="pi pi-search dark:text-white" />
+                    <InputText className='dark:bg-transparent dark:placeholder-white' value={globalFilterValue} onChange={onGlobalFilterChange} placeholder="Keyword Search" />
                 </span>
             </div>
+            </div>
+            
         );
     };
 
@@ -290,7 +291,7 @@ const Index = ({auth, rolesDefault, permissionsDefault}) => {
                 <Dialog
                     ref={modalRole}
                     header="Role"
-                    headerClassName="glass shadow-md dark:text-white"
+                    headerClassName="shadow-lg dark:text-white"
                     className="bg-white  dark:glass dark:text-white"
                     contentClassName=' dark:glass dark:text-white'
                     visible={modalRoleVisible}
@@ -323,7 +324,7 @@ const Index = ({auth, rolesDefault, permissionsDefault}) => {
                 <Dialog
                     ref={modalPermission}
                     header="Permission"
-                    headerClassName="glass shadow-md dark:text-white"
+                    headerClassName="shadow-md dark:text-white"
                     className="bg-white dark:glass dark:text-white"
                     style={{width:'50vw'}}
                     contentClassName=' dark:glass dark:text-white'
@@ -367,7 +368,7 @@ const Index = ({auth, rolesDefault, permissionsDefault}) => {
                         table: ' dark:bg-transparent bg-white rounded-lg dark:text-gray-300',
                         header: ''
                     }}
-                    value={roles} rowEditorInitIcon={rowEditorInitIcon} rowEditorCancelIcon={rowEditorCancelIcon} rowEditorSaveIcon={rowEditorSaveIcon} editMode="row" dataKey="id" onRowEditComplete={onRowRoleEditComplete} >
+                    value={roles} rowEditorCancelIcon={rowEditorCancelIcon} rowEditorSaveIcon={rowEditorSaveIcon} editMode="row" dataKey="id" onRowEditComplete={onRowRoleEditComplete} >
                         <Column field="name" className='dark:border-none' headerClassName='dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300' header="Role" align='left' editor={(options) => NameEditor(options)} style={{ width: '30%' }}></Column>
                         <Column field="guard_name" className='dark:border-none' headerClassName='dark:border-none  bg-transparent dark:bg-transparent dark:text-gray-300' align='left' header="Guard" editor={(options) => GuardEditor(options)} style={{ width: '30%' }}></Column>
                         <Column header="Action" className='dark:border-none' rowEditor headerClassName='dark:border-none  bg-transparent dark:bg-transparent dark:text-gray-300' colSpan={2} align='center' headerStyle={{ width: '5%', minWidth: '8rem' }} bodyStyle={{ textAlign: 'right' }}></Column>
@@ -390,7 +391,7 @@ const Index = ({auth, rolesDefault, permissionsDefault}) => {
                     header={header}
                     globalFilterFields={['name']}
                     style={{color: 'white'}}
-                    value={permissions} rowEditorInitIcon={rowEditorInitIcon} rowEditorCancelIcon={rowEditorCancelIcon} rowEditorSaveIcon={rowEditorSaveIcon} editMode="row" dataKey="id" onRowEditComplete={onRowPermissionEditComplete} >
+                    value={permissions} rowEditorCancelIcon={rowEditorCancelIcon} rowEditorSaveIcon={rowEditorSaveIcon} editMode="row" dataKey="id" onRowEditComplete={onRowPermissionEditComplete} >
                         <Column field="name" sortable className='dark:border-none' headerClassName='dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300' header="Perizinan" align='left' editor={(options) => NameEditor(options)} style={{ width: '30%' }}></Column>
                         <Column field="group_name" sortable className='dark:border-none' headerClassName='dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300' align='left' header="Grup" editor={(options) => GuardEditor(options)} style={{ width: '30%' }}></Column>
                         <Column 

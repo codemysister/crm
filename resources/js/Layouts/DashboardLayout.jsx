@@ -150,8 +150,8 @@ export default function DashboardLayout({ user, children }) {
                     ></span>
                     )}
                 <Link
-                    className={`inline-flex items-center ${currentPath == "/permission" ? 'text-gray-800 dark:text-gray-100' : ''} w-full text-sm font-semibold transition-colors duration-150 hover:text-gray-800 dark:hover:text-gray-200 `}
-                    href={route('permission.view')}
+                    className={`inline-flex items-center ${currentPath == "/product" ? 'text-gray-800 dark:text-gray-100' : ''} w-full text-sm font-semibold transition-colors duration-150 hover:text-gray-800 dark:hover:text-gray-200 `}
+                    href={route('product.view')}
                 >
                     <svg
                     className="w-5 h-5"
@@ -167,7 +167,7 @@ export default function DashboardLayout({ user, children }) {
                         d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
                     ></path>
                     </svg>
-                    <span className="ml-4">Cards</span>
+                    <span className="ml-4">Produk</span>
                 </Link>
                 </li>
                 <li className="relative px-6 py-3">
