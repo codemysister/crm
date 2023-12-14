@@ -24,13 +24,22 @@ class RoleController extends Controller
             $roles['permissionIds'] = $roles->permissions->pluck('id')->toArray();
         }
         $permissionsDefault = Permission::all();
-        return Inertia::render("RolePermission/Index", compact('rolesDefault', 'permissionsDefault'));
+        $permissionGroupsDefault = $permissionsDefault->pluck('group_name')->unique();
+
+        $permissionGroupsDefault = $permissionGroupsDefault->values();
+        
+        $permissionGroupsDefault = $permissionGroupsDefault->map(function ($groupName) {
+            return ['name' => $groupName];
+        });
+
+        return Inertia::render("RolePermission/Index", compact('rolesDefault', 'permissionsDefault', 'permissionGroupsDefault'));
     }
     /**
      * Store a newly created resource in storage.
      */
     public function store(Request $request)
     {
+
         Role::create([
             'name' => $request->name,
             'guard_name' => $request->guard_name
@@ -62,35 +71,7 @@ class RoleController extends Controller
         ]);      
     }
     
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
 
-    
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(Request $request, string $id)
     {
         //

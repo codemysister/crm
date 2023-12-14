@@ -9,18 +9,20 @@ use Spatie\Permission\Models\Role;
 
 class PermissionController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
-    {
-        //
-    }
 
     public function apiGetPermission(){
         $permissions = Permission::all();
 
-        return response()->json($permissions);
+        $permissionGroups = $permissions->pluck('group_name')->unique();
+
+        $permissionGroups = $permissionGroups->values();
+        
+        $permissionGroups = $permissionGroups->map(function ($groupName) {
+            return ['name' => $groupName];
+        });
+      
+
+        return response()->json(['permissions' => $permissions, 'permissionGroups' => $permissionGroups]);
     }
 
     public function apiUpdatePermission(Request $request, $id)
@@ -36,17 +38,7 @@ class PermissionController extends Controller
         $role = Role::find($id);
         $role->syncPermissions($request->data);   
     }
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
+   
     public function store(Request $request)
     {
         Permission::create([
@@ -55,35 +47,4 @@ class PermissionController extends Controller
         ]);
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
-    }
 }

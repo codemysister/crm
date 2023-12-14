@@ -16,40 +16,46 @@ class PermissionSeeder extends Seeder
     {
 
         // Quotation letter / sph
-        Permission::create(['name' => 'view_sph', 'group_name' => 'Surat Penawaran Harga (SPH)']);
-        Permission::create(['name' => 'add_sph', 'group_name' => 'Surat Penawaran Harga (SPH)']);
+        Permission::create(['name' => 'lihat_sph', 'group_name' => 'Surat Penawaran Harga (SPH)']);
+        Permission::create(['name' => 'tambah_sph', 'group_name' => 'Surat Penawaran Harga (SPH)']);
         Permission::create(['name' => 'edit_sph', 'group_name' => 'Surat Penawaran Harga (SPH)']);
-        Permission::create(['name' => 'delete_sph', 'group_name' => 'Surat Penawaran Harga (SPH)']);
+        Permission::create(['name' => 'hapus_sph', 'group_name' => 'Surat Penawaran Harga (SPH)']);
 
         // MOU
-        Permission::create(['name' => 'view_mou', 'group_name' => 'Mou']);
-        Permission::create(['name' => 'add_mou', 'group_name' => 'Mou']);
+        Permission::create(['name' => 'lihat_mou', 'group_name' => 'Mou']);
+        Permission::create(['name' => 'tambah_mou', 'group_name' => 'Mou']);
         Permission::create(['name' => 'edit_mou', 'group_name' => 'Mou']);
-        Permission::create(['name' => 'delete_mou', 'group_name' => 'Mou']);
+        Permission::create(['name' => 'hapus_mou', 'group_name' => 'Mou']);
 
         // General Invoice
-        Permission::create(['name' => 'view_general_invoice', 'group_name' => 'Invoice Umum']);
-        Permission::create(['name' => 'add_general_invoice', 'group_name' => 'Invoice Umum']);
-        Permission::create(['name' => 'edit_general_invoice', 'group_name' => 'Invoice Umum']);
-        Permission::create(['name' => 'delete_general_invoice', 'group_name' => 'Invoice Umum']);
+        Permission::create(['name' => 'lihat_invoice_umum', 'group_name' => 'Invoice Umum']);
+        Permission::create(['name' => 'tambah_invoice_umum', 'group_name' => 'Invoice Umum']);
+        Permission::create(['name' => 'edit_invoice_umum', 'group_name' => 'Invoice Umum']);
+        Permission::create(['name' => 'hapus_invoice_umum', 'group_name' => 'Invoice Umum']);
 
         // Subscription Invoice
-        Permission::create(['name' => 'view_subscription_invoice', 'group_name' => 'Invoice Langganan']);
-        Permission::create(['name' => 'add_subscription_invoice', 'group_name' => 'Invoice Langganan']);
-        Permission::create(['name' => 'edit_subscription_invoice', 'group_name' => 'Invoice Langganan']);
-        Permission::create(['name' => 'delete_subscription_invoice', 'group_name' => 'Invoice Langganan']);
+        Permission::create(['name' => 'lihat_invoice_langganan', 'group_name' => 'Invoice Langganan']);
+        Permission::create(['name' => 'tambah_invoice_langganan', 'group_name' => 'Invoice Langganan']);
+        Permission::create(['name' => 'edit_invoice_langganan', 'group_name' => 'Invoice Langganan']);
+        Permission::create(['name' => 'hapus_invoice_langganan', 'group_name' => 'Invoice Langganan']);
 
         // Receipt
-        Permission::create(['name' => 'view_receipt', 'group_name' => 'Kwitansi']);
-        Permission::create(['name' => 'add_receipt', 'group_name' => 'Kwitansi']);
-        Permission::create(['name' => 'edit_receipt', 'group_name' => 'Kwitansi']);
-        Permission::create(['name' => 'delete_receipt', 'group_name' => 'Kwitansi']);
-
+        Permission::create(['name' => 'lihat_kwitansi', 'group_name' => 'Kwitansi']);
+        Permission::create(['name' => 'tambah_kwitansi', 'group_name' => 'Kwitansi']);
+        Permission::create(['name' => 'edit_kwitansi', 'group_name' => 'Kwitansi']);
+        Permission::create(['name' => 'hapus_kwitansi', 'group_name' => 'Kwitansi']);
+        
         // Official travel letter / spd
-        Permission::create(['name' => 'view_spd', 'group_name' => 'Surat Perjalanan Dinas (SPD)']);
-        Permission::create(['name' => 'add_spd', 'group_name' => 'Surat Perjalanan Dinas (SPD)']);
+        Permission::create(['name' => 'lihat_spd', 'group_name' => 'Surat Perjalanan Dinas (SPD)']);
+        Permission::create(['name' => 'tambah_spd', 'group_name' => 'Surat Perjalanan Dinas (SPD)']);
         Permission::create(['name' => 'edit_spd', 'group_name' => 'Surat Perjalanan Dinas (SPD)']);
-        Permission::create(['name' => 'delete_spd', 'group_name' => 'Surat Perjalanan Dinas (SPD)']);
+        Permission::create(['name' => 'hapus_spd', 'group_name' => 'Surat Perjalanan Dinas (SPD)']);
+        
+        // Product
+        Permission::create(['name' => 'lihat_produk', 'group_name' => 'Produk']);
+        Permission::create(['name' => 'tambah_produk', 'group_name' => 'Produk']);
+        Permission::create(['name' => 'edit_produk', 'group_name' => 'Produk']);
+        Permission::create(['name' => 'hapus_produk', 'group_name' => 'Produk']);
              
     }
 }

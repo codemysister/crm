@@ -21,6 +21,7 @@ export default function Index({auth, productsDefault}) {
     const [modalEditProductIsVisible, setModalEditProductIsVisible] = useState(false);
     const toast = useRef(null);
     const modalProduct = useRef(null);
+    const {roles, permissions} = auth.user;
 
     const { data, setData, post, put, delete: destroy, reset, processing, errors }  = useForm({
         uuid: '',
@@ -34,7 +35,7 @@ export default function Index({auth, productsDefault}) {
     const getProducts = async () => {
         setIsLoadingData(true)
         
-        let response = await fetch('/api/product');
+        let response = await fetch('/api/products');
         let data = await response.json();
    
         setProducts(prev => data);
@@ -68,9 +69,6 @@ export default function Index({auth, productsDefault}) {
         toast.current.show({severity:'error', summary: 'Error', detail:`${type} data gagal`, life: 3000});
     }
 
-    const addButtonIcon = () => {
-        return <i className="pi pi-plus" style={{ fontSize: '0.7rem', paddingRight: '5px' }}></i>
-    }
 
     const handleEditProduct = (product) => {
 
@@ -115,13 +113,17 @@ export default function Index({auth, productsDefault}) {
         </div>
     );
 
+    const addButtonIcon = () => {
+        return <i className="pi pi-plus" style={{ fontSize: '0.7rem', paddingRight: '5px' }}></i>
+    }
+
     const handleSubmitForm = (e, type) => {
    
         e.preventDefault();
 
         if(type ==='tambah'){
             
-            post('/product', {
+            post('/products', {
                 onSuccess: () => {
                     showSuccess('Tambah');
                     setModalProductIsVisible(prev => false);
@@ -135,7 +137,7 @@ export default function Index({auth, productsDefault}) {
             
         }else{
 
-            put('/product/'+data.uuid, {
+            put('/products/'+data.uuid, {
                 onSuccess: () => {
                     showSuccess('Update');
                     setModalEditProductIsVisible(prev => false);
@@ -157,10 +159,12 @@ export default function Index({auth, productsDefault}) {
             <ConfirmDialog />
 
             <HeaderModule title="Produk">
+            {permissions.includes('tambah_produk') && (
                 <Button label="Tambah" className="bg-purple-600 text-sm shadow-md rounded-lg mr-2" icon={addButtonIcon} onClick={() => {
                     setModalProductIsVisible(prev => prev=true)
                     reset('name','category','price','unit','description')
                     }} aria-controls="popup_menu_right" aria-haspopup />
+            )}
             </HeaderModule>
 
             {/* Modal tambah produk */}
@@ -253,7 +257,7 @@ export default function Index({auth, productsDefault}) {
                 </Dialog>
              </div>
 
-
+                    {console.log(permissions.includes('tambah_produk'))}
             <div className='flex w-[95%] max-w-[95%] mx-auto flex-col justify-center mt-5 gap-5'>
                 <div className="card p-fluid w-full h-full flex justify-center rounded-lg">
                 <DataTable
@@ -261,22 +265,26 @@ export default function Index({auth, productsDefault}) {
                     className="w-full h-auto rounded-lg dark:glass border-none text-center shadow-md" 
                     pt={{
                         bodyRow: 'dark:bg-transparent bg-transparent dark:text-gray-300',
-                        table: ' dark:bg-transparent bg-white rounded-lg dark:text-gray-300',
+                        table: 'dark:bg-transparent bg-white rounded-lg dark:text-gray-300',
                         header: ''
                     }}
                     paginator 
                     rows={5}
-                    emptyMessage="Permission tidak ditemukan."
+                    emptyMessage="Produk tidak ditemukan."
                     paginatorClassName="dark:bg-transparent paginator-custome dark:text-gray-300 rounded-b-lg"
                     header={header}
                     value={products} dataKey="id" >
+                        <Column header="No" body={(_, { rowIndex }) => rowIndex + 1} className='dark:border-none pl-6' headerClassName='dark:border-none pl-6 bg-transparent dark:bg-transparent dark:text-gray-300'/>
                         <Column field="uuid" hidden className='dark:border-none' headerClassName='dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300' header="Nama" align='left' style={{ width: '20%' }}></Column>
                         <Column field="name" className='dark:border-none' headerClassName='dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300' header="Nama" align='left' style={{ width: '20%' }}></Column>
                         <Column field="category" className='dark:border-none' headerClassName='dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300' header="Kategori" align='left' style={{ width: '20%' }}></Column>
                         <Column field="price" className='dark:border-none' headerClassName='dark:border-none  bg-transparent dark:bg-transparent dark:text-gray-300' align='left' header="Harga" style={{ width: '10%' }}></Column>
                         <Column field="unit" className='dark:border-none' headerClassName='dark:border-none  bg-transparent dark:bg-transparent dark:text-gray-300' align='left' header="Unit" style={{ width: '10%' }}></Column>
-                        <Column field="description" className='dark:border-none' headerClassName='dark:border-none  bg-transparent dark:bg-transparent dark:text-gray-300' align='left' header="Deskripsi" style={{ width: '30%' }}></Column>
-                        <Column header="Action" body={actionBodyTemplate} style={{ minWidth: '12rem' }} className='dark:border-none' headerClassName='dark:border-none  bg-transparent dark:bg-transparent dark:text-gray-300'></Column>
+                        <Column field="description" className='dark:border-none' headerClassName='dark:border-none  bg-transparent dark:bg-transparent dark:text-gray-300' align='left' header="Deskripsi" style={{ width: '20%' }}></Column>
+                        {(permissions.includes('hapus_produk') && permissions.includes('edit_produk')) && (
+                            <Column header="Action" body={actionBodyTemplate} style={{ minWidth: '12rem' }} className='dark:border-none' headerClassName='dark:border-none  bg-transparent dark:bg-transparent dark:text-gray-300'></Column>
+                        )}
+                    
                     </DataTable>
                 </div>
 

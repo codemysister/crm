@@ -14,6 +14,6 @@ class UserRoleSeeder extends Seeder
     public function run(): void
     {
         $super_admin = User::find(1);
-        $super_admin->assignRole("super_admin");
+        $super_admin->assignRole("super admin");
     }
 }

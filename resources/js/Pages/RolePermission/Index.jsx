@@ -19,9 +19,10 @@ import { Dropdown } from 'primereact/dropdown';
 import { ProgressSpinner } from 'primereact/progressspinner';
 import React from 'react';
 
-const Index = ({auth, rolesDefault, permissionsDefault}) => { 
+const Index = ({auth, rolesDefault, permissionsDefault, permissionGroupsDefault}) => { 
     const [roles, setRoles] = useState(rolesDefault);
     const [permissions, setPermissions] = useState(permissionsDefault);
+    const [permissionGroups, setPermissionGroups] = useState(permissionGroupsDefault);
     const [modalRoleVisible, setModalRoleVisible] = useState(false);
     const [modalPermissionVisible, setModalPermissionVisible] = useState(false);
     const [isLoadingData, setIsLoadingData] = useState(false);
@@ -33,6 +34,7 @@ const Index = ({auth, rolesDefault, permissionsDefault}) => {
     let prevPermissionGroupName = '';
     let isPrevPermissionGroupNameSame = false;
 
+   
     // Role
     const { data, setData, post, put, reset, processing, errors }  = useForm({
         name: '',
@@ -55,7 +57,7 @@ const Index = ({auth, rolesDefault, permissionsDefault}) => {
         
         setIsLoadingData(true)
         
-        let response = await fetch('/api/role');
+        let response = await fetch('/api/roles');
         let data = await response.json();
    
         setRoles(prev => data.roles);
@@ -66,10 +68,11 @@ const Index = ({auth, rolesDefault, permissionsDefault}) => {
         
         setIsLoadingData(true)
         
-        let response = await fetch('/api/permission');
-        let permissions = await response.json();
+        let response = await fetch('/api/permissions');
+        let data = await response.json();
 
-        setPermissions(prev => permissions);
+        setPermissions(prev => data.permissions);
+        setPermissionGroups(prev => data.permissionGroups);
         setIsLoadingData(false)
     }
     
@@ -88,7 +91,7 @@ const Index = ({auth, rolesDefault, permissionsDefault}) => {
             data.name = newData.name;
             data.guard_name = newData.guard_name;
 
-            put(`/api/role/${newData.id}`, {
+            put(`/api/roles/${newData.id}`, {
                 onSuccess: ()=>{
                     data.name = '';
                     getRoles();
@@ -113,7 +116,7 @@ const Index = ({auth, rolesDefault, permissionsDefault}) => {
             permissionInput.group_name = newData.group_name;
         
 
-            putPermission(`/api/permission/${newData.id}`, {
+            putPermission(`/api/permissions/${newData.id}`, {
                 onSuccess: () => {
                     permissionInput.name = '';
                     getPermission();
@@ -170,10 +173,10 @@ const Index = ({auth, rolesDefault, permissionsDefault}) => {
                 accept : async ()=> {
                     
                     if(type==='role'){
-                        await axios.delete('/api/role/'+ data.id, {method:'delete'});
+                        await axios.delete('/api/roles/'+ data.id, {method:'delete'});
                         getRoles();
                     }else{
-                        await axios.delete('/api/permission/'+ data.id, {method:'delete'});
+                        await axios.delete('/api/permissions/'+ data.id, {method:'delete'});
                         getPermission();
                     }
                     showSuccess('Hapus');
@@ -186,7 +189,8 @@ const Index = ({auth, rolesDefault, permissionsDefault}) => {
 
     const handleSubmitForm = (e, type) => {
         e.preventDefault();
-        if(type == 'role'){
+       
+        if(type == 'roles'){
             post('/'+type, {
                 onSuccess: () => {
                     showSuccess('Tambah');
@@ -299,7 +303,7 @@ const Index = ({auth, rolesDefault, permissionsDefault}) => {
                     style={{width:'50vw'}}
                     // breakpoints={{ '960px': '30vw', '641px': '30vw', '0px' : '30vw' }}
                 >
-                    <form onSubmit={(e) => handleSubmitForm(e, 'role')}>    
+                    <form onSubmit={(e) => handleSubmitForm(e, 'roles')}>    
                     <div className='flex flex-col justify-around gap-4 mt-4'>
                         <div className='flex flex-col'>   
                             <label htmlFor="name">Role</label>
@@ -333,7 +337,7 @@ const Index = ({auth, rolesDefault, permissionsDefault}) => {
                     onHide={() => setModalPermissionVisible(false)}
                    
                 >
-                    <form onSubmit={(e) => handleSubmitForm(e, 'permission')}>    
+                    <form onSubmit={(e) => handleSubmitForm(e, 'permissions')}>    
                     <div className='flex flex-col justify-around gap-4 mt-4'>
                         <div className='flex flex-col'>   
                             <label htmlFor="name">Permission</label>
@@ -341,8 +345,10 @@ const Index = ({auth, rolesDefault, permissionsDefault}) => {
                         </div>
                         <div className='flex flex-col'>
                             <label htmlFor="group_name">Grup</label>
-                            <InputText id="group_name" value={permissionInput.group_name} onChange={(e) => setPermissionInput('guard_name', e.target.value)} aria-describedby="guard_name-help" />
+                            <Dropdown editable value={permissionInput.group_name} onChange={(e) => setPermissionInput('group_name', e.target.value)} options={permissionGroups} optionLabel="name" 
+                             placeholder="Pilih Grup" className="w-full md:w-14rem" />
                         </div>
+                        
                     </div>
                     <div className='flex justify-center mt-4'>
                         <Button
@@ -369,6 +375,7 @@ const Index = ({auth, rolesDefault, permissionsDefault}) => {
                         header: ''
                     }}
                     value={roles} rowEditorCancelIcon={rowEditorCancelIcon} rowEditorSaveIcon={rowEditorSaveIcon} editMode="row" dataKey="id" onRowEditComplete={onRowRoleEditComplete} >
+                        <Column header="No" body={(_, { rowIndex }) => rowIndex + 1} className='dark:border-none pl-6' headerClassName='pl-6 dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300'/>
                         <Column field="name" className='dark:border-none' headerClassName='dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300' header="Role" align='left' editor={(options) => NameEditor(options)} style={{ width: '30%' }}></Column>
                         <Column field="guard_name" className='dark:border-none' headerClassName='dark:border-none  bg-transparent dark:bg-transparent dark:text-gray-300' align='left' header="Guard" editor={(options) => GuardEditor(options)} style={{ width: '30%' }}></Column>
                         <Column header="Action" className='dark:border-none' rowEditor headerClassName='dark:border-none  bg-transparent dark:bg-transparent dark:text-gray-300' colSpan={2} align='center' headerStyle={{ width: '5%', minWidth: '8rem' }} bodyStyle={{ textAlign: 'right' }}></Column>
@@ -392,6 +399,7 @@ const Index = ({auth, rolesDefault, permissionsDefault}) => {
                     globalFilterFields={['name']}
                     style={{color: 'white'}}
                     value={permissions} rowEditorCancelIcon={rowEditorCancelIcon} rowEditorSaveIcon={rowEditorSaveIcon} editMode="row" dataKey="id" onRowEditComplete={onRowPermissionEditComplete} >
+                        <Column header="No" body={(_, { rowIndex }) => rowIndex + 1} className='dark:border-none pl-6' headerClassName='pl-6 dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300'/>
                         <Column field="name" sortable className='dark:border-none' headerClassName='dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300' header="Perizinan" align='left' editor={(options) => NameEditor(options)} style={{ width: '30%' }}></Column>
                         <Column field="group_name" sortable className='dark:border-none' headerClassName='dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300' align='left' header="Grup" editor={(options) => GuardEditor(options)} style={{ width: '30%' }}></Column>
                         <Column 
@@ -407,9 +415,9 @@ const Index = ({auth, rolesDefault, permissionsDefault}) => {
                     <div className="card w-full h-full overflow-y-auto dark:glass flex rounded-lg justify-content-center overflow-x-auto shadow-md">
                         
                     <table className="w-full h-full bg-white dark:bg-transparent dark:border-none border-gray-300 text-black dark:text-gray-300">
-                    <thead className='rounded-tr-lg'>
+                    <thead className='rounded-tr-lg sticky backdrop-blur-3xl dark:bg-transparent bg-white top-0'>
                         <tr className='rounded-tr-lg'>
-                            <th className="py-2 px-4 border-b border-r dark:border-none">Perizinan</th>
+                            <th className="w-[15%] py-2 px-4 border-b border-r dark:border-none">Perizinan</th>
                             <th className="py-2 px-4 border-b dark:border-none" colSpan={roles.length}>Role</th>
                             {/* {permissions.map((permission)=>{
                                 return <th key={permission.id} class="py-2 px-4 border-b">{permission.name}</th>

@@ -1,8 +1,8 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import { Head, Link} from '@inertiajs/react';
+import { Head, Link, usePage} from '@inertiajs/react';
 import React, { useEffect, useRef, useState } from "react";
 
-export default function DashboardLayout({ user, children }) {
+export default function DashboardLayout({user, children}) {
     
     const [theme, setTheme] = useState(localStorage.theme);
     const [isSideMenuOpen, setIsSideMenuOpen] = useState(false);
@@ -11,7 +11,8 @@ export default function DashboardLayout({ user, children }) {
     const profileMenuRef = useRef(null);
     const profileMenuBtnRef = useRef(null);
     const currentPath = window.location.pathname;
-    
+    const { roles, permissions } = usePage().props.auth.user
+
     useEffect(()=>{
         
         theme ? localStorage.theme = 'dark' : localStorage.removeItem('theme');
@@ -115,20 +116,79 @@ export default function DashboardLayout({ user, children }) {
                 </li>
                 </ul>
                 <ul>
+               
+                {roles[0] === 'super admin' && (
+                    <li className="relative px-6 py-3">
+                    {currentPath == "/users" && (
+                        <span
+                        className="absolute inset-y-0 left-0 w-1 bg-purple-600 rounded-tr-lg rounded-br-lg"
+                        ></span>
+                        )}
+                    <Link
+                        className={`inline-flex items-center ${currentPath == "/users" ? 'text-gray-800 dark:text-gray-100' : ''} w-full text-sm font-semibold transition-colors duration-150 hover:text-gray-800 dark:hover:text-gray-200 `}
+                        href={route('users.view')}
+                    >
+                    
+
+                        <svg 
+                        className="w-5 h-5"
+                        fill="none"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        >
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z"></path>
+                        </svg>
+                        <span className="ml-4">Users</span>
+                    </Link>
+                    </li>
+                )}
+
+                {roles[0] === 'super admin' && (
+                    <li className="relative px-6 py-3">
+                    {currentPath == "/role-permission" && (
+                        <span
+                        className="absolute inset-y-0 left-0 w-1 bg-purple-600 rounded-tr-lg rounded-br-lg"
+                        ></span>
+                        )}
+                    <Link
+                        className={`inline-flex items-center ${currentPath == "/role-permission" ? 'text-gray-800 dark:text-gray-100' : ''} w-full text-sm font-semibold transition-colors duration-150 hover:text-gray-800 dark:hover:text-gray-200 `}
+                        href={route('role-permission.view')}
+                    >
+                        <svg
+                        className="w-5 h-5"
+
+                        fill="none"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        >
+                        <path
+                            d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"
+                        ></path>
+                        </svg>
+                        <span className="ml-4">Role dan Permission</span>
+                    </Link>
+                    </li>
+                )}
+                <li className="relative px-6 py-3">
+                {currentPath == "/products" && (
+                    <span
+                    className="absolute inset-y-0 left-0 w-1 bg-purple-600 rounded-tr-lg rounded-br-lg"
+                    ></span>
+                    )}
+                <Link
+                    className={`inline-flex items-center ${currentPath == "/products" ? 'text-gray-800 dark:text-gray-100' : ''} w-full text-sm font-semibold transition-colors duration-150 hover:text-gray-800 dark:hover:text-gray-200 `}
+                    href={route('products.view')}
+                >
                 
-                <li className="relative px-6 py-3">
-                {currentPath == "/role-permission" && (
-                    <span
-                    className="absolute inset-y-0 left-0 w-1 bg-purple-600 rounded-tr-lg rounded-br-lg"
-                    ></span>
-                    )}
-                <Link
-                    className={`inline-flex items-center ${currentPath == "/role-permission" ? 'text-gray-800 dark:text-gray-100' : ''} w-full text-sm font-semibold transition-colors duration-150 hover:text-gray-800 dark:hover:text-gray-200 `}
-                    href={route('role-permission.view')}
-                >
-                    <svg
-                    className="w-5 h-5"
 
+                    <svg 
+                    className="w-5 h-5"
                     fill="none"
                     strokeLinecap="round"
                     strokeLinejoin="round"
@@ -136,36 +196,7 @@ export default function DashboardLayout({ user, children }) {
                     viewBox="0 0 24 24"
                     stroke="currentColor"
                     >
-                    <path
-                        d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"
-                    ></path>
-                    </svg>
-                    <span className="ml-4">Role dan Permission</span>
-                </Link>
-                </li>
-                <li className="relative px-6 py-3">
-                {currentPath == "/permission" && (
-                    <span
-                    className="absolute inset-y-0 left-0 w-1 bg-purple-600 rounded-tr-lg rounded-br-lg"
-                    ></span>
-                    )}
-                <Link
-                    className={`inline-flex items-center ${currentPath == "/product" ? 'text-gray-800 dark:text-gray-100' : ''} w-full text-sm font-semibold transition-colors duration-150 hover:text-gray-800 dark:hover:text-gray-200 `}
-                    href={route('product.view')}
-                >
-                    <svg
-                    className="w-5 h-5"
-
-                    fill="none"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    >
-                    <path
-                        d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
-                    ></path>
+                    <path d="M21 7.5l-9-5.25L3 7.5m18 0l-9 5.25m9-5.25v9l-9 5.25M3 7.5l9 5.25M3 7.5v9l9 5.25m0-9v9"></path>
                     </svg>
                     <span className="ml-4">Produk</span>
                 </Link>
