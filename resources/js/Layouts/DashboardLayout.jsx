@@ -139,7 +139,7 @@ export default function DashboardLayout({user, children}) {
                         viewBox="0 0 24 24"
                         stroke="currentColor"
                         >
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z"></path>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z"></path>
                         </svg>
                         <span className="ml-4">Users</span>
                     </Link>
@@ -176,6 +176,31 @@ export default function DashboardLayout({user, children}) {
                     </li>
                 )}
                 <li className="relative px-6 py-3">
+                {currentPath == "/partners" && (
+                    <span
+                    className="absolute inset-y-0 left-0 w-1 bg-purple-600 rounded-tr-lg rounded-br-lg"
+                    ></span>
+                    )}
+                <Link
+                    className={`inline-flex items-center ${currentPath == "/partners" ? 'text-gray-800 dark:text-gray-100' : ''} w-full text-sm font-semibold transition-colors duration-150 hover:text-gray-800 dark:hover:text-gray-200 `}
+                    href={route('partners.view')}
+                >
+    
+                    <svg 
+                    className="w-5 h-5"
+                    fill="none"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    >
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M15 9h3.75M15 12h3.75M15 15h3.75M4.5 19.5h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5zm6-10.125a1.875 1.875 0 11-3.75 0 1.875 1.875 0 013.75 0zm1.294 6.336a6.721 6.721 0 01-3.17.789 6.721 6.721 0 01-3.168-.789 3.376 3.376 0 016.338 0z"></path>
+                    </svg>
+                    <span className="ml-4">Partner</span>
+                </Link>
+                </li>
+                <li className="relative px-6 py-3">
                 {currentPath == "/products" && (
                     <span
                     className="absolute inset-y-0 left-0 w-1 bg-purple-600 rounded-tr-lg rounded-br-lg"
@@ -202,13 +227,18 @@ export default function DashboardLayout({user, children}) {
                 </Link>
                 </li>
                 <li className="relative px-6 py-3">
-                <a
-                    className="inline-flex items-center w-full text-sm font-semibold transition-colors duration-150 hover:text-gray-800 dark:hover:text-gray-200"
-                    href="charts.html"
+                {currentPath == "/spd" && (
+                    <span
+                    className="absolute inset-y-0 left-0 w-1 bg-purple-600 rounded-tr-lg rounded-br-lg"
+                    ></span>
+                    )}
+                <Link
+                    className={`inline-flex items-center ${currentPath == "/spd" ? 'text-gray-800 dark:text-gray-100' : ''} w-full text-sm font-semibold transition-colors duration-150 hover:text-gray-800 dark:hover:text-gray-200 `}
+                    href={route('spd.view')}
                 >
-                    <svg
+                
+                    <svg 
                     className="w-5 h-5"
-
                     fill="none"
                     strokeLinecap="round"
                     strokeLinejoin="round"
@@ -216,78 +246,12 @@ export default function DashboardLayout({user, children}) {
                     viewBox="0 0 24 24"
                     stroke="currentColor"
                     >
-                    <path
-                        d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"
-                    ></path>
-                    <path d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z"></path>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 18.75a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 01-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h1.125c.621 0 1.129-.504 1.09-1.124a17.902 17.902 0 00-3.213-9.193 2.056 2.056 0 00-1.58-.86H14.25M16.5 18.75h-2.25m0-11.177v-.958c0-.568-.422-1.048-.987-1.106a48.554 48.554 0 00-10.026 0 1.106 1.106 0 00-.987 1.106v7.635m12-6.677v6.677m0 4.5v-4.5m0 0h-12"></path>
                     </svg>
-                    <span className="ml-4">Charts</span>
-                </a>
+                    <span className="ml-4">Surat Perjalanan Dinas</span>
+                </Link>
                 </li>
-                <li className="relative px-6 py-3">
-                <a
-                    className="inline-flex items-center w-full text-sm font-semibold transition-colors duration-150 hover:text-gray-800 dark:hover:text-gray-200"
-                    href="buttons.html"
-                >
-                    <svg
-                    className="w-5 h-5"
-
-                    fill="none"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    >
-                    <path
-                        d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122"
-                    ></path>
-                    </svg>
-                    <span className="ml-4">Buttons</span>
-                </a>
-                </li>
-                <li className="relative px-6 py-3">
-                <a
-                    className="inline-flex items-center w-full text-sm font-semibold transition-colors duration-150 hover:text-gray-800 dark:hover:text-gray-200"
-                    href="modals.html"
-                >
-                    <svg
-                    className="w-5 h-5"
-
-                    fill="none"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    >
-                    <path
-                        d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
-                    ></path>
-                    </svg>
-                    <span className="ml-4">Modals</span>
-                </a>
-                </li>
-                <li className="relative px-6 py-3">
-                <a
-                    className="inline-flex items-center w-full text-sm font-semibold transition-colors duration-150 hover:text-gray-800 dark:hover:text-gray-200"
-                    href="tables.html"
-                >
-                    <svg
-                    className="w-5 h-5"
-
-                    fill="none"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    >
-                    <path d="M4 6h16M4 10h16M4 14h16M4 18h16"></path>
-                    </svg>
-                    <span className="ml-4">Tables</span>
-                </a>
-                </li>
+                
                 </ul>
                 <div className="px-6 my-6">
                 <button
@@ -870,7 +834,7 @@ export default function DashboardLayout({user, children}) {
                         </ul>
                     </div>
                 </header>
-                <main className="h-full overflow-y-auto w-full">
+                <main className="h-full overflow-y-auto w-full p-5">
                     {children}
                 </main>
             </div>

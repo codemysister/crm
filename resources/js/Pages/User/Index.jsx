@@ -13,11 +13,12 @@ import { InputTextarea } from 'primereact/inputtextarea';
 import { useForm } from '@inertiajs/react';
 import { ConfirmDialog, confirmDialog } from 'primereact/confirmdialog';
 import { Password } from 'primereact/password';
+import { Skeleton } from 'primereact/skeleton';
 
-export default function Index({auth, usersDefault, rolesDefault}) {
+export default function Index({auth}) {
 
-    const [users, setUsers] = useState(usersDefault)
-    const [roles, setRoles] = useState(rolesDefault);
+    const [users, setUsers] = useState('')
+    const [roles, setRoles] = useState('');
     const { data, setData, post, put, delete: destroy, reset, processing, errors }  = useForm({
         id:'',
         name: '',
@@ -28,7 +29,9 @@ export default function Index({auth, usersDefault, rolesDefault}) {
         password_confirmation: '',
     });
 
+    const dummyArray = Array.from({ length: 5 }, (v, i) => i);
     const [isLoadingData, setIsLoadingData] = useState(false);
+    const [preRenderLoad, setPreRenderLoad] = useState(true);
     const [modalUserIsVisible, setModalUserIsVisible] = useState(false);
     const [modalEditUserIsVisible, setModalEditUserIsVisible] = useState(false);
     const toast = useRef(null);
@@ -45,6 +48,22 @@ export default function Index({auth, usersDefault, rolesDefault}) {
        
         setIsLoadingData(false)
     }
+
+    useEffect( () => {
+        
+        const fetchData = async () => {
+            try {
+              await Promise.all([getUsers()]);
+              setIsLoadingData(false);
+              setPreRenderLoad(prev => prev=false)
+            } catch (error) {
+              console.error('Error fetching data:', error);
+            }
+          };
+      
+          fetchData();
+
+    }, []);
 
     const actionBodyTemplate = (rowData) => {
         return (
@@ -149,6 +168,24 @@ export default function Index({auth, usersDefault, rolesDefault}) {
         
     }
 
+    if(preRenderLoad)
+    {
+        return (
+            <>
+            <DashboardLayout auth={auth.user} className="">
+                    <div className="card my-5">
+                    <DataTable value={dummyArray} className="p-datatable-striped">
+                        <Column style={{ width: '25%' }} body={<Skeleton />}></Column>
+                        <Column style={{ width: '25%' }} body={<Skeleton />}></Column>
+                        <Column style={{ width: '25%' }} body={<Skeleton />}></Column>
+                        <Column style={{ width: '25%' }} body={<Skeleton />}></Column>
+                    </DataTable>
+                    </div>
+                </DashboardLayout>
+                </>
+        )
+    }
+
     return (
         <DashboardLayout auth={auth.user} className="">
             <Toast ref={toast} />
@@ -156,14 +193,17 @@ export default function Index({auth, usersDefault, rolesDefault}) {
 
             <HeaderModule title="User">
                 
-                <Button label="Tambah" className="bg-purple-600 text-sm shadow-md rounded-lg mr-2" icon={addButtonIcon} onClick={() => setModalUserIsVisible(prev=>prev=true)} aria-controls="popup_menu_right" aria-haspopup />
+                <Button label="Tambah" className="bg-purple-600 text-sm shadow-md rounded-lg mr-2" icon={addButtonIcon} onClick={() => {
+                    setModalUserIsVisible(prev=>prev=true)
+                    reset('name','email','role','role_id','id')
+                    }} aria-controls="popup_menu_right" aria-haspopup />
             
             </HeaderModule>
 
-             {/* Modal tambah produk */}
+             {/* Modal tambah user */}
              <div className="card flex justify-content-center">
                 <Dialog
-                    header="Produk"
+                    header="User"
                     headerClassName="dark:glass shadow-md dark:text-white"
                     className="bg-white w-[80%] md:w-[60%] lg:w-[30%] dark:glass dark:text-white"
                     contentClassName=' dark:glass dark:text-white'
@@ -194,7 +234,7 @@ export default function Index({auth, usersDefault, rolesDefault}) {
                              placeholder="Pilih Role" className="w-full md:w-14rem dark:bg-gray-300" />
                         </div>
                     </div>
-                    <div className='flex justify-center mt-5'>
+                    <div className='flex justify-center my-5'>
                         <Button
                             label="Submit" disabled={processing}  className="bg-purple-600 text-sm shadow-md rounded-lg"
                         />
@@ -239,7 +279,7 @@ export default function Index({auth, usersDefault, rolesDefault}) {
                 </Dialog>
              </div>
 
-            <div className='flex w-[95%] max-w-[95%] mx-auto flex-col justify-center mt-5 gap-5'>
+            <div className='flex mx-auto flex-col justify-center mt-5 gap-5'>
                 <div className="card p-fluid w-full h-full flex justify-center rounded-lg">
                 <DataTable
                         className="w-full h-auto rounded-lg dark:glass border-none text-center shadow-md" 

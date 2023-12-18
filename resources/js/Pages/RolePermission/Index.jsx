@@ -18,14 +18,17 @@ import HeaderModule from '@/Components/HeaderModule';
 import { Dropdown } from 'primereact/dropdown';
 import { ProgressSpinner } from 'primereact/progressspinner';
 import React from 'react';
+import { Skeleton } from 'primereact/skeleton';
 
-const Index = ({auth, rolesDefault, permissionsDefault, permissionGroupsDefault}) => { 
-    const [roles, setRoles] = useState(rolesDefault);
-    const [permissions, setPermissions] = useState(permissionsDefault);
-    const [permissionGroups, setPermissionGroups] = useState(permissionGroupsDefault);
+const Index = ({auth}) => { 
+    const [roles, setRoles] = useState('');
+    const [permissions, setPermissions] = useState('');
+    const [permissionGroups, setPermissionGroups] = useState('');
     const [modalRoleVisible, setModalRoleVisible] = useState(false);
     const [modalPermissionVisible, setModalPermissionVisible] = useState(false);
     const [isLoadingData, setIsLoadingData] = useState(false);
+    const [preRenderLoad, setPreRenderLoad] = useState(true);
+    const dummyArray = Array.from({ length: 5 }, (v, i) => i);
     const toast = useRef(null);
     const modalRole = useRef(null);
     const modalPermission = useRef(null);
@@ -55,34 +58,45 @@ const Index = ({auth, rolesDefault, permissionsDefault, permissionGroupsDefault}
 
     async function getRoles() {
         
-        setIsLoadingData(true)
+        setIsLoadingData(prev => prev=true)
         
         let response = await fetch('/api/roles');
         let data = await response.json();
    
         setRoles(prev => data.roles);
-        setIsLoadingData(false)
+        setIsLoadingData(prev => prev=false)
     }
 
     async function getPermission() {
         
-        setIsLoadingData(true)
+        setIsLoadingData(prev => prev=true)
         
         let response = await fetch('/api/permissions');
         let data = await response.json();
 
         setPermissions(prev => data.permissions);
         setPermissionGroups(prev => data.permissionGroups);
-        setIsLoadingData(false)
+        setIsLoadingData(prev => prev=false)
     }
     
     
     useEffect( () => {
         
-        getRoles();
-        getPermission();
+        const fetchData = async () => {
+            try {
+              await Promise.all([getRoles(), getPermission()]);
+              setIsLoadingData(false);
+              setPreRenderLoad(prev => prev=false)
+            } catch (error) {
+              console.error('Error fetching data:', error);
+            }
+          };
+      
+          fetchData();
 
     }, []);
+
+
 
     const onRowRoleEditComplete = async (e) => {
         try {
@@ -284,12 +298,49 @@ const Index = ({auth, rolesDefault, permissionsDefault, permissionGroupsDefault}
         
     }
 
+    if(preRenderLoad)
+    {
+        return (
+            <>
+            <DashboardLayout auth={auth.user} className="">
+                    <div className="card my-5">
+                    <DataTable value={dummyArray} className="p-datatable-striped">
+                        <Column style={{ width: '25%' }} body={<Skeleton />}></Column>
+                        <Column style={{ width: '25%' }} body={<Skeleton />}></Column>
+                        <Column style={{ width: '25%' }} body={<Skeleton />}></Column>
+                        <Column style={{ width: '25%' }} body={<Skeleton />}></Column>
+                    </DataTable>
+                    </div>
+                    <div className="card my-5">
+                    <DataTable value={dummyArray} className="p-datatable-striped">
+                        <Column style={{ width: '25%' }} body={<Skeleton />}></Column>
+                        <Column style={{ width: '25%' }} body={<Skeleton />}></Column>
+                        <Column style={{ width: '25%' }} body={<Skeleton />}></Column>
+                        <Column style={{ width: '25%' }} body={<Skeleton />}></Column>
+                    </DataTable>
+                    </div>
+                    <div className="card my-5">
+                    <DataTable value={dummyArray} className="p-datatable-striped">
+                        <Column style={{ width: '25%' }} body={<Skeleton />}></Column>
+                        <Column style={{ width: '25%' }} body={<Skeleton />}></Column>
+                        <Column style={{ width: '25%' }} body={<Skeleton />}></Column>
+                        <Column style={{ width: '25%' }} body={<Skeleton />}></Column>
+                    </DataTable>
+                    </div>
+                </DashboardLayout>
+                </>
+        )
+    }
+
     return (
+
         <DashboardLayout auth={auth.user} className="">
         
             <Toast ref={toast} />
             <ConfirmDialog />
 
+
+      
             {/* Modal role */}
             <div className="card flex justify-content-center">
                 <Dialog
@@ -321,7 +372,7 @@ const Index = ({auth, rolesDefault, permissionsDefault, permissionGroupsDefault}
                         </div>
                     </form>
                 </Dialog>
-             </div>
+            </div>
 
             {/* Modal permission */}
             <div className="card flex justify-content-center">
@@ -335,7 +386,7 @@ const Index = ({auth, rolesDefault, permissionsDefault, permissionGroupsDefault}
                     breakpoints={{}}
                     visible={modalPermissionVisible}
                     onHide={() => setModalPermissionVisible(false)}
-                   
+                
                 >
                     <form onSubmit={(e) => handleSubmitForm(e, 'permissions')}>    
                     <div className='flex flex-col justify-around gap-4 mt-4'>
@@ -346,7 +397,7 @@ const Index = ({auth, rolesDefault, permissionsDefault, permissionGroupsDefault}
                         <div className='flex flex-col'>
                             <label htmlFor="group_name">Grup</label>
                             <Dropdown editable value={permissionInput.group_name} onChange={(e) => setPermissionInput('group_name', e.target.value)} options={permissionGroups} optionLabel="name" 
-                             placeholder="Pilih Grup" className="w-full md:w-14rem" />
+                            placeholder="Pilih Grup" className="w-full md:w-14rem" />
                         </div>
                         
                     </div>
@@ -357,15 +408,15 @@ const Index = ({auth, rolesDefault, permissionsDefault, permissionGroupsDefault}
                         </div>
                     </form>
                 </Dialog>
-             </div>  
+            </div>  
 
             <HeaderModule title="Role & Perizinan">
                 <Menu model={items} popup ref={menuRight} id="popup_menu_right" popupAlignment="right" />
                 <Button label="Tambah" className="bg-purple-600 text-sm shadow-md rounded-lg mr-2" icon={addButtonIcon} onClick={(event) => menuRight.current.toggle(event)} aria-controls="popup_menu_right" aria-haspopup />
             </HeaderModule>
 
-            <div className='flex w-[95%] max-w-[95%] mx-auto flex-col justify-center mt-5 gap-5'>
-                <div className="card p-fluid w-full h-full flex justify-center rounded-lg">
+            <div className='flex mx-auto flex-col justify-center mt-5 gap-5'>
+                <div className="card p-fluid w-full h-full flex justify-center">
                     <DataTable
                     loading={isLoadingData}
                     className="w-full h-auto rounded-lg dark:glass border-none text-center shadow-md" 
@@ -382,7 +433,7 @@ const Index = ({auth, rolesDefault, permissionsDefault, permissionGroupsDefault}
                         <Column className='dark:border-none' headerClassName='dark:border-none  bg-transparent dark:bg-transparent dark:text-gray-300' align='left' headerStyle={{width:'1%'}} body={(e)=>buttonDelete(e, 'role')} field="id"></Column>
                     </DataTable>
                 </div>
-                <div className="card p-fluid w-full h-auto flex  justify-center  rounded-lg  text-white">
+                <div className="card p-fluid w-full h-auto flex  justify-center text-white">
                     <DataTable
                     loading={isLoadingData}
                     paginator 
@@ -393,7 +444,7 @@ const Index = ({auth, rolesDefault, permissionsDefault, permissionGroupsDefault}
                     className="w-full h-auto rounded-lg dark:text-gray-300 dark:glass border-none text-center shadow-md" 
                     pt={{
                         bodyRow: 'dark:bg-transparent bg-transparent dark:text-gray-300',
-                        table: 'dark:bg-transparent bg-white rounded-lg dark:text-gray-300',
+                        table: 'dark:bg-transparent bg-white dark:text-gray-300',
                     }}
                     header={header}
                     globalFilterFields={['name']}
@@ -409,13 +460,12 @@ const Index = ({auth, rolesDefault, permissionsDefault, permissionGroupsDefault}
                 </div>
             </div>
 
-
-            <div className="flex w-[95%] max-w-[95%] h-[80%] mx-auto my-5">
+            <div className="flex h-[80%] mx-auto my-5">
                     
                     <div className="card w-full h-full overflow-y-auto dark:glass flex rounded-lg justify-content-center overflow-x-auto shadow-md">
                         
                     <table className="w-full h-full bg-white dark:bg-transparent dark:border-none border-gray-300 text-black dark:text-gray-300">
-                    <thead className='rounded-tr-lg sticky backdrop-blur-3xl dark:bg-transparent bg-white top-0'>
+                    <thead className='rounded-tr-lg sticky z-20 backdrop-blur-3xl dark:bg-slate-700 bg-white top-0'>
                         <tr className='rounded-tr-lg'>
                             <th className="w-[15%] py-2 px-4 border-b border-r dark:border-none">Perizinan</th>
                             <th className="py-2 px-4 border-b dark:border-none" colSpan={roles.length}>Role</th>
@@ -433,15 +483,7 @@ const Index = ({auth, rolesDefault, permissionsDefault, permissionGroupsDefault}
                     </thead>
                     <tbody className=''>
 
-                    {isLoadingData ? (
-                        <tr>
-                            <td colSpan={roles.length + 1}>
-                                <div className='flex justify-center'>
-                                    <ProgressSpinner />
-                                </div>
-                            </td>
-                        </tr>
-                    ) : (
+                    {
                         permissions.map((permission, index) => (
                                 <>
                                 
@@ -449,19 +491,23 @@ const Index = ({auth, rolesDefault, permissionsDefault, permissionGroupsDefault}
 
                                 {!isPrevPermissionGroupNameSame ? (
                                     <tr className='text-left bg-slate-50 dark:glass border dark:border-none'>
-                                        <td className="py-2 px-4 bg-slate-50 dark:glass border-r dark:border-none"  colSpan={roles.length+1}>{permission.group_name}</td>
+                                        <td className="py-2 font-bold px-4 border-r dark:border-none"  colSpan={roles.length+1}>{permission.group_name}</td>
                                     </tr>
                                 ): null}
 
-                                <tr className='text-center border dark:border-none'>
-                                    <td className="py-2 px-4 border-r dark:border-none">{permission.name}</td>
+                                <tr className='border dark:border-none'>
+                                    <td className="py-2 text-left px-4 border-r dark:border-none">{permission.name}</td>
                                     {roles.map((role) => (
-                                        <td key={`${permission.id}-${role.id}`} className='w-[60px] border-r dark:border-none'>
-                                            <input
+                                        <td key={`${permission.id}-${role.id}`} className='w-[60px] text-center border-r dark:border-none'>
+                                            {isLoadingData ? (
+                                                <ProgressSpinner style={{width: '5px', height: '5px'}} strokeWidth="8" fill="var(--surface-ground)" animationDuration=".5s" className='z-4' />
+                                            ) : (
+                                                <input
                                                 type="checkbox"
                                                 checked={role.permissionIds?.includes(permission.id)}
                                                 onChange={() => handleChangePermissionRole(permission.id, role)}
                                                 />
+                                            )}
                                         </td>
                                     ))}
                                 </tr>
@@ -471,17 +517,16 @@ const Index = ({auth, rolesDefault, permissionsDefault, permissionGroupsDefault}
                                 </>
                             
                             ))
-                        )}
+                        }
 
     
                     </tbody>
                     </table>
-                   
+                
                 </div>
             </div>
+            
 
-            
-            
         </DashboardLayout>
     );
 }

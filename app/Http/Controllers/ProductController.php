@@ -14,9 +14,7 @@ class ProductController extends Controller
      */
     public function index()
     {
-        $productsDefault = Product::all();
-
-        return Inertia::render("Product/Index", ["productsDefault"=> $productsDefault]);
+        return Inertia::render("Product/Index");
     }
 
     public function apiGetProducts()

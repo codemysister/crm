@@ -18,21 +18,7 @@ class RoleController extends Controller
      */
     public function index()
     {
-        $rolesDefault = Role::with('permissions')->get();
-      
-        foreach($rolesDefault as $roles){
-            $roles['permissionIds'] = $roles->permissions->pluck('id')->toArray();
-        }
-        $permissionsDefault = Permission::all();
-        $permissionGroupsDefault = $permissionsDefault->pluck('group_name')->unique();
-
-        $permissionGroupsDefault = $permissionGroupsDefault->values();
-        
-        $permissionGroupsDefault = $permissionGroupsDefault->map(function ($groupName) {
-            return ['name' => $groupName];
-        });
-
-        return Inertia::render("RolePermission/Index", compact('rolesDefault', 'permissionsDefault', 'permissionGroupsDefault'));
+        return Inertia::render("RolePermission/Index");
     }
     /**
      * Store a newly created resource in storage.
@@ -52,7 +38,8 @@ class RoleController extends Controller
         $roles = Role::with('permissions')->get();
         foreach($roles as $role){
             $role['permissionIds'] = $role->permissions->pluck('id')->toArray();
-        }
+        }      
+
         return response()->json([
             'roles' => $roles
         ]);

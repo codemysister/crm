@@ -1,9 +1,11 @@
 <?php
 
+use App\Http\Controllers\PartnerController;
 use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RoleController;
+use App\Http\Controllers\SPDController;
 use App\Http\Controllers\UserController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
@@ -47,21 +49,22 @@ Route::middleware('auth')->group(function () {
     
 
     Route::middleware(['role:super admin'])->group(function(){
+        
         // Roles
-        Route::get('/role-permission', [RoleController::class, 'index'])->name('role-permission.view');
-        Route::post('/roles', [RoleController::class, 'store'])->name('roles.store');
+        Route::get('/role-permission', [RoleController::class, 'index'])->name('role-permission.view')->middleware(['can:lihat role']);
+        Route::post('/roles', [RoleController::class, 'store'])->name('roles.store')->middleware(['can:tambah role']);
         Route::get('/api/roles', [RoleController::class, 'apiGetRole'])->name('api.roles');
-        Route::put('/api/roles/{id}', [RoleController::class, 'apiUpdateRole'])->name('api.roles.update');
-        Route::delete('/api/roles/{id}', [RoleController::class, 'apiDeleteRole'])->name('api.roles.delete');
+        Route::put('/api/roles/{id}', [RoleController::class, 'apiUpdateRole'])->name('api.roles.update')->middleware(['can:edit role']);
+        Route::delete('/api/roles/{id}', [RoleController::class, 'apiDeleteRole'])->name('api.roles.delete')->middleware(['can:hapus role']);
     });
     
 
     // User
-    Route::get('/users', [UserController::class, 'index'])->name('users.view');
+    Route::get('/users', [UserController::class, 'index'])->name('users.view')->middleware(['can:lihat user']);
     Route::get('api/users', [UserController::class, 'apiGetUsers'])->name('api.users');
-    Route::post('/users', [UserController::class, 'store'])->name('users.store');
-    Route::put('/users/{id}', [UserController::class, 'update'])->name('users.update');
-    Route::delete('/users/{id}', [UserController::class, 'destroy'])->name('users.delete');
+    Route::post('/users', [UserController::class, 'store'])->name('users.store')->middleware(['can:tambah user']);
+    Route::put('/users/{id}', [UserController::class, 'update'])->name('users.update')->middleware(['can:edit user']);
+    Route::delete('/users/{id}', [UserController::class, 'destroy'])->name('users.delete')->middleware(['can:hapus user']);
 
 
     // Permission
@@ -77,11 +80,25 @@ Route::middleware('auth')->group(function () {
     Route::put('/role-permission-sync/{id}', [PermissionController::class, 'permissionSync'])->name('permissions.sync');
     
     // Product
-    Route::get('/products', [ProductController::class, 'index'])->name('products.view');
-    Route::post('/products', [ProductController::class, 'store'])->name('products.store');
-    Route::put('/products/{product:uuid}', [ProductController::class, 'update'])->name('products.update');
-    Route::delete('/products/{product:uuid}', [ProductController::class, 'destroy'])->name('products.destroy');
+    Route::get('/products', [ProductController::class, 'index'])->name('products.view')->middleware(['can:lihat produk']);
+    Route::post('/products', [ProductController::class, 'store'])->name('products.store')->middleware(['can:tambah produk']);
+    Route::put('/products/{product:uuid}', [ProductController::class, 'update'])->name('products.update')->middleware(['can:update produk']);
+    Route::delete('/products/{product:uuid}', [ProductController::class, 'destroy'])->name('products.destroy')->middleware(['can:hapus produk']);
     Route::get('/api/products', [ProductController::class, 'apiGetProducts'])->name('api.products');
+    
+    // SPD
+    Route::get('/spd', [SPDController::class, 'index'])->name('spd.view')->middleware(['can:lihat spd']);
+    Route::post('/spd', [SPDController::class, 'store'])->name('spd.store')->middleware(['can:tambah produk']);
+    Route::put('/spd/{spd:uuid}', [SPDController::class, 'update'])->name('spd.update')->middleware(['can:edit produk']);
+    Route::delete('/spd/{spd:uuid}', [SPDController::class, 'destroy'])->name('spd.destroy')->middleware(['can:hapus produk']);
+    Route::get('/api/spd', [SPDController::class, 'apiGetSPD'])->name('api.spd');
+
+    // Partner
+    Route::get('/partners', [PartnerController::class, 'index'])->name('partners.view')->middleware(['can:lihat partner']);
+    Route::post('/partners', [PartnerController::class, 'store'])->name('partners.store')->middleware(['can:tambah partner']);
+    Route::put('/partners/{partner:uuid}', [PartnerController::class, 'update'])->name('partners.update')->middleware(['can:edit partner']);
+    Route::delete('/partners/{partner:uuid}', [PartnerController::class, 'destroy'])->name('partners.destroy')->middleware(['can:hapus partner']);
+    Route::get('/api/partners', [PartnerController::class, 'apiGetPartners'])->name('api.partners');
 
 
 });

@@ -37,5 +37,10 @@ class RoleSeeder extends Seeder
             "name"=> "design print delivery",
             "guard_name" => "web"
         ]);
+
+        Role::create([
+            "name"=> "partner",
+            "guard_name" => "web"
+        ]);
     }
 }

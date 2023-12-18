@@ -15,23 +15,8 @@ class UserController extends Controller
      * Display a listing of the resource.
      */
     public function index()
-    {
-        $usersDefault = User::with('roles')->get();
-        $rolesDefault = Role::all();
-        $usersDefault = $usersDefault->map(function ($user) {
-            $role = $user->roles->first();
-            return [
-                'id' => $user->id,
-                'name' => $user->name,
-                'email' => $user->email,
-                'role' => $role->name,
-                'role_id' => $role->id,
-            ];
-        });
-
-        
-        return Inertia::render('User/Index', compact('usersDefault', 'rolesDefault'));
-
+    {        
+        return Inertia::render('User/Index');
     }
 
     public function apiGetUsers()
