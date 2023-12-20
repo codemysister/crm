@@ -2,10 +2,12 @@
 
 use App\Http\Controllers\PartnerController;
 use App\Http\Controllers\PartnerPicController;
+use App\Http\Controllers\PartnerSubscriptionController;
 use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RoleController;
+use App\Http\Controllers\SignatureController;
 use App\Http\Controllers\SPDController;
 use App\Http\Controllers\UserController;
 use Illuminate\Foundation\Application;
@@ -94,6 +96,9 @@ Route::middleware('auth')->group(function () {
     Route::delete('/spd/{spd:uuid}', [SPDController::class, 'destroy'])->name('spd.destroy')->middleware(['can:hapus produk']);
     Route::get('/api/spd', [SPDController::class, 'apiGetSPD'])->name('api.spd');
 
+    Route::resource('signature', SignatureController::class);
+    Route::get('/api/signature', [SignatureController::class, 'apiGetSignature'])->name('api.signature');
+
     // Partner
     Route::get('/partners', [PartnerController::class, 'index'])->name('partners.view')->middleware(['can:lihat partner']);
     Route::post('/partners', [PartnerController::class, 'store'])->name('partners.store')->middleware(['can:tambah partner']);
@@ -101,11 +106,17 @@ Route::middleware('auth')->group(function () {
     Route::delete('/partners/{partner:uuid}', [PartnerController::class, 'destroy'])->name('partners.destroy')->middleware(['can:hapus partner']);
     Route::get('/api/partners', [PartnerController::class, 'apiGetPartners'])->name('api.partners');
     
-    // PIC
+    // Partner PIC
     Route::post('/partners/pics', [PartnerPicController::class, 'store'])->name('partners.pics.store');
     Route::get('/api/partners/pics', [PartnerPicController::class, 'apiGetPIC'])->name('api.partners.pics');
     Route::put('/partners/pics/{uuid}', [PartnerPicController::class, 'update'])->name('partners.pics.update');
     Route::delete('/partners/pics/{uuid}', [PartnerPicController::class, 'destroy'])->name('partners.pics.destroy');
+   
+    // Partner Subscription
+    Route::post('/partners/subscriptions', [PartnerSubscriptionController::class, 'store'])->name('partners.subscriptions.store');
+    Route::get('/api/partners/subscriptions', [PartnerSubscriptionController::class, 'apiGetSubscription'])->name('api.partners.subscriptions');
+    Route::put('/partners/subscriptions/{uuid}', [PartnerSubscriptionController::class, 'update'])->name('partners.subscriptions.update');
+    Route::delete('/partners/subscriptions/{uuid}', [PartnerSubscriptionController::class, 'destroy'])->name('partners.subscriptions.destroy');
 
 
 });

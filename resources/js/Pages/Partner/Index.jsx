@@ -26,6 +26,7 @@ export default function Index({auth}) {
     const [partners, setPartners] = useState('');
     const [pics, setPics] = useState('');
     const [sales, setSales] = useState('');
+    const [subscriptions, setSubscriptions] = useState('');
     const [account_managers, setAccountManagers] = useState('');
     const [activeIndexTab, setActiveIndexTab] = useState(0);
     const [isLoadingData, setIsLoadingData] = useState(false);
@@ -165,10 +166,21 @@ export default function Index({auth}) {
         setIsLoadingData(false)
     }
 
+    const getSubscriptions = async () => {
+        setIsLoadingData(true)
+        
+        let response = await fetch('/api/partners/subscriptions');
+        let data = await response.json();
+   
+        setSubscriptions(prev => data);
+       
+        setIsLoadingData(false)
+    }
+
     useEffect(()=>{
         const fetchData = async () => {
             try {
-              await Promise.all([getPartners(), getPics()]);
+              await Promise.all([getPartners(), getPics(), getSubscriptions()]);
               setIsLoadingData(false);
               setPreRenderLoad(prev => prev=false)
             } catch (error) {
@@ -193,6 +205,15 @@ export default function Index({auth}) {
             <React.Fragment>
                 <Button icon="pi pi-pencil" rounded outlined className="mr-2" onClick={() => handleEditPIC(rowData)} />
                 <Button icon="pi pi-trash" rounded outlined severity="danger" onClick={() => {handleDeletePIC(rowData)}} />
+            </React.Fragment>
+        );
+    };
+
+    const actionBodyTemplateSubscriptipn = (rowData) => {
+        return (
+            <React.Fragment>
+                <Button icon="pi pi-pencil" rounded outlined className="mr-2" onClick={() => handleEditSubscription(rowData)} />
+                <Button icon="pi pi-trash" rounded outlined severity="danger" onClick={() => {handleDeleteSubscription(rowData)}} />
             </React.Fragment>
         );
     };
@@ -276,6 +297,39 @@ export default function Index({auth}) {
     };
 
     const handleDeletePIC = (pic) => {
+        confirmDialog({
+            message: 'Apakah Anda yakin untuk menghapus ini?',
+            header: 'Konfirmasi hapus',
+            icon: 'pi pi-info-circle',
+            acceptClassName: 'p-button-danger',
+            accept : async ()=> {
+                
+                destroyPIC('partners/pics/'+pic.uuid, {
+                    onSuccess: () => {
+                        getPics();
+                        showSuccess('Hapus');
+                    },
+                    onError: () => {
+                        showError('Hapus')
+                    }
+                })
+            },
+        });
+    }
+
+    const handleEditSubscription = (pic) => {
+       
+        setDataPIC(data => ({ ...data, uuid: pic.uuid}));
+        setDataPIC(data => ({ ...data, partner: pic.partner}));
+        setDataPIC(data => ({ ...data, name: pic.name}));
+        setDataPIC(data => ({ ...data, number: pic.number}));
+        setDataPIC(data => ({ ...data, position: pic.position}));
+        setDataPIC(data => ({ ...data, address: pic.address}));
+        
+        setModalEditPicIsVisible(true);
+    };
+
+    const handleDeleteSubscription = (pic) => {
         confirmDialog({
             message: 'Apakah Anda yakin untuk menghapus ini?',
             header: 'Konfirmasi hapus',
@@ -830,14 +884,41 @@ export default function Index({auth}) {
                         </div>
 
                     </div>
+
                 </TabPanel>
+
                 <TabPanel header="Langganan">
-                    <p className="m-0">
-                        At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti 
-                        quos dolores et quas molestias excepturi sint occaecati cupiditate non provident, similique sunt in
-                        culpa qui officia deserunt mollitia animi, id est laborum et dolorum fuga. Et harum quidem rerum facilis est et expedita distinctio. 
-                        Nam libero tempore, cum soluta nobis est eligendi optio cumque nihil impedit quo minus.
-                    </p>
+                <div className='flex mx-auto flex-col justify-center mt-5 gap-5'>
+                        <div className="card p-fluid w-full h-full flex justify-center rounded-lg">
+                        
+                        <DataTable
+                            loading={isLoadingData}
+                            className="w-full h-auto rounded-lg dark:glass border-none text-center shadow-md" 
+                            pt={{
+                                bodyRow: 'dark:bg-transparent bg-transparent dark:text-gray-300',
+                                table: 'dark:bg-transparent bg-white dark:text-gray-300',
+                                header: ''
+                            }}
+                            paginator 
+                            rows={5}
+                            emptyMessage="Langganan partner tidak ditemukan."
+                            paginatorClassName="dark:bg-transparent paginator-custome dark:text-gray-300 rounded-b-lg"
+                            header={header}
+                            filters={filters}
+                            globalFilterFields={['partner.name','period']}
+                            value={subscriptions} dataKey="id" >
+                                <Column header="No" body={(_, { rowIndex }) => rowIndex + 1} className='dark:border-none pl-6' headerClassName='dark:border-none pl-6 bg-transparent dark:bg-transparent dark:text-gray-300' style={{ width:'3%' }}/>
+                                <Column header="Partner" body={(rowData) => rowData.partner.name } className='dark:border-none' headerClassName='dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300' align='left' style={{ width: '15%' }}></Column>
+                                <Column field="nominal" header="Nominal" className='dark:border-none' headerClassName='dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300' align='left' style={{ width: '15%' }}></Column>
+                                <Column field="uuid" hidden className='dark:border-none' headerClassName='dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300' header="Nama" align='left'></Column>
+                                <Column field="bank" header="Bank" className='dark:border-none' headerClassName='dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300' align='left' style={{ width: '15%' }}></Column>
+                                <Column field="account_bank_number" header="Nomor Rekening" className='dark:border-none' headerClassName='dark:border-none  bg-transparent dark:bg-transparent dark:text-gray-300' align='left' style={{ width: '15%' }}></Column>
+                                <Column field="account_bank_name" header="Atas Nama" className='dark:border-none' headerClassName='dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300'  align='left' style={{ width: '20%' }}></Column>
+                                <Column header="Action" body={actionBodyTemplateSubscriptipn} style={{ width:'10%' }} className='dark:border-none' headerClassName='dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300'></Column>
+                            </DataTable>
+                            
+                        </div>
+                    </div>
                 </TabPanel>
             </TabView>
 

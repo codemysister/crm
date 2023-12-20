@@ -20,6 +20,7 @@ export default function Index({auth}) {
 
     const [users, setUsers] = useState('')
     const [roles, setRoles] = useState('');
+    
     const { data, setData, post, put, delete: destroy, reset, processing, errors }  = useForm({
         id:'',
         name: '',
@@ -221,6 +222,7 @@ export default function Index({auth}) {
 
              {/* Modal tambah user */}
              <div className="card flex justify-content-center">
+                
                 <Dialog
                     header="User"
                     headerClassName="dark:glass shadow-md dark:text-white"
