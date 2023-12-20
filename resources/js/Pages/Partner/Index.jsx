@@ -19,6 +19,7 @@ import { Badge } from 'primereact/badge';
 import { TabMenu } from 'primereact/tabmenu';
 import { TabPanel, TabView } from 'primereact/tabview';
 import { Skeleton } from 'primereact/skeleton';
+import { FilterMatchMode } from 'primereact/api';
 
 export default function Index({auth}) {
     
@@ -32,16 +33,33 @@ export default function Index({auth}) {
     const [preRenderLoad, setPreRenderLoad] = useState(true);
     const [modalPartnersIsVisible, setModalPartnersIsVisible] = useState(false);
     const [modalEditPartnersIsVisible, setModalEditPartnersIsVisible] = useState(false);
+    const [modalPicIsVisible, setModalPicIsVisible] = useState(false);
+    const [modalEditPicIsVisible, setModalEditPicIsVisible] = useState(false);
     const toast = useRef(null);
     const btnSubmit = useRef(null);
     const modalPartner = useRef(null);
     const {roles, permissions} = auth.user;
     const [activeIndex, setActiveIndex] = useState(0);
 
+    const [filters, setFilters] = useState({
+        global: { value: null, matchMode: FilterMatchMode.CONTAINS },
+    });
+
+    const [globalFilterValue, setGlobalFilterValue] = useState('');
+
+    const onGlobalFilterChange = (e) => {
+        const value = e.target.value;
+        let _filters = { ...filters };
+
+        _filters['global'].value = value;
+
+        setFilters(_filters);
+        setGlobalFilterValue(value);
+    };
     
-    const { data, setData, post, put, delete: destroy, reset, processing, errors }  = useForm(
-        {   
-            partner: {
+    const { data, setData, post, put, delete: destroy, reset, processing, errors }  = useForm({   
+        
+        partner: {
             uuid: '',
             sales: {},
             account_manager: {},
@@ -66,13 +84,15 @@ export default function Index({auth}) {
         }
     });
 
-    // const { data, setData, post, put, delete: destroy, reset, processing, errors }  = useForm({
-    //     partner: {},
-    //     name: '',
-    //     number: '',
-    //     position: '',
 
-    // })
+    const { data: dataPIC, setData: setDataPIC, post: postPIC, put: putPIC, delete: destroyPIC, reset: resetPIC, processing: processingPIC, errors:errorPIC }  = useForm({
+        uuid:'',
+        partner: {},
+        name: '',
+        number: '',
+        position: '',
+        address: ''
+    })
 
     const status = [
         { name: 'Proses'},
@@ -81,7 +101,7 @@ export default function Index({auth}) {
         { name: 'Non Aktif'},
     ];
     
-    const selectedSalesTemplate = (option, props) => {
+    const selectedOptionTemplate = (option, props) => {
         if (option) {
             return (
                 <div className="flex align-items-center">
@@ -93,7 +113,7 @@ export default function Index({auth}) {
         return <span>{props.placeholder}</span>;
     };
 
-    const salesOptionTemplate = (option) => {
+    const optionTemplate = (option) => {
         return (
             <div className="flex align-items-center">
                 <div>{option.name}</div>
@@ -134,10 +154,21 @@ export default function Index({auth}) {
         setIsLoadingData(false)
     }
 
+    const getPics = async () => {
+        setIsLoadingData(true)
+        
+        let response = await fetch('/api/partners/pics');
+        let data = await response.json();
+   
+        setPics(prev => data);
+       
+        setIsLoadingData(false)
+    }
+
     useEffect(()=>{
         const fetchData = async () => {
             try {
-              await Promise.all([getPartners()]);
+              await Promise.all([getPartners(), getPics()]);
               setIsLoadingData(false);
               setPreRenderLoad(prev => prev=false)
             } catch (error) {
@@ -151,8 +182,17 @@ export default function Index({auth}) {
     const actionBodyTemplate = (rowData) => {
         return (
             <React.Fragment>
-                <Button icon="pi pi-pencil" rounded outlined className="mr-2" onClick={() => handleEditProduct(rowData)} />
-                <Button icon="pi pi-trash" rounded outlined severity="danger" onClick={() => {handleDeleteProduct(rowData)}} />
+                <Button icon="pi pi-pencil" rounded outlined className="mr-2" onClick={() => handleEditPartner(rowData)} />
+                <Button icon="pi pi-trash" rounded outlined severity="danger" onClick={() => {handleDeletePartner(rowData)}} />
+            </React.Fragment>
+        );
+    };
+
+    const actionBodyTemplatePIC = (rowData) => {
+        return (
+            <React.Fragment>
+                <Button icon="pi pi-pencil" rounded outlined className="mr-2" onClick={() => handleEditPIC(rowData)} />
+                <Button icon="pi pi-trash" rounded outlined severity="danger" onClick={() => {handleDeletePIC(rowData)}} />
             </React.Fragment>
         );
     };
@@ -184,7 +224,7 @@ export default function Index({auth}) {
     }
 
 
-    const handleEditProduct = (partner) => {
+    const handleEditPartner = (partner) => {
         setData((prevData) => ({
             ...prevData,
             partner: {
@@ -202,7 +242,7 @@ export default function Index({auth}) {
         setModalEditPartnersIsVisible(true);
     };
 
-    const handleDeleteProduct = (partner) => {
+    const handleDeletePartner = (partner) => {
         confirmDialog({
             message: 'Apakah Anda yakin untuk menghapus ini?',
             header: 'Konfirmasi hapus',
@@ -223,16 +263,54 @@ export default function Index({auth}) {
         });
     }
 
-    const header = (
-        <div className=" flex flex-row justify-left gap-2 align-items-center items-end">
+    const handleEditPIC = (pic) => {
+       
+        setDataPIC(data => ({ ...data, uuid: pic.uuid}));
+        setDataPIC(data => ({ ...data, partner: pic.partner}));
+        setDataPIC(data => ({ ...data, name: pic.name}));
+        setDataPIC(data => ({ ...data, number: pic.number}));
+        setDataPIC(data => ({ ...data, position: pic.position}));
+        setDataPIC(data => ({ ...data, address: pic.address}));
+        
+        setModalEditPicIsVisible(true);
+    };
+
+    const handleDeletePIC = (pic) => {
+        confirmDialog({
+            message: 'Apakah Anda yakin untuk menghapus ini?',
+            header: 'Konfirmasi hapus',
+            icon: 'pi pi-info-circle',
+            acceptClassName: 'p-button-danger',
+            accept : async ()=> {
+                
+                destroyPIC('partners/pics/'+pic.uuid, {
+                    onSuccess: () => {
+                        getPics();
+                        showSuccess('Hapus');
+                    },
+                    onError: () => {
+                        showError('Hapus')
+                    }
+                })
+            },
+        });
+    }
+
+    const renderHeader = () => {
+        return (
+            <div className="flex flex-row justify-left gap-2 align-items-center items-end">
             <div className="w-[30%]">
                 <span className="p-input-icon-left">
                     <i className="pi pi-search dark:text-white" />
-                    <InputText className='dark:bg-transparent dark:placeholder-white' type="search" onInput={(e) => setGlobalFilter(e.target.value)} placeholder="Search..." />
+                    <InputText className='dark:bg-transparent dark:placeholder-white' value={globalFilterValue} onChange={onGlobalFilterChange} placeholder="Keyword Search" />
                 </span>
             </div>
-        </div>
-    );
+            </div>
+            
+        );
+    };
+
+    const header = renderHeader();
 
     const footerTemplate = () => {
         return (
@@ -284,6 +362,42 @@ export default function Index({auth}) {
         
     }
 
+    const handleSubmitFormPIC = (e, type) => {
+   
+        e.preventDefault();
+        
+        if(type ==='tambah'){
+            
+            postPIC('/partners/pics', {
+                onSuccess: () => {
+                    showSuccess('Tambah');
+                    setModalPicIsVisible(prev => false);
+                    getPics();
+                    resetPIC('partner', 'name', 'number', 'position', 'address');
+                },
+                onError: () => {
+                    showError('Tambah');
+                }    
+            });
+            
+        }else{
+        
+            putPIC('/partners/pics/'+dataPIC.uuid, {
+                onSuccess: () => {
+                    showSuccess('Update');
+                    setModalEditPicIsVisible(prev => false);
+                    getPics();
+                    resetPIC('partner', 'name', 'number', 'position', 'address');
+                },
+                onError: () => {
+                    showError('Update');
+                }    
+            });
+        }
+
+        
+    }
+
     if(preRenderLoad)
     {
         return (
@@ -307,14 +421,23 @@ export default function Index({auth}) {
             <Toast ref={toast} />
             <ConfirmDialog />
 
-            <HeaderModule title="Partner">
-                <Button label="Tambah" className="bg-purple-600 text-sm shadow-md rounded-lg mr-2" icon={addButtonIcon} onClick={() => {
+            <HeaderModule title={activeIndexTab==0 ? "Partner" : null ||  activeIndexTab==1 ? "PIC" : null || activeIndexTab==2 ? "Langganan" : null}>
+                
+                
+                {activeIndexTab==0 && (<Button label="Tambah" className="bg-purple-600 text-sm shadow-md rounded-lg mr-2" icon={addButtonIcon} onClick={() => {
                 setModalPartnersIsVisible(prev => prev=true)
                 reset('partner')
-                }} aria-controls="popup_menu_right" aria-haspopup />
+                }} aria-controls="popup_menu_right" aria-haspopup />)}
+
+                {activeIndexTab==1 && (<Button label="Tambah" className="bg-purple-600 text-sm shadow-md rounded-lg mr-2" icon={addButtonIcon} onClick={() => {
+                setModalPicIsVisible(prev => prev=true)
+               
+                }} aria-controls="popup_menu_right" aria-haspopup />)}
+                
             </HeaderModule>
 
             <TabView className='mt-3' activeIndex={activeIndexTab} onTabChange={(e) => setActiveIndexTab(e.index)}>
+                
                 <TabPanel header="List Partner">
                      {/* Modal tambah partner */}
                     <div className="card flex justify-content-center">
@@ -348,13 +471,13 @@ export default function Index({auth}) {
                                     <div className='flex flex-col'>    
                                         <label htmlFor="sales">Sales</label>
                                         <Dropdown value={data.partner.sales} onChange={(e) => setData('partner',{...data.partner, sales: e.target.value})} options={sales} optionLabel="name" placeholder="Pilih Sales" 
-                                        filter valueTemplate={selectedSalesTemplate} itemTemplate={salesOptionTemplate} className="w-full md:w-14rem" />
+                                        filter valueTemplate={selectedOptionTemplate} itemTemplate={optionTemplate} className="w-full md:w-14rem" />
                                     </div>
 
                                     <div className='flex flex-col'>    
                                         <label htmlFor="account_manager">Account Manager (AM)</label>
                                         <Dropdown value={data.partner.account_manager} onChange={(e) => setData('partner',{...data.partner, account_manager: e.target.value})} options={account_managers} optionLabel="name" placeholder="Pilih Account Manager (AM)" 
-                                        filter valueTemplate={selectedSalesTemplate} itemTemplate={salesOptionTemplate} className="w-full md:w-14rem" />
+                                        filter valueTemplate={selectedOptionTemplate} itemTemplate={optionTemplate} className="w-full md:w-14rem" />
                                     </div>
 
                                     <div className='flex flex-col'>
@@ -407,7 +530,7 @@ export default function Index({auth}) {
 
                                     <div className='flex flex-col'>
                                         <label htmlFor="number">No.Hp</label>
-                                        <InputText value={data.pic.number} type="number" onChange={(e) => setData('pic',{...data.pic, number: e.target.value})} className='dark:bg-gray-300' id="number" aria-describedby="number-help" />
+                                        <InputText value={data.pic.number} keyfilter="int" min={0} onChange={(e) => setData('pic',{...data.pic, number: e.target.value})} className='dark:bg-gray-300' id="number" aria-describedby="number-help" />
                                     </div>
 
                                     <div className='flex flex-col'>   
@@ -487,15 +610,15 @@ export default function Index({auth}) {
                                     </div>
 
                                     <div className='flex flex-col'>    
-                                        <label htmlFor="sales">Sales</label>
+                                        <label htmlFor="sales">Sales</label>                                   
                                         <Dropdown value={data.partner.sales} onChange={(e) => setData('partner',{...data.partner, sales: e.target.value})} options={sales} optionLabel="name" placeholder="Pilih Sales" 
-                                        filter valueTemplate={selectedSalesTemplate} itemTemplate={salesOptionTemplate} className="w-full md:w-14rem" />
+                                        filter valueTemplate={selectedOptionTemplate} itemTemplate={optionTemplate} className="w-full md:w-14rem" />
                                     </div>
 
                                     <div className='flex flex-col'>    
                                         <label htmlFor="account_manager">Account Manager (AM)</label>
                                         <Dropdown value={data.partner.account_manager} onChange={(e) => setData('partner',{...data.partner, account_manager: e.target.value})} options={account_managers} optionLabel="name" placeholder="Pilih Account Manager (AM)" 
-                                        filter valueTemplate={selectedSalesTemplate} itemTemplate={salesOptionTemplate} className="w-full md:w-14rem" />
+                                        filter valueTemplate={selectedOptionTemplate} itemTemplate={optionTemplate} className="w-full md:w-14rem" />
                                     </div>
 
                                     <div className='flex flex-col'>
@@ -549,6 +672,8 @@ export default function Index({auth}) {
                             }}
                             paginator 
                             rows={5}
+                            filters={filters}
+                            globalFilterFields={['name', 'sales.name', 'account_manager.name']}
                             emptyMessage="Partner tidak ditemukan."
                             paginatorClassName="dark:bg-transparent paginator-custome dark:text-gray-300 rounded-b-lg"
                             header={header}
@@ -570,7 +695,111 @@ export default function Index({auth}) {
 
                     </div>
                 </TabPanel>
+
                 <TabPanel header="PIC">
+
+                    {/* Modal tambah pic */}
+                    <div className="card flex justify-content-center">
+                        <Dialog
+                            header="PIC"
+                            headerClassName="dark:glass dark:text-white"
+                            className="bg-white w-[80%] md:w-[60%] lg:w-[35%] dark:glass dark:text-white"
+                            contentClassName='dark:glass dark:text-white'
+                            visible={modalPicIsVisible}
+                            onHide={() => setModalPicIsVisible(false)}
+                        >
+
+                            <form onSubmit={(e) => handleSubmitFormPIC(e, 'tambah')}>    
+                    
+                    
+                            <div className='flex flex-col justify-around gap-4 mt-4'>
+                                
+                                <div className='flex flex-col'>   
+                                    <label htmlFor="name">Nama</label>
+                                    <InputText value={dataPIC.name} onChange={(e) => setDataPIC('name', e.target.value)} className='dark:bg-gray-300' id="name" aria-describedby="name-help" />
+                                </div>
+
+                                <div className='flex flex-col'>    
+                                    <label htmlFor="pic_partner">Partner</label>
+                                    <Dropdown optionLabel="name" value={dataPIC.partner} onChange={(e) => setDataPIC('partner', e.target.value)} options={partners} placeholder="Pilih Partner" 
+                                    filter valueTemplate={selectedOptionTemplate} itemTemplate={optionTemplate} className="w-full md:w-14rem" />
+                                </div>
+
+                                <div className='flex flex-col'>
+                                    <label htmlFor="number">No.Hp</label>
+                                    <InputText keyfilter="int" min={0} value={dataPIC.number} onChange={(e) => setDataPIC('number', e.target.value)} className='dark:bg-gray-300' id="number" aria-describedby="number-help" />
+                                </div>
+
+                                <div className='flex flex-col'>   
+                                    <label htmlFor="position">Jabatan</label>
+                                    <InputText value={dataPIC.position} onChange={(e) => setDataPIC('position', e.target.value)} className='dark:bg-gray-300' id="position" aria-describedby="position-help" />
+                                </div>
+                                
+                                <div className='flex flex-col'>   
+                                    <label htmlFor="address">Alamat</label>
+                                    <InputTextarea value={dataPIC.address} onChange={(e) => setDataPIC('address', e.target.value)} rows={5} cols={30} />
+                                </div>
+
+                            </div>
+                            <div className='flex justify-center mt-5'>
+                                <Button label="Submit" disabled={processingPIC} className="bg-purple-600 text-sm shadow-md rounded-lg"/>
+                            </div>
+
+                            </form>
+                        </Dialog>
+                    </div>
+
+                    {/* Modal edit pic */}
+                    <div className="card flex justify-content-center">
+                        <Dialog
+                            header="Edit PIC"
+                            headerClassName="dark:glass shadow-md z-20 dark:text-white"
+                            className="bg-white w-[80%] md:w-[60%] lg:w-[30%] dark:glass dark:text-white"
+                            contentClassName=' dark:glass dark:text-white'
+                            visible={modalEditPicIsVisible}
+                            onHide={() => setModalEditPicIsVisible(false)}
+                        >
+                            <form onSubmit={(e) => handleSubmitFormPIC(e, 'update')}>    
+                            <div className='flex flex-col justify-around gap-4 mt-4'>
+                                
+                                <div className='flex flex-col'>   
+                                    <label htmlFor="name">Nama</label>
+                                    <InputText value={dataPIC.name} onChange={(e) => setDataPIC('name', e.target.value)} className='dark:bg-gray-300' id="name" aria-describedby="name-help" />
+                                </div>
+
+                                <div className='flex flex-col'>    
+                                    <label htmlFor="pic_partner">Partner</label>
+                                   
+                                    <Dropdown value={dataPIC.partner} options={partners} onChange={(e) => setDataPIC('partner',  e.target.value)} optionLabel="name" placeholder="Pilih Partner" 
+                                    filter valueTemplate={selectedOptionTemplate} itemTemplate={optionTemplate} className="w-full md:w-14rem" />
+                                </div>
+
+                                <div className='flex flex-col'>
+                                    <label htmlFor="number">No.Hp</label>
+                                    <InputText keyfilter="int" min={0} value={dataPIC.number} onChange={(e) => setDataPIC('number', e.target.value)} className='dark:bg-gray-300' id="number" aria-describedby="number-help" />
+                                </div>
+
+                                <div className='flex flex-col'>   
+                                    <label htmlFor="position">Jabatan</label>
+                                    <InputText value={dataPIC.position} onChange={(e) => setDataPIC('position', e.target.value)} className='dark:bg-gray-300' id="position" aria-describedby="position-help" />
+                                </div>
+                                
+                                <div className='flex flex-col'>   
+                                    <label htmlFor="address">Alamat</label>
+                                    <InputTextarea value={dataPIC.address} onChange={(e) => setDataPIC('address', e.target.value)} rows={5} cols={30} />
+                                </div>
+
+                            </div>
+
+                            <div className='flex justify-center mt-5'>
+                                <Button
+                                    label="Submit" disabled={processing} className="bg-purple-600 text-sm shadow-md rounded-lg"
+                                />
+                                </div>
+                            </form>
+                        </Dialog>
+                    </div>
+
                     <div className='flex mx-auto flex-col justify-center mt-5 gap-5'>
                         <div className="card p-fluid w-full h-full flex justify-center rounded-lg">
                         <DataTable
@@ -586,19 +815,17 @@ export default function Index({auth}) {
                             emptyMessage="Partner tidak ditemukan."
                             paginatorClassName="dark:bg-transparent paginator-custome dark:text-gray-300 rounded-b-lg"
                             header={header}
-                            value={partners} dataKey="id" >
+                            filters={filters}
+                            globalFilterFields={['name', 'partner.name']}
+                            value={pics} dataKey="id" >
                                 <Column header="No" body={(_, { rowIndex }) => rowIndex + 1} className='dark:border-none pl-6' headerClassName='dark:border-none pl-6 bg-transparent dark:bg-transparent dark:text-gray-300' style={{ width:'3%' }}/>
-                                <Column field="name" className='dark:border-none' headerClassName='dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300' header="Nama" align='left' style={{ width: '10%' }}></Column>
-                                <Column field="uuid" hidden className='dark:border-none' headerClassName='dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300' header="Nama" align='left' style={{ width: '10%' }}></Column>
-                                <Column header="Sales" body={(rowData) => rowData.sales.name } className='dark:border-none' headerClassName='dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300' align='left' style={{ width: '10%' }}></Column>
-                                <Column header="Account Manager" body={(rowData) => rowData.account_manager.name } className='dark:border-none' headerClassName='dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300' align='left' style={{ width: '10%' }}></Column>
-                                <Column header="Tanggal daftar" body={(rowData) => new Date(rowData.register_date).toLocaleDateString("id")} className='dark:border-none' headerClassName='dark:border-none  bg-transparent dark:bg-transparent dark:text-gray-300' align='left' style={{ width: '10%' }}></Column>
-                                <Column header="Tanggal live" body={(rowData) => new Date(rowData.live_date).toLocaleDateString("id")} className='dark:border-none' headerClassName='dark:border-none  bg-transparent dark:bg-transparent dark:text-gray-300' align='left' style={{ width: '10%' }}></Column>
+                                <Column field="name" header="PIC" className='dark:border-none' headerClassName='dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300' align='left' style={{ width: '15%' }}></Column>
+                                <Column header="Partner" body={(rowData) => rowData.partner.name } className='dark:border-none' headerClassName='dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300' align='left' style={{ width: '15%' }}></Column>
+                                <Column field="uuid" hidden className='dark:border-none' headerClassName='dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300' header="Nama" align='left'></Column>
+                                <Column field="number" header="Nomor Handphone" className='dark:border-none' headerClassName='dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300' align='left' style={{ width: '15%' }}></Column>
+                                <Column field="position" header="Jabatan" className='dark:border-none' headerClassName='dark:border-none  bg-transparent dark:bg-transparent dark:text-gray-300' align='left' style={{ width: '15%' }}></Column>
                                 <Column field="address" className='dark:border-none' headerClassName='dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300' header="Alamat" align='left' style={{ width: '20%' }}></Column>
-                                <Column header="Status" body={(rowData) => {
-                                    return <Badge value={rowData.status} className="text-white" severity={rowData.status == 'Aktif' ? 'success' : null || rowData.status == 'CLBK' ? 'info' : null || rowData.status == 'Proses' ? 'warning' : null || rowData.status == 'Non Aktif' ? 'danger' : null}></Badge>
-                                }} className='dark:border-none' headerClassName='dark:border-none  bg-transparent dark:bg-transparent dark:text-gray-300' align='left' style={{ width: '10%' }}></Column>
-                                <Column header="Action" body={actionBodyTemplate} style={{ width:'10%' }} className='dark:border-none' headerClassName='dark:border-none  bg-transparent dark:bg-transparent dark:text-gray-300'></Column>
+                                <Column header="Action" body={actionBodyTemplatePIC} style={{ width:'10%' }} className='dark:border-none' headerClassName='dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300'></Column>
                             </DataTable>
                         </div>
 

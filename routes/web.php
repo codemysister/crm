@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\PartnerController;
+use App\Http\Controllers\PartnerPicController;
 use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProfileController;
@@ -99,6 +100,12 @@ Route::middleware('auth')->group(function () {
     Route::put('/partners/{partner:uuid}', [PartnerController::class, 'update'])->name('partners.update')->middleware(['can:edit partner']);
     Route::delete('/partners/{partner:uuid}', [PartnerController::class, 'destroy'])->name('partners.destroy')->middleware(['can:hapus partner']);
     Route::get('/api/partners', [PartnerController::class, 'apiGetPartners'])->name('api.partners');
+    
+    // PIC
+    Route::post('/partners/pics', [PartnerPicController::class, 'store'])->name('partners.pics.store');
+    Route::get('/api/partners/pics', [PartnerPicController::class, 'apiGetPIC'])->name('api.partners.pics');
+    Route::put('/partners/pics/{uuid}', [PartnerPicController::class, 'update'])->name('partners.pics.update');
+    Route::delete('/partners/pics/{uuid}', [PartnerPicController::class, 'destroy'])->name('partners.pics.destroy');
 
 
 });

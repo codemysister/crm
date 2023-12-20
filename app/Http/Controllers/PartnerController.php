@@ -14,12 +14,7 @@ class PartnerController extends Controller
 {
     public function index()
     {   
-        $partnersDefault = Partner::with(['sales', 'account_manager', 'pics'])->get();
-        $picsDefault = PartnerPIC::with('partner')->get();
-        $salesDefault = User::role('sales')->get();
-        $accountManagerDefault = User::role('account manager')->get();
-
-        return Inertia::render("Partner/Index", compact("partnersDefault", "salesDefault", 'accountManagerDefault', 'picsDefault'));
+        return Inertia::render("Partner/Index");
     }
 
     public function store(Request $request)

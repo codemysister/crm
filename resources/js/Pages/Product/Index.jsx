@@ -207,12 +207,13 @@ export default function Index({auth}) {
     }
 
     return (
+
         <DashboardLayout auth={auth.user} className="">
             <Toast ref={toast} />
             <ConfirmDialog />
 
             <HeaderModule title="Produk">
-            {permissions.includes('tambah_produk') && (
+            {permissions.includes('tambah produk') && (
                 <Button label="Tambah" className="bg-purple-600 text-sm shadow-md rounded-lg mr-2" icon={addButtonIcon} onClick={() => {
                     setModalProductIsVisible(prev => prev=true)
                     reset('name','category','price','unit','description')
@@ -346,6 +347,7 @@ export default function Index({auth}) {
             </div>
          
         </DashboardLayout>
+        
     );
 }
         

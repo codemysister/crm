@@ -14,6 +14,7 @@ import { useForm } from '@inertiajs/react';
 import { ConfirmDialog, confirmDialog } from 'primereact/confirmdialog';
 import { Password } from 'primereact/password';
 import { Skeleton } from 'primereact/skeleton';
+import { FilterMatchMode } from 'primereact/api';
 
 export default function Index({auth}) {
 
@@ -35,7 +36,20 @@ export default function Index({auth}) {
     const [modalUserIsVisible, setModalUserIsVisible] = useState(false);
     const [modalEditUserIsVisible, setModalEditUserIsVisible] = useState(false);
     const toast = useRef(null);
+    const [filters, setFilters] = useState({
+        global: { value: null, matchMode: FilterMatchMode.CONTAINS },
+    });
 
+    const [globalFilterValue, setGlobalFilterValue] = useState('');
+    const onGlobalFilterChange = (e) => {
+        const value = e.target.value;
+        let _filters = { ...filters };
+
+        _filters['global'].value = value;
+
+        setFilters(_filters);
+        setGlobalFilterValue(value);
+    };
 
     const getUsers = async () => {
         setIsLoadingData(true)
@@ -119,16 +133,21 @@ export default function Index({auth}) {
         });
     }
 
-    const header = (
-        <div className=" flex flex-row justify-left gap-2 align-items-center items-end">
+    const renderHeader = () => {
+        return (
+            <div className="flex flex-row justify-left gap-2 align-items-center items-end">
             <div className="w-[30%]">
                 <span className="p-input-icon-left">
                     <i className="pi pi-search dark:text-white" />
-                    <InputText className='dark:bg-transparent dark:placeholder-white' type="search" onInput={(e) => setGlobalFilter(e.target.value)} placeholder="Search..." />
+                    <InputText className='dark:bg-transparent dark:placeholder-white' value={globalFilterValue} onChange={onGlobalFilterChange} placeholder="Keyword Search" />
                 </span>
             </div>
-        </div>
-    );
+            </div>
+            
+        );
+    };
+
+    const header = renderHeader();
 
     const handleSubmitForm = (e, type) => {
    
@@ -291,6 +310,9 @@ export default function Index({auth}) {
                         paginator 
                         rows={5}
                         loading={isLoadingData}
+                        filters={filters}
+                        header={header}
+                        globalFilterFields={['name', 'role', 'email']}
                         emptyMessage="User tidak ditemukan."
                         paginatorClassName="dark:bg-transparent paginator-custome dark:text-gray-300 rounded-b-lg"
                         value={users} dataKey="id" >
