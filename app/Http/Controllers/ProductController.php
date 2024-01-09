@@ -24,17 +24,7 @@ class ProductController extends Controller
         return response()->json($products);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
+    
     public function store(Request $request)
     {
         
@@ -49,27 +39,18 @@ class ProductController extends Controller
     }
 
     /**
-     * Display the specified resource.
-     */
-    public function show(Product $product)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Product $product)
-    {
-        //
-    }
-
-    /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Product $product)
+    public function update(Request $request, $uuid)
     {
-        $product->update($request->all());
+        Product::where('uuid', $uuid)->first()->update([
+            "uuid" => Str::uuid(),
+            "name"=> $request->name,
+            "category"=> $request->category,
+            "price"=> $request->price,
+            "description"=> $request->description,
+            "unit"=> $request->unit,
+        ]);
     }
 
     /**

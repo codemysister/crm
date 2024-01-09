@@ -16,7 +16,7 @@ return new class extends Migration
             $table->uuid('uuid');
             $table->string('name')->unique('name');
             $table->enum('category', ['Produk', 'Layanan']);
-            $table->integer('price');
+            $table->bigInteger('price');
             $table->string('unit');
             $table->text('description')->nullable();
             $table->timestamps();
