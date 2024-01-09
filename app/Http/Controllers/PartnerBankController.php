@@ -2,15 +2,15 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\PartnerPIC;
+use App\Models\PartnerBank;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
-class PartnerPicController extends Controller
+class PartnerBankController extends Controller
 {
     public function apiGetPIC()
     {
-        $pics = PartnerPIC::with(['partner.sales', 'partner.account_manager', 
+        $partnerBanks = PartnerBank::with(['partner.sales', 'partner.account_manager', 
         'partner.pics' => function ($query) {
             $query->latest();
         }, 'partner.subscription' => function ($query) {
@@ -19,35 +19,33 @@ class PartnerPicController extends Controller
             $query->latest();
         }])
         ->get();
-        return response()->json($pics);
+        return response()->json($partnerBanks);
     }
 
     public function store(Request $request)
     {
-        PartnerPIC::create([
+        PartnerBank::create([
             'uuid' => Str::uuid(),
             'partner_id'=> $request["partner"]["id"],
-            'name' => $request->name,
-            'number' => $request->number,
-            'position' => $request->position,
-            'address' => $request->address
+            'bank' => $request->bank,
+            'account_bank_number' => $request->account_bank_number,
+            'account_bank_name' => $request->account_bank_name
         ]);
     }
 
     public function update(Request $request, $uuid)
     {
-        PartnerPIC::where('uuid', $uuid)->first()->update([
+        PartnerBank::where('uuid', $uuid)->first()->update([
+            'uuid' => Str::uuid(),
             'partner_id'=> $request["partner"]["id"],
-            'name' => $request->name,
-            'number' => $request->number,
-            'position' => $request->position,
-            'address' => $request->address
+            'bank' => $request->bank,
+            'account_bank_number' => $request->account_bank_number,
+            'account_bank_name' => $request->account_bank_name
         ]);
     }
 
     public function destroy($uuid)
     {
-        PartnerPIC::where('uuid', $uuid)->delete();
+        PartnerBank::where('uuid', $uuid)->delete();
     }
-
 }

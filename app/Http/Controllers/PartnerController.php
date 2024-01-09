@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Partner;
+use App\Models\PartnerBank;
 use App\Models\PartnerPIC;
 use App\Models\PartnerSubscription;
 use App\Models\User;
@@ -39,14 +40,29 @@ class PartnerController extends Controller
             'address' => $request['pic']['address']
         ]);
 
+        $bank = PartnerBank::create([
+            'uuid' => Str::uuid(),
+            'partner_id' => $partner->id,
+            'bank' => $request['bank']['bank'],
+            'account_bank_number' => $request['bank']['account_bank_number'],
+            'account_bank_name' => $request['bank']['account_bank_name']
+        ]);
+
         $subscription = PartnerSubscription::create([
             'uuid' => Str::uuid(),
             'partner_id' => $partner->id,
             'nominal' => $request['subscription']['nominal'],
             'period' => $request['subscription']['period'],
-            'bank' => $request['subscription']['bank'],
-            'account_bank_number' => $request['subscription']['account_bank_number'],
-            'account_bank_name' => $request['subscription']['account_bank_name']
+            'price_card' => json_encode([
+                'price' => $request['subscription']['price_card']['price'],
+                'type' => $request['subscription']['price_card']['price'] !== null ?  $request['subscription']['price_card']['type']['name'] : '',
+            ]),
+            'price_lanyard' => $request['subscription']['price_lanyard'],
+            'price_subscription_system' => $request['subscription']['price_subscription_system'],
+            'price_training' => json_encode([
+                'price' => $request['subscription']['price_training']['price'],
+                'type' => $request['subscription']['price_training']['price'] !== null ? $request['subscription']['price_training']['type']['name'] : '' ,
+            ])
         ]);
     }
 
@@ -71,7 +87,14 @@ class PartnerController extends Controller
 
     public function apiGetPartners()
     {   
-        $partnersDefault = Partner::with(['sales', 'account_manager'])->get();
+        $partnersDefault = Partner::with(['sales', 'account_manager', 
+        'pics'  => function($query) {
+        $query->latest();
+        }, 'subscription'  => function($query) {
+            $query->latest();
+        }, 'banks' => function($query) {
+            $query->latest();
+        }])->get();
         $salesDefault = User::role('sales')->get();
         $accountManagerDefault = User::role('account manager')->get();
 
@@ -79,6 +102,22 @@ class PartnerController extends Controller
             'partners' => $partnersDefault,
             'sales' => $salesDefault,
             'account_managers' => $accountManagerDefault
+        ]);
+    }
+
+    public function apiGetPartner($uuid)
+    {   
+        $partner = Partner::with(['sales', 'account_manager', 
+            'pics'  => function($query) {
+            $query->latest();
+        }, 'subscription'  => function($query) {
+            $query->latest();
+        }, 'banks' => function($query) {
+            $query->latest();
+        }])->where('uuid', $uuid)->get();
+        
+        return response()->json([
+            'partner' => $partner
         ]);
     }
 }

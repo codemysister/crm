@@ -28,4 +28,14 @@ class Partner extends Authenticatable
     {
         return $this->hasMany(PartnerPIC::class, 'partner_id', 'id');
     }
+
+    public function banks()
+    {
+        return $this->hasMany(PartnerBank::class, 'partner_id', 'id');
+    }
+
+    public function subscription()
+    {
+        return $this->hasOne(PartnerSubscription::class);
+    }
 }
