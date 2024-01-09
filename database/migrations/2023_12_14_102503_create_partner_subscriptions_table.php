@@ -17,9 +17,10 @@ return new class extends Migration
             $table->foreignId('partner_id')->constrained('partners', 'id')->onDelete('cascade');
             $table->bigInteger('nominal');
             $table->string('period');
-            $table->string('bank');
-            $table->bigInteger('account_bank_number');
-            $table->string('account_bank_name');
+            $table->json('price_card')->nullable();
+            $table->bigInteger('price_lanyard')->nullable();
+            $table->bigInteger('price_subscription_system')->nullable();
+            $table->json('price_training')->nullable();
             $table->timestamps();
         });
     }
