@@ -1,0 +1,37 @@
+/* InvoiceHeader.css */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+  }
+  
+  .invoice-header {
+    display: flex;
+    justify-content: space-between;
+    padding: 20px;
+    background-color: #f0f0f0;
+  }
+  
+  .company-info {
+    max-width: 60%;
+  }
+  
+  .company-info h1,
+  .company-info p {
+    margin: 0;
+  }
+  
+  .company-info p:last-child {
+    margin-top: 10px;
+  }
+  
+  .logo {
+    max-width: 20%;
+    text-align: right;
+  }
+  
+  .logo img {
+    max-width: 100%;
+    height: auto;
+  }
+  

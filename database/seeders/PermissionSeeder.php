@@ -74,12 +74,28 @@ class PermissionSeeder extends Seeder
         Permission::create(['name' => 'tambah permission', 'group_name' => 'Permission']);
         Permission::create(['name' => 'edit permission', 'group_name' => 'Permission']);
         Permission::create(['name' => 'hapus permission', 'group_name' => 'Permission']);
+
+        // Role & permission
+        Permission::create(['name' => 'setting role permission', 'group_name' => 'Permission & Role']);
+    
         
         // Partner
         Permission::create(['name' => 'lihat partner', 'group_name' => 'Partner']);
         Permission::create(['name' => 'tambah partner', 'group_name' => 'Partner']);
         Permission::create(['name' => 'edit partner', 'group_name' => 'Partner']);
         Permission::create(['name' => 'hapus partner', 'group_name' => 'Partner']);
+       
+        // PIC
+        Permission::create(['name' => 'lihat pic', 'group_name' => 'PIC']);
+        Permission::create(['name' => 'tambah pic', 'group_name' => 'PIC']);
+        Permission::create(['name' => 'edit pic', 'group_name' => 'PIC']);
+        Permission::create(['name' => 'hapus pic', 'group_name' => 'PIC']);
+        
+        // Subscription
+        Permission::create(['name' => 'lihat langganan', 'group_name' => 'Langganan']);
+        Permission::create(['name' => 'tambah langganan', 'group_name' => 'Langganan']);
+        Permission::create(['name' => 'edit langganan', 'group_name' => 'Langganan']);
+        Permission::create(['name' => 'hapus langganan', 'group_name' => 'Langganan']);
 
              
     }

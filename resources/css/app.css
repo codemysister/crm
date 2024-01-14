@@ -74,6 +74,8 @@
       color:rgb(175, 175, 175);
       border: none;
     }
+
+    
     /* End Input Text */
 
 
@@ -97,7 +99,17 @@
 
     /* Step */
     .p-steps .p-steps-item .p-menuitem-link{
-      padding: 0.5rem 0.5rem;
+      /* padding: 0.5rem 0.5rem; */
+      gap: 5px;
+      flex-direction: column;
+    }
+
+    .p-steps {
+      padding: 0;
+    }
+
+    .p-steps .p-steps-item .p-menuitem-link .p-steps-title{
+      padding-left: 0px;
     }
     /* End Step */
 
@@ -185,8 +197,26 @@
     /* Datepicker */
     button.p-datepicker-trigger.p-button.p-component.p-button-icon-only{
       background-color: #673AB7;
+      z-index: 10;
     }
+
+    
     /* End Datepicker */
+
+    /* Tooltip */
+    .p-tooltip .p-tooltip-text{
+      background-color: rgba(189, 188, 188, 0.966);
+    }
+    /* Endtooltip */
+
+    
+    /* Menu */
+    .p-menuitem-active{
+      background-color: #f5f5f5;
+      color:white;
+     
+    }
+    /* End Menu */
 }
 
 

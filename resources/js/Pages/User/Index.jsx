@@ -20,6 +20,7 @@ export default function Index({auth}) {
 
     const [users, setUsers] = useState('')
     const [roles, setRoles] = useState('');
+    const {roles: roleAuth, permissions: permissionAuth} = auth.user;
     
     const { data, setData, post, put, delete: destroy, reset, processing, errors }  = useForm({
         id:'',
@@ -83,8 +84,15 @@ export default function Index({auth}) {
     const actionBodyTemplate = (rowData) => {
         return (
             <React.Fragment>
+
+                {permissionAuth.includes('edit user') && (
                 <Button icon="pi pi-pencil" rounded outlined className="mr-2" onClick={() => handleEditProduct(rowData)} />
+                )}
+
+                {permissionAuth.includes('hapus user') && (
                 <Button icon="pi pi-trash" rounded outlined severity="danger" onClick={() => {handleDeleteProduct(rowData)}} />
+                )}
+
             </React.Fragment>
         );
     };
@@ -212,12 +220,12 @@ export default function Index({auth}) {
             <ConfirmDialog />
 
             <HeaderModule title="User">
-                
+            {permissionAuth.includes('tambah user') && (
                 <Button label="Tambah" className="bg-purple-600 text-sm shadow-md rounded-lg mr-2" icon={addButtonIcon} onClick={() => {
                     setModalUserIsVisible(prev=>prev=true)
                     reset('name','email','role','role_id','id')
                     }} aria-controls="popup_menu_right" aria-haspopup />
-            
+            )}
             </HeaderModule>
 
              {/* Modal tambah user */}
@@ -322,7 +330,9 @@ export default function Index({auth}) {
                             <Column field="name" className='dark:border-none' headerClassName='dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300' header="Nama" align='left' style={{ width: '30%' }}></Column>
                             <Column field="role" className='dark:border-none' headerClassName='dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300' header="Role" align='left' style={{ width: '30%' }}></Column>
                             <Column field="email" className='dark:border-none' headerClassName='dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300' header="Email" align='left' style={{ width: '30%' }}></Column>
+                            { (permissionAuth.includes('edit user') || permissionAuth.includes('hapus user') ) && (
                             <Column header="Action" body={actionBodyTemplate} style={{ minWidth: '12rem' }}  className='dark:border-none' headerClassName='dark:border-none  bg-transparent dark:bg-transparent dark:text-gray-300'></Column>
+                            )}
                 </DataTable>
                 </div>
             </div>

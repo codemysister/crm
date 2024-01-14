@@ -24,6 +24,7 @@ const Index = ({auth}) => {
     const [roles, setRoles] = useState('');
     const [permissions, setPermissions] = useState('');
     const [permissionGroups, setPermissionGroups] = useState('');
+    const {roles: roleAuth, permissions: permissionAuth} = auth.user;
     const [modalRoleVisible, setModalRoleVisible] = useState(false);
     const [modalPermissionVisible, setModalPermissionVisible] = useState(false);
     const [isLoadingData, setIsLoadingData] = useState(false);
@@ -230,13 +231,16 @@ const Index = ({auth}) => {
         {
             label: 'Opsi',
             items: [
+                (permissionAuth.includes('tambah role') &&
                 {
                     label: 'Role',
                     icon: 'pi pi-user',
                     command: () => {
                         setModalRoleVisible(true)
                     }
-                },
+                    
+                }),
+                (permissionAuth.includes('tambah permission') &&
                 {
                     label: 'Perizinan',
                     icon: 'pi pi-verified',
@@ -244,6 +248,7 @@ const Index = ({auth}) => {
                         setModalPermissionVisible(true)
                     }
                 }
+                )
             ]
         }
     ];
@@ -340,6 +345,13 @@ const Index = ({auth}) => {
             <ConfirmDialog />
 
 
+            <HeaderModule title="Role & Perizinan">
+                <Menu model={items} popup ref={menuRight} id="popup_menu_right" popupAlignment="right" />
+                { ( (permissionAuth.includes('tambah permission') || (permissionAuth.includes('tambah role') )) &&
+                <Button label="Tambah" className="bg-purple-600 text-sm shadow-md rounded-lg mr-2" icon={addButtonIcon} onClick={(event) => menuRight.current.toggle(event)} aria-controls="popup_menu_right" aria-haspopup />
+                )}
+            </HeaderModule>
+
       
             {/* Modal role */}
             <div className="card flex justify-content-center">
@@ -410,12 +422,8 @@ const Index = ({auth}) => {
                 </Dialog>
             </div>  
 
-            <HeaderModule title="Role & Perizinan">
-                <Menu model={items} popup ref={menuRight} id="popup_menu_right" popupAlignment="right" />
-                <Button label="Tambah" className="bg-purple-600 text-sm shadow-md rounded-lg mr-2" icon={addButtonIcon} onClick={(event) => menuRight.current.toggle(event)} aria-controls="popup_menu_right" aria-haspopup />
-            </HeaderModule>
-
             <div className='flex mx-auto flex-col justify-center mt-5 gap-5'>
+            { (permissionAuth.includes('lihat role') &&
                 <div className="card p-fluid w-full h-full flex justify-center">
                     <DataTable
                     loading={isLoadingData}
@@ -426,13 +434,19 @@ const Index = ({auth}) => {
                         header: ''
                     }}
                     value={roles} rowEditorCancelIcon={rowEditorCancelIcon} rowEditorSaveIcon={rowEditorSaveIcon} editMode="row" dataKey="id" onRowEditComplete={onRowRoleEditComplete} >
-                        <Column header="No" body={(_, { rowIndex }) => rowIndex + 1} className='dark:border-none pl-6' headerClassName='pl-6 dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300'/>
-                        <Column field="name" className='dark:border-none' headerClassName='dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300' header="Role" align='left' editor={(options) => NameEditor(options)} style={{ width: '30%' }}></Column>
-                        <Column field="guard_name" className='dark:border-none' headerClassName='dark:border-none  bg-transparent dark:bg-transparent dark:text-gray-300' align='left' header="Guard" editor={(options) => GuardEditor(options)} style={{ width: '30%' }}></Column>
+                        <Column header="No" body={(_, { rowIndex }) => rowIndex + 1} className='dark:border-none pl-6' headerClassName='pl-6 dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300' style={{ width: '5%' }}/>
+                        <Column field="name" className='dark:border-none' headerClassName='dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300' header="Role" align='left' editor={(options) => NameEditor(options)} style={{ width: '20%' }}></Column>
+                        <Column field="guard_name" className='dark:border-none' headerClassName='dark:border-none  bg-transparent dark:bg-transparent dark:text-gray-300' align='left' header="Guard" editor={(options) => GuardEditor(options)} style={{ width: '20%' }}></Column>
+                        
                         <Column header="Action" className='dark:border-none' rowEditor headerClassName='dark:border-none  bg-transparent dark:bg-transparent dark:text-gray-300' colSpan={2} align='center' headerStyle={{ width: '5%', minWidth: '8rem' }} bodyStyle={{ textAlign: 'right' }}></Column>
+                    
                         <Column className='dark:border-none' headerClassName='dark:border-none  bg-transparent dark:bg-transparent dark:text-gray-300' align='left' headerStyle={{width:'1%'}} body={(e)=>buttonDelete(e, 'role')} field="id"></Column>
-                    </DataTable>
+                        
+                        </DataTable>
                 </div>
+                )}
+
+                { (permissionAuth.includes('lihat permission') &&
                 <div className="card p-fluid w-full h-auto flex  justify-center text-white">
                     <DataTable
                     loading={isLoadingData}
@@ -450,16 +464,19 @@ const Index = ({auth}) => {
                     globalFilterFields={['name']}
                     style={{color: 'white'}}
                     value={permissions} rowEditorCancelIcon={rowEditorCancelIcon} rowEditorSaveIcon={rowEditorSaveIcon} editMode="row" dataKey="id" onRowEditComplete={onRowPermissionEditComplete} >
-                        <Column header="No" body={(_, { rowIndex }) => rowIndex + 1} className='dark:border-none pl-6' headerClassName='pl-6 dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300'/>
-                        <Column field="name" sortable className='dark:border-none' headerClassName='dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300' header="Perizinan" align='left' editor={(options) => NameEditor(options)} style={{ width: '30%' }}></Column>
+                        <Column header="No" body={(_, { rowIndex }) => rowIndex + 1} className='dark:border-none pl-6' headerClassName='pl-6 dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300' style={{ width: '5%' }}/>
+                        <Column field="name" sortable className='dark:border-none' headerClassName='dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300' header="Perizinan" align='left' editor={(options) => NameEditor(options)} style={{ width: '20%' }}></Column>
                         <Column field="group_name" sortable className='dark:border-none' headerClassName='dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300' align='left' header="Grup" editor={(options) => GuardEditor(options)} style={{ width: '30%' }}></Column>
                         <Column 
                         header="Action" className='dark:border-none' rowEditor headerClassName='dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300' colSpan={2}  align='center' headerStyle={{ width: '10%', minWidth: '8rem' }} bodyStyle={{ textAlign: 'right' }}></Column>
                         <Column bodyStyle={{width:'10px'}} headerStyle={{width: '1%'}} className='dark:border-none' headerClassName='dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300' body={(e)=>buttonDelete(e, 'permission')}></Column>
                     </DataTable>
                 </div>
+                )}
+
             </div>
 
+            { (permissionAuth.includes('setting role permission') &&
             <div className="flex h-[80%] mx-auto my-5">
                     
                     <div className="card w-full h-full overflow-y-auto dark:glass flex rounded-lg justify-content-center overflow-x-auto shadow-md">
@@ -525,6 +542,7 @@ const Index = ({auth}) => {
                 
                 </div>
             </div>
+            )}
             
 
         </DashboardLayout>

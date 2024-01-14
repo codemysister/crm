@@ -27,6 +27,7 @@
         "jspdf": "^2.5.1",
         "jspdf-autotable": "^3.8.1",
         "primeicons": "^6.0.1",
-        "primereact": "^10.2.1"
+        "primereact": "^10.2.1",
+        "puppeteer": "^21.7.0"
     }
 }
