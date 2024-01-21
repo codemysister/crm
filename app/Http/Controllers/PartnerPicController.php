@@ -10,15 +10,20 @@ class PartnerPicController extends Controller
 {
     public function apiGetPIC()
     {
-        $pics = PartnerPIC::with(['partner.sales', 'partner.account_manager', 
-        'partner.pics' => function ($query) {
-            $query->latest();
-        }, 'partner.subscription' => function ($query) {
-            $query->latest();
-        }, 'partner.banks' => function ($query) {
-            $query->latest();
-        }])
-        ->get();
+        $pics = PartnerPIC::with([
+            'partner.sales',
+            'partner.account_manager',
+            'partner.pics' => function ($query) {
+                $query->latest();
+            },
+            'partner.subscription' => function ($query) {
+                $query->latest();
+            },
+            'partner.banks' => function ($query) {
+                $query->latest();
+            }
+        ])
+            ->get();
         return response()->json($pics);
     }
 
@@ -26,7 +31,7 @@ class PartnerPicController extends Controller
     {
         PartnerPIC::create([
             'uuid' => Str::uuid(),
-            'partner_id'=> $request["partner"]["id"],
+            'partner_id' => $request["partner"]["id"],
             'name' => $request->name,
             'number' => $request->number,
             'position' => $request->position,
@@ -37,7 +42,7 @@ class PartnerPicController extends Controller
     public function update(Request $request, $uuid)
     {
         PartnerPIC::where('uuid', $uuid)->first()->update([
-            'partner_id'=> $request["partner"]["id"],
+            'partner_id' => $request["partner"]["id"],
             'name' => $request->name,
             'number' => $request->number,
             'position' => $request->position,

@@ -10,18 +10,16 @@ return new class extends Migration {
      */
     public function up(): void
     {
-        Schema::create('stpd', function (Blueprint $table) {
+        Schema::create('sphs', function (Blueprint $table) {
             $table->id();
             $table->uuid();
+            $table->foreignId('partner_id')->constrained('partners', 'id')->onDelete('cascade');
             $table->string('code');
-            $table->string('institution');
-            $table->string('location');
-            $table->date('departure_date');
-            $table->date('return_date');
-            $table->string('transportation');
-            $table->string('accommodation');
+            $table->json('partner'); // {name:'', pic: '', address:''}
+            $table->json('sales');  // {name:'', wa: '', email:''}
             $table->json('signature'); // {name:'', position: '', signature:'path'}
-            $table->string('stpd_doc');
+            $table->string('sph_doc');
+            $table->foreignId('created_by')->constrained('users', 'id')->onDelete('cascade');
             $table->timestamps();
         });
     }
@@ -31,6 +29,6 @@ return new class extends Migration {
      */
     public function down(): void
     {
-        Schema::dropIfExists('s_p_d_s');
+        Schema::dropIfExists('sphs');
     }
 };

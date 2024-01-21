@@ -14,7 +14,7 @@ use Inertia\Inertia;
 class PartnerController extends Controller
 {
     public function index()
-    {   
+    {
         return Inertia::render("Partner/Index");
     }
 
@@ -22,7 +22,7 @@ class PartnerController extends Controller
     {
         $partner = Partner::create([
             'uuid' => Str::uuid(),
-            'name'=> $request['partner']['name'],
+            'name' => $request['partner']['name'],
             'sales_id' => $request['partner']['sales']['id'],
             'account_manager_id' => $request['partner']['account_manager']['id'],
             'register_date' => $request['partner']['register_date'],
@@ -55,13 +55,13 @@ class PartnerController extends Controller
             'period' => $request['subscription']['period'],
             'price_card' => json_encode([
                 'price' => $request['subscription']['price_card']['price'],
-                'type' => $request['subscription']['price_card']['price'] !== null ?  $request['subscription']['price_card']['type']['name'] : '',
+                'type' => $request['subscription']['price_card']['price'] !== null ? $request['subscription']['price_card']['type']['name'] : '',
             ]),
             'price_lanyard' => $request['subscription']['price_lanyard'],
             'price_subscription_system' => $request['subscription']['price_subscription_system'],
             'price_training' => json_encode([
                 'price' => $request['subscription']['price_training']['price'],
-                'type' => $request['subscription']['price_training']['price'] !== null ? $request['subscription']['price_training']['type']['name'] : '' ,
+                'type' => $request['subscription']['price_training']['price'] !== null ? $request['subscription']['price_training']['type']['name'] : '',
             ])
         ]);
     }
@@ -70,7 +70,7 @@ class PartnerController extends Controller
     {
 
         Partner::where('uuid', $uuid)->first()->update([
-            'name'=> $request['partner']['name'],
+            'name' => $request['partner']['name'],
             'sales_id' => $request['partner']['sales']['id'],
             'account_manager_id' => $request['partner']['account_manager']['id'],
             'register_date' => $request['partner']['register_date'],
@@ -86,15 +86,20 @@ class PartnerController extends Controller
     }
 
     public function apiGetPartners()
-    {   
-        $partnersDefault = Partner::with(['sales', 'account_manager', 
-        'pics'  => function($query) {
-        $query->latest();
-        }, 'subscription'  => function($query) {
-            $query->latest();
-        }, 'banks' => function($query) {
-            $query->latest();
-        }])->get();
+    {
+        $partnersDefault = Partner::with([
+            'sales',
+            'account_manager',
+            'pics' => function ($query) {
+                $query->latest();
+            },
+            'subscription' => function ($query) {
+                $query->latest();
+            },
+            'banks' => function ($query) {
+                $query->latest();
+            }
+        ])->get();
         $salesDefault = User::role('sales')->get();
         $accountManagerDefault = User::role('account manager')->get();
 
@@ -106,16 +111,21 @@ class PartnerController extends Controller
     }
 
     public function apiGetPartner($uuid)
-    {   
-        $partner = Partner::with(['sales', 'account_manager', 
-            'pics'  => function($query) {
-            $query->latest();
-        }, 'subscription'  => function($query) {
-            $query->latest();
-        }, 'banks' => function($query) {
-            $query->latest();
-        }])->where('uuid', $uuid)->get();
-        
+    {
+        $partner = Partner::with([
+            'sales',
+            'account_manager',
+            'pics' => function ($query) {
+                $query->latest();
+            },
+            'subscription' => function ($query) {
+                $query->latest();
+            },
+            'banks' => function ($query) {
+                $query->latest();
+            }
+        ])->where('uuid', $uuid)->get();
+
         return response()->json([
             'partner' => $partner
         ]);

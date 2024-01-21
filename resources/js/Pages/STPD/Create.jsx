@@ -215,7 +215,7 @@ const Create = ({ usersDefault, partnersDefault }) => {
                                         hidden
                                     />
                                 </div>
-                                
+
                                 <div className="flex flex-col mt-3">
                                     <label htmlFor="lembaga">Lembaga *</label>
                                     <Dropdown
@@ -418,10 +418,8 @@ const Create = ({ usersDefault, partnersDefault }) => {
                             selection={data.employees}
                             onSelectionChange={(e) => {
                                 console.log(e.value);
-                                setData("employees", e.value)
-                            }
-                                
-                            }
+                                setData("employees", e.value);
+                            }}
                             dataKey="id"
                         >
                             <Column
@@ -444,6 +442,17 @@ const Create = ({ usersDefault, partnersDefault }) => {
                         <header>
                             <div className="flex justify-between items-center">
                                 <div className="w-full">
+                                    <img
+                                        src="/assets/img/cazh.png"
+                                        alt=""
+                                        className="scale-[0.6]"
+                                        // style={{ scale: 0.8 }}
+                                    />
+                                    {/* <button className="z-50" onClick={tes}>
+                                    tes
+                                </button> */}
+                                </div>
+                                <div className="w-full">
                                     <h2 className="font-bold text-sm">
                                         PT CAZH TEKNOLOGI INOVASI
                                     </h2>
@@ -455,17 +464,6 @@ const Create = ({ usersDefault, partnersDefault }) => {
                                     </p>
                                     <p className="text-xs">Jawa Tengah 53183</p>
                                     <p className="text-xs">hello@cazh.id</p>
-                                </div>
-                                <div className="w-full">
-                                    <img
-                                        src="/assets/img/cazh.png"
-                                        alt=""
-                                        className="scale-[0.6]"
-                                        // style={{ scale: 0.8 }}
-                                    />
-                                    {/* <button className="z-50" onClick={tes}>
-                                    tes
-                                </button> */}
                                 </div>
                             </div>
                         </header>

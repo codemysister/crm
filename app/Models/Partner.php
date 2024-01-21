@@ -13,11 +13,11 @@ class Partner extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable, HasRoles;
 
-    protected $guarded = [];  
+    protected $guarded = [];
 
     public function sales()
     {
-       return $this->belongsTo(User::class, 'sales_id', 'id');
+        return $this->belongsTo(User::class, 'sales_id', 'id');
     }
     public function account_manager()
     {

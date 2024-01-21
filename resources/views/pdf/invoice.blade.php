@@ -34,7 +34,7 @@
 
     <div class="flex flex-col justify-center mt-8 text-center">
         <div class="font-bold underline text-sm">SURAT KETERANGAN PERJALANAN DINAS</div>
-        <div class="text-sm">Nomor : 001/CAZH-SPJ/X/2023</div>
+        <div class="text-sm">Nomor : {{stpd->code}}</div>
     </div>
 
     <div class="mt-4">

@@ -9,8 +9,10 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\SignatureController;
+use App\Http\Controllers\SPHController;
 use App\Http\Controllers\STPDController;
 use App\Http\Controllers\UserController;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -32,6 +34,11 @@ use Inertia\Inertia;
 //         'laravelVersion' => Application::VERSION,
 //         'phpVersion' => PHP_VERSION,
 //     ]);
+// });
+
+// Route::get('/pdf', function () {
+//     $pdf = PDF::loadView('pdf.sph', []);
+//     return $pdf->stream();
 // });
 
 Route::redirect('/', '/login', 301);
@@ -85,15 +92,6 @@ Route::middleware('auth')->group(function () {
     Route::delete('/products/{product:uuid}', [ProductController::class, 'destroy'])->name('products.destroy')->middleware(['can:hapus produk']);
     Route::get('/api/products', [ProductController::class, 'apiGetProducts'])->name('api.products');
 
-    // STPD
-    Route::get('/stpd', [STPDController::class, 'index'])->name('stpd.view')->middleware(['can:lihat produk']);
-    Route::get('/stpd/create', [STPDController::class, 'create'])->name('stpd.create');
-    Route::post('/stpd', [STPDController::class, 'store'])->name('stpd.store')->middleware(['can:tambah produk']);
-    Route::get('/stpd/{stpd:uuid}', [STPDController::class, 'edit'])->name('stpd.edit')->middleware(['can:edit produk']);
-    Route::put('/stpd/{stpd:uuid}', [STPDController::class, 'update'])->name('stpd.update')->middleware(['can:edit produk']);
-    Route::delete('/stpd/{stpd:uuid}', [STPDController::class, 'destroy'])->name('stpd.destroy')->middleware(['can:hapus produk']);
-    Route::get('/api/stpd', [STPDController::class, 'apiGetSTPD'])->name('api.stpd');
-
     Route::resource('signature', SignatureController::class);
     Route::get('/api/signature', [SignatureController::class, 'apiGetSignature'])->name('api.signature');
 
@@ -123,7 +121,23 @@ Route::middleware('auth')->group(function () {
     Route::put('/partners/subscriptions/{uuid}', [PartnerSubscriptionController::class, 'update'])->name('partners.subscriptions.update');
     Route::delete('/partners/subscriptions/{uuid}', [PartnerSubscriptionController::class, 'destroy'])->name('partners.subscriptions.destroy');
 
+    // STPD
+    Route::get('/stpd', [STPDController::class, 'index'])->name('stpd.view')->middleware(['can:lihat produk']);
+    Route::get('/stpd/create', [STPDController::class, 'create'])->name('stpd.create');
+    Route::post('/stpd', [STPDController::class, 'store'])->name('stpd.store')->middleware(['can:tambah produk']);
+    Route::get('/stpd/{stpd:uuid}', [STPDController::class, 'edit'])->name('stpd.edit')->middleware(['can:edit produk']);
+    Route::put('/stpd/{stpd:uuid}', [STPDController::class, 'update'])->name('stpd.update')->middleware(['can:edit produk']);
+    Route::delete('/stpd/{stpd:uuid}', [STPDController::class, 'destroy'])->name('stpd.destroy')->middleware(['can:hapus produk']);
+    Route::get('/api/stpd', [STPDController::class, 'apiGetSTPD'])->name('api.stpd');
 
+    // SPH
+    Route::get('/sph', [SPHController::class, 'index'])->name('sph.view')->middleware(['can:lihat produk']);
+    Route::get('/sph/create', [SPHController::class, 'create'])->name('sph.create');
+    Route::post('/sph', [SPHController::class, 'store'])->name('sph.store')->middleware(['can:tambah produk']);
+    Route::get('/sph/{sph:uuid}', [SPHController::class, 'edit'])->name('sph.edit')->middleware(['can:edit produk']);
+    Route::put('/sph/{sph:uuid}', [SPHController::class, 'update'])->name('sph.update')->middleware(['can:edit produk']);
+    Route::delete('/sph/{sph:uuid}', [SPHController::class, 'destroy'])->name('sph.destroy')->middleware(['can:hapus produk']);
+    Route::get('/api/sph', [SPHController::class, 'apiGetSPH'])->name('api.sph');
 });
 
 require __DIR__ . '/auth.php';
