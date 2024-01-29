@@ -15,9 +15,15 @@ return new class extends Migration {
             $table->uuid();
             $table->foreignId('partner_id')->constrained('partners', 'id')->onDelete('cascade');
             $table->string('code');
-            $table->json('partner'); // {name:'', pic: '', address:''}
-            $table->json('sales');  // {name:'', wa: '', email:''}
-            $table->json('signature'); // {name:'', position: '', signature:'path'}
+            $table->string('partner_name');
+            $table->string('partner_pic');
+            $table->string('partner_address');
+            $table->string('sales_name');
+            $table->string('sales_wa');
+            $table->string('sales_email');
+            $table->string('signature_name');
+            $table->string('signature_position');
+            $table->string('signature_image');
             $table->string('sph_doc');
             $table->foreignId('created_by')->constrained('users', 'id')->onDelete('cascade');
             $table->timestamps();

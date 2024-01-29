@@ -18,25 +18,21 @@
             margin-bottom: 2cm;
         }
 
-        @import url('https://fonts.googleapis.com/css2?family=Sen:wght@400;500;600;700;800&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap');
 
 
         body {
             margin: 0px;
             padding: 0px;
             box-sizing: border-box;
-            font-family: 'Sen', sans-serif;
+            font-family: 'Inter', sans-serif;
+
         }
     </style>
 </head>
 
-<body class="font-sen text-base">
+<body class="text-base">
 
-    @php
-    $partner = json_decode($sph->partner, true);
-    $sales = json_decode($sph->sales, true);
-    $signature = json_decode($sph->signature, true);
-    @endphp
 
     <div class="flex justify-between items-center">
         <table>
@@ -66,9 +62,9 @@
 
     <div class="flex flex-col justify-start mt-6 text-left">
         <p class="text-sm">Kepada Yth.</p>
-        <p class="text-sm"><b>{{$partner['pic']}}</b></p>
-        <p class="text-sm"><b>{{$partner['name']}}</b></p>
-        <p class="text-sm">di {{$partner['address']}}</p>
+        <p class="text-sm"><b>{{$sph->partner_pic}}</b></p>
+        <p class="text-sm"><b>{{$sph->partner_name}}</b></p>
+        <p class="text-sm">di {{$sph->partner_address}}</p>
     </div>
 
     <div class="mt-6 text-left">
@@ -77,8 +73,8 @@
 
     <div class="mt-6 text-left">
         <p class="text-sm text-justify">Menindaklanjuti komunikasi yang telah dilakukan oleh tim marketing kami
-            {{$sales['name']}}
-            dengan perwakilan dari {{$partner['pic']}}, dengan ini kami sampaikan penawaran sebagai berikut:</p>
+            {{$sph->sales_name}}
+            dengan perwakilan dari {{$sph->partner_pic}}, dengan ini kami sampaikan penawaran sebagai berikut:</p>
     </div>
 
 
@@ -111,7 +107,7 @@
             Untuk konfirmasi persetujuan silakan hubungi :
         </p>
         <p class="text-sm">
-            <b>{{$sales['name']}}</b> via WA : <b>{{$sales['wa']}}</b>, email : <b>{{$sales['email']}}</b>
+            <b>{{$sph->sales_name}}</b> via WA : <b>{{$sph->sales_wa}}</b>, email : <b>{{$sph->sales_email}}</b>
         </p>
     </div>
 
@@ -127,9 +123,9 @@
 
     <div class="flex flex-col justify-start mt-8 float-left">
         <p class="text-sm">Purwokerto, {{date("d/m/Y")}}</p>
-        <img class="h-20 w-[15%]" src="{{ public_path($signature['signature']) }}" alt="Signature">
-        <div>{{ $signature['name'] }}</div>
-        <div>{{ $signature['position'] }}</div>
+        <img class="h-20 w-[15%]" src="{{ public_path($sph->signature_image) }}" alt="Signature">
+        <div>{{ $sph->signature_name }}</div>
+        <div>{{ $sph->signature_position }}</div>
     </div>
 
 

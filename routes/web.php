@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\MOUController;
 use App\Http\Controllers\PartnerBankController;
 use App\Http\Controllers\PartnerController;
 use App\Http\Controllers\PartnerPicController;
@@ -15,6 +16,8 @@ use App\Http\Controllers\UserController;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
+use Spatie\Browsershot\Browsershot;
+use Illuminate\Http\Response;
 
 /*
 |--------------------------------------------------------------------------
@@ -36,15 +39,42 @@ use Inertia\Inertia;
 //     ]);
 // });
 
-// Route::get('/pdf', function () {
-//     $pdf = PDF::loadView('pdf.sph', []);
-//     return $pdf->stream();
-// });
+Route::get('/pdf', function () {
+    $pdf = PDF::loadView('pdf.mou', []);
+    $pdf->output();
+    $dom_pdf = $pdf->getDomPDF();
+    $pageWidth = $dom_pdf->getCanvas()->get_width();
+    $pageHeight = $dom_pdf->getCanvas()->get_height();
+    $canvas = $dom_pdf->get_canvas();
+    $canvas->page_text($pageWidth - 100, $pageHeight - 20, "Page {PAGE_NUM} of {PAGE_COUNT}", null, 10, array(0, 0, 0));
+    return $pdf->stream();
+});
+
+Route::get('/browsershot', function () {
+
+    $html = view('pdf.mou')->render();
+    $pdf = Browsershot::html($html)
+        ->setIncludedPath(config('services.browsershot.included_path'))
+        ->showBackground()
+        ->save('example.pdf');
+
+    // return new Response($pdf, 200, [
+    //     'Content-Type' => 'application/pdf',
+    //     'Content-Disposition' => 'attachment; filename="example.pdf"',
+    //     'Content-Length' => strlen($pdf)
+    // ]);
+    // Browsershot::url('https://laravel.com')
+    //     ->setIncludedPath(config('services.browsershot.included_path'))
+    //     ->save('example.pdf');
+
+});
+
+
 
 Route::redirect('/', '/login', 301);
 
 Route::get('/tes', function () {
-    return Inertia::render('tes');
+    return view('pdf.mou');
 });
 
 Route::middleware('auth')->group(function () {
@@ -138,6 +168,15 @@ Route::middleware('auth')->group(function () {
     Route::put('/sph/{sph:uuid}', [SPHController::class, 'update'])->name('sph.update')->middleware(['can:edit produk']);
     Route::delete('/sph/{sph:uuid}', [SPHController::class, 'destroy'])->name('sph.destroy')->middleware(['can:hapus produk']);
     Route::get('/api/sph', [SPHController::class, 'apiGetSPH'])->name('api.sph');
+
+    // MOU
+    Route::get('/mou', [MOUController::class, 'index'])->name('mou.view')->middleware(['can:lihat produk']);
+    Route::get('/mou/create', [MOUController::class, 'create'])->name('mou.create');
+    Route::post('/mou', [MOUController::class, 'store'])->name('mou.store')->middleware(['can:tambah produk']);
+    Route::get('/mou/{mou:uuid}', [MOUController::class, 'edit'])->name('mou.edit')->middleware(['can:edit produk']);
+    Route::put('/mou/{mou:uuid}', [MOUController::class, 'update'])->name('mou.update')->middleware(['can:edit produk']);
+    Route::delete('/mou/{mou:uuid}', [MOUController::class, 'destroy'])->name('mou.destroy')->middleware(['can:hapus produk']);
+    Route::get('/api/mou', [MOUController::class, 'apiGetmou'])->name('api.mou');
 });
 
 require __DIR__ . '/auth.php';

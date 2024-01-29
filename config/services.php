@@ -31,4 +31,8 @@ return [
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
 
+    'browsershot' => [
+        'include_path' => '$PATH"'.env('BROWSERSHOT_INCLUDE_PATH')
+    ]
+
 ];

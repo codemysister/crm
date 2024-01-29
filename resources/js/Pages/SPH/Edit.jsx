@@ -3,10 +3,9 @@ import { Card } from "primereact/card";
 import { useState } from "react";
 import { Button } from "primereact/button";
 import { DataTable } from "primereact/datatable";
-import { Column } from "jspdf-autotable";
+import { Column } from "primereact/column";
 import { Dialog } from "primereact/dialog";
-import { Head, useForm } from "@inertiajs/react";
-import { Calendar } from "primereact/calendar";
+import { Head, Link, useForm } from "@inertiajs/react";
 import { useRef } from "react";
 import { FilterMatchMode } from "primereact/api";
 import { Dropdown } from "primereact/dropdown";
@@ -16,17 +15,11 @@ import { Badge } from "primereact/badge";
 
 const BASE_URL = import.meta.env.VITE_BASE_URL;
 
-const Create = ({
-    usersDefault,
-    partnersDefault,
-    salesDefault,
-    productsDefault,
-    sph,
-}) => {
-    const [users, setUsers] = useState(usersDefault);
-    const [partners, setPartners] = useState(partnersDefault);
-    const [sales, setSales] = useState(salesDefault);
-    const [products, setProducts] = useState(productsDefault);
+const Edit = ({ usersProp, partnersProp, salesProp, productsProp, sph }) => {
+    const [users, setUsers] = useState(usersProp);
+    const [partners, setPartners] = useState(partnersProp);
+    const [sales, setSales] = useState(salesProp);
+    const [products, setProducts] = useState(productsProp);
     const [dialogVisible, setDialogVisible] = useState(false);
     const [dialogProductVisible, setDialogProductVisible] = useState(false);
     const [rowClick, setRowClick] = useState(true);
@@ -37,7 +30,7 @@ const Create = ({
         {
             name: "Muh Arif Mahfudin",
             position: "CEO",
-            signature: "/assets/img/signatures/ttd.png",
+            image: "/assets/img/signatures/ttd.png",
         },
     ];
     const [filters, setFilters] = useState({
@@ -69,15 +62,20 @@ const Create = ({
         errors,
     } = useForm({
         uuid: "",
-        code: `${Math.floor(
-            Math.random() * 1000
-        )}/CAZH-SPJ/X/${new Date().getFullYear()}`,
+        code: sph.code,
         partner_id: sph.partner_id,
+        partner_name: sph.partner_name,
+        partner_pic: sph.partner_pic,
+        partner_address: sph.partner_address,
         products: sph.products,
-        partner: JSON.parse(sph.partner),
-        sales: JSON.parse(sph.sales),
+        sales_name: sph.sales_name,
+        sales_wa: sph.sales_wa,
+        sales_address: sph.sales_address,
+        sales_email: sph.sales_email,
         created_by: "",
-        signature: JSON.parse(sph.signature),
+        signature_name: sph.signature_name,
+        signature_position: sph.signature_position,
+        signature_image: sph.signature_image,
     });
 
     const dialogFooterTemplate = (type) => {
@@ -134,7 +132,7 @@ const Create = ({
             <div className="flex flex-wrap p-2 align-items-center gap-3">
                 <img
                     className="w-3rem shadow-2 flex-shrink-0 border-round"
-                    src={item.signature}
+                    src={item.image}
                     alt={item.name}
                 />
                 <div className="flex-1 flex flex-col gap-2 xl:mr-8">
@@ -236,7 +234,28 @@ const Create = ({
             <div className="h-screen max-h-screen overflow-y-hidden">
                 <div className="flex flex-col h-screen max-h-screen overflow-hidden md:flex-row z-40 relative gap-5">
                     <div className="md:w-[40%] overflow-y-auto h-screen max-h-screen p-5">
-                        <Card title="Surat Penawaran Harga">
+                        <Card>
+                            <div className="flex justify-between items-center mb-4">
+                                <h1 className="font-bold text-2xl">
+                                    Surat Penawaran Harga
+                                </h1>
+                                <Link href="/sph">
+                                    <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                        stroke-width="1.5"
+                                        stroke="currentColor"
+                                        class="w-6 h-6"
+                                    >
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            d="M8.25 9V5.25A2.25 2.25 0 0 1 10.5 3h6a2.25 2.25 0 0 1 2.25 2.25v13.5A2.25 2.25 0 0 1 16.5 21h-6a2.25 2.25 0 0 1-2.25-2.25V15m-3 0-3-3m0 0 3-3m-3 3H15"
+                                        />
+                                    </svg>
+                                </Link>
+                            </div>
                             <div className="flex flex-col">
                                 <Button
                                     label="Tambah Produk"
@@ -260,20 +279,18 @@ const Create = ({
                                 <div className="flex flex-col mt-3">
                                     <label htmlFor="lembaga">Lembaga *</label>
                                     <Dropdown
-                                        value={data.partner.name}
+                                        value={data.partner_name}
                                         onChange={(e) => {
+                                            console.log(e.target.value);
                                             setData({
                                                 ...data,
-                                                partner: {
-                                                    ...data.partner,
-                                                    id: e.target.value.id,
-                                                    name: e.target.value.name,
-                                                    address:
-                                                        e.target.value.address,
-                                                    pic: e.target.value.pics[0]
-                                                        .name,
-                                                },
                                                 partner_id: e.target.value.id,
+                                                partner_name:
+                                                    e.target.value.name,
+                                                partner_address:
+                                                    e.target.value.address,
+                                                partner_pic:
+                                                    e.target.value.pics[0].name,
                                             });
                                         }}
                                         options={partners}
@@ -291,14 +308,11 @@ const Create = ({
                                         Lokasi *
                                     </label>
                                     <InputText
-                                        value={data.partner.address}
+                                        value={data.partner_pic}
                                         onChange={(e) =>
                                             setData({
                                                 ...data,
-                                                partner: {
-                                                    ...data.partner,
-                                                    address: e.target.value,
-                                                },
+                                                partner_pic: e.target.value,
                                             })
                                         }
                                         className="dark:bg-gray-300"
@@ -309,14 +323,11 @@ const Create = ({
                                 <div className="flex flex-col mt-3">
                                     <label htmlFor="partner_pic">PIC *</label>
                                     <InputText
-                                        value={data.partner.pic}
+                                        value={data.partner_pic}
                                         onChange={(e) =>
                                             setData({
                                                 ...data,
-                                                partner: {
-                                                    ...data.partner,
-                                                    pic: e.target.value,
-                                                },
+                                                partner_pic: e.target.value,
                                             })
                                         }
                                         className="dark:bg-gray-300"
@@ -327,15 +338,13 @@ const Create = ({
                                 <div className="flex flex-col mt-3">
                                     <label htmlFor="sales">Sales *</label>
                                     <Dropdown
-                                        value={data.sales.name}
+                                        value={data.sales_name}
                                         onChange={(e) => {
                                             setData({
                                                 ...data,
-                                                sales: {
-                                                    ...data.sales,
-                                                    name: e.target.value.name,
-                                                    email: e.target.value.email,
-                                                },
+                                                sales_name: e.target.value.name,
+                                                sales_email:
+                                                    e.target.value.email,
                                             });
                                         }}
                                         options={sales}
@@ -353,14 +362,11 @@ const Create = ({
                                         Whatsapp Sales *
                                     </label>
                                     <InputText
-                                        value={data.sales.wa}
+                                        value={data.sales_wa}
                                         onChange={(e) => {
                                             setData({
                                                 ...data,
-                                                sales: {
-                                                    ...data.sales,
-                                                    wa: e.target.value,
-                                                },
+                                                sales_wa: e.target.value,
                                             });
                                         }}
                                         className="dark:bg-gray-300"
@@ -373,14 +379,11 @@ const Create = ({
                                         Email Sales *
                                     </label>
                                     <InputText
-                                        value={data.sales.email}
+                                        value={data.sales_email}
                                         onChange={(e) =>
                                             setData({
                                                 ...data,
-                                                sales: {
-                                                    ...data.sales,
-                                                    email: e.target.value,
-                                                },
+                                                sales_email: e.target.value,
                                             })
                                         }
                                         className="dark:bg-gray-300"
@@ -393,11 +396,16 @@ const Create = ({
                                         Tanda Tangan *
                                     </label>
                                     <Dropdown
-                                        value={data.signature}
+                                        value={data.signature_name}
                                         onChange={(e) => {
                                             setData({
                                                 ...data,
-                                                signature: e.target.value,
+                                                signature_name:
+                                                    e.target.value.name,
+                                                signature_position:
+                                                    e.target.value.position,
+                                                signature_image:
+                                                    e.target.value.image,
                                             });
                                         }}
                                         options={signatures}
@@ -407,6 +415,7 @@ const Create = ({
                                         valueTemplate={selectedOptionTemplate}
                                         itemTemplate={optionSignatureTemplate}
                                         className="w-full md:w-14rem"
+                                        editable
                                     />
                                 </div>
 
@@ -463,7 +472,7 @@ const Create = ({
                             const no = index + 1;
                             return (
                                 <div
-                                    className="flex gap-5 items-center justify-center"
+                                    className="flex gap-5 mt-2 items-center justify-center"
                                     key={product + index}
                                 >
                                     <div>
@@ -566,7 +575,7 @@ const Create = ({
                                         </div>
                                     </div>
 
-                                    <div className="flex">
+                                    <div className="flex self-center pt-4">
                                         <Button
                                             className="bg-red-500 h-1 w-1 shadow-md rounded-full "
                                             icon={() => (
@@ -676,9 +685,13 @@ const Create = ({
 
                         <div className="mt-5">
                             <h1>Kepada Yth.</h1>
-                            <h1 className="font-bold">{data.partner.pic}</h1>
-                            <h1 className="font-bold">{data.partner.name}</h1>
-                            <h1>di {data.partner.address}</h1>
+                            <h1 className="font-bold">
+                                {data.partner_pic ?? "{{pic}}"}
+                            </h1>
+                            <h1 className="font-bold">
+                                {data.partner_name ?? "{{partner}}"}
+                            </h1>
+                            <h1>di {data.partner_address ?? "{{alamat}}"}</h1>
                         </div>
 
                         <div className="mt-5">
@@ -688,8 +701,10 @@ const Create = ({
                         <div className="mt-5">
                             <h1>
                                 Menindaklanjuti komunikasi yang telah dilakukan
-                                oleh tim marketing kami {data.sales.name} dengan
-                                perwakilan dari {data.partner.name}, dengan ini
+                                oleh tim marketing kami{" "}
+                                {data.sales_name ?? "{{sales}}"} dengan
+                                perwakilan dari{" "}
+                                {data.partner_name ?? "{{partner}}"}, dengan ini
                                 kami sampaikan penawaran sebagai berikut:
                             </h1>
                         </div>
@@ -729,9 +744,9 @@ const Create = ({
                                 Untuk konfirmasi persetujuan silakan hubungi :
                             </h1>
                             <h1>
-                                <b>{data.sales.name}</b> via WA :{" "}
-                                <b>{data.sales.wa}</b>, email :{" "}
-                                <b>{data.sales.email}</b>
+                                <b>{data.sales_name ?? "{{sales}}"}</b> via WA :{" "}
+                                <b>{data.sales_wa ?? "{{wa_sales}}"}</b>, email
+                                : <b>{data.sales_email ?? "{{email_sales}}"}</b>
                             </h1>
                         </div>
 
@@ -746,12 +761,9 @@ const Create = ({
 
                         <div className="flex flex-col mt-5 justify-start w-[30%]">
                             <p>Purwokerto, {new Date().getFullYear()}</p>
-                            <img
-                                src={BASE_URL + data.signature.signature}
-                                alt=""
-                            />
-                            <p>{data.signature.name}</p>
-                            <p>{data.signature.position}</p>
+                            <img src={BASE_URL + data.signature_image} alt="" />
+                            <p>{data.signature_name}</p>
+                            <p>{data.signature_position}</p>
                         </div>
                     </div>
                 </div>
@@ -762,4 +774,4 @@ const Create = ({
     );
 };
 
-export default Create;
+export default Edit;

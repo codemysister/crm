@@ -14,8 +14,8 @@ import { FilterMatchMode } from "primereact/api";
 
 const BASE_URL = import.meta.env.VITE_BASE_URL;
 
-export default function Index({ auth, sphsDefault }) {
-    const [sphs, setSphs] = useState(sphsDefault);
+export default function Index({ auth }) {
+    const [mous, setMous] = useState();
     const [isLoadingData, setIsLoadingData] = useState(false);
     const dummyArray = Array.from({ length: 5 }, (v, i) => i);
     const [preRenderLoad, setPreRenderLoad] = useState(true);
@@ -54,13 +54,13 @@ export default function Index({ auth, sphsDefault }) {
         setGlobalFilterValue(value);
     };
 
-    const getSphs = async () => {
+    const getMous = async () => {
         setIsLoadingData(true);
 
-        let response = await fetch("/api/sph");
+        let response = await fetch("/api/mou");
         let data = await response.json();
 
-        setSphs((prev) => data);
+        setMous((prev) => data);
 
         setIsLoadingData(false);
     };
@@ -68,7 +68,7 @@ export default function Index({ auth, sphsDefault }) {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                await Promise.all([getSphs()]);
+                await Promise.all([getMous()]);
                 setIsLoadingData(false);
                 setPreRenderLoad((prev) => (prev = false));
             } catch (error) {
@@ -87,7 +87,7 @@ export default function Index({ auth, sphsDefault }) {
                     rounded
                     outlined
                     className="mr-2"
-                    onClick={() => (window.location = "/sph/" + rowData.uuid)}
+                    onClick={() => (window.location = "/mou/" + rowData.uuid)}
                 />
                 <Button
                     icon="pi pi-trash"
@@ -205,9 +205,9 @@ export default function Index({ auth, sphsDefault }) {
             <Toast ref={toast} />
             <ConfirmDialog />
 
-            <HeaderModule title="Surat Penawaran Harga">
+            <HeaderModule title="Mou">
                 <Link
-                    href="/sph/create"
+                    href="/mou/create"
                     className="bg-purple-600 block text-white py-2 px-3 font-semibold text-sm shadow-md rounded-lg mr-2"
                 >
                     <i
@@ -235,7 +235,7 @@ export default function Index({ auth, sphsDefault }) {
                         emptyMessage="Surat penawaran harga tidak ditemukan."
                         paginatorClassName="dark:bg-transparent paginator-custome dark:text-gray-300 rounded-b-lg"
                         header={renderHeader}
-                        value={sphs}
+                        value={mous}
                         globalFilterFields={["partner", "sales"]}
                         dataKey="id"
                     >
@@ -259,7 +259,7 @@ export default function Index({ auth, sphsDefault }) {
                             headerClassName="dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300"
                             header="Lembaga"
                             align="left"
-                            style={{ minWidth: "8rem" }}
+                            style={{ minWidth: "10rem" }}
                         ></Column>
                         <Column
                             field="code"
@@ -274,7 +274,15 @@ export default function Index({ auth, sphsDefault }) {
                             headerClassName="dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300"
                             header="PIC"
                             align="left"
-                            style={{ minWidth: "6rem" }}
+                            style={{ minWidth: "10rem" }}
+                        ></Column>
+                        <Column
+                            field="partner_pic_position"
+                            className="dark:border-none"
+                            headerClassName="dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300"
+                            header="Jabatan PIC"
+                            align="left"
+                            style={{ minWidth: "10rem" }}
                         ></Column>
                         <Column
                             field="partner_address"
@@ -282,30 +290,17 @@ export default function Index({ auth, sphsDefault }) {
                             headerClassName="dark:border-none  bg-transparent dark:bg-transparent dark:text-gray-300"
                             align="left"
                             header="Alamat"
-                            style={{ minWidth: "8rem" }}
+                            style={{ minWidth: "10rem" }}
                         ></Column>
                         <Column
-                            field="sales_name"
+                            field="url_subdomain"
                             className="dark:border-none"
                             headerClassName="dark:border-none  bg-transparent dark:bg-transparent dark:text-gray-300"
                             align="left"
-                            header="Sales"
-                            style={{ minWidth: "6rem" }}
+                            header="URL subdomain"
+                            style={{ minWidth: "12rem" }}
                         ></Column>
-                        <Column
-                            field="sales_wa"
-                            className="dark:border-none"
-                            headerClassName="dark:border-none  bg-transparent dark:bg-transparent dark:text-gray-300"
-                            align="left"
-                            header="WA Sales"
-                        ></Column>
-                        <Column
-                            field="sales_email"
-                            className="dark:border-none"
-                            headerClassName="dark:border-none  bg-transparent dark:bg-transparent dark:text-gray-300"
-                            align="left"
-                            header="Email Sales"
-                        ></Column>
+
                         <Column
                             body={(rowData) => {
                                 return rowData.spd_doc == "" ? (

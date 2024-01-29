@@ -15,7 +15,7 @@ return new class extends Migration {
             $table->foreignId('sph_id')->constrained('sphs', 'id')->onDelete('cascade');
             $table->string('name');
             $table->integer('qty');
-            $table->text('detail');
+            $table->text('detail')->nullable();
             $table->bigInteger('price');
             $table->bigInteger('total');
             $table->timestamps();

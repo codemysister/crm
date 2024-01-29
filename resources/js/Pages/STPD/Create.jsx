@@ -3,7 +3,6 @@ import { Card } from "primereact/card";
 import { useState } from "react";
 import { Button } from "primereact/button";
 import { DataTable } from "primereact/datatable";
-import { Column } from "jspdf-autotable";
 import { Dialog } from "primereact/dialog";
 import { Head, useForm } from "@inertiajs/react";
 import { Calendar } from "primereact/calendar";
@@ -12,6 +11,7 @@ import { FilterMatchMode } from "primereact/api";
 import { Dropdown } from "primereact/dropdown";
 import React from "react";
 import { Toast } from "primereact/toast";
+import { Column } from "primereact/column";
 
 const BASE_URL = import.meta.env.VITE_BASE_URL;
 

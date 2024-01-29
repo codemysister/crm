@@ -11,7 +11,6 @@ use Illuminate\Queue\SerializesModels;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
-use Inertia\Inertia;
 
 class GenerateSTPDJob implements ShouldQueue
 {
@@ -39,7 +38,7 @@ class GenerateSTPDJob implements ShouldQueue
             "stpd_doc" => "storage/$path"
         ]);
 
-        $pdf = PDF::loadView('pdf.invoice', [
+        $pdf = PDF::loadView('pdf.stpd', [
             "stpd" => $this->stpd,
             "employees" => $this->employees
         ]);

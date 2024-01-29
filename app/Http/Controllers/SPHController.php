@@ -22,23 +22,23 @@ class SPHController extends Controller
 
     public function create()
     {
-        $usersDefault = User::with([
+        $usersProp = User::with([
             'roles' => function ($query) {
                 $query->latest();
             }
         ])->get();
-        $usersDefault->transform(function ($user) {
+        $usersProp->transform(function ($user) {
             $user->position = $user->roles->first()->name;
             $user->user_id = $user->id;
             unset($user->roles);
             return $user;
         });
-        $partnersDefault = Partner::with(
+        $partnersProp = Partner::with(
             'pics'
         )->get();
-        $productsDefault = Product::all();
-        $salesDefault = User::role('sales')->get();
-        return Inertia::render('SPH/Create', compact('partnersDefault', 'usersDefault', 'productsDefault', 'salesDefault'));
+        $productsProp = Product::all();
+        $salesProp = User::role('sales')->get();
+        return Inertia::render('SPH/Create', compact('partnersProp', 'usersProp', 'productsProp', 'salesProp'));
     }
 
 
@@ -47,22 +47,16 @@ class SPHController extends Controller
         $sph = SPH::create([
             "uuid" => Str::uuid(),
             "code" => $request->code,
-            "partner_id" => $request->partner['id'],
-            "partner" => json_encode([
-                "name" => $request->partner['name'],
-                "address" => $request->partner['address'],
-                "pic" => $request->partner['pic']
-            ]),
-            "sales" => json_encode([
-                "name" => $request->sales['name'],
-                "wa" => $request->sales['wa'],
-                "email" => $request->sales['email']
-            ]),
-            "signature" => json_encode([
-                "signature" => $request->signature['signature'],
-                "name" => $request->signature['name'],
-                "position" => $request->signature['position'],
-            ]),
+            "partner_id" => $request->partner_id,
+            "partner_name" => $request->partner_name,
+            "partner_pic" => $request->partner_pic,
+            "partner_address" => $request->partner_address,
+            "sales_name" => $request->sales_name,
+            "sales_wa" => $request->sales_wa,
+            "sales_email" => $request->sales_email,
+            "signature_name" => $request->signature_name,
+            "signature_position" => $request->signature_position,
+            "signature_image" => $request->signature_image,
             "sph_doc" => "",
             "created_by" => Auth::user()->id
         ]);
@@ -83,49 +77,41 @@ class SPHController extends Controller
 
     public function edit($uuid)
     {
-        $usersDefault = User::with([
+        $usersProp = User::with([
             'roles' => function ($query) {
                 $query->latest();
             }
         ])->get();
-        $usersDefault->transform(function ($user) {
+        $usersProp->transform(function ($user) {
             $user->position = $user->roles->first()->name;
             $user->user_id = $user->id;
             unset($user->roles);
             return $user;
         });
-        $partnersDefault = Partner::with(
+        $partnersProp = Partner::with(
             'pics'
         )->get();
-        $productsDefault = Product::all(['uuid', 'name', 'price', 'category']);
-        $salesDefault = User::role('sales')->get();
+        $productsProp = Product::all(['uuid', 'name', 'price', 'category']);
+        $salesProp = User::role('sales')->get();
 
         $sph = SPH::with('products')->where('uuid', '=', $uuid)->first();
 
-        return Inertia::render('SPH/Edit', compact('usersDefault', 'partnersDefault', 'productsDefault', 'sph'));
+        return Inertia::render('SPH/Edit', compact('usersProp', 'partnersProp', 'productsProp', 'sph'));
     }
 
     public function update(Request $request, $uuid)
     {
-
-
         $sph = SPH::where('uuid', '=', $uuid)->update([
             "partner_id" => $request->partner_id,
-            "partner" => json_encode([
-                "name" => $request->partner['name'],
-                "address" => $request->partner['address'],
-                "pic" => $request->partner['pic']
-            ]),
-            "sales" => json_encode([
-                "name" => $request->sales['name'],
-                "wa" => $request->sales['wa'],
-                "email" => $request->sales['email']
-            ]),
-            "signature" => json_encode([
-                "signature" => $request->signature['signature'],
-                "name" => $request->signature['name'],
-                "position" => $request->signature['position'],
-            ])
+            "partner_name" => $request->partner_name,
+            "partner_pic" => $request->partner_pic,
+            "partner_address" => $request->partner_address,
+            "sales_name" => $request->sales_name,
+            "sales_wa" => $request->sales_wa,
+            "sales_email" => $request->sales_email,
+            "signature_name" => $request->signature_name,
+            "signature_position" => $request->signature_position,
+            "signature_image" => $request->signature_image,
         ]);
 
         $sph = SPH::with('products')->where('uuid', '=', $uuid)->first();
