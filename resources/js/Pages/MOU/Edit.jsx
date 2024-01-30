@@ -55,14 +55,9 @@ const Edit = ({ usersProp, partnersProp, mou }) => {
     const animateExpiredDate = useRef(null);
     const animateProfitSharing = useRef(null);
     const animateProfitSharingDetail = useRef(null);
-    const animateSalesName = useRef(null);
-    const animateSalesWa = useRef(null);
-    const animateSalesAddress = useRef(null);
-    const animateCreatedBy = useRef(null);
     const animateSignatureName = useRef(null);
-    const animateSignaturePosition = useRef(null);
-    const animateSignatureImage = useRef(null);
-    const animateRegisterDate = useRef(null);
+    const animateReferral = useRef(null);
+    const animateReferralName = useRef(null);
 
     const {
         data,
@@ -100,6 +95,8 @@ const Edit = ({ usersProp, partnersProp, mou }) => {
         expired_date: new Date(mou.expired_date),
         profit_sharing: Boolean(mou.profit_sharing),
         profit_sharing_detail: mou.profit_sharing_detail,
+        referral: Boolean(mou.referral),
+        referral_name: mou.referral_name,
         signature_name: mou.signature_name,
         signature_position: mou.signature_position,
         signature_image: mou.signature_image,
@@ -1252,6 +1249,65 @@ const Edit = ({ usersProp, partnersProp, mou }) => {
                                             onBlur={() => {
                                                 stopAnimateInputFocus(
                                                     animateProfitSharingDetail
+                                                );
+                                            }}
+                                        />
+                                    </div>
+                                )}
+
+                                <div className="flex flex-col mt-3">
+                                    <label htmlFor="referral">Referral</label>
+                                    <div className="flex items-center gap-2 my-2">
+                                        <Checkbox
+                                            onChange={(e) =>
+                                                setData("referral", e.checked)
+                                            }
+                                            checked={data.referral}
+                                            onFocus={() => {
+                                                triggerInputFocus(
+                                                    animateReferral
+                                                );
+                                            }}
+                                            onBlur={() => {
+                                                stopAnimateInputFocus(
+                                                    animateReferral
+                                                );
+                                            }}
+                                        ></Checkbox>
+                                        <p className="text-xs">
+                                            melibatkan referral
+                                        </p>
+                                    </div>
+                                </div>
+
+                                {data.referral && (
+                                    <div className="flex flex-col mt-3">
+                                        <label htmlFor="referral_name">
+                                            Atas Nama
+                                        </label>
+
+                                        <InputText
+                                            value={data.referral_name}
+                                            onChange={(e) =>
+                                                setData(
+                                                    "referral_name",
+                                                    e.target.value
+                                                )
+                                            }
+                                            className={`dark:bg-gray-300 ${
+                                                errors.referral_name &&
+                                                "p-invalid"
+                                            }`}
+                                            id="referral_name"
+                                            aria-describedby="referral_name-help"
+                                            onFocus={() => {
+                                                triggerInputFocus(
+                                                    animateReferral
+                                                );
+                                            }}
+                                            onBlur={() => {
+                                                stopAnimateInputFocus(
+                                                    animateReferral
                                                 );
                                             }}
                                         />
@@ -2823,17 +2879,36 @@ const Edit = ({ usersProp, partnersProp, mou }) => {
                                                     <table>
                                                         <tbody className="text-justify">
                                                             <tr>
-                                                                <td className="align-text-top w-[4%]">
+                                                                <td className="align-text-top w-[5%]">
                                                                     a.
                                                                 </td>
                                                                 <td>
-                                                                    Pihak Kedua
-                                                                    harus
-                                                                    mengkonfirmasi
-                                                                    setiap
-                                                                    pencairan
-                                                                    saldo
-                                                                    CazhBox;
+                                                                    Pihak Kedua{" "}
+                                                                    <b
+                                                                        ref={
+                                                                            animateProfitSharing
+                                                                        }
+                                                                    >
+                                                                        {data.profit_sharing ==
+                                                                        true
+                                                                            ? "melakukan"
+                                                                            : "tidak melakukan" ??
+                                                                              "{{Bagi Hasil}}"}
+                                                                    </b>{" "}
+                                                                    bagi hasil.{" "}
+                                                                    {data.profit_sharing ==
+                                                                        true &&
+                                                                        (data.profit_sharing_detail ?? (
+                                                                            <b
+                                                                                ref={
+                                                                                    animateProfitSharingDetail
+                                                                                }
+                                                                            >
+                                                                                {
+                                                                                    "{{Ketentuan Bagi Hasil}}"
+                                                                                }
+                                                                            </b>
+                                                                        ))}
                                                                 </td>
                                                             </tr>
                                                         </tbody>
@@ -2972,21 +3047,47 @@ const Edit = ({ usersProp, partnersProp, mou }) => {
                                     className="w-[30%]"
                                     ref={animateSignatureName}
                                 >
-                                    <p>
-                                        Purwokerto, {new Date().getFullYear()}
-                                    </p>
+                                    <p>Pihak Pertama</p>
                                     <img
                                         src={BASE_URL + data.signature_image}
                                         alt=""
+                                        className="min-h-20"
                                     />
-                                    <p>{data.signature_name}</p>
-                                    <p>{data.signature_position}</p>
+                                    <p>
+                                        <b>
+                                            {data.signature_name ??
+                                                "{{nama_pihak_pertama}}"}
+                                        </b>
+                                    </p>
+                                    {/* <p>{data.signature_position}</p> */}
                                 </div>
                                 <div className="w-[30%]">
                                     <p>Pihak Kedua</p>
-
-                                    <p>{data.partner_pic}</p>
+                                    <div className="min-h-20"></div>
+                                    <p>
+                                        <b>
+                                            {data.partner_pic ??
+                                                "{{nama_pihak_kedua}}"}
+                                        </b>
+                                    </p>
                                 </div>
+                            </div>
+                            <div
+                                className="px-8 flex flex-row mt-5 justify-center"
+                                ref={animateReferral}
+                            >
+                                {data.referral && (
+                                    <div className="w-[30%]">
+                                        <p>Pihak Ketiga</p>
+                                        <div className="min-h-20"></div>
+                                        <p>
+                                            <b>
+                                                {data.referral_name ??
+                                                    "{{nama_referral}}"}
+                                            </b>
+                                        </p>
+                                    </div>
+                                )}
                             </div>
                         </div>
                     </div>

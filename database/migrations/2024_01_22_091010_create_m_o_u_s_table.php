@@ -39,7 +39,7 @@ return new class extends Migration {
             $table->boolean('profit_sharing');
             $table->text('profit_sharing_detail')->nullable();
             $table->boolean('referral');
-            $table->string('referral_name');
+            $table->string('referral_name')->nullable();
             $table->string('signature_name');
             $table->string('signature_position');
             $table->string('signature_image');

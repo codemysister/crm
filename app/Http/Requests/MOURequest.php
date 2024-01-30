@@ -46,6 +46,7 @@ class MOURequest extends FormRequest
             "account_bank_name" => "required",
             "expired_date" => "required",
             "profit_sharing" => "required",
+            "referral" => "required",
             "signature_name" => "required",
             "signature_position" => "required",
             "signature_image" => "required",

@@ -120,7 +120,6 @@
         </p>
     </div>
 
-
     <div class="flex flex-col justify-start mt-8 float-left">
         <p class="text-sm">Purwokerto, {{date("d/m/Y")}}</p>
         <img class="h-20 w-[15%]" src="{{ public_path($sph->signature_image) }}" alt="Signature">

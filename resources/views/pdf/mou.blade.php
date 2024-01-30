@@ -1,5 +1,3 @@
-<!-- resources/views/spd.blade.php -->
-
 <!DOCTYPE html>
 <html lang="en">
 
@@ -43,7 +41,6 @@
 </head>
 
 <body style="font-size: 13px">
-
 
     <div>
         <header style="text-align: center;">
@@ -177,8 +174,8 @@
                                                 <td>
                                                     Aplikasi Web Dashboard Sistem Manajemen Lembaga, yang dapat diakses
                                                     dengan alamat URL <b>{{$mou->url_subdomain}}</b> menggunakan
-                                                    peramban web (web
-                                                    browser) apa pun yang terhubung dengan jaringan internet.
+                                                    peramban web <i>(web
+                                                        browser)</i> apa pun yang terhubung dengan jaringan internet.
                                                 </td>
                                             </tr>
                                             <tr>
@@ -186,7 +183,8 @@
                                                     b.
                                                 </td>
                                                 <td>
-                                                    Aplikasi Mobile Kartu Digital bernama “CARDS Kartu Digital” yang
+                                                    Aplikasi <i>Mobile</i> Kartu Digital bernama “CARDS Kartu Digital”
+                                                    yang
                                                     dapat diunduh untuk pengguna sistem operasi Android maupun iOS.
                                                 </td>
                                             </tr>
@@ -195,7 +193,8 @@
                                                     c.
                                                 </td>
                                                 <td>
-                                                    Aplikasi Mobile Kasir Digital bernama “CAZH POS” dan/atau “CAZH POS
+                                                    Aplikasi <i>Mobile</i> Kasir Digital bernama “CAZH POS” dan/atau
+                                                    “CAZH POS
                                                     Lite” yang dapat diunduh untuk pengguna sistem operasi Android.
                                                 </td>
                                             </tr>
@@ -235,7 +234,8 @@
                                                     b.
                                                 </td>
                                                 <td style="">
-                                                    CazhPOIN adalah saldo milik user aplikasi mobile Kartu Digital
+                                                    CazhPOIN adalah saldo milik user aplikasi <i>mobile</i> Kartu
+                                                    Digital
                                                 </td>
                                             </tr>
                                             <tr>
@@ -243,7 +243,7 @@
                                                     c.
                                                 </td>
                                                 <td style="">
-                                                    Top-up adalah proses pengisian saldo
+                                                    <i>Top-up</i> adalah proses pengisian saldo
                                                 </td>
                                             </tr>
                                             <tr>
@@ -251,7 +251,7 @@
                                                     d.
                                                 </td>
                                                 <td style="">
-                                                    Withdraw adalah proses penarikan saldo
+                                                    <i>Withdraw</i> adalah proses penarikan saldo
                                                 </td>
                                             </tr>
                                             <tr>
@@ -259,8 +259,10 @@
                                                     e.
                                                 </td>
                                                 <td style="">
-                                                    Virtual Account adalah metode pembayaran melalui fasilitas bank yang
-                                                    dapat dilakukan dari ATM, Internet banking maupun m-banking.
+                                                    <i>Virtual Account</i> adalah metode pembayaran melalui fasilitas
+                                                    bank yang
+                                                    dapat dilakukan dari ATM, <i>Internet banking</i> maupun
+                                                    <i>m-banking</i>.
                                                 </td>
                                             </tr>
                                             <tr>
@@ -269,8 +271,8 @@
                                                 </td>
                                                 <td style="">
                                                     QRIS adalah metode pembayaran menggunakan standar QR yang diatur
-                                                    oleh Bank Indonesia, baik melalui aplikasi e-wallet maupun
-                                                    m-banking.
+                                                    oleh Bank Indonesia, baik melalui aplikasi <i>e-wallet</i> maupun
+                                                    <i>m-banking</i>.
                                                 </td>
                                             </tr>
                                         </tbody>
@@ -470,7 +472,8 @@
                                     Pembayaran
                                 </p>
                                 <p style="text-align: justify;">
-                                    Pihak Pertama berhak mengirimkan tagihan berupa invoice digital maupun tercetak
+                                    Pihak Pertama berhak mengirimkan tagihan berupa <i>invoice</i> digital maupun
+                                    tercetak
                                     untuk dibayar oleh Pihak Kedua dengan ketentuan sebagai berikut:
                                 </p>
                                 <div style="padding-left: 6px;">
@@ -481,7 +484,8 @@
                                                     a.
                                                 </td>
                                                 <td>
-                                                    Pembayaran melalui tautan (link) atau cara lain yang ditentukan
+                                                    Pembayaran melalui tautan <i>(link)</i> atau cara lain yang
+                                                    ditentukan
                                                     Pihak Pertama;
                                                 </td>
                                             </tr>
@@ -490,7 +494,7 @@
                                                     b.
                                                 </td>
                                                 <td>
-                                                    Sebelum batas waktu pembayaran yang ditentukan pada invoice.
+                                                    Sebelum batas waktu pembayaran yang ditentukan pada <i>invoice</i>.
                                                 </td>
                                             </tr>
                                         </tbody>
@@ -1033,7 +1037,9 @@
                                                     a.
                                                 </td>
                                                 <td>
-                                                    Pihak Kedua harus mengkonfirmasi setiap pencairan saldo CazhBox;
+                                                    Pihak Kedua {{ $mou->profit_sharing ? "mendapatkan" : "tidak
+                                                    mendapatkan" }} bagi hasil.
+                                                    {{ $mou->profit_sharing ? $mou->profit_sharing_detail : "" }}
                                                 </td>
                                             </tr>
                                         </tbody>
@@ -1107,17 +1113,31 @@
             <div class="px-8 flex flex-row mt-5 justify-between">
                 <div class="w-[30%]">
                     <p>
-                        Purwokerto,
+                        Pihak Pertama,
                     </p>
-                    <img class="h-20 w-[15%]" src="{{ public_path($mou->signature_image) }}" />
-                    <p>{{$mou->signature_name}}</p>
-                    <p>{{$mou->signature_position}}</p>
+                    <img class="min-h-20 w-[15%]" src="{{ public_path($mou->signature_image) }}" />
+                    <p><b>{{$mou->signature_name}}</b></p>
                 </div>
                 <div class="w-[30%]">
                     <p>Pihak Kedua</p>
-                    <p>{{$mou->partner_pic}}</p>
+                    <div style="min-height: 80px"></div>
+                    <p><b>{{$mou->partner_pic}}</b></p>
                 </div>
             </div>
+
+            @if($mou->referral)
+            <div class="px-8 flex flex-row mt-5 justify-center">
+                <div class="w-[30%]">
+                    <p>Pihak Ketiga</p>
+                    <div style="min-height: 80px"></div>
+                    <p>
+                        <b>
+                            {{$mou->referral_name}}
+                        </b>
+                    </p>
+                </div>
+            </div>
+            @endif
         </div>
 
     </div>

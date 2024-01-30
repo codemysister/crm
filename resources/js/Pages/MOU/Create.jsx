@@ -58,14 +58,7 @@ const Create = ({ usersProp, partnersProp }) => {
     const animateProfitSharingDetail = useRef(null);
     const animateReferral = useRef(null);
     const animateReferralName = useRef(null);
-    const animateSalesName = useRef(null);
-    const animateSalesWa = useRef(null);
-    const animateSalesAddress = useRef(null);
-    const animateCreatedBy = useRef(null);
     const animateSignatureName = useRef(null);
-    const animateSignaturePosition = useRef(null);
-    const animateSignatureImage = useRef(null);
-    const animateRegisterDate = useRef(null);
 
     const {
         data,
@@ -106,8 +99,8 @@ const Create = ({ usersProp, partnersProp }) => {
         expired_date: null,
         profit_sharing: null,
         profit_sharing_detail: null,
-        referall: false,
-        referrall_name: null,
+        referral: false,
+        referral_name: null,
         signature_name: null,
         signature_position: null,
         signature_image: null,
@@ -1267,65 +1260,6 @@ const Create = ({ usersProp, partnersProp }) => {
                                 )}
 
                                 <div className="flex flex-col mt-3">
-                                    <label htmlFor="referral">Referral</label>
-                                    <div className="flex items-center gap-2 my-2">
-                                        <Checkbox
-                                            onChange={(e) =>
-                                                setData("referral", e.checked)
-                                            }
-                                            checked={data.referral}
-                                            onFocus={() => {
-                                                triggerInputFocus(
-                                                    animateReferral
-                                                );
-                                            }}
-                                            onBlur={() => {
-                                                stopAnimateInputFocus(
-                                                    animateReferral
-                                                );
-                                            }}
-                                        ></Checkbox>
-                                        <p className="text-xs">
-                                            melibatkan referral
-                                        </p>
-                                    </div>
-                                </div>
-
-                                {data.referrall_name && (
-                                    <div className="flex flex-col mt-3">
-                                        <label htmlFor="referrall_name">
-                                            Atas Nama
-                                        </label>
-
-                                        <InputText
-                                            value={data.referrall_name}
-                                            onChange={(e) =>
-                                                setData(
-                                                    "referrall_name",
-                                                    e.target.value
-                                                )
-                                            }
-                                            className={`dark:bg-gray-300 ${
-                                                errors.referrall_name &&
-                                                "p-invalid"
-                                            }`}
-                                            id="referrall_name"
-                                            aria-describedby="referrall_name-help"
-                                            onFocus={() => {
-                                                triggerInputFocus(
-                                                    animateReferralName
-                                                );
-                                            }}
-                                            onBlur={() => {
-                                                stopAnimateInputFocus(
-                                                    animateReferralName
-                                                );
-                                            }}
-                                        />
-                                    </div>
-                                )}
-
-                                <div className="flex flex-col mt-3">
                                     <label htmlFor="signature">
                                         Tanda Tangan *
                                     </label>
@@ -1364,6 +1298,65 @@ const Create = ({ usersProp, partnersProp }) => {
                                         }}
                                     />
                                 </div>
+
+                                <div className="flex flex-col mt-3">
+                                    <label htmlFor="referral">Referral</label>
+                                    <div className="flex items-center gap-2 my-2">
+                                        <Checkbox
+                                            onChange={(e) =>
+                                                setData("referral", e.checked)
+                                            }
+                                            checked={data.referral}
+                                            onFocus={() => {
+                                                triggerInputFocus(
+                                                    animateReferral
+                                                );
+                                            }}
+                                            onBlur={() => {
+                                                stopAnimateInputFocus(
+                                                    animateReferral
+                                                );
+                                            }}
+                                        ></Checkbox>
+                                        <p className="text-xs">
+                                            melibatkan referral
+                                        </p>
+                                    </div>
+                                </div>
+
+                                {data.referral && (
+                                    <div className="flex flex-col mt-3">
+                                        <label htmlFor="referral_name">
+                                            Atas Nama
+                                        </label>
+
+                                        <InputText
+                                            value={data.referral_name}
+                                            onChange={(e) =>
+                                                setData(
+                                                    "referral_name",
+                                                    e.target.value
+                                                )
+                                            }
+                                            className={`dark:bg-gray-300 ${
+                                                errors.referral_name &&
+                                                "p-invalid"
+                                            }`}
+                                            id="referral_name"
+                                            aria-describedby="referral_name-help"
+                                            onFocus={() => {
+                                                triggerInputFocus(
+                                                    animateReferral
+                                                );
+                                            }}
+                                            onBlur={() => {
+                                                stopAnimateInputFocus(
+                                                    animateReferral
+                                                );
+                                            }}
+                                        />
+                                    </div>
+                                )}
 
                                 <div className="flex-flex-col mt-3">
                                     <form onSubmit={handleSubmitForm}>
@@ -2907,7 +2900,11 @@ const Create = ({ usersProp, partnersProp }) => {
                                                                     {data.profit_sharing ==
                                                                         true &&
                                                                         (data.profit_sharing_detail ?? (
-                                                                            <b>
+                                                                            <b
+                                                                                ref={
+                                                                                    animateProfitSharingDetail
+                                                                                }
+                                                                            >
                                                                                 {
                                                                                     "{{Ketentuan Bagi Hasil}}"
                                                                                 }
@@ -3046,7 +3043,8 @@ const Create = ({ usersProp, partnersProp }) => {
                                     </tbody>
                                 </table>
                             </div>
-                            <div className="px-8 flex flex-row mt-5 justify-between bg-red-500">
+
+                            <div className="px-8 flex flex-row mt-5 justify-between">
                                 <div
                                     className="w-[30%]"
                                     ref={animateSignatureName}
@@ -3058,7 +3056,10 @@ const Create = ({ usersProp, partnersProp }) => {
                                         className="min-h-20"
                                     />
                                     <p>
-                                        <b>{data.signature_name}</b>
+                                        <b>
+                                            {data.signature_name ??
+                                                "{{nama_pihak_pertama}}"}
+                                        </b>
                                     </p>
                                     {/* <p>{data.signature_position}</p> */}
                                 </div>
@@ -3066,19 +3067,29 @@ const Create = ({ usersProp, partnersProp }) => {
                                     <p>Pihak Kedua</p>
                                     <div className="min-h-20"></div>
                                     <p>
-                                        <b>{data.partner_pic}</b>
+                                        <b>
+                                            {data.partner_pic ??
+                                                "{{nama_pihak_kedua}}"}
+                                        </b>
                                     </p>
                                 </div>
                             </div>
-
-                            <div className="px-8 flex flex-row mt-5 justify-center">
-                                <div className="w-[30%]">
-                                    <p>Pihak Ketiga</p>
-                                    <div className="min-h-20"></div>
-                                    <p>
-                                        <b>{data.partner_pic}</b>
-                                    </p>
-                                </div>
+                            <div
+                                className="px-8 flex flex-row mt-5 justify-center"
+                                ref={animateReferral}
+                            >
+                                {data.referral && (
+                                    <div className="w-[30%]">
+                                        <p>Pihak Ketiga</p>
+                                        <div className="min-h-20"></div>
+                                        <p>
+                                            <b>
+                                                {data.referral_name ??
+                                                    "{{nama_referral}}"}
+                                            </b>
+                                        </p>
+                                    </div>
+                                )}
                             </div>
                         </div>
                     </div>
