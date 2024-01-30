@@ -11,6 +11,7 @@ import { ConfirmDialog, confirmDialog } from "primereact/confirmdialog";
 import { Skeleton } from "primereact/skeleton";
 import { Link } from "@inertiajs/react";
 import { FilterMatchMode } from "primereact/api";
+import { MultiSelect } from "primereact/multiselect";
 
 const BASE_URL = import.meta.env.VITE_BASE_URL;
 
@@ -24,6 +25,58 @@ export default function Index({ auth }) {
     const [filters, setFilters] = useState({
         global: { value: null, matchMode: FilterMatchMode.CONTAINS },
     });
+    const columns = [
+        { field: "partner_name", header: "Partner" },
+        { field: "code", header: "Kode" },
+        { field: "partner_pic", header: "PIC" },
+        { field: "partner_pic_position", header: "Jabatan PIC" },
+        { field: "partner_address", header: "Lokasi" },
+        { field: "url_subdomain", header: "Url Subdomain" },
+        { field: "price_card", header: "Harga Kartu" },
+        { field: "price_lanyard", header: "Harga Lanyard" },
+        {
+            field: "price_subscription_system",
+            header: "Harga Langganan Sistem",
+        },
+        { field: "period_subscription", header: "Langganan Per-" },
+        { field: "price_training_offline", header: "Harga Training Offline" },
+        { field: "price_training_online", header: "Harga Training Online" },
+        { field: "fee_purchase_cazhpoin", header: "Isi Kartu via CazhPOIN" },
+        { field: "fee_bill_cazhpoin", header: "Bayar Tagihan via CazhPOIN" },
+        { field: "fee_topup_cazhpos", header: "Topup Kartu via CazhPos" },
+        {
+            field: "fee_withdraw_cazhpos",
+            header: "Withdraw Kartu via Cazh POS",
+        },
+        {
+            field: "fee_bill_saldokartu",
+            header: "Bayar Tagihan via Saldo Kartu",
+        },
+        {
+            field: "bank",
+            header: "Bank",
+        },
+        {
+            field: "account_bank_number",
+            header: "Nomor Rekening",
+        },
+        {
+            field: "expired_date",
+            header: "Tanggal Kadaluarsa",
+        },
+        {
+            field: "profit_sharing",
+            header: "Bagi Hasil",
+        },
+    ];
+    const [visibleColumns, setVisibleColumns] = useState([
+        { field: "partner_name", header: "Partner" },
+        { field: "code", header: "Kode" },
+        { field: "partner_pic", header: "PIC" },
+        { field: "partner_pic_position", header: "Jabatan PIC" },
+        { field: "partner_address", header: "Lokasi" },
+        { field: "url_subdomain", header: "Url Subdomain" },
+    ]);
 
     const {
         data,
@@ -121,16 +174,16 @@ export default function Index({ auth }) {
         });
     };
 
-    const handleDeleteProduct = (sph) => {
+    const handleDeleteProduct = (mou) => {
         confirmDialog({
             message: "Apakah Anda yakin untuk menghapus ini?",
             header: "Konfirmasi hapus",
             icon: "pi pi-info-circle",
             acceptClassName: "p-button-danger",
             accept: async () => {
-                destroy("sph/" + sph.uuid, {
+                destroy("mou/" + mou.uuid, {
                     onSuccess: () => {
-                        getSphs();
+                        getMous();
                         showSuccess("Hapus");
                     },
                     onError: () => {
@@ -167,6 +220,41 @@ export default function Index({ auth }) {
             ></i>
         );
     };
+
+    const onColumnToggle = (event) => {
+        let selectedColumns = event.value;
+        let orderedSelectedColumns = columns.filter((col) =>
+            selectedColumns.some((sCol) => sCol.field === col.field)
+        );
+
+        setVisibleColumns(orderedSelectedColumns);
+    };
+
+    const header = (
+        <div className="flex flex-col md:flex-row justify-between items-center">
+            <div className="flex w-full sm:w-[30%] flex-row justify-left gap-2 align-items-center items-end">
+                <div className="w-full">
+                    <span className="p-input-icon-left">
+                        <i className="pi pi-search dark:text-white" />
+                        <InputText
+                            className="dark:bg-transparent dark:placeholder-white"
+                            value={globalFilterValue}
+                            onChange={onGlobalFilterChange}
+                            placeholder="Keyword Search"
+                        />
+                    </span>
+                </div>
+            </div>
+            <MultiSelect
+                value={visibleColumns}
+                options={columns}
+                optionLabel="header"
+                onChange={onColumnToggle}
+                className="w-full sm:w-[30%] p-0"
+                display="chip"
+            />
+        </div>
+    );
 
     if (preRenderLoad) {
         return (
@@ -220,7 +308,7 @@ export default function Index({ auth }) {
 
             <div className="flex mx-auto flex-col justify-center mt-5 gap-5">
                 <div className="card p-fluid w-full h-full flex justify-center rounded-lg">
-                    <DataTable
+                    {/* <DataTable
                         loading={isLoadingData}
                         className="w-full h-auto rounded-lg dark:glass border-none text-center shadow-md"
                         pt={{
@@ -328,6 +416,83 @@ export default function Index({ auth }) {
                             align="left"
                             header="Dibuat Oleh"
                             style={{ minWidth: "10rem" }}
+                        ></Column>
+                        <Column
+                            header="Action"
+                            body={actionBodyTemplate}
+                            style={{ minWidth: "12rem" }}
+                            className="dark:border-none"
+                            headerClassName="dark:border-none  bg-transparent dark:bg-transparent dark:text-gray-300"
+                        ></Column>
+                    </DataTable> */}
+
+                    <DataTable
+                        value={mous}
+                        header={header}
+                        tableStyle={{ minWidth: "50rem" }}
+                        loading={isLoadingData}
+                        className="w-full h-auto rounded-lg dark:glass border-none text-center shadow-md"
+                        pt={{
+                            bodyRow:
+                                "dark:bg-transparent bg-transparent dark:text-gray-300",
+                            table: "dark:bg-transparent bg-white rounded-lg dark:text-gray-300",
+                            header: "",
+                        }}
+                        paginator
+                        filters={filters}
+                        rows={5}
+                        emptyMessage="MOU tidak ditemukan."
+                        paginatorClassName="dark:bg-transparent paginator-custome dark:text-gray-300 rounded-b-lg"
+                        globalFilterFields={["partner", "sales"]}
+                        dataKey="id"
+                    >
+                        <Column
+                            header="No"
+                            body={(_, { rowIndex }) => rowIndex + 1}
+                            className="dark:border-none pl-6"
+                            headerClassName="dark:border-none pl-6 bg-transparent dark:bg-transparent dark:text-gray-300"
+                        />
+                        {visibleColumns.map((col) => (
+                            <Column
+                                key={col.field}
+                                style={{ minWidth: "10rem" }}
+                                field={col.field}
+                                header={col.header}
+                                body={(rowData) => {
+                                    if (col.field === "expired_date") {
+                                        return new Date(
+                                            rowData.expired_date
+                                        ).toLocaleDateString("id");
+                                    } else if (col.field === "profit_sharing") {
+                                        return rowData.profit_sharing === 0
+                                            ? "Tidak"
+                                            : "Ya";
+                                    } else if (col.field === "register_date") {
+                                        return new Date(
+                                            rowData.register_date
+                                        ).toLocaleDateString("id");
+                                    } else {
+                                        return rowData[col.field];
+                                    }
+                                }}
+                            />
+                        ))}
+                        <Column
+                            body={(rowData) => {
+                                return rowData.spd_doc == "" ? (
+                                    "dokumen sedang dibuat"
+                                ) : (
+                                    <a
+                                        href={BASE_URL + "/" + rowData.sph_doc}
+                                        download={`Surat_Tugas_Perjalanan_Dinas_${rowData.partner_name}`}
+                                        class="p-button font-bold text-center rounded-full block pi pi-file-pdf"
+                                    ></a>
+                                );
+                            }}
+                            className="dark:border-none"
+                            headerClassName="dark:border-none  bg-transparent dark:bg-transparent dark:text-gray-300"
+                            align="left"
+                            header="Dokumen"
                         ></Column>
                         <Column
                             header="Action"

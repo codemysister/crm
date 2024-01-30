@@ -32,7 +32,7 @@ class MOURequest extends FormRequest
             "url_subdomain" => "required",
             "price_card" => "required|integer",
             "price_lanyard" => "required|integer",
-            "nominal_subscription" => "required|integer",
+            "price_subscription_system" => "required|integer",
             "period_subscription" => "required",
             "price_training_offline" => "required|integer",
             "price_training_online" => "required|integer",

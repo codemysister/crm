@@ -23,7 +23,7 @@ return new class extends Migration {
             $table->string('url_subdomain');
             $table->bigInteger('price_card');
             $table->bigInteger('price_lanyard');
-            $table->bigInteger('nominal_subscription');
+            $table->bigInteger('price_subscription_system');
             $table->string('period_subscription');
             $table->bigInteger('price_training_offline');
             $table->bigInteger('price_training_online');
@@ -38,6 +38,8 @@ return new class extends Migration {
             $table->date('expired_date');
             $table->boolean('profit_sharing');
             $table->text('profit_sharing_detail')->nullable();
+            $table->boolean('referral');
+            $table->string('referral_name');
             $table->string('signature_name');
             $table->string('signature_position');
             $table->string('signature_image');

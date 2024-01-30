@@ -56,7 +56,7 @@ class MOUController extends Controller
             "url_subdomain" => $request->url_subdomain,
             "price_card" => $request->price_card,
             "price_lanyard" => $request->price_lanyard,
-            "nominal_subscription" => $request->nominal_subscription,
+            "price_subscription_system" => $request->price_subscription_system,
             "period_subscription" => $request->period_subscription,
             "price_training_offline" => $request->price_training_offline,
             "price_training_online" => $request->price_training_online,
@@ -100,9 +100,50 @@ class MOUController extends Controller
         return Inertia::render('MOU/Edit', compact('mou', 'usersProp', 'partnersProp'));
     }
 
+    public function update(MOURequest $request, $uuid)
+    {
+        $mou = MOU::where('uuid', '=', $uuid)->first();
+        $mou->update([
+            "day" => $request->day,
+            "date" => (new DateTime($request->date))->format('Y-m-d H:i:s'),
+            "partner_name" => $request->partner_name,
+            "partner_pic" => $request->partner_pic,
+            "partner_pic_position" => $request->partner_pic_position,
+            "partner_address" => $request->partner_address,
+            "url_subdomain" => $request->url_subdomain,
+            "price_card" => $request->price_card,
+            "price_lanyard" => $request->price_lanyard,
+            "price_subscription_system" => $request->price_subscription_system,
+            "period_subscription" => $request->period_subscription,
+            "price_training_offline" => $request->price_training_offline,
+            "price_training_online" => $request->price_training_online,
+            "fee_purchase_cazhpoin" => $request->fee_purchase_cazhpoin,
+            "fee_bill_cazhpoin" => $request->fee_bill_cazhpoin,
+            "fee_topup_cazhpos" => $request->fee_topup_cazhpos,
+            "fee_withdraw_cazhpos" => $request->fee_withdraw_cazhpos,
+            "fee_bill_saldokartu" => $request->fee_bill_saldokartu,
+            "bank" => $request->bank,
+            "account_bank_number" => $request->account_bank_number,
+            "account_bank_name" => $request->account_bank_name,
+            "expired_date" => (new DateTime($request->expired_date))->format('Y-m-d H:i:s'),
+            "profit_sharing" => $request->profit_sharing,
+            "signature_name" => $request->signature_name,
+            "signature_position" => $request->signature_position,
+            "signature_image" => $request->signature_image
+        ]);
+
+        GenerateMOUJob::dispatch($mou);
+    }
     public function apiGetMou()
     {
         $mouProp = MOU::with('user')->get();
         return response()->json($mouProp);
+    }
+
+    public function destroy($uuid)
+    {
+        $mou = MOU::where('uuid', '=', $uuid)->first();
+        unlink($mou->mou_doc);
+        $mou->delete();
     }
 }

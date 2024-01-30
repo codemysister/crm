@@ -85,7 +85,7 @@ const Edit = ({ usersProp, partnersProp, mou }) => {
         url_subdomain: mou.url_subdomain,
         price_card: mou.price_card,
         price_lanyard: mou.price_lanyard,
-        nominal_subscription: mou.nominal_subscription,
+        price_subscription_system: mou.price_subscription_system,
         period_subscription: mou.period_subscription,
         price_training_offline: mou.price_training_offline,
         price_training_online: mou.price_training_online,
@@ -111,6 +111,14 @@ const Edit = ({ usersProp, partnersProp, mou }) => {
         { name: "kartu/tahun" },
         { name: "lembaga/bulan" },
         { name: "lembaga/tahun" },
+    ];
+
+    const signatures = [
+        {
+            name: "Muh Arif Mahfudin",
+            position: "CEO",
+            image: "/assets/img/signatures/ttd.png",
+        },
     ];
 
     document.querySelector("body").classList.add("overflow-hidden");
@@ -196,14 +204,14 @@ const Edit = ({ usersProp, partnersProp, mou }) => {
     const handleSubmitForm = (e) => {
         e.preventDefault();
 
-        post("/mou", {
+        put("/mou/" + mou.uuid, {
             onSuccess: () => {
-                showSuccess("Tambah");
+                showSuccess("Update");
                 // reset("name", "category", "price", "unit", "description");
             },
 
             onError: () => {
-                showError("Tambah");
+                showError("Update");
             },
         });
     };
@@ -218,18 +226,18 @@ const Edit = ({ usersProp, partnersProp, mou }) => {
                         <Card>
                             <div className="flex justify-between items-center mb-4">
                                 <h1 className="font-bold text-2xl">Mou</h1>
-                                <Link href="/sph">
+                                <Link href="/mou">
                                     <svg
                                         xmlns="http://www.w3.org/2000/svg"
                                         fill="none"
                                         viewBox="0 0 24 24"
-                                        stroke-width="1.5"
+                                        strokWidth="1.5"
                                         stroke="currentColor"
                                         class="w-6 h-6"
                                     >
                                         <path
-                                            stroke-linecap="round"
-                                            stroke-linejoin="round"
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
                                             d="M8.25 9V5.25A2.25 2.25 0 0 1 10.5 3h6a2.25 2.25 0 0 1 2.25 2.25v13.5A2.25 2.25 0 0 1 16.5 21h-6a2.25 2.25 0 0 1-2.25-2.25V15m-3 0-3-3m0 0 3-3m-3 3H15"
                                         />
                                     </svg>
@@ -286,9 +294,18 @@ const Edit = ({ usersProp, partnersProp, mou }) => {
                                                 );
                                             }}
                                             itemTemplate={optionTemplate}
-                                            className="w-full md:w-14rem"
+                                            className={`w-full md:w-14rem ${
+                                                errors.day && "p-invalid"
+                                            }`}
                                         />
                                     </div>
+                                    {errors.day && (
+                                        <Message
+                                            className="bg-transparent p-0 my-2 justify-start text-xs"
+                                            severity="error"
+                                            text={errors.day}
+                                        />
+                                    )}
                                 </div>
                                 <div className="flex flex-col mt-3">
                                     <label htmlFor="date">
@@ -318,7 +335,17 @@ const Edit = ({ usersProp, partnersProp, mou }) => {
                                         }}
                                         showIcon
                                         dateFormat="yy-mm-dd"
+                                        className={`w-full md:w-14rem ${
+                                            errors.date && "p-invalid"
+                                        }`}
                                     />
+                                    {errors.date && (
+                                        <Message
+                                            className="bg-transparent p-0 my-2 justify-start text-xs"
+                                            severity="error"
+                                            text={errors.date}
+                                        />
+                                    )}
                                 </div>
 
                                 <div className="flex flex-col mt-3">
@@ -360,7 +387,9 @@ const Edit = ({ usersProp, partnersProp, mou }) => {
                                         filter
                                         valueTemplate={selectedOptionTemplate}
                                         itemTemplate={optionTemplate}
-                                        className="w-full md:w-14rem"
+                                        className={`w-full md:w-14rem ${
+                                            errors.partner_name && "p-invalid"
+                                        }`}
                                         editable
                                         onFocus={() => {
                                             triggerInputFocus(
@@ -373,6 +402,13 @@ const Edit = ({ usersProp, partnersProp, mou }) => {
                                             );
                                         }}
                                     />
+                                    {errors.partner_name && (
+                                        <Message
+                                            className="bg-transparent p-0 my-2 justify-start text-xs"
+                                            severity="error"
+                                            text={errors.partner_name}
+                                        />
+                                    )}
                                 </div>
                                 <div className="flex flex-col mt-3">
                                     <label htmlFor="partner_address">
@@ -386,7 +422,10 @@ const Edit = ({ usersProp, partnersProp, mou }) => {
                                                 partner_address: e.target.value,
                                             })
                                         }
-                                        className="dark:bg-gray-300"
+                                        className={`dark:bg-gray-300 ${
+                                            errors.partner_address &&
+                                            "p-invalid"
+                                        }`}
                                         id="partner_address"
                                         aria-describedby="partner_address-help"
                                         onFocus={() => {
@@ -400,6 +439,13 @@ const Edit = ({ usersProp, partnersProp, mou }) => {
                                             );
                                         }}
                                     />
+                                    {errors.partner_address && (
+                                        <Message
+                                            className="bg-transparent p-0 my-2 justify-start text-xs"
+                                            severity="error"
+                                            text={errors.partner_address}
+                                        />
+                                    )}
                                 </div>
                                 <div className="flex flex-col mt-3">
                                     <label htmlFor="partner_pic">PIC *</label>
@@ -411,7 +457,9 @@ const Edit = ({ usersProp, partnersProp, mou }) => {
                                                 partner_pic: e.target.value,
                                             })
                                         }
-                                        className="dark:bg-gray-300"
+                                        className={`dark:bg-gray-300 ${
+                                            errors.partner_pic && "p-invalid"
+                                        }`}
                                         id="partner_pic"
                                         aria-describedby="partner_pic-help"
                                         onFocus={() => {
@@ -425,6 +473,13 @@ const Edit = ({ usersProp, partnersProp, mou }) => {
                                             );
                                         }}
                                     />
+                                    {errors.partner_pic && (
+                                        <Message
+                                            className="bg-transparent p-0 my-2 justify-start text-xs"
+                                            severity="error"
+                                            text={errors.partner_pic}
+                                        />
+                                    )}
                                 </div>
                                 <div className="flex flex-col mt-3">
                                     <label htmlFor="partner_pic">
@@ -439,7 +494,10 @@ const Edit = ({ usersProp, partnersProp, mou }) => {
                                                     e.target.value,
                                             })
                                         }
-                                        className="dark:bg-gray-300"
+                                        className={`dark:bg-gray-300 ${
+                                            errors.partner_pic_position &&
+                                            "p-invalid"
+                                        }`}
                                         id="partner_pic"
                                         aria-describedby="partner_pic-help"
                                         onFocus={() => {
@@ -453,6 +511,13 @@ const Edit = ({ usersProp, partnersProp, mou }) => {
                                             );
                                         }}
                                     />
+                                    {errors.partner_pic_position && (
+                                        <Message
+                                            className="bg-transparent p-0 my-2 justify-start text-xs"
+                                            severity="error"
+                                            text={errors.partner_pic_position}
+                                        />
+                                    )}
                                 </div>
                                 <div className="flex flex-col mt-3">
                                     <label htmlFor="url_subdomain">
@@ -466,7 +531,9 @@ const Edit = ({ usersProp, partnersProp, mou }) => {
                                                 url_subdomain: e.target.value,
                                             })
                                         }
-                                        className="dark:bg-gray-300"
+                                        className={`dark:bg-gray-300 ${
+                                            errors.url_subdomain && "p-invalid"
+                                        }`}
                                         id="url_subdomain"
                                         aria-describedby="url_subdomain-help"
                                         onFocus={() => {
@@ -480,6 +547,13 @@ const Edit = ({ usersProp, partnersProp, mou }) => {
                                             );
                                         }}
                                     />
+                                    {errors.url_subdomain && (
+                                        <Message
+                                            className="bg-transparent p-0 my-2 justify-start text-xs"
+                                            severity="error"
+                                            text={errors.url_subdomain}
+                                        />
+                                    )}
                                 </div>
                                 <div className="flex flex-col mt-3">
                                     <label htmlFor="price_card">
@@ -499,7 +573,17 @@ const Edit = ({ usersProp, partnersProp, mou }) => {
                                                 animatePriceCard
                                             );
                                         }}
+                                        className={`${
+                                            errors.price_card && "p-invalid"
+                                        }`}
                                     />
+                                    {errors.price_card && (
+                                        <Message
+                                            className="bg-transparent p-0 my-2 justify-start text-xs"
+                                            severity="error"
+                                            text={errors.price_card}
+                                        />
+                                    )}
                                 </div>
                                 <div className="flex flex-col mt-3">
                                     <label htmlFor="price_lanyard">
@@ -525,6 +609,10 @@ const Edit = ({ usersProp, partnersProp, mou }) => {
                                                     animatePriceLanyard
                                                 );
                                             }}
+                                            className={`${
+                                                errors.price_lanyard &&
+                                                "p-invalid"
+                                            }`}
                                         />
                                         <Button
                                             className="h-[35px]"
@@ -536,6 +624,13 @@ const Edit = ({ usersProp, partnersProp, mou }) => {
                                             }
                                         />
                                     </div>
+                                    {errors.price_lanyard && (
+                                        <Message
+                                            className="bg-transparent p-0 my-2 justify-start text-xs"
+                                            severity="error"
+                                            text={errors.price_lanyard}
+                                        />
+                                    )}
                                     <OverlayPanel
                                         className="shadow-md"
                                         ref={infoPriceLanyardRef}
@@ -554,15 +649,15 @@ const Edit = ({ usersProp, partnersProp, mou }) => {
                                     </OverlayPanel>
                                 </div>
                                 <div className="flex flex-col mt-3">
-                                    <label htmlFor="nominal_subscription">
+                                    <label htmlFor="price_subscription_system">
                                         Harga Langganan Sistem *
                                     </label>
 
                                     <InputNumber
-                                        value={data.nominal_subscription}
+                                        value={data.price_subscription_system}
                                         onChange={(e) =>
                                             setData(
-                                                "nominal_subscription",
+                                                "price_subscription_system",
                                                 e.value
                                             )
                                         }
@@ -576,7 +671,20 @@ const Edit = ({ usersProp, partnersProp, mou }) => {
                                                 animateNominalSubscription
                                             );
                                         }}
+                                        className={`${
+                                            errors.price_subscription_system &&
+                                            "p-invalid"
+                                        }`}
                                     />
+                                    {errors.price_subscription_system && (
+                                        <Message
+                                            className="bg-transparent p-0 my-2 justify-start text-xs"
+                                            severity="error"
+                                            text={
+                                                errors.price_subscription_system
+                                            }
+                                        />
+                                    )}
                                 </div>
                                 <div className="flex flex-col mt-3">
                                     <label htmlFor="period_subscription">
@@ -596,7 +704,10 @@ const Edit = ({ usersProp, partnersProp, mou }) => {
                                         filter
                                         valueTemplate={selectedOptionTemplate}
                                         itemTemplate={optionTemplate}
-                                        className="w-full md:w-14rem"
+                                        className={`w-full md:w-14rem ${
+                                            errors.period_subscription &&
+                                            "p-invalid"
+                                        }`}
                                         editable
                                         onFocus={() => {
                                             triggerInputFocus(
@@ -609,6 +720,13 @@ const Edit = ({ usersProp, partnersProp, mou }) => {
                                             );
                                         }}
                                     />
+                                    {errors.period_subscription && (
+                                        <Message
+                                            className="bg-transparent p-0 my-2 justify-start text-xs"
+                                            severity="error"
+                                            text={errors.period_subscription}
+                                        />
+                                    )}
                                 </div>
                                 <div className="flex flex-col mt-3">
                                     <label htmlFor="period_subscription">
@@ -642,7 +760,10 @@ const Edit = ({ usersProp, partnersProp, mou }) => {
                                                     e.value
                                                 )
                                             }
-                                            className="h-full"
+                                            className={`h-full${
+                                                errors.price_training_offline &&
+                                                "p-invalid"
+                                            }`}
                                             onFocus={() => {
                                                 triggerInputFocus(
                                                     animatePriceTrainingOffline
@@ -664,7 +785,13 @@ const Edit = ({ usersProp, partnersProp, mou }) => {
                                             }
                                         />
                                     </div>
-
+                                    {errors.price_training_offline && (
+                                        <Message
+                                            className="bg-transparent p-0 my-2 justify-start text-xs"
+                                            severity="error"
+                                            text={errors.price_training_offline}
+                                        />
+                                    )}
                                     <OverlayPanel
                                         className="shadow-md"
                                         ref={infoPriceTrainingRef}
@@ -692,7 +819,10 @@ const Edit = ({ usersProp, partnersProp, mou }) => {
                                                     e.value
                                                 )
                                             }
-                                            className="h-full"
+                                            className={`h-full ${
+                                                errors.price_training_online &&
+                                                "p-invalid"
+                                            }`}
                                             onFocus={() => {
                                                 triggerInputFocus(
                                                     animatePriceTrainingOnline
@@ -714,7 +844,13 @@ const Edit = ({ usersProp, partnersProp, mou }) => {
                                             }
                                         />
                                     </div>
-
+                                    {errors.price_training_online && (
+                                        <Message
+                                            className="bg-transparent p-0 my-2 justify-start text-xs"
+                                            severity="error"
+                                            text={errors.price_training_online}
+                                        />
+                                    )}
                                     <OverlayPanel
                                         className="shadow-md"
                                         ref={infoPriceTrainingOnlineRef}
@@ -746,7 +882,10 @@ const Edit = ({ usersProp, partnersProp, mou }) => {
                                                 e.value
                                             )
                                         }
-                                        className="h-full"
+                                        className={`h-full ${
+                                            errors.fee_purchase_cazhpoin &&
+                                            "p-invalid"
+                                        }`}
                                         onFocus={() => {
                                             triggerInputFocus(
                                                 animateFeePurchaseCazhpoin
@@ -758,6 +897,13 @@ const Edit = ({ usersProp, partnersProp, mou }) => {
                                             );
                                         }}
                                     />
+                                    {errors.fee_purchase_cazhpoin && (
+                                        <Message
+                                            className="bg-transparent p-0 my-2 justify-start text-xs"
+                                            severity="error"
+                                            text={errors.fee_purchase_cazhpoin}
+                                        />
+                                    )}
                                 </div>
                                 <div className="flex flex-col mt-3">
                                     <label htmlFor="fee_bill_cazhpoin">
@@ -771,7 +917,10 @@ const Edit = ({ usersProp, partnersProp, mou }) => {
                                                 e.value
                                             )
                                         }
-                                        className="h-full"
+                                        className={`h-full ${
+                                            errors.fee_bill_cazhpoin &&
+                                            "p-invalid"
+                                        }`}
                                         onFocus={() => {
                                             triggerInputFocus(
                                                 animateFeeBillCazhpoin
@@ -783,6 +932,13 @@ const Edit = ({ usersProp, partnersProp, mou }) => {
                                             );
                                         }}
                                     />
+                                    {errors.fee_bill_cazhpoin && (
+                                        <Message
+                                            className="bg-transparent p-0 my-2 justify-start text-xs"
+                                            severity="error"
+                                            text={errors.fee_bill_cazhpoin}
+                                        />
+                                    )}
                                 </div>
                                 <div className="flex flex-col mt-3">
                                     <label htmlFor="fee_topup_cazhpos">
@@ -796,7 +952,10 @@ const Edit = ({ usersProp, partnersProp, mou }) => {
                                                 e.value
                                             )
                                         }
-                                        className="h-full"
+                                        className={`h-full ${
+                                            errors.fee_topup_cazhpos &&
+                                            "p-invalid"
+                                        }`}
                                         onFocus={() => {
                                             triggerInputFocus(
                                                 animateFeeTopupCazhpos
@@ -808,6 +967,13 @@ const Edit = ({ usersProp, partnersProp, mou }) => {
                                             );
                                         }}
                                     />
+                                    {errors.fee_topup_cazhpos && (
+                                        <Message
+                                            className="bg-transparent p-0 my-2 justify-start text-xs"
+                                            severity="error"
+                                            text={errors.fee_topup_cazhpos}
+                                        />
+                                    )}
                                 </div>
                                 <div className="flex flex-col mt-3">
                                     <label htmlFor="fee_withdraw_cazhpos">
@@ -821,7 +987,10 @@ const Edit = ({ usersProp, partnersProp, mou }) => {
                                                 e.value
                                             )
                                         }
-                                        className="h-full"
+                                        className={`h-full ${
+                                            errors.fee_withdraw_cazhpos &&
+                                            "p-invalid"
+                                        }`}
                                         onFocus={() => {
                                             triggerInputFocus(
                                                 animateFeeWithdrawCazhpos
@@ -833,6 +1002,13 @@ const Edit = ({ usersProp, partnersProp, mou }) => {
                                             );
                                         }}
                                     />
+                                    {errors.fee_withdraw_cazhpos && (
+                                        <Message
+                                            className="bg-transparent p-0 my-2 justify-start text-xs"
+                                            severity="error"
+                                            text={errors.fee_withdraw_cazhpos}
+                                        />
+                                    )}
                                 </div>
                                 <div className="flex flex-col mt-3">
                                     <label htmlFor="fee_bill_saldokartu">
@@ -846,7 +1022,10 @@ const Edit = ({ usersProp, partnersProp, mou }) => {
                                                 e.value
                                             )
                                         }
-                                        className="h-full"
+                                        className={`h-full ${
+                                            errors.fee_bill_saldokartu &&
+                                            "p-invalid"
+                                        }`}
                                         onFocus={() => {
                                             triggerInputFocus(
                                                 animateFeeBillSaldokartu
@@ -858,6 +1037,13 @@ const Edit = ({ usersProp, partnersProp, mou }) => {
                                             );
                                         }}
                                     />
+                                    {errors.fee_bill_saldokartu && (
+                                        <Message
+                                            className="bg-transparent p-0 my-2 justify-start text-xs"
+                                            severity="error"
+                                            text={errors.fee_bill_saldokartu}
+                                        />
+                                    )}
                                 </div>
                                 <div className="flex flex-col mt-3">
                                     <label htmlFor="fee_withdraw_cazhpos">
@@ -879,7 +1065,9 @@ const Edit = ({ usersProp, partnersProp, mou }) => {
                                         optionValue="name"
                                         editable
                                         placeholder="Pilih Bank"
-                                        className="w-full md:w-14rem"
+                                        className={`w-full md:w-14rem ${
+                                            errors.bank && "p-invalid"
+                                        }`}
                                         onFocus={() => {
                                             triggerInputFocus(animateBank);
                                         }}
@@ -887,6 +1075,13 @@ const Edit = ({ usersProp, partnersProp, mou }) => {
                                             stopAnimateInputFocus(animateBank);
                                         }}
                                     />
+                                    {errors.bank && (
+                                        <Message
+                                            className="bg-transparent p-0 my-2 justify-start text-xs"
+                                            severity="error"
+                                            text={errors.bank}
+                                        />
+                                    )}
                                 </div>
                                 <div className="flex flex-col mt-3">
                                     <label htmlFor="account_bank_number">
@@ -900,7 +1095,10 @@ const Edit = ({ usersProp, partnersProp, mou }) => {
                                                 e.target.value
                                             )
                                         }
-                                        className="dark:bg-gray-300"
+                                        className={`dark:bg-gray-300 ${
+                                            errors.account_bank_number &&
+                                            "p-invalid"
+                                        }`}
                                         id="account_bank_number"
                                         aria-describedby="account_bank_number-help"
                                         keyfilter="int"
@@ -915,6 +1113,13 @@ const Edit = ({ usersProp, partnersProp, mou }) => {
                                             );
                                         }}
                                     />
+                                    {errors.account_bank_name && (
+                                        <Message
+                                            className="bg-transparent p-0 my-2 justify-start text-xs"
+                                            severity="error"
+                                            text={errors.account_bank_name}
+                                        />
+                                    )}
                                 </div>
                                 <div className="flex flex-col mt-3">
                                     <label htmlFor="account_bank_name">
@@ -928,7 +1133,10 @@ const Edit = ({ usersProp, partnersProp, mou }) => {
                                                 e.target.value
                                             )
                                         }
-                                        className="dark:bg-gray-300"
+                                        className={`dark:bg-gray-300 ${
+                                            errors.account_bank_name &&
+                                            "p-invalid"
+                                        }`}
                                         id="account_bank_name"
                                         aria-describedby="account_bank_name-help"
                                         onFocus={() => {
@@ -942,6 +1150,13 @@ const Edit = ({ usersProp, partnersProp, mou }) => {
                                             );
                                         }}
                                     />
+                                    {errors.account_bank_name && (
+                                        <Message
+                                            className="bg-transparent p-0 my-2 justify-start text-xs"
+                                            severity="error"
+                                            text={errors.account_bank_name}
+                                        />
+                                    )}
                                 </div>
 
                                 <div className="flex flex-col mt-3">
@@ -978,6 +1193,9 @@ const Edit = ({ usersProp, partnersProp, mou }) => {
                                         }}
                                         showIcon
                                         dateFormat="yy-mm-dd"
+                                        className={`${
+                                            errors.expired_date && "p-invalid"
+                                        }`}
                                     />
                                 </div>
                                 <div className="flex flex-col mt-3">
@@ -1063,7 +1281,9 @@ const Edit = ({ usersProp, partnersProp, mou }) => {
                                         filter
                                         valueTemplate={selectedOptionTemplate}
                                         itemTemplate={optionSignatureTemplate}
-                                        className="w-full md:w-14rem"
+                                        className={`w-full md:w-14rem ${
+                                            errors.signature_name && "p-invalid"
+                                        }`}
                                         editable
                                         onFocus={() => {
                                             triggerInputFocus(
@@ -1715,7 +1935,7 @@ const Edit = ({ usersProp, partnersProp, mou }) => {
                                                                                         }
                                                                                     >
                                                                                         Rp
-                                                                                        {data.nominal_subscription?.toLocaleString(
+                                                                                        {data.price_subscription_system?.toLocaleString(
                                                                                             "id-ID"
                                                                                         ) ??
                                                                                             "{Harga Langganan}"}{" "}
