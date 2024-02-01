@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\MOUController;
+use App\Http\Controllers\PartnerAccountSettingController;
 use App\Http\Controllers\PartnerBankController;
 use App\Http\Controllers\PartnerController;
 use App\Http\Controllers\PartnerPicController;
@@ -144,6 +145,12 @@ Route::middleware('auth')->group(function () {
     Route::get('/api/partners/banks', [PartnerBankController::class, 'apiGetPIC'])->name('api.partners.banks');
     Route::put('/partners/banks/{uuid}', [PartnerBankController::class, 'update'])->name('partners.banks.update');
     Route::delete('/partners/banks/{uuid}', [PartnerBankController::class, 'destroy'])->name('partners.banks.destroy');
+
+    // Partner Account
+    Route::post('/partners/accounts', [PartnerAccountSettingController::class, 'store'])->name('partners.accounts.store');
+    Route::get('/api/partners/accounts', [PartnerAccountSettingController::class, 'apiGetAccounts'])->name('api.partners.accounts');
+    Route::put('/partners/accounts/{uuid}', [PartnerAccountSettingController::class, 'update'])->name('partners.accounts.update');
+    Route::delete('/partners/accounts/{uuid}', [PartnerAccountSettingController::class, 'destroy'])->name('partners.accounts.destroy');
 
     // Partner Subscription
     Route::post('/partners/subscriptions', [PartnerSubscriptionController::class, 'store'])->name('partners.subscriptions.store');

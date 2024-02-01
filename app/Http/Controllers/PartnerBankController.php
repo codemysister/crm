@@ -41,7 +41,6 @@ class PartnerBankController extends Controller
     public function update(Request $request, $uuid)
     {
         PartnerBank::where('uuid', $uuid)->first()->update([
-            'uuid' => Str::uuid(),
             'partner_id' => $request["partner"]["id"],
             'bank' => $request->bank,
             'account_bank_number' => $request->account_bank_number,

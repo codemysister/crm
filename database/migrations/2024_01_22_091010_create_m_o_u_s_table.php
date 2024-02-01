@@ -16,6 +16,7 @@ return new class extends Migration {
             $table->string('code');
             $table->string('day');
             $table->date('date');
+            $table->foreignId('partner_id')->constrained('partners', 'id')->onDelete('cascade');
             $table->string('partner_name');
             $table->string('partner_pic');
             $table->string('partner_pic_position');

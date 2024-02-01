@@ -197,7 +197,7 @@
     /* Datepicker */
     button.p-datepicker-trigger.p-button.p-component.p-button-icon-only{
       background-color: #673AB7;
-      z-index: 10;
+      z-index: 9;
     }
 
     

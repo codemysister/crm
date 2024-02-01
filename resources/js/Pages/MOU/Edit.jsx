@@ -73,6 +73,7 @@ const Edit = ({ usersProp, partnersProp, mou }) => {
         code: mou.code,
         day: mou.day,
         date: new Date(mou.date),
+        partner_id: mou.partner_id,
         partner_name: mou.partner_name,
         partner_pic: mou.partner_pic,
         partner_pic_position: mou.partner_pic_position,

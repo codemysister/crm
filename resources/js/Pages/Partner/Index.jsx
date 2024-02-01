@@ -32,6 +32,7 @@ export default function Index({ auth }) {
     const [pics, setPics] = useState("");
     const [sales, setSales] = useState("");
     const [banks, setBanks] = useState("");
+    const [accounts, setAccounts] = useState("");
     const [subscriptions, setSubscriptions] = useState("");
     const [account_managers, setAccountManagers] = useState("");
     const [activeIndexTab, setActiveIndexTab] = useState(0);
@@ -46,6 +47,9 @@ export default function Index({ auth }) {
     const [modalSubscriptionIsVisible, setModalSubscriptionIsVisible] =
         useState(false);
     const [modalEditSubscriptionIsVisible, setModalEditSubscriptionIsVisible] =
+        useState(false);
+    const [modalAccountIsVisible, setModalAccountIsVisible] = useState(false);
+    const [modalEditAccountIsVisible, setModalEditAccountIsVisible] =
         useState(false);
     const toast = useRef(null);
     const btnSubmit = useRef(null);
@@ -93,7 +97,10 @@ export default function Index({ auth }) {
         { field: "total_bill", header: "Total Tagihan (nominal + ppn)" },
         { field: "period", header: "Periode Langganan" },
         { field: "price_lanyard", header: "Tarif Lanyard" },
-        { field: "price_subcription_system", header: "Tarif Langganan Sistem" },
+        {
+            field: "price_subscription_system",
+            header: "Tarif Langganan Sistem",
+        },
         { field: "price_training_offline", header: "Tarif Training Offline" },
         { field: "price_training_online", header: "Tarif Training Online" },
         {
@@ -114,6 +121,7 @@ export default function Index({ auth }) {
             header: "Fee Bayar Tagihan via Saldo Kartu",
         },
     ];
+
     const [visibleColumnsSubscription, setVisibleColumnsSubscription] =
         useState([
             { field: "nominal", header: "Nominal" },
@@ -218,6 +226,24 @@ export default function Index({ auth }) {
         bank: "",
         account_bank_number: "",
         account_bank_name: "",
+    });
+
+    const {
+        data: dataAccount,
+        setData: setDataAccount,
+        post: postAccount,
+        put: putAccount,
+        delete: destroyAccount,
+        reset: resetAccount,
+        processing: processingAccount,
+        errors: errorAccount,
+    } = useForm({
+        uuid: "",
+        partner: {},
+        subdomain: "",
+        email_super_admin: "",
+        cas_link_partner: "",
+        card_number: "",
     });
 
     const {
@@ -359,6 +385,17 @@ export default function Index({ auth }) {
         setIsLoadingData(false);
     };
 
+    const getAccounts = async () => {
+        setIsLoadingData(true);
+
+        let response = await fetch("/api/partners/accounts");
+        let data = await response.json();
+
+        setAccounts((prev) => data);
+
+        setIsLoadingData(false);
+    };
+
     const getSubscriptions = async () => {
         setIsLoadingData(true);
 
@@ -381,6 +418,8 @@ export default function Index({ auth }) {
                 } else if (activeIndexTab == 2) {
                     await getBanks();
                 } else if (activeIndexTab == 3) {
+                    await getAccounts();
+                } else if (activeIndexTab == 4) {
                     await getSubscriptions();
                 } else {
                     await getPartners();
@@ -433,6 +472,29 @@ export default function Index({ auth }) {
                     severity="danger"
                     onClick={() => {
                         handleDeleteBank(rowData);
+                    }}
+                />
+            </React.Fragment>
+        );
+    };
+
+    const actionBodyTemplateAccount = (rowData) => {
+        return (
+            <React.Fragment>
+                <Button
+                    icon="pi pi-pencil"
+                    rounded
+                    outlined
+                    className="mr-2"
+                    onClick={() => handleEditAccount(rowData)}
+                />
+                <Button
+                    icon="pi pi-trash"
+                    rounded
+                    outlined
+                    severity="danger"
+                    onClick={() => {
+                        handleDeleteAccount(rowData);
                     }}
                 />
             </React.Fragment>
@@ -618,6 +680,20 @@ export default function Index({ auth }) {
         setModalEditBankIsVisible(true);
     };
 
+    const handleEditAccount = (account) => {
+        setDataAccount((data) => ({
+            ...data,
+            uuid: account.uuid,
+            partner: account.partner,
+            subdomain: account.subdomain,
+            email_super_admin: account.email_super_admin,
+            cas_link_partner: account.cas_link_partner,
+            card_number: account.card_number,
+        }));
+
+        setModalEditAccountIsVisible(true);
+    };
+
     const handleDeleteBank = (bank) => {
         confirmDialog({
             message: "Apakah Anda yakin untuk menghapus ini?",
@@ -628,6 +704,26 @@ export default function Index({ auth }) {
                 destroyBank("partners/banks/" + bank.uuid, {
                     onSuccess: () => {
                         getBanks();
+                        showSuccess("Hapus");
+                    },
+                    onError: () => {
+                        showError("Hapus");
+                    },
+                });
+            },
+        });
+    };
+
+    const handleDeleteAccount = (account) => {
+        confirmDialog({
+            message: "Apakah Anda yakin untuk menghapus ini?",
+            header: "Konfirmasi hapus",
+            icon: "pi pi-info-circle",
+            acceptClassName: "p-button-danger",
+            accept: async () => {
+                destroyAccount("partners/accounts/" + account.uuid, {
+                    onSuccess: () => {
+                        getAccounts();
                         showSuccess("Hapus");
                     },
                     onError: () => {
@@ -922,6 +1018,36 @@ export default function Index({ auth }) {
         }
     };
 
+    const handleSubmitFormAccount = (e, type) => {
+        e.preventDefault();
+
+        if (type === "tambah") {
+            postAccount("/partners/accounts", {
+                onSuccess: () => {
+                    showSuccess("Tambah");
+                    setModalAccountIsVisible((prev) => false);
+                    getAccounts();
+                    resetAccount();
+                },
+                onError: () => {
+                    showError("Tambah");
+                },
+            });
+        } else {
+            putAccount("/partners/accounts/" + dataAccount.uuid, {
+                onSuccess: () => {
+                    showSuccess("Update");
+                    setModalEditAccountIsVisible((prev) => false);
+                    getAccounts();
+                    resetAccount();
+                },
+                onError: () => {
+                    showError("Update");
+                },
+            });
+        }
+    };
+
     const handleSubmitFormSubscription = (e, type) => {
         e.preventDefault();
 
@@ -973,7 +1099,7 @@ export default function Index({ auth }) {
 
     const handleSelectedDetailPartner = (partner) => {
         setSelectedDetailPartner(partner);
-        setActiveIndexTab((prev) => (prev = 4));
+        setActiveIndexTab((prev) => (prev = 5));
     };
 
     if (preRenderLoad) {
@@ -1028,8 +1154,10 @@ export default function Index({ auth }) {
                         : null || activeIndexTab == 2
                         ? "Bank"
                         : null || activeIndexTab == 3
-                        ? "Langganan"
+                        ? "Akun"
                         : null || activeIndexTab == 4
+                        ? "Langganan"
+                        : null || activeIndexTab == 5
                         ? "Detail Partner"
                         : null
                 }
@@ -1082,6 +1210,20 @@ export default function Index({ auth }) {
                         className="bg-purple-600 text-sm shadow-md rounded-lg mr-2"
                         icon={addButtonIcon}
                         onClick={() => {
+                            setModalAccountIsVisible((prev) => (prev = true));
+                            resetAccount();
+                        }}
+                        aria-controls="popup_menu_right"
+                        aria-haspopup
+                    />
+                )}
+
+                {activeIndexTab == 4 && (
+                    <Button
+                        label="Tambah"
+                        className="bg-purple-600 text-sm shadow-md rounded-lg mr-2"
+                        icon={addButtonIcon}
+                        onClick={() => {
                             setModalSubscriptionIsVisible(
                                 (prev) => (prev = true)
                             );
@@ -1092,7 +1234,7 @@ export default function Index({ auth }) {
                     />
                 )}
 
-                {activeIndexTab == 4 && (
+                {activeIndexTab == 5 && (
                     <Button
                         label="Tambah"
                         className="bg-purple-600 text-sm shadow-md rounded-lg mr-2"
@@ -4004,6 +4146,352 @@ export default function Index({ auth }) {
                                     body={(_, { rowIndex }) => rowIndex + 1}
                                     className="dark:border-none pl-6"
                                     headerClassName="dark:border-none pl-6 bg-transparent dark:bg-transparent dark:text-gray-300"
+                                    style={{ minWidth: "3%" }}
+                                />
+                                <Column
+                                    header="Partner"
+                                    body={(rowData) => (
+                                        <button
+                                            onClick={() =>
+                                                handleSelectedDetailPartner(
+                                                    rowData.partner
+                                                )
+                                            }
+                                            className="hover:text-blue-700"
+                                        >
+                                            {rowData.partner.name}
+                                        </button>
+                                    )}
+                                    className="dark:border-none"
+                                    headerClassName="dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300"
+                                    align="left"
+                                    style={{ minWidth: "4rem" }}
+                                ></Column>
+                                <Column
+                                    field="uuid"
+                                    hidden
+                                    className="dark:border-none"
+                                    headerClassName="dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300"
+                                    header="Nama"
+                                    align="left"
+                                ></Column>
+                                <Column
+                                    field="account_bank_name"
+                                    header="Atas Nama"
+                                    className="dark:border-none"
+                                    headerClassName="dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300"
+                                    align="left"
+                                    style={{ minWidth: "4rem" }}
+                                ></Column>
+                                <Column
+                                    field="bank"
+                                    header="Bank"
+                                    className="dark:border-none"
+                                    headerClassName="dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300"
+                                    align="left"
+                                    style={{ minWidth: "4rem" }}
+                                ></Column>
+                                <Column
+                                    field="account_bank_number"
+                                    header="Nomor Rekening"
+                                    className="dark:border-none"
+                                    headerClassName="dark:border-none  bg-transparent dark:bg-transparent dark:text-gray-300"
+                                    align="left"
+                                    style={{ minWidth: "5rem" }}
+                                ></Column>
+                                <Column
+                                    header="Action"
+                                    body={actionBodyTemplateBank}
+                                    style={{ minWidth: "4rem" }}
+                                    className="dark:border-none"
+                                    headerClassName="dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300"
+                                ></Column>
+                            </DataTable>
+                        </div>
+                    </div>
+                </TabPanel>
+
+                <TabPanel header="Akun">
+                    {/* Modal tambah akun */}
+                    <div className="card flex justify-content-center">
+                        <Dialog
+                            header="Akun"
+                            headerClassName="dark:glass dark:text-white"
+                            className="bg-white w-[80%] md:w-[60%] lg:w-[35%] dark:glass dark:text-white"
+                            contentClassName="dark:glass dark:text-white"
+                            visible={modalAccountIsVisible}
+                            onHide={() => setModalAccountIsVisible(false)}
+                        >
+                            <form
+                                onSubmit={(e) =>
+                                    handleSubmitFormAccount(e, "tambah")
+                                }
+                            >
+                                <div className="flex flex-col justify-around gap-4 mt-4">
+                                    <div className="flex flex-col">
+                                        <label htmlFor="partner_subcription">
+                                            Partner
+                                        </label>
+                                        <Dropdown
+                                            optionLabel="name"
+                                            value={dataAccount.partner}
+                                            onChange={(e) =>
+                                                setDataAccount(
+                                                    "partner",
+                                                    e.target.value
+                                                )
+                                            }
+                                            options={partners}
+                                            placeholder="Pilih Partner"
+                                            filter
+                                            valueTemplate={
+                                                selectedOptionTemplate
+                                            }
+                                            itemTemplate={optionTemplate}
+                                            className="w-full md:w-14rem"
+                                        />
+                                    </div>
+
+                                    <div className="flex flex-col">
+                                        <label htmlFor="subdomain">
+                                            Subdomain
+                                        </label>
+                                        <InputText
+                                            value={dataAccount.subdomain}
+                                            onChange={(e) =>
+                                                setDataAccount(
+                                                    "subdomain",
+                                                    e.target.value
+                                                )
+                                            }
+                                            className="dark:bg-gray-300"
+                                            id="subdomain"
+                                            aria-describedby="subdomain-help"
+                                        />
+                                    </div>
+
+                                    <div className="flex flex-col">
+                                        <label htmlFor="email_super_admin">
+                                            Email Super Admin
+                                        </label>
+                                        <InputText
+                                            value={
+                                                dataAccount.email_super_admin
+                                            }
+                                            onChange={(e) =>
+                                                setDataAccount(
+                                                    "email_super_admin",
+                                                    e.target.value
+                                                )
+                                            }
+                                            className="dark:bg-gray-300"
+                                            id="email_super_admin"
+                                            aria-describedby="email_super_admin-help"
+                                        />
+                                    </div>
+
+                                    <div className="flex flex-col">
+                                        <label htmlFor="cars_link_partner">
+                                            CAS link partner
+                                        </label>
+                                        <InputText
+                                            value={dataAccount.cas_link_partner}
+                                            onChange={(e) =>
+                                                setDataAccount(
+                                                    "cas_link_partner",
+                                                    e.target.value
+                                                )
+                                            }
+                                            className="dark:bg-gray-300"
+                                            id="cars_link_partner"
+                                            aria-describedby="cars_link_partner-help"
+                                        />
+                                    </div>
+                                    <div className="flex flex-col">
+                                        <label htmlFor="card_number">
+                                            Nomor Kartu (8 digit)
+                                        </label>
+                                        <InputText
+                                            value={dataAccount.card_number}
+                                            onChange={(e) =>
+                                                setDataAccount(
+                                                    "card_number",
+                                                    e.target.value
+                                                )
+                                            }
+                                            keyfilter="int"
+                                            className="dark:bg-gray-300"
+                                            id="card_number"
+                                            aria-describedby="card_number-help"
+                                        />
+                                    </div>
+                                </div>
+                                <div className="flex justify-center mt-5">
+                                    <Button
+                                        label="Submit"
+                                        disabled={processingAccount}
+                                        className="bg-purple-600 text-sm shadow-md rounded-lg"
+                                    />
+                                </div>
+                            </form>
+                        </Dialog>
+                    </div>
+
+                    {/* Modal edit akun */}
+                    <div className="card flex justify-content-center">
+                        <Dialog
+                            header="Akun"
+                            headerClassName="dark:glass dark:text-white"
+                            className="bg-white w-[80%] md:w-[60%] lg:w-[35%] dark:glass dark:text-white"
+                            contentClassName="dark:glass dark:text-white"
+                            visible={modalEditAccountIsVisible}
+                            onHide={() => setModalEditAccountIsVisible(false)}
+                        >
+                            <form
+                                onSubmit={(e) =>
+                                    handleSubmitFormAccount(e, "update")
+                                }
+                            >
+                                <div className="flex flex-col justify-around gap-4 mt-4">
+                                    <div className="flex flex-col">
+                                        <label htmlFor="partner_subcription">
+                                            Partner
+                                        </label>
+                                        <Dropdown
+                                            optionLabel="name"
+                                            optionValue="name"
+                                            value={dataAccount.partner.name}
+                                            onChange={(e) =>
+                                                setDataAccount(
+                                                    "partner",
+                                                    e.target.value
+                                                )
+                                            }
+                                            options={partners}
+                                            placeholder="Pilih Partner"
+                                            filter
+                                            valueTemplate={
+                                                selectedOptionTemplate
+                                            }
+                                            itemTemplate={optionTemplate}
+                                            className="w-full md:w-14rem"
+                                        />
+                                    </div>
+
+                                    <div className="flex flex-col">
+                                        <label htmlFor="subdomain">
+                                            Subdomain
+                                        </label>
+                                        <InputText
+                                            value={dataAccount.subdomain}
+                                            onChange={(e) =>
+                                                setDataAccount(
+                                                    "subdomain",
+                                                    e.target.value
+                                                )
+                                            }
+                                            className="dark:bg-gray-300"
+                                            id="subdomain"
+                                            aria-describedby="subdomain-help"
+                                        />
+                                    </div>
+
+                                    <div className="flex flex-col">
+                                        <label htmlFor="email_super_admin">
+                                            Email Super Admin
+                                        </label>
+                                        <InputText
+                                            value={
+                                                dataAccount.email_super_admin
+                                            }
+                                            onChange={(e) =>
+                                                setDataAccount(
+                                                    "email_super_admin",
+                                                    e.target.value
+                                                )
+                                            }
+                                            className="dark:bg-gray-300"
+                                            id="email_super_admin"
+                                            aria-describedby="email_super_admin-help"
+                                        />
+                                    </div>
+
+                                    <div className="flex flex-col">
+                                        <label htmlFor="cars_link_partner">
+                                            CAS link partner
+                                        </label>
+                                        <InputText
+                                            value={dataAccount.cas_link_partner}
+                                            onChange={(e) =>
+                                                setDataAccount(
+                                                    "cas_link_partner",
+                                                    e.target.value
+                                                )
+                                            }
+                                            className="dark:bg-gray-300"
+                                            id="cars_link_partner"
+                                            aria-describedby="cars_link_partner-help"
+                                        />
+                                    </div>
+                                    <div className="flex flex-col">
+                                        <label htmlFor="card_number">
+                                            Nomor Kartu (8 digit)
+                                        </label>
+                                        <InputText
+                                            value={dataAccount.card_number}
+                                            onChange={(e) =>
+                                                setDataAccount(
+                                                    "card_number",
+                                                    e.target.value
+                                                )
+                                            }
+                                            keyfilter="int"
+                                            className="dark:bg-gray-300"
+                                            id="card_number"
+                                            aria-describedby="card_number-help"
+                                        />
+                                    </div>
+                                </div>
+                                <div className="flex justify-center mt-5">
+                                    <Button
+                                        label="Submit"
+                                        disabled={processingBank}
+                                        className="bg-purple-600 text-sm shadow-md rounded-lg"
+                                    />
+                                </div>
+                            </form>
+                        </Dialog>
+                    </div>
+
+                    <div className="flex mx-auto flex-col justify-center mt-5 gap-5">
+                        <div className="card p-fluid w-full h-full flex justify-center rounded-lg">
+                            <DataTable
+                                loading={isLoadingData}
+                                className="w-full h-auto rounded-lg dark:glass border-none text-center shadow-md"
+                                pt={{
+                                    bodyRow:
+                                        "dark:bg-transparent bg-transparent dark:text-gray-300",
+                                    table: "dark:bg-transparent bg-white dark:text-gray-300",
+                                    header: "",
+                                }}
+                                paginator
+                                rows={5}
+                                emptyMessage="Langganan partner tidak ditemukan."
+                                paginatorClassName="dark:bg-transparent paginator-custome dark:text-gray-300 rounded-b-lg"
+                                header={header}
+                                filters={filters}
+                                globalFilterFields={[
+                                    "partner.name",
+                                    "account_bank_name",
+                                ]}
+                                value={accounts}
+                                dataKey="id"
+                            >
+                                <Column
+                                    header="No"
+                                    body={(_, { rowIndex }) => rowIndex + 1}
+                                    className="dark:border-none pl-6"
+                                    headerClassName="dark:border-none pl-6 bg-transparent dark:bg-transparent dark:text-gray-300"
                                     style={{ width: "3%" }}
                                 />
                                 <Column
@@ -4023,7 +4511,7 @@ export default function Index({ auth }) {
                                     className="dark:border-none"
                                     headerClassName="dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300"
                                     align="left"
-                                    style={{ width: "15%" }}
+                                    style={{ minWidth: "8rem" }}
                                 ></Column>
                                 <Column
                                     field="uuid"
@@ -4034,33 +4522,41 @@ export default function Index({ auth }) {
                                     align="left"
                                 ></Column>
                                 <Column
-                                    field="account_bank_name"
-                                    header="Atas Nama"
+                                    field="subdomain"
+                                    header="Subdomain"
                                     className="dark:border-none"
                                     headerClassName="dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300"
                                     align="left"
-                                    style={{ width: "10%" }}
+                                    style={{ minWidth: "8rem" }}
                                 ></Column>
                                 <Column
-                                    field="bank"
-                                    header="Bank"
+                                    field="email_super_admin"
+                                    header="Email Super Admin"
                                     className="dark:border-none"
                                     headerClassName="dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300"
                                     align="left"
-                                    style={{ width: "10%" }}
+                                    style={{ minWidth: "8rem" }}
                                 ></Column>
                                 <Column
-                                    field="account_bank_number"
-                                    header="Nomor Rekening"
+                                    field="cas_link_partner"
+                                    header="CAS Link Partner"
                                     className="dark:border-none"
                                     headerClassName="dark:border-none  bg-transparent dark:bg-transparent dark:text-gray-300"
                                     align="left"
-                                    style={{ width: "15%" }}
+                                    style={{ minWidth: "8rem" }}
+                                ></Column>
+                                <Column
+                                    field="card_number"
+                                    header="Nomor Kartu (8 digit)"
+                                    className="dark:border-none"
+                                    headerClassName="dark:border-none  bg-transparent dark:bg-transparent dark:text-gray-300"
+                                    align="left"
+                                    style={{ minWidth: "8rem" }}
                                 ></Column>
                                 <Column
                                     header="Action"
-                                    body={actionBodyTemplateBank}
-                                    style={{ width: "10%" }}
+                                    body={actionBodyTemplateAccount}
+                                    style={{ minWidth: "8rem" }}
                                     className="dark:border-none"
                                     headerClassName="dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300"
                                 ></Column>
@@ -4086,6 +4582,29 @@ export default function Index({ auth }) {
                                 }
                             >
                                 <div className="flex flex-col justify-around gap-4 mt-1">
+                                    <div className="flex flex-col">
+                                        <label htmlFor="partner_subcription">
+                                            Partner
+                                        </label>
+                                        <Dropdown
+                                            optionLabel="name"
+                                            value={dataSubscription.partner}
+                                            onChange={(e) =>
+                                                setDataSubscription(
+                                                    "partner",
+                                                    e.target.value
+                                                )
+                                            }
+                                            options={partners}
+                                            placeholder="Pilih Partner"
+                                            filter
+                                            valueTemplate={
+                                                selectedOptionTemplate
+                                            }
+                                            itemTemplate={optionTemplate}
+                                            className="w-full md:w-14rem"
+                                        />
+                                    </div>
                                     <div className="flex flex-col">
                                         <label htmlFor="nominal">
                                             Nominal Langganan *

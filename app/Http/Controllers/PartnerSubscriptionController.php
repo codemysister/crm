@@ -32,18 +32,23 @@ class PartnerSubscriptionController extends Controller
         PartnerSubscription::create([
             'uuid' => Str::uuid(),
             'partner_id' => $request["partner"]["id"],
-            'nominal' => $request->nominal,
-            'period' => $request->period,
+            'nominal' => $request['nominal'],
+            'ppn' => $request['ppn'],
+            'total_bill' => $request['total_bill'],
+            'period' => $request['period'],
             'price_card' => json_encode([
                 'price' => $request['price_card']['price'],
-                'type' => $request['price_card']['price'] !== null ? $request['price_card']['type']['name'] : null,
+                'type' => $request['price_card']['price'] !== null ? $request['price_card']['type'] : '',
             ]),
             'price_lanyard' => $request['price_lanyard'],
             'price_subscription_system' => $request['price_subscription_system'],
-            'price_training' => json_encode([
-                'price' => $request['price_training']['price'],
-                'type' => $request['price_training']['price'] !== null ? $request['price_training']['type']['name'] : null,
-            ])
+            'price_training_offline' => $request['price_training_offline'],
+            'price_training_online' => $request['price_training_online'],
+            'fee_purchase_cazhpoin' => $request['fee_purchase_cazhpoin'],
+            'fee_bill_cazhpoin' => $request['fee_bill_cazhpoin'],
+            'fee_topup_cazhpos' => $request['fee_topup_cazhpos'],
+            'fee_withdraw_cazhpos' => $request['fee_withdraw_cazhpos'],
+            'fee_bill_saldokartu' => $request['fee_bill_saldokartu'],
         ]);
     }
 
@@ -52,18 +57,23 @@ class PartnerSubscriptionController extends Controller
         PartnerSubscription::where('uuid', $uuid)->first()->update([
             'uuid' => Str::uuid(),
             'partner_id' => $request["partner"]["id"],
-            'nominal' => $request->nominal,
-            'period' => $request->period,
+            'nominal' => $request['nominal'],
+            'ppn' => $request['ppn'],
+            'total_bill' => $request['total_bill'],
+            'period' => $request['period'],
             'price_card' => json_encode([
                 'price' => $request['price_card']['price'],
-                'type' => $request['price_card']['price'] !== null ? $request['price_card']['type'] : null,
+                'type' => $request['price_card']['price'] !== null ? $request['price_card']['type'] : '',
             ]),
             'price_lanyard' => $request['price_lanyard'],
             'price_subscription_system' => $request['price_subscription_system'],
-            'price_training' => json_encode([
-                'price' => $request['price_training']['price'],
-                'type' => $request['price_training']['price'] !== null ? $request['price_training']['type'] : null,
-            ])
+            'price_training_offline' => $request['price_training_offline'],
+            'price_training_online' => $request['price_training_online'],
+            'fee_purchase_cazhpoin' => $request['fee_purchase_cazhpoin'],
+            'fee_bill_cazhpoin' => $request['fee_bill_cazhpoin'],
+            'fee_topup_cazhpos' => $request['fee_topup_cazhpos'],
+            'fee_withdraw_cazhpos' => $request['fee_withdraw_cazhpos'],
+            'fee_bill_saldokartu' => $request['fee_bill_saldokartu'],
         ]);
     }
 

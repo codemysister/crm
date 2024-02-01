@@ -49,6 +49,7 @@ class MOUController extends Controller
             "code" => $request->code,
             "day" => $request->day,
             "date" => (new DateTime($request->date))->format('Y-m-d H:i:s'),
+            "partner_id" => $request->partner_id,
             "partner_name" => $request->partner_name,
             "partner_pic" => $request->partner_pic,
             "partner_pic_position" => $request->partner_pic_position,
@@ -109,6 +110,7 @@ class MOUController extends Controller
         $mou->update([
             "day" => $request->day,
             "date" => (new DateTime($request->date))->format('Y-m-d H:i:s'),
+            "partner_id" => $request->partner_id,
             "partner_name" => $request->partner_name,
             "partner_pic" => $request->partner_pic,
             "partner_pic_position" => $request->partner_pic_position,

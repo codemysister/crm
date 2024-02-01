@@ -34,6 +34,11 @@ class Partner extends Authenticatable
         return $this->hasMany(PartnerBank::class, 'partner_id', 'id');
     }
 
+    public function accounts()
+    {
+        return $this->hasMany(PartnerAccountSetting::class, 'partner_id', 'id');
+    }
+
     public function subscription()
     {
         return $this->hasOne(PartnerSubscription::class);
