@@ -160,6 +160,7 @@ export default function Index({ auth }) {
             number: "",
             position: "",
             address: "",
+            email: "",
         },
         account_setting: {
             subdomain: "",
@@ -209,6 +210,7 @@ export default function Index({ auth }) {
         number: "",
         position: "",
         address: "",
+        email: "",
     });
 
     const {
@@ -735,12 +737,16 @@ export default function Index({ auth }) {
     };
 
     const handleEditPIC = (pic) => {
-        setDataPIC((data) => ({ ...data, uuid: pic.uuid }));
-        setDataPIC((data) => ({ ...data, partner: pic.partner }));
-        setDataPIC((data) => ({ ...data, name: pic.name }));
-        setDataPIC((data) => ({ ...data, number: pic.number }));
-        setDataPIC((data) => ({ ...data, position: pic.position }));
-        setDataPIC((data) => ({ ...data, address: pic.address }));
+        setDataPIC((data) => ({
+            ...data,
+            uuid: pic.uuid,
+            partner: pic.partner,
+            name: pic.name,
+            number: pic.number,
+            position: pic.position,
+            address: pic.address,
+            email: pic.email,
+        }));
 
         setModalEditPicIsVisible(true);
     };
@@ -1612,11 +1618,26 @@ export default function Index({ auth }) {
                                                 />
                                             </div>
 
-                                            {/* <div className='flex flex-col'>   
-                                        <label htmlFor="email">Email</label>
-                                        <InputText value={data.pic.email} type="email" onChange={(e) => setData('pic',{...data.pic, email: e.target.value})} className='dark:bg-gray-300' id="email" aria-describedby="email-help" />
-                                    </div> */}
-
+                                            <div className="flex flex-col">
+                                                <label htmlFor="number">
+                                                    Email *
+                                                </label>
+                                                <InputText
+                                                    value={data.pic.email}
+                                                    keyfilter="int"
+                                                    min={0}
+                                                    onChange={(e) =>
+                                                        setData("pic", {
+                                                            ...data.pic,
+                                                            email: e.target
+                                                                .value,
+                                                        })
+                                                    }
+                                                    className="dark:bg-gray-300"
+                                                    id="email"
+                                                    aria-describedby="email-help"
+                                                />
+                                            </div>
                                             <div className="flex flex-col">
                                                 <label htmlFor="number">
                                                     No.Hp *
@@ -3630,6 +3651,22 @@ export default function Index({ auth }) {
                                     </div>
 
                                     <div className="flex flex-col">
+                                        <label htmlFor="number">Email *</label>
+                                        <InputText
+                                            value={dataPIC.email}
+                                            onChange={(e) =>
+                                                setDataPIC(
+                                                    "email",
+                                                    e.target.value
+                                                )
+                                            }
+                                            className="dark:bg-gray-300"
+                                            id="email"
+                                            aria-describedby="email-help"
+                                        />
+                                    </div>
+
+                                    <div className="flex flex-col">
                                         <label htmlFor="number">No.Hp</label>
                                         <InputText
                                             keyfilter="int"
@@ -3749,6 +3786,22 @@ export default function Index({ auth }) {
                                     </div>
 
                                     <div className="flex flex-col">
+                                        <label htmlFor="number">Email *</label>
+                                        <InputText
+                                            value={dataPIC.email}
+                                            onChange={(e) =>
+                                                setDataPIC(
+                                                    "email",
+                                                    e.target.value
+                                                )
+                                            }
+                                            className="dark:bg-gray-300"
+                                            id="email"
+                                            aria-describedby="email-help"
+                                        />
+                                    </div>
+
+                                    <div className="flex flex-col">
                                         <label htmlFor="number">No.Hp</label>
                                         <InputText
                                             keyfilter="int"
@@ -3845,7 +3898,7 @@ export default function Index({ auth }) {
                                     className="dark:border-none"
                                     headerClassName="dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300"
                                     align="left"
-                                    style={{ width: "15%" }}
+                                    style={{ minWidth: "8rem" }}
                                 ></Column>
                                 <Column
                                     header="Partner"
@@ -3864,7 +3917,7 @@ export default function Index({ auth }) {
                                     className="dark:border-none"
                                     headerClassName="dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300"
                                     align="left"
-                                    style={{ width: "15%" }}
+                                    style={{ minWidth: "8rem" }}
                                 ></Column>
                                 <Column
                                     field="uuid"
@@ -3875,12 +3928,20 @@ export default function Index({ auth }) {
                                     align="left"
                                 ></Column>
                                 <Column
+                                    field="email"
+                                    header="Email"
+                                    className="dark:border-none"
+                                    headerClassName="dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300"
+                                    align="left"
+                                    style={{ minWidth: "8rem" }}
+                                ></Column>
+                                <Column
                                     field="number"
                                     header="Nomor Handphone"
                                     className="dark:border-none"
                                     headerClassName="dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300"
                                     align="left"
-                                    style={{ width: "15%" }}
+                                    style={{ minWidth: "8rem" }}
                                 ></Column>
                                 <Column
                                     field="position"
@@ -3888,7 +3949,7 @@ export default function Index({ auth }) {
                                     className="dark:border-none"
                                     headerClassName="dark:border-none  bg-transparent dark:bg-transparent dark:text-gray-300"
                                     align="left"
-                                    style={{ width: "15%" }}
+                                    style={{ minWidth: "8rem" }}
                                 ></Column>
                                 <Column
                                     field="address"
@@ -3896,7 +3957,7 @@ export default function Index({ auth }) {
                                     headerClassName="dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300"
                                     header="Alamat"
                                     align="left"
-                                    style={{ width: "20%" }}
+                                    style={{ minWidth: "8rem" }}
                                 ></Column>
                                 <Column
                                     header="Action"

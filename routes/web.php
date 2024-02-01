@@ -11,6 +11,7 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\SignatureController;
+use App\Http\Controllers\SLAController;
 use App\Http\Controllers\SPHController;
 use App\Http\Controllers\STPDController;
 use App\Http\Controllers\UserController;
@@ -40,20 +41,10 @@ use Illuminate\Http\Response;
 //     ]);
 // });
 
-Route::get('/pdf', function () {
-    $pdf = PDF::loadView('pdf.mou', []);
-    $pdf->output();
-    $dom_pdf = $pdf->getDomPDF();
-    $pageWidth = $dom_pdf->getCanvas()->get_width();
-    $pageHeight = $dom_pdf->getCanvas()->get_height();
-    $canvas = $dom_pdf->get_canvas();
-    $canvas->page_text($pageWidth - 100, $pageHeight - 20, "Page {PAGE_NUM} of {PAGE_COUNT}", null, 10, array(0, 0, 0));
-    return $pdf->stream();
-});
 
 Route::get('/browsershot', function () {
 
-    $html = view('pdf.mou')->render();
+    $html = view('pdf.sla')->render();
     $pdf = Browsershot::html($html)
         ->setIncludedPath(config('services.browsershot.included_path'))
         ->showBackground()
@@ -184,6 +175,15 @@ Route::middleware('auth')->group(function () {
     Route::put('/mou/{mou:uuid}', [MOUController::class, 'update'])->name('mou.update')->middleware(['can:edit produk']);
     Route::delete('/mou/{mou:uuid}', [MOUController::class, 'destroy'])->name('mou.destroy')->middleware(['can:hapus produk']);
     Route::get('/api/mou', [MOUController::class, 'apiGetmou'])->name('api.mou');
+
+    // SLA
+    Route::get('/sla', [SLAController::class, 'index'])->name('sla.view')->middleware(['can:lihat produk']);
+    Route::get('/sla/create', [SLAController::class, 'create'])->name('sla.create');
+    Route::post('/sla', [SLAController::class, 'store'])->name('sla.store')->middleware(['can:tambah produk']);
+    Route::get('/sla/{sla:uuid}', [SLAController::class, 'edit'])->name('sla.edit')->middleware(['can:edit produk']);
+    Route::put('/sla/{sla:uuid}', [SLAController::class, 'update'])->name('sla.update')->middleware(['can:edit produk']);
+    Route::delete('/sla/{sla:uuid}', [SLAController::class, 'destroy'])->name('sla.destroy')->middleware(['can:hapus produk']);
+    Route::get('/api/sla', [SLAController::class, 'apiGetmou'])->name('api.sla');
 });
 
 require __DIR__ . '/auth.php';

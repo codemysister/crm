@@ -34,6 +34,7 @@ class PartnerPicController extends Controller
             'partner_id' => $request["partner"]["id"],
             'name' => $request->name,
             'number' => $request->number,
+            'email' => $request->email,
             'position' => $request->position,
             'address' => $request->address
         ]);
@@ -45,6 +46,7 @@ class PartnerPicController extends Controller
             'partner_id' => $request["partner"]["id"],
             'name' => $request->name,
             'number' => $request->number,
+            'email' => $request->email,
             'position' => $request->position,
             'address' => $request->address
         ]);
