@@ -141,7 +141,7 @@
         <div class="flex  flex-row mt-5 justify-between">
             <div class="w-[30%]">
                 <p>Pihak Pertama</p>
-                <img src="{{ public_path($sla->signature_image) }}" alt="" class="min-h-20" />
+                <img src="{{ public_path($sla->signature_image) }}" alt="" class="min-h-20 w-full" />
                 <p>{{$sla->signature_name}}</p>
             </div>
             <div class="w-[30%]">

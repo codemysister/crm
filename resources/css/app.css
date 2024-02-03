@@ -44,6 +44,10 @@
       border-top-right-radius: 0.5rem;
     }
 
+    .p-datatable{
+      font-size: 15px;
+    }
+
     .dark .p-datatable .p-datatable-header {
       background-color: transparent;
     }

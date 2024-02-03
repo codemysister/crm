@@ -17,7 +17,7 @@ import { Checkbox } from "primereact/checkbox";
 
 const BASE_URL = import.meta.env.VITE_BASE_URL;
 
-const Create = ({ usersProp, partnersProp, rolesProp, productsProp }) => {
+const Create = ({ usersProp, partnersProp, rolesProp, sla }) => {
     const [users, setUsers] = useState(usersProp);
     const [roles, setRoles] = useState(rolesProp);
     const [partners, setPartners] = useState(partnersProp);
@@ -35,72 +35,20 @@ const Create = ({ usersProp, partnersProp, rolesProp, productsProp }) => {
         processing,
         errors,
     } = useForm({
-        uuid: "",
-        code: `${Math.floor(
-            Math.random() * 1000
-        )}/CAZH-SLA/X/${new Date().getFullYear()}`,
-        activities: [
-            {
-                activity: "tes1",
-                cazh_pic: "admin",
-                duration: "2 hari",
-                estimation_date: new Date(),
-                realization: null,
-            },
-            {
-                activity: "tes2",
-                cazh_pic: "admin",
-                duration: "2 hari",
-                estimation_date: new Date(),
-                realization: null,
-            },
-            {
-                activity: "tes3",
-                cazh_pic: "admin",
-                duration: "3 hari",
-                estimation_date: new Date(),
-                realization: null,
-            },
-            {
-                activity: "tes4",
-                cazh_pic: "sales",
-                duration: "4 hari",
-                estimation_date: new Date(),
-                realization: null,
-            },
-            {
-                activity: "tes5",
-                cazh_pic: "sales",
-                duration: "5 hari",
-                estimation_date: new Date(),
-                realization: null,
-            },
-            {
-                activity: "tes6",
-                cazh_pic: "sales",
-                duration: "6 hari",
-                estimation_date: new Date(),
-                realization: null,
-            },
-            {
-                activity: "tes7",
-                cazh_pic: "sales",
-                duration: "7 hari",
-                estimation_date: new Date(),
-                realization: null,
-            },
-        ],
+        uuid: sla.uuid,
+        code: sla.code,
+        activities: sla.activities,
         partner: {},
-        partner_name: null,
-        partner_address: null,
-        partner_phone_number: null,
-        partner_pic: null,
-        partner_pic_email: null,
-        partner_pic_number: null,
-        referral: false,
-        referral_name: null,
-        signature_name: null,
-        signature_image: null,
+        partner_name: sla.partner_name,
+        partner_address: sla.partner_address,
+        partner_phone_number: sla.partner_phone_number,
+        partner_pic: sla.partner_pic,
+        partner_pic_email: sla.partner_pic_email,
+        partner_pic_number: sla.partner_pic_number,
+        referral: Boolean(sla.referral),
+        referral_name: sla.referral_name,
+        signature_name: sla.signature_name,
+        signature_image: sla.signature_image,
     });
 
     const animatePartnerRef = useRef();
@@ -278,7 +226,7 @@ const Create = ({ usersProp, partnersProp, rolesProp, productsProp }) => {
     const handleSubmitForm = (e) => {
         e.preventDefault();
 
-        post("/sla", {
+        put("/sla/" + data.uuid, {
             onSuccess: () => {
                 showSuccess("Tambah");
                 window.location = BASE_URL + "/sla";

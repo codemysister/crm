@@ -479,12 +479,12 @@ export default function Index({ auth }) {
                         ))}
                         <Column
                             body={(rowData) => {
-                                return rowData.spd_doc == "" ? (
+                                return rowData.mou_doc == "" ? (
                                     "dokumen sedang dibuat"
                                 ) : (
                                     <a
-                                        href={BASE_URL + "/" + rowData.sph_doc}
-                                        download={`Surat_Tugas_Perjalanan_Dinas_${rowData.partner_name}`}
+                                        href={BASE_URL + "/" + rowData.mou_doc}
+                                        download={`MOU_${rowData.partner_name}`}
                                         class="p-button font-bold text-center rounded-full block pi pi-file-pdf"
                                     ></a>
                                 );

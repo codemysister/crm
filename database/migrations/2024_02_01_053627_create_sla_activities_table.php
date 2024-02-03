@@ -12,6 +12,7 @@ return new class extends Migration {
     {
         Schema::create('sla_activities', function (Blueprint $table) {
             $table->id();
+            $table->uuid('uuid');
             $table->foreignId('sla_id')->constrained('slas', 'id')->onDelete('cascade');
             $table->string('activity');
             $table->string('cazh_pic');

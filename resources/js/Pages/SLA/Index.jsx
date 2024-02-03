@@ -14,15 +14,20 @@ import { Link, useForm } from "@inertiajs/react";
 import { ConfirmDialog, confirmDialog } from "primereact/confirmdialog";
 import { Skeleton } from "primereact/skeleton";
 import { InputNumber } from "primereact/inputnumber";
+import { ProgressSpinner } from "primereact/progressspinner";
+import { Calendar } from "primereact/calendar";
+const BASE_URL = import.meta.env.VITE_BASE_URL;
 
 export default function Index({ auth }) {
-    const [products, setProducts] = useState("");
+    const [slas, setSlas] = useState("");
+    const [positions, setPositions] = useState("");
     const [isLoadingData, setIsLoadingData] = useState(false);
     const dummyArray = Array.from({ length: 5 }, (v, i) => i);
     const [preRenderLoad, setPreRenderLoad] = useState(true);
-    const [modalProductIsVisible, setModalProductIsVisible] = useState(false);
-    const [modalEditProductIsVisible, setModalEditProductIsVisible] =
+    const [modalEditActivityIsVisible, setModalEditActivityIsVisible] =
         useState(false);
+    const [expandedRows, setExpandedRows] = useState(null);
+    useState(false);
     const toast = useRef(null);
     const modalProduct = useRef(null);
     const { roles, permissions } = auth.user;
@@ -41,11 +46,12 @@ export default function Index({ auth }) {
         errors,
     } = useForm({
         id: "",
-        name: "",
-        category: "",
-        price: "",
-        unit: "",
-        description: "",
+        sla_id: "",
+        activity: "",
+        cazh_pic: "",
+        duration: "",
+        estimation_date: "",
+        realization: "",
     });
 
     const [globalFilterValue, setGlobalFilterValue] = useState("");
@@ -59,21 +65,42 @@ export default function Index({ auth }) {
         setGlobalFilterValue(value);
     };
 
-    const getProducts = async () => {
+    const getSlas = async () => {
         setIsLoadingData(true);
 
-        let response = await fetch("/api/products");
+        let response = await fetch("/api/sla");
         let data = await response.json();
 
-        setProducts((prev) => data);
+        setSlas((prev) => data.sla);
+        setPositions((prev) => data.roles);
 
         setIsLoadingData(false);
+    };
+
+    const selectedOptionTemplate = (option, props) => {
+        if (option) {
+            return (
+                <div className="flex align-items-center">
+                    <div>{option.name}</div>
+                </div>
+            );
+        }
+
+        return <span>{props.placeholder}</span>;
+    };
+
+    const optionTemplate = (option) => {
+        return (
+            <div className="flex align-items-center">
+                <div>{option.name}</div>
+            </div>
+        );
     };
 
     useEffect(() => {
         const fetchData = async () => {
             try {
-                await Promise.all([getProducts()]);
+                await Promise.all([getSlas()]);
                 setIsLoadingData(false);
                 setPreRenderLoad((prev) => (prev = false));
             } catch (error) {
@@ -84,7 +111,6 @@ export default function Index({ auth }) {
         fetchData();
     }, []);
 
-    let categories = [{ name: "Produk" }, { name: "Layanan" }];
     const actionBodyTemplate = (rowData) => {
         return (
             <React.Fragment>
@@ -94,7 +120,9 @@ export default function Index({ auth }) {
                         rounded
                         outlined
                         className="mr-2"
-                        onClick={() => handleEditProduct(rowData)}
+                        onClick={() =>
+                            (window.location = "/sla/" + rowData.uuid)
+                        }
                     />
                 )}
                 {permissions.includes("hapus produk") && (
@@ -104,7 +132,34 @@ export default function Index({ auth }) {
                         outlined
                         severity="danger"
                         onClick={() => {
-                            handleDeleteProduct(rowData);
+                            handleDeleteActivity(rowData);
+                        }}
+                    />
+                )}
+            </React.Fragment>
+        );
+    };
+
+    const actionActivityBodyTemplate = (rowData) => {
+        return (
+            <React.Fragment>
+                {permissions.includes("edit produk") && (
+                    <Button
+                        icon="pi pi-pencil"
+                        rounded
+                        outlined
+                        className="mr-2"
+                        onClick={() => handleEditActivity(rowData)}
+                    />
+                )}
+                {permissions.includes("hapus produk") && (
+                    <Button
+                        icon="pi pi-trash"
+                        rounded
+                        outlined
+                        severity="danger"
+                        onClick={() => {
+                            handleDeleteActivity(rowData);
                         }}
                     />
                 )}
@@ -131,26 +186,30 @@ export default function Index({ auth }) {
         });
     };
 
-    const handleEditProduct = (product) => {
-        setData((data) => ({ ...data, uuid: product.uuid }));
-        setData((data) => ({ ...data, name: product.name }));
-        setData((data) => ({ ...data, category: product.category }));
-        setData((data) => ({ ...data, price: product.price }));
-        setData((data) => ({ ...data, unit: product.unit }));
-        setData((data) => ({ ...data, description: product.description }));
-        setModalEditProductIsVisible(true);
+    const handleEditActivity = (activity) => {
+        setData((data) => ({
+            ...data,
+            uuid: activity.uuid,
+            sla_id: activity.sla_id,
+            activity: activity.activity,
+            cazh_pic: activity.cazh_pic,
+            duration: activity.duration,
+            estimation_date: activity.estimation_date,
+            realization: activity.realization,
+        }));
+        setModalEditActivityIsVisible(true);
     };
 
-    const handleDeleteProduct = (product) => {
+    const handleDeleteActivity = (activity) => {
         confirmDialog({
             message: "Apakah Anda yakin untuk menghapus ini?",
             header: "Konfirmasi hapus",
             icon: "pi pi-info-circle",
             acceptClassName: "p-button-danger",
             accept: async () => {
-                destroy("products/" + product.uuid, {
+                destroy("activity/" + activity.uuid, {
                     onSuccess: () => {
-                        getProducts();
+                        getSlas();
                         showSuccess("Hapus");
                     },
                     onError: () => {
@@ -159,6 +218,74 @@ export default function Index({ auth }) {
                 });
             },
         });
+    };
+
+    const allowExpansion = (rowData) => {
+        return rowData.activities.length > 0;
+    };
+
+    const rowExpansionTemplate = (data) => {
+        return (
+            <div className="px-14 py-5 flex">
+                <DataTable
+                    headerClassName="bg-red-500"
+                    value={data.activities}
+                    className=""
+                >
+                    <Column
+                        header="No"
+                        body={(_, { rowIndex }) => rowIndex + 1}
+                        style={{ width: "1rem" }}
+                        className="dark:border-none"
+                        headerClassName="dark:border-none bg-gray-50 dark:bg-transparent dark:text-gray-300"
+                    />
+                    <Column
+                        field="activity"
+                        header="Tahapan"
+                        style={{ minWidth: "10rem" }}
+                        headerClassName="dark:border-none bg-gray-50 dark:bg-transparent dark:text-gray-300"
+                    ></Column>
+                    <Column
+                        field="cazh_pic"
+                        header="Penanggungjawab"
+                        style={{ minWidth: "8rem" }}
+                        headerClassName="dark:border-none bg-gray-50 dark:bg-transparent dark:text-gray-300"
+                    ></Column>
+                    <Column
+                        field="duration"
+                        header="Estimasi Waktu"
+                        style={{ minWidth: "8rem" }}
+                        headerClassName="dark:border-none bg-gray-50 dark:bg-transparent dark:text-gray-300"
+                    ></Column>
+                    <Column
+                        field="estimation_date"
+                        header="Tanggal"
+                        body={(rowData) => {
+                            return new Date(
+                                rowData.estimation_date
+                            ).toLocaleDateString("id");
+                        }}
+                        style={{ minWidth: "8rem" }}
+                        headerClassName="dark:border-none bg-gray-50 dark:bg-transparent dark:text-gray-300"
+                    ></Column>
+                    <Column
+                        field="realization"
+                        body={(rowData) => {
+                            return rowData.realization ?? "belum diisi";
+                        }}
+                        header="Realisasi"
+                        style={{ minWidth: "12rem" }}
+                        headerClassName="dark:border-none bg-gray-50 dark:bg-transparent dark:text-gray-300"
+                    ></Column>
+                    <Column
+                        header="Action"
+                        body={actionActivityBodyTemplate}
+                        className="dark:border-none"
+                        headerClassName="dark:border-none bg-gray-50 dark:bg-transparent dark:text-gray-300"
+                    ></Column>
+                </DataTable>
+            </div>
+        );
     };
 
     const renderHeader = () => {
@@ -206,12 +333,12 @@ export default function Index({ auth }) {
                 },
             });
         } else {
-            put("/products/" + data.uuid, {
+            put(`/activity/${data.uuid}`, {
                 onSuccess: () => {
                     showSuccess("Update");
-                    setModalEditProductIsVisible((prev) => false);
-                    getProducts();
-                    reset("name", "category", "price", "unit", "description");
+                    setModalEditActivityIsVisible((prev) => false);
+                    getSlas();
+                    reset();
                 },
                 onError: () => {
                     showError("Update");
@@ -272,177 +399,6 @@ export default function Index({ auth }) {
                 )}
             </HeaderModule>
 
-            {/* Modal tambah produk */}
-            <div className="card flex justify-content-center">
-                <Dialog
-                    ref={modalProduct}
-                    header="Produk"
-                    headerClassName="dark:glass shadow-md dark:text-white"
-                    className="bg-white w-[80%] md:w-[60%] lg:w-[30%] dark:glass dark:text-white"
-                    contentClassName=" dark:glass dark:text-white"
-                    visible={modalProductIsVisible}
-                    onHide={() => setModalProductIsVisible(false)}
-                >
-                    <form onSubmit={(e) => handleSubmitForm(e, "tambah")}>
-                        <div className="flex flex-col justify-around gap-4 mt-4">
-                            <div className="flex flex-col">
-                                <label htmlFor="name">Nama</label>
-                                <InputText
-                                    value={data.name}
-                                    onChange={(e) =>
-                                        setData("name", e.target.value)
-                                    }
-                                    className="dark:bg-gray-300"
-                                    id="name"
-                                    aria-describedby="name-help"
-                                />
-                            </div>
-                            <div className="flex flex-col">
-                                <label htmlFor="category">Kategori</label>
-                                <Dropdown
-                                    value={data.category}
-                                    onChange={(e) =>
-                                        setData("category", e.target.value)
-                                    }
-                                    options={categories}
-                                    optionLabel="name"
-                                    placeholder="Pilih Kategori"
-                                    className="w-full md:w-14rem"
-                                />
-                            </div>
-                            <div className="flex flex-col">
-                                <label htmlFor="price">Harga</label>
-                                {/* <InputNumber id="price"  value={data.price} onValueChange={(e) => setData('price', e.target.value)} locale="id-ID" /> */}
-                                <InputNumber
-                                    value={data.price}
-                                    onValueChange={(e) =>
-                                        setData("price", e.target.value)
-                                    }
-                                    locale="id-ID"
-                                />
-
-                                {/* <InputText id="price" value={data.price} onChange={(e) => setData('price', e.target.value)}  aria-describedby="price-help" /> */}
-                            </div>
-                            <div className="flex flex-col">
-                                <label htmlFor="unit">Unit</label>
-                                <InputText
-                                    className="dark:bg-gray-300"
-                                    value={data.unit}
-                                    onChange={(e) =>
-                                        setData("unit", e.target.value)
-                                    }
-                                    id="unit"
-                                    aria-describedby="unit-help"
-                                />
-                            </div>
-                            <div className="flex flex-col">
-                                <label htmlFor="description">Description</label>
-                                <InputTextarea
-                                    value={data.description}
-                                    onChange={(e) =>
-                                        setData("description", e.target.value)
-                                    }
-                                    rows={5}
-                                    cols={30}
-                                />
-                            </div>
-                        </div>
-                        <div className="flex justify-center my-5">
-                            <Button
-                                label="Submit"
-                                disabled={processing}
-                                className="bg-purple-600 text-sm shadow-md rounded-lg"
-                            />
-                        </div>
-                    </form>
-                </Dialog>
-            </div>
-
-            {/* Modal edit produk */}
-            <div className="card flex justify-content-center">
-                <Dialog
-                    ref={modalProduct}
-                    header="Produk"
-                    headerClassName="dark:glass shadow-md dark:text-white"
-                    className="bg-white w-[80%] md:w-[60%] lg:w-[30%] dark:glass dark:text-white"
-                    contentClassName=" dark:glass dark:text-white"
-                    visible={modalEditProductIsVisible}
-                    onHide={() => setModalEditProductIsVisible(false)}
-                >
-                    <form onSubmit={(e) => handleSubmitForm(e, "update")}>
-                        <div className="flex flex-col justify-around gap-4 mt-4">
-                            <div className="flex flex-col">
-                                <label htmlFor="name">Nama</label>
-                                <InputText
-                                    value={data.name}
-                                    onChange={(e) =>
-                                        setData("name", e.target.value)
-                                    }
-                                    className="dark:bg-gray-300"
-                                    id="name"
-                                    aria-describedby="name-help"
-                                />
-                            </div>
-                            <div className="flex flex-col">
-                                <label htmlFor="category">Kategori</label>
-                                <Dropdown
-                                    optionValue="name"
-                                    value={data.category}
-                                    optionLabel="name"
-                                    onChange={(e) =>
-                                        setData("category", e.target.value)
-                                    }
-                                    options={categories}
-                                    placeholder="Pilih Kategori"
-                                    className="w-full md:w-14rem dark:bg-gray-300"
-                                />
-                            </div>
-                            <div className="flex flex-col">
-                                <label htmlFor="price">Harga</label>
-                                <InputNumber
-                                    value={data.price}
-                                    onValueChange={(e) =>
-                                        setData("price", e.target.value)
-                                    }
-                                    locale="id-ID"
-                                />
-                            </div>
-                            <div className="flex flex-col">
-                                <label htmlFor="unit">Unit</label>
-                                <InputText
-                                    className="dark:bg-gray-300"
-                                    value={data.unit}
-                                    onChange={(e) =>
-                                        setData("unit", e.target.value)
-                                    }
-                                    id="unit"
-                                    aria-describedby="unit-help"
-                                />
-                            </div>
-                            <div className="flex flex-col">
-                                <label htmlFor="description">Description</label>
-                                <InputTextarea
-                                    className="dark:bg-gray-300"
-                                    value={data.description}
-                                    onChange={(e) =>
-                                        setData("description", e.target.value)
-                                    }
-                                    rows={5}
-                                    cols={30}
-                                />
-                            </div>
-                        </div>
-                        <div className="flex justify-center mt-5">
-                            <Button
-                                label="Submit"
-                                disabled={processing}
-                                className="bg-purple-600 text-sm shadow-md rounded-lg"
-                            />
-                        </div>
-                    </form>
-                </Dialog>
-            </div>
-
             <div className="flex mx-auto flex-col justify-center mt-5 gap-5">
                 <div className="card p-fluid w-full h-full flex justify-center rounded-lg">
                     <DataTable
@@ -461,9 +417,17 @@ export default function Index({ auth }) {
                         paginatorClassName="dark:bg-transparent paginator-custome dark:text-gray-300 rounded-b-lg"
                         header={header}
                         globalFilterFields={["name", "category"]}
-                        value={products}
+                        value={slas}
                         dataKey="id"
+                        expandedRows={expandedRows}
+                        onRowToggle={(e) => setExpandedRows(e.data)}
+                        rowExpansionTemplate={rowExpansionTemplate}
                     >
+                        <Column
+                            expander={allowExpansion}
+                            style={{ width: "1rem" }}
+                        />
+
                         <Column
                             header="No"
                             body={(_, { rowIndex }) => rowIndex + 1}
@@ -481,46 +445,87 @@ export default function Index({ auth }) {
                             style={{ width: "10%" }}
                         ></Column>
                         <Column
-                            field="name"
+                            field="code"
                             className="dark:border-none"
                             headerClassName="dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300"
-                            header="Nama"
+                            header="Kode"
                             align="left"
-                            style={{ width: "20%" }}
+                            style={{ minWidth: "8rem" }}
                         ></Column>
                         <Column
-                            field="category"
+                            field="partner_name"
                             className="dark:border-none"
                             headerClassName="dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300"
-                            header="Kategori"
+                            header="Lembaga"
                             align="left"
-                            style={{ width: "10%" }}
+                            style={{ minWidth: "8rem" }}
                         ></Column>
                         <Column
-                            field="price"
+                            field="partner_address"
+                            className="dark:border-none"
+                            headerClassName="dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300"
+                            header="Alamat Lembaga"
+                            align="left"
+                            style={{ minWidth: "8rem" }}
+                        ></Column>
+                        <Column
+                            field="partner_phone_number"
+                            className="dark:border-none"
+                            headerClassName="dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300"
+                            header="Nomor Telepon Lembaga"
+                            align="left"
+                            style={{ minWidth: "8rem" }}
+                        ></Column>
+                        <Column
+                            field="partner_pic"
+                            className="dark:border-none"
+                            headerClassName="dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300"
+                            header="PIC Lembaga"
+                            align="left"
+                            style={{ minWidth: "8rem" }}
+                        ></Column>
+                        <Column
+                            field="partner_pic_email"
+                            className="dark:border-none"
+                            headerClassName="dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300"
+                            header="Email PIC"
+                            align="left"
+                            style={{ minWidth: "8rem" }}
+                        ></Column>
+                        <Column
+                            field="partner_pic_number"
+                            className="dark:border-none"
+                            headerClassName="dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300"
+                            header="Nomor Telepon PIC"
+                            align="left"
+                            style={{ minWidth: "8rem" }}
+                        ></Column>
+                        <Column
+                            body={(rowData) => {
+                                return rowData.sla_doc == "tes" ? (
+                                    <ProgressSpinner
+                                        style={{
+                                            width: "30px",
+                                            height: "30px",
+                                        }}
+                                        strokeWidth="8"
+                                        fill="var(--surface-ground)"
+                                        animationDuration=".5s"
+                                    />
+                                ) : (
+                                    <a
+                                        href={BASE_URL + "/" + rowData.sla_doc}
+                                        download={`MOU_${rowData.partner_name}`}
+                                        class="p-button font-bold text-center rounded-full block pi pi-file-pdf"
+                                    ></a>
+                                );
+                            }}
                             className="dark:border-none"
                             headerClassName="dark:border-none  bg-transparent dark:bg-transparent dark:text-gray-300"
                             align="left"
-                            header="Harga"
-                            style={{ width: "10%" }}
+                            header="Dokumen"
+                            style={{ minWidth: "2rem" }}
                         ></Column>
-                        <Column
-                            field="unit"
-                            className="dark:border-none"
-                            headerClassName="dark:border-none  bg-transparent dark:bg-transparent dark:text-gray-300"
-                            align="left"
-                            header="Unit"
-                            style={{ width: "10%" }}
-                        ></Column>
-                        <Column
-                            field="description"
-                            className="dark:border-none"
-                            headerClassName="dark:border-none  bg-transparent dark:bg-transparent dark:text-gray-300"
-                            align="left"
-                            header="Deskripsi"
-                            style={{ width: "40%" }}
-                        ></Column>
-
                         <Column
                             header="Action"
                             body={actionBodyTemplate}
@@ -529,6 +534,114 @@ export default function Index({ auth }) {
                             headerClassName="dark:border-none  bg-transparent dark:bg-transparent dark:text-gray-300"
                         ></Column>
                     </DataTable>
+                </div>
+                {console.log(data)}
+                <div className="card flex justify-content-center">
+                    <Dialog
+                        header="Aktivitas"
+                        headerClassName="dark:glass shadow-md dark:text-white"
+                        className="bg-white w-[80%] md:w-[60%] lg:w-[30%] dark:glass dark:text-white"
+                        contentClassName=" dark:glass dark:text-white"
+                        visible={modalEditActivityIsVisible}
+                        onHide={() => setModalEditActivityIsVisible(false)}
+                    >
+                        <form onSubmit={(e) => handleSubmitForm(e, "update")}>
+                            <div className="flex flex-col justify-around gap-4 mt-4">
+                                <div className="flex flex-col">
+                                    <label htmlFor="activity">Aktivitas</label>
+                                    <InputText
+                                        value={data.activity}
+                                        onChange={(e) =>
+                                            setData("activity", e.target.value)
+                                        }
+                                        className="dark:bg-gray-300"
+                                        id="activity"
+                                        aria-describedby="activity-help"
+                                    />
+                                </div>
+                                <div className="flex flex-col">
+                                    <label htmlFor="activity">
+                                        Penanggungjawab
+                                    </label>
+                                    <Dropdown
+                                        value={data.cazh_pic}
+                                        onChange={(e) => {
+                                            setData("cazh_pic", e.target.value);
+                                        }}
+                                        options={positions}
+                                        optionLabel="name"
+                                        optionValue="name"
+                                        placeholder="Pilih Penanggungjawab"
+                                        filter
+                                        valueTemplate={selectedOptionTemplate}
+                                        itemTemplate={optionTemplate}
+                                        className="w-full md:w-14rem"
+                                        editable
+                                    />
+                                </div>
+
+                                <div className="flex flex-col">
+                                    <label htmlFor="price">
+                                        Estimasi Waktu
+                                    </label>
+                                    <InputText
+                                        value={data.duration}
+                                        onChange={(e) =>
+                                            setData("duration", e.target.value)
+                                        }
+                                        className="dark:bg-gray-300"
+                                        id="duration"
+                                        aria-describedby="duration-help"
+                                    />
+                                </div>
+                                <div className="flex flex-col">
+                                    <label htmlFor="estimation_date">
+                                        Tanggal
+                                    </label>
+                                    <Calendar
+                                        value={
+                                            data.estimation_date
+                                                ? new Date(data.estimation_date)
+                                                : null
+                                        }
+                                        style={{ height: "35px" }}
+                                        onChange={(e) => {
+                                            setData(
+                                                "estimation_date",
+                                                e.target.value
+                                            );
+                                        }}
+                                        showIcon
+                                        dateFormat="dd/mm/yy"
+                                    />
+                                </div>
+                                <div className="flex flex-col">
+                                    <label htmlFor="realization">
+                                        Realisasi
+                                    </label>
+                                    <InputTextarea
+                                        className="dark:bg-gray-300"
+                                        value={data.realization}
+                                        onChange={(e) =>
+                                            setData(
+                                                "realization",
+                                                e.target.value
+                                            )
+                                        }
+                                        rows={5}
+                                        cols={30}
+                                    />
+                                </div>
+                            </div>
+                            <div className="flex justify-center mt-5">
+                                <Button
+                                    label="Submit"
+                                    disabled={processing}
+                                    className="bg-purple-600 text-sm shadow-md rounded-lg"
+                                />
+                            </div>
+                        </form>
+                    </Dialog>
                 </div>
             </div>
         </DashboardLayout>

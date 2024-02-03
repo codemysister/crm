@@ -183,7 +183,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/sla/{sla:uuid}', [SLAController::class, 'edit'])->name('sla.edit')->middleware(['can:edit produk']);
     Route::put('/sla/{sla:uuid}', [SLAController::class, 'update'])->name('sla.update')->middleware(['can:edit produk']);
     Route::delete('/sla/{sla:uuid}', [SLAController::class, 'destroy'])->name('sla.destroy')->middleware(['can:hapus produk']);
-    Route::get('/api/sla', [SLAController::class, 'apiGetmou'])->name('api.sla');
+    Route::get('/api/sla', [SLAController::class, 'apiGetSla'])->name('api.sla');
+    Route::put('/activity/{activity:uuid}', [SLAController::class, 'activityUpdate'])->name('activity.update')->middleware(['can:hapus produk']);
+    Route::delete('/activity/{activity:uuid}', [SLAController::class, 'activityDestroy'])->name('activity.destroy')->middleware(['can:hapus produk']);
 });
 
 require __DIR__ . '/auth.php';
