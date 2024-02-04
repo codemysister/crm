@@ -16,9 +16,26 @@ use Inertia\Inertia;
 
 class PartnerController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        return Inertia::render("Partner/Index");
+        $uuid = $request->query('uuid');
+        $partner = null;
+        if ($uuid) {
+            $partner = Partner::with([
+                'sales',
+                'account_manager',
+                'pics' => function ($query) {
+                    $query->latest();
+                },
+                'subscription' => function ($query) {
+                    $query->latest();
+                },
+                'banks' => function ($query) {
+                    $query->latest();
+                }
+            ])->where('uuid', '=', $uuid)->first();
+        }
+        return Inertia::render("Partner/Index", compact('partner'));
     }
 
     public function store(Request $request)
@@ -135,6 +152,24 @@ class PartnerController extends Controller
             'sales' => $salesDefault,
             'account_managers' => $accountManagerDefault
         ]);
+    }
+
+    public function show($uuid)
+    {
+        $partner = Partner::with([
+            'sales',
+            'account_manager',
+            'pics' => function ($query) {
+                $query->latest();
+            },
+            'subscription' => function ($query) {
+                $query->latest();
+            },
+            'banks' => function ($query) {
+                $query->latest();
+            }
+        ])->where('uuid', '=', $uuid)->first();
+        return response()->json($partner);
     }
 
     public function apiGetPartner($uuid)

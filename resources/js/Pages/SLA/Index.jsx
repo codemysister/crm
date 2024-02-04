@@ -111,6 +111,11 @@ export default function Index({ auth }) {
         fetchData();
     }, []);
 
+    const handleSelectedDetailPartner = (partner) => {
+        const newUrl = `/partners?uuid=${partner.uuid}`;
+        window.location = newUrl;
+    };
+
     const actionBodyTemplate = (rowData) => {
         return (
             <React.Fragment>
@@ -457,6 +462,18 @@ export default function Index({ auth }) {
                             className="dark:border-none"
                             headerClassName="dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300"
                             header="Lembaga"
+                            body={(rowData) => (
+                                <button
+                                    onClick={() =>
+                                        handleSelectedDetailPartner(
+                                            rowData.partner
+                                        )
+                                    }
+                                    className="hover:text-blue-700"
+                                >
+                                    {rowData.partner.name}
+                                </button>
+                            )}
                             align="left"
                             style={{ minWidth: "8rem" }}
                         ></Column>

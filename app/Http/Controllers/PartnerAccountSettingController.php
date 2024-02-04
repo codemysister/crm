@@ -10,7 +10,19 @@ class PartnerAccountSettingController extends Controller
 {
     public function apiGetAccounts()
     {
-        $partnerAccount = PartnerAccountSetting::with('partner')->get();
+        $partnerAccount = PartnerAccountSetting::with([
+            'partner.sales',
+            'partner.account_manager',
+            'partner.pics' => function ($query) {
+                $query->latest();
+            },
+            'partner.subscription' => function ($query) {
+                $query->latest();
+            },
+            'partner.banks' => function ($query) {
+                $query->latest();
+            }
+        ])->get();
         return response()->json($partnerAccount);
     }
 
