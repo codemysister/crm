@@ -18,7 +18,8 @@ return new class extends Migration {
             $table->string('cazh_pic');
             $table->string('duration');
             $table->date('estimation_date');
-            $table->text('realization')->nullable();
+            $table->date('realization_date')->nullable();
+            $table->text('link_drive_proof')->nullable();
             $table->timestamps();
         });
     }

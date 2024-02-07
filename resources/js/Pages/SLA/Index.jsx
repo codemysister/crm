@@ -51,7 +51,7 @@ export default function Index({ auth }) {
         cazh_pic: "",
         duration: "",
         estimation_date: "",
-        realization: "",
+        realization_date: "",
     });
 
     const [globalFilterValue, setGlobalFilterValue] = useState("");
@@ -200,7 +200,7 @@ export default function Index({ auth }) {
             cazh_pic: activity.cazh_pic,
             duration: activity.duration,
             estimation_date: activity.estimation_date,
-            realization: activity.realization,
+            realization_date: activity.realization_date,
         }));
         setModalEditActivityIsVisible(true);
     };
@@ -274,12 +274,16 @@ export default function Index({ auth }) {
                         headerClassName="dark:border-none bg-gray-50 dark:bg-transparent dark:text-gray-300"
                     ></Column>
                     <Column
-                        field="realization"
-                        body={(rowData) => {
-                            return rowData.realization ?? "belum diisi";
-                        }}
+                        field="realization_date"
                         header="Realisasi"
-                        style={{ minWidth: "12rem" }}
+                        body={(rowData) => {
+                            return rowData.realization_date !== null
+                                ? new Date(
+                                      rowData.realization_date
+                                  ).toLocaleDateString("id")
+                                : "belum diisi";
+                        }}
+                        style={{ minWidth: "8rem" }}
                         headerClassName="dark:border-none bg-gray-50 dark:bg-transparent dark:text-gray-300"
                     ></Column>
                     <Column
@@ -418,7 +422,7 @@ export default function Index({ auth }) {
                         paginator
                         filters={filters}
                         rows={5}
-                        emptyMessage="Produk tidak ditemukan."
+                        emptyMessage="SLA tidak ditemukan."
                         paginatorClassName="dark:bg-transparent paginator-custome dark:text-gray-300 rounded-b-lg"
                         header={header}
                         globalFilterFields={["name", "category"]}
@@ -532,7 +536,7 @@ export default function Index({ auth }) {
                                 ) : (
                                     <a
                                         href={BASE_URL + "/" + rowData.sla_doc}
-                                        download={`MOU_${rowData.partner_name}`}
+                                        download={`SLA_${rowData.partner_name}`}
                                         class="p-button font-bold text-center rounded-full block pi pi-file-pdf"
                                     ></a>
                                 );
@@ -552,7 +556,6 @@ export default function Index({ auth }) {
                         ></Column>
                     </DataTable>
                 </div>
-                {console.log(data)}
                 <div className="card flex justify-content-center">
                     <Dialog
                         header="Aktivitas"
@@ -636,17 +639,23 @@ export default function Index({ auth }) {
                                     <label htmlFor="realization">
                                         Realisasi
                                     </label>
-                                    <InputTextarea
-                                        className="dark:bg-gray-300"
-                                        value={data.realization}
-                                        onChange={(e) =>
-                                            setData(
-                                                "realization",
-                                                e.target.value
-                                            )
+                                    <Calendar
+                                        value={
+                                            data.realization_date
+                                                ? new Date(
+                                                      data.realization_date
+                                                  )
+                                                : null
                                         }
-                                        rows={5}
-                                        cols={30}
+                                        style={{ height: "35px" }}
+                                        onChange={(e) => {
+                                            setData(
+                                                "realization_date",
+                                                e.target.value
+                                            );
+                                        }}
+                                        showIcon
+                                        dateFormat="dd/mm/yy"
                                     />
                                 </div>
                             </div>

@@ -44,8 +44,9 @@
     <div>
         <header>
             <div class="flex justify-start items-center">
-                <div class="w-[10%]">
-                    <img src="assets\img\cazh.png" alt="" class="float-left w-full h-full" />
+                <div class="w-[10%]" style="width:10%;">
+                    <img src="{{ public_path('assets/img/logo/sla_logo.png') }}" alt="" class="float-left w-full h-full"
+                        style="width: 100%; height: 100%" />
                 </div>
                 <div class="w-full text-center">
                     <h2 class="font-bold">PT CAZH TEKNOLOGI INOVASI</h2>
@@ -128,7 +129,8 @@
                         <td class="border p-1">
                             {{date('j M Y', strtotime($activity["estimation_date"]))}}
                         </td>
-                        <td class="border p-1"></td>
+                        <td class="border p-1">{{$activity["realization_date"] ? date('j M Y',
+                            strtotime($activity["realization_date"])) : ''}}</td>
                     </tr>
                     @endforeach
 
@@ -139,18 +141,19 @@
 
 
         <div class="flex  flex-row mt-5 justify-between">
-            <div class="w-[30%]">
+            <div class="w-[30%]" style="width: 30%;">
                 <p>Pihak Pertama</p>
-                <img src="{{ public_path($sla->signature_image) }}" alt="" class="min-h-20 w-full" />
+                <img src="{{ public_path($sla->signature_image) }}" alt="" class="min-h-20 w-full"
+                    style="width:90%; height: 80px" />
                 <p>{{$sla->signature_name}}</p>
             </div>
-            <div class="w-[30%]">
+            <div class="w-[30%]" style="width: 30%;">
                 <p>Pihak Kedua</p>
                 <div style="min-height: 80px"></div>
                 <p>{{$sla->partner_pic}}</p>
             </div>
             @if($sla->referral)
-            <div class="w-[30%]">
+            <div class="w-[30%]" style="width: 30%;">
                 <p>Pihak Ketiga</p>
                 <div style="min-height: 80px"></div>
                 <p>{{$sla->referral_name}}</p>

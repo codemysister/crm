@@ -39,6 +39,8 @@ const Create = ({ usersProp, partnersProp, rolesProp, sla }) => {
         code: sla.code,
         activities: sla.activities,
         partner: {},
+        partner_id: sla.partner_id,
+        date: new Date(),
         partner_name: sla.partner_name,
         partner_address: sla.partner_address,
         partner_phone_number: sla.partner_phone_number,
@@ -251,7 +253,7 @@ const Create = ({ usersProp, partnersProp, rolesProp, sla }) => {
                                 <h1 className="font-bold text-2xl">
                                     Service Level Agreement
                                 </h1>
-                                <Link href="/sph">
+                                <Link href="/sla">
                                     <svg
                                         xmlns="http://www.w3.org/2000/svg"
                                         fill="none"
@@ -290,46 +292,7 @@ const Create = ({ usersProp, partnersProp, rolesProp, sla }) => {
 
                                 <div className="flex flex-col mt-3">
                                     <label htmlFor="lembaga">Lembaga *</label>
-                                    {/* <Dropdown
-                                        value={data.partner_name}
-                                        onChange={(e) => {
-                                            setData({
-                                                ...data,
-                                                partner_id: e.target.value.id,
-                                                partner_name:
-                                                    e.target.value.name,
-                                                partner_address:
-                                                    e.target.value.address,
-                                                partner_phone_number:
-                                                    e.target.value.phone_number,
-                                                partner_pic:
-                                                    e.target.value.pics[0].name,
-                                                partner_pic_email:
-                                                    e.target.value.pics[0]
-                                                        .email,
-                                                partner_pic_number:
-                                                    e.target.value.pics[0]
-                                                        .number,
-                                            });
-                                        }}
-                                        onFocus={() => {
-                                            triggerInputFocus(
-                                                animatePartnerNameRef
-                                            );
-                                        }}
-                                        onBlur={() => {
-                                            stopAnimateInputFocus(
-                                                animatePartnerNameRef
-                                            );
-                                        }}
-                                        options={partners}
-                                        optionLabel="name"
-                                        placeholder="Pilih Lembaga"
-                                        filter
-                                        valueTemplate={selectedOptionTemplate}
-                                        itemTemplate={optionTemplate}
-                                        className="w-full md:w-14rem"
-                                    /> */}
+
                                     <Dropdown
                                         value={data.partner_name}
                                         onChange={(e) => {
@@ -504,6 +467,7 @@ const Create = ({ usersProp, partnersProp, rolesProp, sla }) => {
                                         aria-describedby="partner_pic_email-help"
                                     />
                                 </div>
+                                {console.log(data.activities)}
                                 <div className="flex flex-col mt-3">
                                     <label htmlFor="partner_pic_number">
                                         Nomor HP Penanggungjawab *
@@ -658,7 +622,8 @@ const Create = ({ usersProp, partnersProp, rolesProp, sla }) => {
                                         cazh_pic: null,
                                         duration: null,
                                         estimation_date: null,
-                                        realization: null,
+                                        realization_date: null,
+                                        link_drive_proof: null,
                                     };
 
                                     let updatedActivities = [
@@ -715,7 +680,7 @@ const Create = ({ usersProp, partnersProp, rolesProp, sla }) => {
                                                         e.target.value
                                                     );
                                                 }}
-                                                options={roles}
+                                                options={users}
                                                 optionLabel="name"
                                                 optionValue="name"
                                                 placeholder="Pilih Penanggungjawab"
@@ -765,10 +730,6 @@ const Create = ({ usersProp, partnersProp, rolesProp, sla }) => {
                                                 }
                                                 style={{ height: "35px" }}
                                                 onChange={(e) => {
-                                                    const formattedDate =
-                                                        new Date(e.target.value)
-                                                            .toISOString()
-                                                            .split("T")[0];
                                                     handleInputChange(
                                                         index,
                                                         "estimation_date",
@@ -785,11 +746,25 @@ const Create = ({ usersProp, partnersProp, rolesProp, sla }) => {
                                             <label htmlFor="partner_address">
                                                 Realisasi
                                             </label>
-                                            <InputText
-                                                value={activity.realization}
-                                                className="dark:bg-gray-300"
-                                                id="partner_address"
-                                                aria-describedby="partner_address-help"
+
+                                            <Calendar
+                                                value={
+                                                    activity.realization_date
+                                                        ? new Date(
+                                                              activity.realization_date
+                                                          )
+                                                        : null
+                                                }
+                                                style={{ height: "35px" }}
+                                                onChange={(e) => {
+                                                    handleInputChange(
+                                                        index,
+                                                        "realization_date",
+                                                        e.target.value
+                                                    );
+                                                }}
+                                                showIcon
+                                                dateFormat="yy-mm-dd"
                                             />
                                         </div>
                                     </div>
@@ -835,7 +810,7 @@ const Create = ({ usersProp, partnersProp, rolesProp, sla }) => {
                             <div className="flex justify-start items-center">
                                 <div className="w-[10%]">
                                     <img
-                                        src="/assets/img/cazh.png"
+                                        src="/assets/img/logo/sla_logo.png"
                                         alt=""
                                         className="float-left w-full h-full"
                                     />
@@ -1018,7 +993,19 @@ const Create = ({ usersProp, partnersProp, rolesProp, sla }) => {
                                                         : ""}
                                                 </td>
                                                 <td className="border p-1">
-                                                    {data.realization}
+                                                    {data.realization_date !==
+                                                    null
+                                                        ? new Date(
+                                                              data.realization_date
+                                                          ).toLocaleDateString(
+                                                              "en-GB",
+                                                              {
+                                                                  day: "numeric",
+                                                                  month: "short",
+                                                                  year: "numeric",
+                                                              }
+                                                          )
+                                                        : ""}
                                                 </td>
                                             </tr>
                                         );
