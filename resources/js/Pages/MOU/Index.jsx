@@ -12,6 +12,7 @@ import { Skeleton } from "primereact/skeleton";
 import { Link } from "@inertiajs/react";
 import { FilterMatchMode } from "primereact/api";
 import { MultiSelect } from "primereact/multiselect";
+import { ProgressSpinner } from "primereact/progressspinner";
 
 const BASE_URL = import.meta.env.VITE_BASE_URL;
 
@@ -26,8 +27,9 @@ export default function Index({ auth }) {
         global: { value: null, matchMode: FilterMatchMode.CONTAINS },
     });
     const columns = [
-        { field: "partner_name", header: "Partner" },
         { field: "code", header: "Kode" },
+        { field: "day", header: "Hari" },
+        { field: "date", header: "Tanggal" },
         { field: "partner_pic", header: "PIC" },
         { field: "partner_pic_position", header: "Jabatan PIC" },
         { field: "partner_address", header: "Lokasi" },
@@ -70,8 +72,8 @@ export default function Index({ auth }) {
         },
     ];
     const [visibleColumns, setVisibleColumns] = useState([
-        { field: "partner_name", header: "Partner" },
         { field: "code", header: "Kode" },
+        { field: "date", header: "Tanggal" },
         { field: "partner_pic", header: "PIC" },
         { field: "partner_pic_position", header: "Jabatan PIC" },
         { field: "partner_address", header: "Lokasi" },
@@ -230,6 +232,11 @@ export default function Index({ auth }) {
         setVisibleColumns(orderedSelectedColumns);
     };
 
+    const handleSelectedDetailPartner = (partner) => {
+        const newUrl = `/partners?uuid=${partner.uuid}`;
+        window.location = newUrl;
+    };
+
     const header = (
         <div className="flex flex-col md:flex-row justify-between items-center">
             <div className="flex w-full sm:w-[30%] flex-row justify-left gap-2 align-items-center items-end">
@@ -308,124 +315,6 @@ export default function Index({ auth }) {
 
             <div className="flex mx-auto flex-col justify-center mt-5 gap-5">
                 <div className="card p-fluid w-full h-full flex justify-center rounded-lg">
-                    {/* <DataTable
-                        loading={isLoadingData}
-                        className="w-full h-auto rounded-lg dark:glass border-none text-center shadow-md"
-                        pt={{
-                            bodyRow:
-                                "dark:bg-transparent bg-transparent dark:text-gray-300",
-                            table: "dark:bg-transparent bg-white rounded-lg dark:text-gray-300",
-                            header: "",
-                        }}
-                        paginator
-                        filters={filters}
-                        rows={5}
-                        emptyMessage="Surat penawaran harga tidak ditemukan."
-                        paginatorClassName="dark:bg-transparent paginator-custome dark:text-gray-300 rounded-b-lg"
-                        header={renderHeader}
-                        value={mous}
-                        globalFilterFields={["partner", "sales"]}
-                        dataKey="id"
-                    >
-                        <Column
-                            header="No"
-                            body={(_, { rowIndex }) => rowIndex + 1}
-                            className="dark:border-none pl-6"
-                            headerClassName="dark:border-none pl-6 bg-transparent dark:bg-transparent dark:text-gray-300"
-                        />
-                        <Column
-                            field="uuid"
-                            hidden
-                            className="dark:border-none"
-                            headerClassName="dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300"
-                            header="Nama"
-                            align="left"
-                        ></Column>
-                        <Column
-                            field="partner_name"
-                            className="dark:border-none"
-                            headerClassName="dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300"
-                            header="Lembaga"
-                            align="left"
-                            style={{ minWidth: "10rem" }}
-                        ></Column>
-                        <Column
-                            field="code"
-                            className="dark:border-none"
-                            headerClassName="dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300"
-                            header="Kode"
-                            align="left"
-                        ></Column>
-                        <Column
-                            field="partner_pic"
-                            className="dark:border-none"
-                            headerClassName="dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300"
-                            header="PIC"
-                            align="left"
-                            style={{ minWidth: "10rem" }}
-                        ></Column>
-                        <Column
-                            field="partner_pic_position"
-                            className="dark:border-none"
-                            headerClassName="dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300"
-                            header="Jabatan PIC"
-                            align="left"
-                            style={{ minWidth: "10rem" }}
-                        ></Column>
-                        <Column
-                            field="partner_address"
-                            className="dark:border-none"
-                            headerClassName="dark:border-none  bg-transparent dark:bg-transparent dark:text-gray-300"
-                            align="left"
-                            header="Alamat"
-                            style={{ minWidth: "10rem" }}
-                        ></Column>
-                        <Column
-                            field="url_subdomain"
-                            className="dark:border-none"
-                            headerClassName="dark:border-none  bg-transparent dark:bg-transparent dark:text-gray-300"
-                            align="left"
-                            header="URL subdomain"
-                            style={{ minWidth: "12rem" }}
-                        ></Column>
-
-                        <Column
-                            body={(rowData) => {
-                                return rowData.spd_doc == "" ? (
-                                    "dokumen sedang dibuat"
-                                ) : (
-                                    <a
-                                        href={BASE_URL + "/" + rowData.sph_doc}
-                                        download={`Surat_Tugas_Perjalanan_Dinas_${rowData.partner_name}`}
-                                        class="p-button font-bold text-center rounded-full block pi pi-file-pdf"
-                                    ></a>
-                                );
-                            }}
-                            className="dark:border-none"
-                            headerClassName="dark:border-none  bg-transparent dark:bg-transparent dark:text-gray-300"
-                            align="left"
-                            header="Dokumen"
-                        ></Column>
-                        <Column
-                            field="created_by"
-                            body={(rowData) => {
-                                return rowData.user.name;
-                            }}
-                            className="dark:border-none"
-                            headerClassName="dark:border-none  bg-transparent dark:bg-transparent dark:text-gray-300"
-                            align="left"
-                            header="Dibuat Oleh"
-                            style={{ minWidth: "10rem" }}
-                        ></Column>
-                        <Column
-                            header="Action"
-                            body={actionBodyTemplate}
-                            style={{ minWidth: "12rem" }}
-                            className="dark:border-none"
-                            headerClassName="dark:border-none  bg-transparent dark:bg-transparent dark:text-gray-300"
-                        ></Column>
-                    </DataTable> */}
-
                     <DataTable
                         value={mous}
                         header={header}
@@ -452,10 +341,32 @@ export default function Index({ auth }) {
                             className="dark:border-none pl-6"
                             headerClassName="dark:border-none pl-6 bg-transparent dark:bg-transparent dark:text-gray-300"
                         />
+
+                        <Column
+                            field="partner_name"
+                            className="dark:border-none"
+                            headerClassName="dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300"
+                            header="Lembaga"
+                            body={(rowData) => (
+                                <button
+                                    onClick={() =>
+                                        handleSelectedDetailPartner(
+                                            rowData.partner
+                                        )
+                                    }
+                                    className="hover:text-blue-700"
+                                >
+                                    {rowData.partner.name}
+                                </button>
+                            )}
+                            align="left"
+                            style={{ minWidth: "8rem" }}
+                        ></Column>
+
                         {visibleColumns.map((col) => (
                             <Column
                                 key={col.field}
-                                style={{ minWidth: "10rem" }}
+                                style={{ minWidth: "7rem" }}
                                 field={col.field}
                                 header={col.header}
                                 body={(rowData) => {
@@ -467,10 +378,27 @@ export default function Index({ auth }) {
                                         return rowData.profit_sharing === 0
                                             ? "Tidak"
                                             : "Ya";
-                                    } else if (col.field === "register_date") {
+                                    } else if (col.field === "date") {
                                         return new Date(
-                                            rowData.register_date
+                                            rowData.date
                                         ).toLocaleDateString("id");
+                                    } else if (
+                                        col.field === "price_card" ||
+                                        col.field === "price_lanyard" ||
+                                        col.field ===
+                                            "price_subscription_system" ||
+                                        col.field ===
+                                            "price_training_offline" ||
+                                        col.field === "price_training_online" ||
+                                        col.field === "fee_purchase_cazhpoin" ||
+                                        col.field === "fee_bill_cazhpoin" ||
+                                        col.field === "fee_topup_cazhpos" ||
+                                        col.field === "fee_withdraw_cazhpos" ||
+                                        col.field === "price_lanyard"
+                                    ) {
+                                        return rowData[
+                                            col.field
+                                        ]?.toLocaleString("id-ID");
                                     } else {
                                         return rowData[col.field];
                                     }
@@ -479,8 +407,16 @@ export default function Index({ auth }) {
                         ))}
                         <Column
                             body={(rowData) => {
-                                return rowData.mou_doc == "" ? (
-                                    "dokumen sedang dibuat"
+                                return rowData.mou_doc === "" ? (
+                                    <ProgressSpinner
+                                        style={{
+                                            width: "30px",
+                                            height: "30px",
+                                        }}
+                                        strokeWidth="8"
+                                        fill="var(--surface-ground)"
+                                        animationDuration=".5s"
+                                    />
                                 ) : (
                                     <a
                                         href={BASE_URL + "/" + rowData.mou_doc}

@@ -332,7 +332,7 @@ const Edit = ({ usersProp, partnersProp, mou }) => {
                                             stopAnimateInputFocus(animateDate);
                                         }}
                                         showIcon
-                                        dateFormat="yy-mm-dd"
+                                        dateFormat="dd/mm/yy"
                                         className={`w-full md:w-14rem ${
                                             errors.date && "p-invalid"
                                         }`}
@@ -369,6 +369,63 @@ const Edit = ({ usersProp, partnersProp, mou }) => {
                                                     partner_pic_position:
                                                         e.target.value.pics[0]
                                                             .position,
+                                                    url_subdomain:
+                                                        e.target.value
+                                                            .accounts[0]
+                                                            .subdomain,
+                                                    period_subscription:
+                                                        e.target.value
+                                                            .subscription[0]
+                                                            .period,
+                                                    price_card: JSON.parse(
+                                                        e.target.value
+                                                            .subscription[0]
+                                                            .price_card
+                                                    ).price,
+                                                    price_lanyard:
+                                                        e.target.value
+                                                            .subscription[0]
+                                                            .price_lanyard,
+                                                    price_subscription_system:
+                                                        e.target.value
+                                                            .subscription[0]
+                                                            .price_subscription_system,
+                                                    price_training_offline:
+                                                        e.target.value
+                                                            .subscription[0]
+                                                            .price_training_offline,
+                                                    price_training_online:
+                                                        e.target.value
+                                                            .subscription[0]
+                                                            .price_training_online,
+                                                    fee_purchase_cazhpoin:
+                                                        e.target.value
+                                                            .subscription[0]
+                                                            .fee_purchase_cazhpoin,
+                                                    fee_bill_cazhpoin:
+                                                        e.target.value
+                                                            .subscription[0]
+                                                            .fee_bill_cazhpoin,
+                                                    fee_topup_cazhpos:
+                                                        e.target.value
+                                                            .subscription[0]
+                                                            .fee_topup_cazhpos,
+                                                    fee_withdraw_cazhpos:
+                                                        e.target.value
+                                                            .subscription[0]
+                                                            .fee_withdraw_cazhpos,
+                                                    fee_bill_saldokartu:
+                                                        e.target.value
+                                                            .subscription[0]
+                                                            .fee_bill_saldokartu,
+                                                    bank: e.target.value
+                                                        .banks[0].bank,
+                                                    account_bank_name:
+                                                        e.target.value.banks[0]
+                                                            .account_bank_name,
+                                                    account_bank_number:
+                                                        e.target.value.banks[0]
+                                                            .account_bank_number,
                                                 });
                                             } else {
                                                 setData({

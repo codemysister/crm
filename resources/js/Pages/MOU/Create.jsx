@@ -115,6 +115,12 @@ const Create = ({ usersProp, partnersProp }) => {
         },
     ];
 
+    const option_price_lanyard = [
+        { name: "Lanyard Polos", price: 10000 },
+        { name: "Lanyard Sablon", price: 12000 },
+        { name: "Lanyard Printing", price: 20000 },
+    ];
+
     document.querySelector("body").classList.add("overflow-hidden");
 
     const selectedOptionTemplate = (option, props) => {
@@ -156,12 +162,45 @@ const Create = ({ usersProp, partnersProp }) => {
         );
     };
 
+    const option_fee = [{ name: 1000 }, { name: 2000 }, { name: 2500 }];
+
+    const option_training_offline = [
+        { name: "Jawa", price: 15000000 },
+        { name: "Kalimantan", price: 25000000 },
+        { name: "Sulawesi", price: 27000000 },
+        { name: "Sumatra", price: 23000000 },
+        { name: "Bali", price: 26000000 },
+        { name: "Jabodetabek", price: 15000000 },
+    ];
+
     const option_period_subscription = [
         { name: "kartu/bulan" },
         { name: "kartu/tahun" },
         { name: "lembaga/bulan" },
         { name: "lembaga/tahun" },
     ];
+
+    const selectedOptionTrainingTemplate = (option, props) => {
+        if (option) {
+            return (
+                <div className="flex align-items-center">
+                    <div>{option.price}</div>
+                </div>
+            );
+        }
+
+        return <span>{props.placeholder}</span>;
+    };
+
+    const optionTrainingTemplate = (option) => {
+        return (
+            <div className="flex align-items-center">
+                <div>
+                    {option.name} - {option.price}
+                </div>
+            </div>
+        );
+    };
 
     // fungsi toast
     const showSuccess = (type) => {
@@ -354,6 +393,7 @@ const Create = ({ usersProp, partnersProp }) => {
                                     <Dropdown
                                         value={data.partner_name}
                                         onChange={(e) => {
+                                            console.log(e.target.value);
                                             if (
                                                 typeof e.target.value ===
                                                 "object"
@@ -372,6 +412,63 @@ const Create = ({ usersProp, partnersProp }) => {
                                                     partner_pic_position:
                                                         e.target.value.pics[0]
                                                             .position,
+                                                    url_subdomain:
+                                                        e.target.value
+                                                            .accounts[0]
+                                                            .subdomain,
+                                                    period_subscription:
+                                                        e.target.value
+                                                            .subscription[0]
+                                                            .period,
+                                                    price_card: JSON.parse(
+                                                        e.target.value
+                                                            .subscription[0]
+                                                            .price_card
+                                                    ).price,
+                                                    price_lanyard:
+                                                        e.target.value
+                                                            .subscription[0]
+                                                            .price_lanyard,
+                                                    price_subscription_system:
+                                                        e.target.value
+                                                            .subscription[0]
+                                                            .price_subscription_system,
+                                                    price_training_offline:
+                                                        e.target.value
+                                                            .subscription[0]
+                                                            .price_training_offline,
+                                                    price_training_online:
+                                                        e.target.value
+                                                            .subscription[0]
+                                                            .price_training_online,
+                                                    fee_purchase_cazhpoin:
+                                                        e.target.value
+                                                            .subscription[0]
+                                                            .fee_purchase_cazhpoin,
+                                                    fee_bill_cazhpoin:
+                                                        e.target.value
+                                                            .subscription[0]
+                                                            .fee_bill_cazhpoin,
+                                                    fee_topup_cazhpos:
+                                                        e.target.value
+                                                            .subscription[0]
+                                                            .fee_topup_cazhpos,
+                                                    fee_withdraw_cazhpos:
+                                                        e.target.value
+                                                            .subscription[0]
+                                                            .fee_withdraw_cazhpos,
+                                                    fee_bill_saldokartu:
+                                                        e.target.value
+                                                            .subscription[0]
+                                                            .fee_bill_saldokartu,
+                                                    bank: e.target.value
+                                                        .banks[0].bank,
+                                                    account_bank_name:
+                                                        e.target.value.banks[0]
+                                                            .account_bank_name,
+                                                    account_bank_number:
+                                                        e.target.value.banks[0]
+                                                            .account_bank_number,
                                                 });
                                             } else {
                                                 setData({
@@ -411,6 +508,7 @@ const Create = ({ usersProp, partnersProp }) => {
                                         />
                                     )}
                                 </div>
+                                {console.log(data)}
                                 <div className="flex flex-col mt-3">
                                     <label htmlFor="partner_address">
                                         Lokasi *
@@ -590,41 +688,35 @@ const Create = ({ usersProp, partnersProp }) => {
                                     <label htmlFor="price_lanyard">
                                         Harga Lanyard *
                                     </label>
-
-                                    <div className="p-inputgroup flex-1 h-full">
-                                        <InputNumber
-                                            value={data.price_lanyard}
-                                            onChange={(e) =>
-                                                setData(
-                                                    "price_lanyard",
-                                                    e.value
-                                                )
-                                            }
-                                            onFocus={() => {
-                                                triggerInputFocus(
-                                                    animatePriceLanyard
-                                                );
-                                            }}
-                                            onBlur={() => {
-                                                stopAnimateInputFocus(
-                                                    animatePriceLanyard
-                                                );
-                                            }}
-                                            className={`${
-                                                errors.price_lanyard &&
-                                                "p-invalid"
-                                            }`}
-                                        />
-                                        <Button
-                                            className="h-[35px]"
-                                            icon="pi pi-info-circle"
-                                            onClick={(e) =>
-                                                infoPriceLanyardRef.current.toggle(
-                                                    e
-                                                )
-                                            }
-                                        />
-                                    </div>
+                                    <Dropdown
+                                        value={data.price_lanyard}
+                                        onChange={(e) =>
+                                            setData(
+                                                "price_lanyard",
+                                                Number(e.target.value)
+                                            )
+                                        }
+                                        options={option_price_lanyard}
+                                        optionLabel="price"
+                                        optionValue="price"
+                                        placeholder="Pilih Tarif"
+                                        editable
+                                        valueTemplate={
+                                            selectedOptionTrainingTemplate
+                                        }
+                                        itemTemplate={optionTrainingTemplate}
+                                        onFocus={() => {
+                                            triggerInputFocus(
+                                                animatePriceLanyard
+                                            );
+                                        }}
+                                        onBlur={() => {
+                                            stopAnimateInputFocus(
+                                                animatePriceLanyard
+                                            );
+                                        }}
+                                        className="w-full md:w-14rem"
+                                    />
                                     {errors.price_lanyard && (
                                         <Message
                                             className="bg-transparent p-0 my-2 justify-start text-xs"
@@ -632,22 +724,6 @@ const Create = ({ usersProp, partnersProp }) => {
                                             text={errors.price_lanyard}
                                         />
                                     )}
-                                    <OverlayPanel
-                                        className="shadow-md"
-                                        ref={infoPriceLanyardRef}
-                                    >
-                                        <ul className="list-disc list-inside">
-                                            <li>10.000/pcs (lanyard polos)</li>
-                                            <li>
-                                                12.000/pcs (lanyard sablon 1
-                                                warna)
-                                            </li>
-                                            <li>
-                                                20.000/pcs (lanyard printing 2
-                                                sisi)
-                                            </li>
-                                        </ul>
-                                    </OverlayPanel>
                                 </div>
                                 <div className="flex flex-col mt-3">
                                     <label htmlFor="price_subscription_system">
@@ -655,6 +731,7 @@ const Create = ({ usersProp, partnersProp }) => {
                                     </label>
 
                                     <InputNumber
+                                        locale="id-ID"
                                         value={data.price_subscription_system}
                                         onChange={(e) =>
                                             setData(
@@ -696,11 +773,12 @@ const Create = ({ usersProp, partnersProp }) => {
                                         onChange={(e) => {
                                             setData(
                                                 "period_subscription",
-                                                e.target.value.name
+                                                e.target.value
                                             );
                                         }}
                                         options={option_period_subscription}
                                         optionLabel="name"
+                                        optionValue="name"
                                         placeholder="Langganan Per-"
                                         filter
                                         valueTemplate={selectedOptionTemplate}
@@ -709,7 +787,6 @@ const Create = ({ usersProp, partnersProp }) => {
                                             errors.period_subscription &&
                                             "p-invalid"
                                         }`}
-                                        editable
                                         onFocus={() => {
                                             triggerInputFocus(
                                                 animatePeriodSubscription
@@ -733,59 +810,36 @@ const Create = ({ usersProp, partnersProp }) => {
                                     <label htmlFor="period_subscription">
                                         Training Lokasi*
                                     </label>
-                                    {/* <Dropdown
+
+                                    <Dropdown
                                         value={data.price_training_offline}
-                                        onChange={(e) => {
+                                        onChange={(e) =>
                                             setData(
                                                 "price_training_offline",
-                                                e.target.value
+                                                Number(e.target.value)
+                                            )
+                                        }
+                                        options={option_training_offline}
+                                        optionLabel="price"
+                                        optionValue="price"
+                                        placeholder="Pilih Tarif"
+                                        editable
+                                        valueTemplate={
+                                            selectedOptionTrainingTemplate
+                                        }
+                                        itemTemplate={optionTrainingTemplate}
+                                        onFocus={() => {
+                                            triggerInputFocus(
+                                                animatePriceTrainingOffline
                                             );
                                         }}
-                                        options={prices_training_offline}
-                                        optionLabel="price"
-                                        placeholder="Harga training"
-                                        filter
-                                        valueTemplate={
-                                            selectedPriceOptionTemplate
-                                        }
-                                        itemTemplate={priceOptionTemplate}
+                                        onBlur={() => {
+                                            stopAnimateInputFocus(
+                                                animatePriceTrainingOffline
+                                            );
+                                        }}
                                         className="w-full md:w-14rem"
-                                        editable
-                                    /> */}
-                                    <div className="p-inputgroup flex-1 h-full">
-                                        <InputNumber
-                                            value={data.price_training_offline}
-                                            onChange={(e) =>
-                                                setData(
-                                                    "price_training_offline",
-                                                    e.value
-                                                )
-                                            }
-                                            className={`h-full${
-                                                errors.price_training_offline &&
-                                                "p-invalid"
-                                            }`}
-                                            onFocus={() => {
-                                                triggerInputFocus(
-                                                    animatePriceTrainingOffline
-                                                );
-                                            }}
-                                            onBlur={() => {
-                                                stopAnimateInputFocus(
-                                                    animatePriceTrainingOffline
-                                                );
-                                            }}
-                                        />
-                                        <Button
-                                            className="h-[35px]"
-                                            icon="pi pi-info-circle"
-                                            onClick={(e) =>
-                                                infoPriceTrainingRef.current.toggle(
-                                                    e
-                                                )
-                                            }
-                                        />
-                                    </div>
+                                    />
                                     {errors.price_training_offline && (
                                         <Message
                                             className="bg-transparent p-0 my-2 justify-start text-xs"
@@ -793,19 +847,6 @@ const Create = ({ usersProp, partnersProp }) => {
                                             text={errors.price_training_offline}
                                         />
                                     )}
-                                    <OverlayPanel
-                                        className="shadow-md"
-                                        ref={infoPriceTrainingRef}
-                                    >
-                                        <ul className="list-disc list-inside">
-                                            <li>Jawa: 15jt</li>
-                                            <li>Kalimantan: 25jt</li>
-                                            <li>Sulawesi: 27jt</li>
-                                            <li>Sumatra: 23jt</li>
-                                            <li>Bali: 26jt</li>
-                                            <li>Jabodetabek: 15jt</li>
-                                        </ul>
-                                    </OverlayPanel>
                                 </div>
                                 <div className="flex flex-col mt-3">
                                     <label htmlFor="price_training_online">
@@ -813,6 +854,7 @@ const Create = ({ usersProp, partnersProp }) => {
                                     </label>
                                     <div className="p-inputgroup flex-1 h-full">
                                         <InputNumber
+                                            locale="id-ID"
                                             value={data.price_training_online}
                                             onChange={(e) =>
                                                 setData(
@@ -875,18 +917,21 @@ const Create = ({ usersProp, partnersProp }) => {
                                     <label htmlFor="fee_purchase_cazhpoin">
                                         Fee isi kartu via CazhPOIN*
                                     </label>
-                                    <InputNumber
+
+                                    <Dropdown
                                         value={data.fee_purchase_cazhpoin}
                                         onChange={(e) =>
                                             setData(
                                                 "fee_purchase_cazhpoin",
-                                                e.value
+                                                Number(e.target.value)
                                             )
                                         }
-                                        className={`h-full ${
-                                            errors.fee_purchase_cazhpoin &&
-                                            "p-invalid"
-                                        }`}
+                                        options={option_fee}
+                                        optionLabel="name"
+                                        optionValue="name"
+                                        placeholder="Pilih Tarif"
+                                        editable
+                                        valueTemplate={selectedOptionTemplate}
                                         onFocus={() => {
                                             triggerInputFocus(
                                                 animateFeePurchaseCazhpoin
@@ -897,6 +942,8 @@ const Create = ({ usersProp, partnersProp }) => {
                                                 animateFeePurchaseCazhpoin
                                             );
                                         }}
+                                        itemTemplate={optionTemplate}
+                                        className="w-full md:w-14rem"
                                     />
                                     {errors.fee_purchase_cazhpoin && (
                                         <Message
@@ -910,18 +957,21 @@ const Create = ({ usersProp, partnersProp }) => {
                                     <label htmlFor="fee_bill_cazhpoin">
                                         Fee bayar tagihan via CazhPOIN*
                                     </label>
-                                    <InputNumber
+
+                                    <Dropdown
                                         value={data.fee_bill_cazhpoin}
                                         onChange={(e) =>
                                             setData(
                                                 "fee_bill_cazhpoin",
-                                                e.value
+                                                Number(e.target.value)
                                             )
                                         }
-                                        className={`h-full ${
-                                            errors.fee_bill_cazhpoin &&
-                                            "p-invalid"
-                                        }`}
+                                        options={option_fee}
+                                        optionLabel="name"
+                                        optionValue="name"
+                                        placeholder="Pilih Tarif"
+                                        editable
+                                        valueTemplate={selectedOptionTemplate}
                                         onFocus={() => {
                                             triggerInputFocus(
                                                 animateFeeBillCazhpoin
@@ -932,7 +982,10 @@ const Create = ({ usersProp, partnersProp }) => {
                                                 animateFeeBillCazhpoin
                                             );
                                         }}
+                                        itemTemplate={optionTemplate}
+                                        className="w-full md:w-14rem"
                                     />
+
                                     {errors.fee_bill_cazhpoin && (
                                         <Message
                                             className="bg-transparent p-0 my-2 justify-start text-xs"
@@ -945,18 +998,21 @@ const Create = ({ usersProp, partnersProp }) => {
                                     <label htmlFor="fee_topup_cazhpos">
                                         Fee topup kartu via CazhPOIN*
                                     </label>
-                                    <InputNumber
+
+                                    <Dropdown
                                         value={data.fee_topup_cazhpos}
                                         onChange={(e) =>
                                             setData(
                                                 "fee_topup_cazhpos",
-                                                e.value
+                                                Number(e.target.value)
                                             )
                                         }
-                                        className={`h-full ${
-                                            errors.fee_topup_cazhpos &&
-                                            "p-invalid"
-                                        }`}
+                                        options={option_fee}
+                                        optionLabel="name"
+                                        optionValue="name"
+                                        placeholder="Pilih Tarif"
+                                        editable
+                                        valueTemplate={selectedOptionTemplate}
                                         onFocus={() => {
                                             triggerInputFocus(
                                                 animateFeeTopupCazhpos
@@ -967,7 +1023,10 @@ const Create = ({ usersProp, partnersProp }) => {
                                                 animateFeeTopupCazhpos
                                             );
                                         }}
+                                        itemTemplate={optionTemplate}
+                                        className="w-full md:w-14rem"
                                     />
+
                                     {errors.fee_topup_cazhpos && (
                                         <Message
                                             className="bg-transparent p-0 my-2 justify-start text-xs"
@@ -980,18 +1039,21 @@ const Create = ({ usersProp, partnersProp }) => {
                                     <label htmlFor="fee_withdraw_cazhpos">
                                         Fee penarikan saldo kartu via CazhPOIN*
                                     </label>
-                                    <InputNumber
+
+                                    <Dropdown
                                         value={data.fee_withdraw_cazhpos}
                                         onChange={(e) =>
                                             setData(
                                                 "fee_withdraw_cazhpos",
-                                                e.value
+                                                Number(e.target.value)
                                             )
                                         }
-                                        className={`h-full ${
-                                            errors.fee_withdraw_cazhpos &&
-                                            "p-invalid"
-                                        }`}
+                                        options={option_fee}
+                                        optionLabel="name"
+                                        optionValue="name"
+                                        placeholder="Pilih Tarif"
+                                        editable
+                                        valueTemplate={selectedOptionTemplate}
                                         onFocus={() => {
                                             triggerInputFocus(
                                                 animateFeeWithdrawCazhpos
@@ -1002,7 +1064,10 @@ const Create = ({ usersProp, partnersProp }) => {
                                                 animateFeeWithdrawCazhpos
                                             );
                                         }}
+                                        itemTemplate={optionTemplate}
+                                        className="w-full md:w-14rem"
                                     />
+
                                     {errors.fee_withdraw_cazhpos && (
                                         <Message
                                             className="bg-transparent p-0 my-2 justify-start text-xs"
@@ -1015,18 +1080,21 @@ const Create = ({ usersProp, partnersProp }) => {
                                     <label htmlFor="fee_bill_saldokartu">
                                         Fee bayar tagihan via Saldo Kartu*
                                     </label>
-                                    <InputNumber
+
+                                    <Dropdown
                                         value={data.fee_bill_saldokartu}
                                         onChange={(e) =>
                                             setData(
                                                 "fee_bill_saldokartu",
-                                                e.value
+                                                Number(e.target.value)
                                             )
                                         }
-                                        className={`h-full ${
-                                            errors.fee_bill_saldokartu &&
-                                            "p-invalid"
-                                        }`}
+                                        options={option_fee}
+                                        optionLabel="name"
+                                        optionValue="name"
+                                        placeholder="Pilih Tarif"
+                                        editable
+                                        valueTemplate={selectedOptionTemplate}
                                         onFocus={() => {
                                             triggerInputFocus(
                                                 animateFeeBillSaldokartu
@@ -1037,7 +1105,10 @@ const Create = ({ usersProp, partnersProp }) => {
                                                 animateFeeBillSaldokartu
                                             );
                                         }}
+                                        itemTemplate={optionTemplate}
+                                        className="w-full md:w-14rem"
                                     />
+
                                     {errors.fee_bill_saldokartu && (
                                         <Message
                                             className="bg-transparent p-0 my-2 justify-start text-xs"
@@ -1047,9 +1118,7 @@ const Create = ({ usersProp, partnersProp }) => {
                                     )}
                                 </div>
                                 <div className="flex flex-col mt-3">
-                                    <label htmlFor="fee_withdraw_cazhpos">
-                                        Bank*
-                                    </label>
+                                    <label htmlFor="bank">Bank*</label>
                                     <Dropdown
                                         value={data.bank}
                                         onChange={(e) =>

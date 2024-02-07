@@ -116,7 +116,7 @@
                                 </tr>
                                 <tr>
                                     <td style="width: 20%;">Jabatan</td>
-                                    <td>: <b>{{$mou["partner_pic_position"]}}</b></td>
+                                    <td>: <b>{{ucwords($mou["partner_pic_position"])}}</b></td>
                                 </tr>
                                 <tr>
                                     <td style="width: 20%;">Lembaga</td>
@@ -386,7 +386,8 @@
                                                                     Langganan sistem
                                                                 </td>
                                                                 <td style="border: 1px solid #d1d5db; padding: 5px">
-                                                                    Rp{{number_format($mou->nominal_subscription, 0,
+                                                                    Rp{{number_format($mou->price_subscription_system,
+                                                                    0,
                                                                     ',', '.')}} per-{{$mou->period_subscription}}
                                                                 </td>
                                                             </tr>

@@ -8,6 +8,7 @@ use App\Models\MOU;
 use App\Models\Partner;
 use App\Models\Product;
 use App\Models\User;
+use Carbon\Carbon;
 use DateTime;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -34,9 +35,20 @@ class MOUController extends Controller
             unset($user->roles);
             return $user;
         });
-        $partnersProp = Partner::with(
-            'pics'
-        )->get();
+        $partnersProp = Partner::with([
+            'pics' => function ($query) {
+                $query->latest();
+            },
+            'subscription' => function ($query) {
+                $query->latest();
+            },
+            'accounts' => function ($query) {
+                $query->latest();
+            },
+            'banks' => function ($query) {
+                $query->latest();
+            },
+        ])->get();
         return Inertia::render('MOU/Create', compact('partnersProp', 'usersProp'));
     }
 
@@ -48,7 +60,7 @@ class MOUController extends Controller
             "uuid" => Str::uuid(),
             "code" => $request->code,
             "day" => $request->day,
-            "date" => (new DateTime($request->date))->format('Y-m-d H:i:s'),
+            "date" => Carbon::parse($request->date)->setTimezone('GMT+7')->format('Y-m-d H:i:s'),
             "partner_id" => $request->partner_id,
             "partner_name" => $request->partner_name,
             "partner_pic" => $request->partner_pic,
@@ -69,7 +81,7 @@ class MOUController extends Controller
             "bank" => $request->bank,
             "account_bank_number" => $request->account_bank_number,
             "account_bank_name" => $request->account_bank_name,
-            "expired_date" => (new DateTime($request->expired_date))->format('Y-m-d H:i:s'),
+            "expired_date" => Carbon::parse($request->expired_date)->setTimezone('GMT+7')->format('Y-m-d H:i:s'),
             "profit_sharing" => $request->profit_sharing,
             "profit_sharing_detail" => $request->profit_sharing_detail,
             "referral" => $request->referral,
@@ -78,7 +90,7 @@ class MOUController extends Controller
             "signature_name" => $request->signature_name,
             "signature_position" => $request->signature_position,
             "signature_image" => $request->signature_image,
-            "mou_doc" => "tes"
+            "mou_doc" => ""
         ]);
 
         GenerateMOUJob::dispatch($mou);
@@ -97,9 +109,20 @@ class MOUController extends Controller
             unset($user->roles);
             return $user;
         });
-        $partnersProp = Partner::with(
-            'pics'
-        )->get();
+        $partnersProp = Partner::with([
+            'pics' => function ($query) {
+                $query->latest();
+            },
+            'subscription' => function ($query) {
+                $query->latest();
+            },
+            'accounts' => function ($query) {
+                $query->latest();
+            },
+            'banks' => function ($query) {
+                $query->latest();
+            },
+        ])->get();
         $mou = MOU::where('uuid', '=', $uuid)->first();
         return Inertia::render('MOU/Edit', compact('mou', 'usersProp', 'partnersProp'));
     }
@@ -109,7 +132,7 @@ class MOUController extends Controller
         $mou = MOU::where('uuid', '=', $uuid)->first();
         $mou->update([
             "day" => $request->day,
-            "date" => (new DateTime($request->date))->format('Y-m-d H:i:s'),
+            "date" => Carbon::parse($request->date)->setTimezone('GMT+7')->format('Y-m-d H:i:s'),
             "partner_id" => $request->partner_id,
             "partner_name" => $request->partner_name,
             "partner_pic" => $request->partner_pic,
@@ -130,7 +153,7 @@ class MOUController extends Controller
             "bank" => $request->bank,
             "account_bank_number" => $request->account_bank_number,
             "account_bank_name" => $request->account_bank_name,
-            "expired_date" => (new DateTime($request->expired_date))->format('Y-m-d H:i:s'),
+            "expired_date" => Carbon::parse($request->expired_date)->setTimezone('GMT+7')->format('Y-m-d H:i:s'),
             "profit_sharing" => $request->profit_sharing,
             "profit_sharing_detail" => $request->profit_sharing_detail,
             "referral" => $request->referral,
@@ -144,7 +167,7 @@ class MOUController extends Controller
     }
     public function apiGetMou()
     {
-        $mouProp = MOU::with('user')->get();
+        $mouProp = MOU::with('user', 'partner')->get();
         return response()->json($mouProp);
     }
 
