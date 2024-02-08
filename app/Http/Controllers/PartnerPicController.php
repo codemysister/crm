@@ -23,7 +23,14 @@ class PartnerPicController extends Controller
                 $query->latest();
             }
         ])
-            ->get();
+            ->orderBy('created_at', 'desc')->get();
+
+        $pics->each(function ($pic) {
+            if ($pic->partner->pics->isNotEmpty()) {
+                $pic->partner->pics->first()->latest = true;
+            }
+        });
+
         return response()->json($pics);
     }
 
@@ -36,7 +43,6 @@ class PartnerPicController extends Controller
             'number' => $request->number,
             'email' => $request->email,
             'position' => $request->position,
-            'address' => $request->address
         ]);
     }
 
@@ -48,7 +54,6 @@ class PartnerPicController extends Controller
             'number' => $request->number,
             'email' => $request->email,
             'position' => $request->position,
-            'address' => $request->address
         ]);
     }
 

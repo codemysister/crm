@@ -18,7 +18,6 @@ return new class extends Migration {
             $table->string('number');
             $table->string('email');
             $table->string('position');
-            $table->text('address')->nullable();
             $table->timestamps();
         });
     }

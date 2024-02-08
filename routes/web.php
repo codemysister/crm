@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\InvoiceGeneralController;
 use App\Http\Controllers\MOUController;
 use App\Http\Controllers\PartnerAccountSettingController;
 use App\Http\Controllers\PartnerBankController;
@@ -124,6 +125,7 @@ Route::middleware('auth')->group(function () {
     Route::put('/partners/{partner:uuid}', [PartnerController::class, 'update'])->name('partners.update')->middleware(['can:edit partner']);
     Route::delete('/partners/{partner:uuid}', [PartnerController::class, 'destroy'])->name('partners.destroy')->middleware(['can:hapus partner']);
     Route::get('/api/partner/detail/{partner:uuid}', [PartnerController::class, 'apiGetPartner'])->name('api.partner');
+    Route::put('/api/partner/detail/{partner:uuid}', [PartnerController::class, 'updateDetailPartner'])->name('api.update.partner');
     Route::get('/api/partners', [PartnerController::class, 'apiGetPartners'])->name('api.partners');
 
     // Partner PIC
@@ -187,6 +189,16 @@ Route::middleware('auth')->group(function () {
     Route::get('/api/sla', [SLAController::class, 'apiGetSla'])->name('api.sla');
     Route::put('/activity/{activity:uuid}', [SLAController::class, 'activityUpdate'])->name('activity.update')->middleware(['can:hapus produk']);
     Route::delete('/activity/{activity:uuid}', [SLAController::class, 'activityDestroy'])->name('activity.destroy')->middleware(['can:hapus produk']);
+
+    // Invoice Umum
+    Route::get('/invoice_generals', [InvoiceGeneralController::class, 'index'])->name('invoice_generals.view')->middleware(['can:lihat produk']);
+    Route::get('/invoice_generals/create', [InvoiceGeneralController::class, 'create'])->name('invoice_generals.create');
+    Route::post('/invoice_generals', [InvoiceGeneralController::class, 'store'])->name('invoice_generals.store')->middleware(['can:tambah produk']);
+    Route::get('/invoice_generals/{invoice_generals:uuid}', [InvoiceGeneralController::class, 'edit'])->name('invoice_generals.edit')->middleware(['can:edit produk']);
+    Route::put('/invoice_generals/{invoice_generals:uuid}', [InvoiceGeneralController::class, 'update'])->name('invoice_generals.update')->middleware(['can:edit produk']);
+    Route::delete('/invoice_generals/{invoice_generals:uuid}', [InvoiceGeneralController::class, 'destroy'])->name('invoice_generals.destroy')->middleware(['can:hapus produk']);
+    Route::get('/api/invoice_generals', [InvoiceGeneralController::class, 'apiGetInvoiceGenerals'])->name('api.invoice_generals');
 });
+
 
 require __DIR__ . '/auth.php';

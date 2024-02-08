@@ -402,8 +402,6 @@ const Subscription = ({
                             handleSubmitFormSubscription(e, "tambah")
                         }
                     >
-                        {console.log(subscriptions)}
-                        {console.log(dataSubscription)}
                         <div className="flex flex-col justify-around gap-4 mt-1">
                             <div className="flex flex-col">
                                 <label htmlFor="partner_subcription">

@@ -18,10 +18,9 @@ import { TabPanel, TabView } from "primereact/tabview";
 import { Skeleton } from "primereact/skeleton";
 import { FilterMatchMode } from "primereact/api";
 import { OverlayPanel } from "primereact/overlaypanel";
-import { MultiSelect } from "primereact/multiselect";
-
+import { FileUpload } from "primereact/fileupload";
 import Pic from "./Pic.jsx";
-import DetailPartner from "./DetailPartner.jsx";
+import DetailPartner from "./DetailPartner/DetailPartner.jsx";
 import Bank from "./Bank.jsx";
 import Account from "./Account.jsx";
 import Subscription from "./Subscription.jsx";
@@ -30,6 +29,11 @@ export default function Index({ auth, partner }) {
     const [partners, setPartners] = useState("");
     const [sales, setSales] = useState("");
     const [account_managers, setAccountManagers] = useState("");
+    const [provinces, setProvinces] = useState([]);
+    const [regencys, setRegencys] = useState([]);
+    const [subdistricts, setSubdistricts] = useState([]);
+    const [codeProvince, setcodeProvince] = useState(null);
+    const [codeRegency, setcodeRegency] = useState(null);
     const [activeIndexTab, setActiveIndexTab] = useState(0);
     const [isLoadingData, setIsLoadingData] = useState(false);
     const [modalPartnersIsVisible, setModalPartnersIsVisible] = useState(false);
@@ -38,27 +42,15 @@ export default function Index({ auth, partner }) {
     const toast = useRef(null);
     const btnSubmit = useRef(null);
     const modalPartner = useRef(null);
+    const scrollForm = useRef(null);
     const infoPriceTrainingOnlineRef = useRef(null);
     const { roles, permissions } = auth.user;
     const [activeIndex, setActiveIndex] = useState(0);
     const dummyArray = Array.from({ length: 5 }, (v, i) => i);
     const [preRenderLoad, setPreRenderLoad] = useState(true);
-    const [inputPriceCard, setInputPriceCard] = useState(false);
-    const [inputPriceLanyard, setInputPriceLanyard] = useState(false);
-    const [inputPriceSubscriptionSystem, setInputPriceSubscriptionSystem] =
-        useState(false);
-    const [inputPriceTrainingOffline, setInputPriceTrainingOffline] =
-        useState(false);
-    const [inputPriceTrainingOnline, setInputPriceTrainingOnline] =
-        useState(false);
-    const [inputFeePurchaseCazhpoin, setInputFeePurchaseCazhpoin] =
-        useState(false);
-    const [inputFeeBillCazhpoin, setInputFeeBillCazhpoin] = useState(false);
-    const [inputFeeTopupCazhpos, setInputFeeTopupCazhpos] = useState(false);
-    const [inputFeeWithdrawCazhpos, setInputFeeWithdrawCazhpos] =
-        useState(false);
-    const [inputFeeBillSaldokartu, setInputFeeBillSaldokartu] = useState(false);
     const [selectedDetailPartner, setSelectedDetailPartner] = useState(partner);
+    const [totalSize, setTotalSize] = useState(0);
+    const fileUploadRef = useRef(null);
 
     useEffect(() => {
         if (selectedDetailPartner) {
@@ -67,13 +59,131 @@ export default function Index({ auth, partner }) {
     }, []);
 
     useEffect(() => {
+        if (scrollForm.current) {
+            setTimeout(() => {
+                scrollForm.current.scrollIntoView({
+                    behavior: "smooth",
+                    block: "end",
+                });
+            }, 200);
+        }
+    }, [activeIndex]);
+
+    useEffect(() => {
         const fetchData = async () => {
             await getPartners();
+            await getProvince();
             setPreRenderLoad((prev) => (prev = false));
         };
 
         fetchData();
     }, [activeIndexTab]);
+
+    useEffect(() => {
+        if (codeProvince) {
+            getRegencys(codeProvince);
+        }
+        if (codeRegency && codeProvince) {
+            getSubdistricts(codeProvince, codeRegency);
+        }
+    }, [codeProvince, codeRegency]);
+
+    const getProvince = async () => {
+        const options = {
+            method: "GET",
+            url: `/api/wilayah/provinsi/`,
+            headers: {
+                "Content-Type": "application/json",
+            },
+        };
+
+        try {
+            const response = await axios.request(options);
+            const dataArray = Object.entries(response.data).map(
+                ([key, value]) => ({
+                    code: key,
+                    name: value
+                        .toLowerCase()
+                        .split(" ")
+                        .map(
+                            (word) =>
+                                word.charAt(0).toUpperCase() + word.slice(1)
+                        )
+                        .join(" "),
+                })
+            );
+            setProvinces((prev) => (prev = dataArray));
+        } catch (error) {
+            console.log(error);
+        }
+    };
+
+    const getRegencys = async (code) => {
+        let url = code
+            ? `api/wilayah/kabupaten?provinsi=${code}`
+            : `api/wilayah/kabupaten`;
+        const options = {
+            method: "GET",
+            url: url,
+            headers: {
+                "Content-Type": "application/json",
+            },
+        };
+
+        try {
+            const response = await axios.request(options);
+            const dataArray = Object.entries(response.data).map(
+                ([key, value]) => ({
+                    code: key,
+                    name: value
+                        .toLowerCase()
+                        .split(" ")
+                        .map(
+                            (word) =>
+                                word.charAt(0).toUpperCase() + word.slice(1)
+                        )
+                        .join(" "),
+                })
+            );
+            setRegencys((prev) => (prev = dataArray));
+        } catch (error) {
+            console.log(error);
+        }
+    };
+
+    const getSubdistricts = async (codeProv, codeRege) => {
+        let url =
+            codeProv !== null && codeRege !== null
+                ? `api/wilayah/kecamatan?provinsi=${codeProv}&kabupaten=${codeRege}`
+                : `api/wilayah/kecamatan`;
+        const options = {
+            method: "GET",
+            url: url,
+            headers: {
+                "Content-Type": "application/json",
+            },
+        };
+
+        try {
+            const response = await axios.request(options);
+            const dataArray = Object.entries(response.data).map(
+                ([key, value]) => ({
+                    code: key,
+                    name: value
+                        .toLowerCase()
+                        .split(" ")
+                        .map(
+                            (word) =>
+                                word.charAt(0).toUpperCase() + word.slice(1)
+                        )
+                        .join(" "),
+                })
+            );
+            setSubdistricts((prev) => (prev = dataArray));
+        } catch (error) {
+            console.log(error);
+        }
+    };
 
     const [filters, setFilters] = useState({
         global: { value: null, matchMode: FilterMatchMode.CONTAINS },
@@ -102,28 +212,34 @@ export default function Index({ auth, partner }) {
         partner: {
             uuid: "",
             sales: {},
-            account_manager: {},
+            account_manager: {
+                name: null,
+                id: null,
+            },
             name: "",
+            logo: null,
             phone_number: "",
+            province: null,
+            regency: null,
+            subdistrict: null,
+            address: null,
             onboarding_date: new Date(),
             onboarding_age: null,
             live_date: null,
             live_age: null,
             monitoring_date_after_3_month_live: null,
-            address: null,
             status: "",
         },
         pic: {
             name: "",
             number: "",
             position: "",
-            address: "",
             email: "",
         },
         account_setting: {
             subdomain: "",
             email_super_admin: "",
-            cas_link_partner: "",
+            cas_link_partner: "https://cas.cazh.id/partner/",
             card_number: "",
         },
         bank: {
@@ -231,39 +347,6 @@ export default function Index({ auth, partner }) {
         setIsLoadingData(false);
     };
 
-    const getBanks = async () => {
-        setIsLoadingData(true);
-
-        let response = await fetch("/api/partners/banks");
-        let data = await response.json();
-
-        setBanks((prev) => data);
-
-        setIsLoadingData(false);
-    };
-
-    const getAccounts = async () => {
-        setIsLoadingData(true);
-
-        let response = await fetch("/api/partners/accounts");
-        let data = await response.json();
-
-        setAccounts((prev) => data);
-
-        setIsLoadingData(false);
-    };
-
-    const getSubscriptions = async () => {
-        setIsLoadingData(true);
-
-        let response = await fetch("/api/partners/subscriptions");
-        let data = await response.json();
-
-        setSubscriptions((prev) => data);
-
-        setIsLoadingData(false);
-    };
-
     const actionBodyTemplate = (rowData) => {
         return (
             <React.Fragment>
@@ -287,29 +370,6 @@ export default function Index({ auth, partner }) {
         );
     };
 
-    const actionBodyTemplateBank = (rowData) => {
-        return (
-            <React.Fragment>
-                <Button
-                    icon="pi pi-pencil"
-                    rounded
-                    outlined
-                    className="mr-2"
-                    onClick={() => handleEditBank(rowData)}
-                />
-                <Button
-                    icon="pi pi-trash"
-                    rounded
-                    outlined
-                    severity="danger"
-                    onClick={() => {
-                        handleDeleteBank(rowData);
-                    }}
-                />
-            </React.Fragment>
-        );
-    };
-
     let cardCategories = [{ name: "digital" }, { name: "cetak" }];
 
     const items = [
@@ -326,8 +386,15 @@ export default function Index({ auth, partner }) {
             label: "Akun",
         },
         {
-            label: "Langganan",
+            label: "Tarif",
         },
+    ];
+
+    const option_period_subscription = [
+        { name: "kartu/bulan" },
+        { name: "kartu/tahun" },
+        { name: "lembaga/bulan" },
+        { name: "lembaga/tahun" },
     ];
 
     // fungsi toast
@@ -365,10 +432,15 @@ export default function Index({ auth, partner }) {
                 monitoring_date_after_3_month_live:
                     partner.monitoring_date_after_3_month_live,
                 live_date: partner.live_date,
+                province: partner.province,
+                regency: partner.regency,
+                subdistrict: partner.subdistrict,
                 address: partner.address,
                 status: partner.status,
             },
         }));
+        setcodeRegency(JSON.parse(partner.regency).code);
+        setcodeProvince(JSON.parse(partner.province).code);
         setModalEditPartnersIsVisible(true);
     };
 
@@ -382,57 +454,6 @@ export default function Index({ auth, partner }) {
                 destroy("partners/" + partner.uuid, {
                     onSuccess: () => {
                         getPartners();
-                        showSuccess("Hapus");
-                    },
-                    onError: () => {
-                        showError("Hapus");
-                    },
-                });
-            },
-        });
-    };
-
-    const handleEditBank = (bank) => {
-        setDataBank((data) => ({ ...data, uuid: bank.uuid }));
-        setDataBank((data) => ({ ...data, partner: bank.partner }));
-        setDataBank((data) => ({ ...data, bank: bank.bank }));
-        setDataBank((data) => ({
-            ...data,
-            account_bank_number: bank.account_bank_number,
-        }));
-        setDataBank((data) => ({
-            ...data,
-            account_bank_name: bank.account_bank_name,
-        }));
-
-        setModalEditBankIsVisible(true);
-    };
-
-    const handleEditPIC = (pic) => {
-        setDataPIC((data) => ({
-            ...data,
-            uuid: pic.uuid,
-            partner: pic.partner,
-            name: pic.name,
-            number: pic.number,
-            position: pic.position,
-            address: pic.address,
-            email: pic.email,
-        }));
-
-        setModalEditPicIsVisible(true);
-    };
-
-    const handleDeletePIC = (pic) => {
-        confirmDialog({
-            message: "Apakah Anda yakin untuk menghapus ini?",
-            header: "Konfirmasi hapus",
-            icon: "pi pi-info-circle",
-            acceptClassName: "p-button-danger",
-            accept: async () => {
-                destroyPIC("partners/pics/" + pic.uuid, {
-                    onSuccess: () => {
-                        getPics();
                         showSuccess("Hapus");
                     },
                     onError: () => {
@@ -521,6 +542,7 @@ export default function Index({ auth, partner }) {
                         onClick={() => {
                             setModalPartnersIsVisible((prev) => (prev = true));
                             reset("partner");
+                            setActiveIndex((prev) => (prev = 0));
                         }}
                         aria-controls="popup_menu_right"
                         aria-haspopup
@@ -564,7 +586,9 @@ export default function Index({ auth, partner }) {
                     type="button"
                     icon="pi pi-angle-right"
                     disabled={activeIndex == 4}
-                    onClick={() => setActiveIndex((prev) => prev + 1)}
+                    onClick={() => {
+                        setActiveIndex((prev) => prev + 1);
+                    }}
                     className="bg-purple-600 text-sm shadow-md rounded-lg"
                 />
             </div>
@@ -580,7 +604,13 @@ export default function Index({ auth, partner }) {
                     showSuccess("Tambah");
                     setModalPartnersIsVisible((prev) => false);
                     getPartners();
-                    reset("partner", "pic", "subscription");
+                    reset(
+                        "partner",
+                        "pic",
+                        "subscription",
+                        "account_setting",
+                        "bank"
+                    );
                 },
                 onError: () => {
                     showError("Tambah");
@@ -699,6 +729,24 @@ export default function Index({ auth, partner }) {
 
                                             <div className="flex flex-col">
                                                 <label htmlFor="name">
+                                                    Logo
+                                                </label>
+                                                <FileUpload
+                                                    mode="basic"
+                                                    className="flex w-full p-1"
+                                                    onSelect={(rowData) => {
+                                                        setData("partner", {
+                                                            ...data.partner,
+                                                            logo: rowData,
+                                                        });
+                                                    }}
+                                                    accept="image/*"
+                                                    maxFileSize={1000000}
+                                                />
+                                            </div>
+
+                                            <div className="flex flex-col">
+                                                <label htmlFor="name">
                                                     Nomor Telepon *
                                                 </label>
                                                 <InputText
@@ -778,6 +826,149 @@ export default function Index({ auth, partner }) {
                                             </div>
 
                                             <div className="flex flex-col">
+                                                <label htmlFor="province">
+                                                    Provinsi *
+                                                </label>
+                                                <Dropdown
+                                                    value={
+                                                        data.partner.province
+                                                            ? JSON.parse(
+                                                                  data.partner
+                                                                      .province
+                                                              )
+                                                            : null
+                                                    }
+                                                    onChange={(e) => {
+                                                        setcodeProvince(
+                                                            (prev) =>
+                                                                (prev =
+                                                                    e.target
+                                                                        .value
+                                                                        .code)
+                                                        );
+                                                        setData("partner", {
+                                                            ...data.partner,
+                                                            province:
+                                                                JSON.stringify(
+                                                                    e.target
+                                                                        .value
+                                                                ),
+                                                        });
+                                                    }}
+                                                    options={provinces}
+                                                    optionLabel="name"
+                                                    placeholder="Pilih Provinsi"
+                                                    filter
+                                                    valueTemplate={
+                                                        selectedOptionTemplate
+                                                    }
+                                                    itemTemplate={
+                                                        optionTemplate
+                                                    }
+                                                    className="w-full md:w-14rem"
+                                                />
+                                            </div>
+
+                                            <div className="flex flex-col">
+                                                <label htmlFor="regency">
+                                                    Kabupaten *
+                                                </label>
+                                                <Dropdown
+                                                    value={
+                                                        data.partner.regency
+                                                            ? JSON.parse(
+                                                                  data.partner
+                                                                      .regency
+                                                              )
+                                                            : null
+                                                    }
+                                                    onChange={(e) => {
+                                                        setcodeRegency(
+                                                            (prev) =>
+                                                                (prev =
+                                                                    e.target
+                                                                        .value
+                                                                        .code)
+                                                        );
+                                                        setData("partner", {
+                                                            ...data.partner,
+                                                            regency:
+                                                                JSON.stringify(
+                                                                    e.target
+                                                                        .value
+                                                                ),
+                                                        });
+                                                    }}
+                                                    options={regencys}
+                                                    optionLabel="name"
+                                                    placeholder="Pilih Kabupaten"
+                                                    filter
+                                                    valueTemplate={
+                                                        selectedOptionTemplate
+                                                    }
+                                                    itemTemplate={
+                                                        optionTemplate
+                                                    }
+                                                    className="w-full md:w-14rem"
+                                                />
+                                            </div>
+
+                                            <div className="flex flex-col">
+                                                <label htmlFor="subdistrict">
+                                                    Kecamatan
+                                                </label>
+                                                <Dropdown
+                                                    value={
+                                                        data.partner.subdistrict
+                                                            ? JSON.parse(
+                                                                  data.partner
+                                                                      .subdistrict
+                                                              )
+                                                            : null
+                                                    }
+                                                    onChange={(e) =>
+                                                        setData("partner", {
+                                                            ...data.partner,
+                                                            subdistrict:
+                                                                JSON.stringify(
+                                                                    e.target
+                                                                        .value
+                                                                ),
+                                                        })
+                                                    }
+                                                    options={subdistricts}
+                                                    optionLabel="name"
+                                                    placeholder="Pilih Kecamatan"
+                                                    filter
+                                                    valueTemplate={
+                                                        selectedOptionTemplate
+                                                    }
+                                                    itemTemplate={
+                                                        optionTemplate
+                                                    }
+                                                    className="w-full md:w-14rem"
+                                                />
+                                            </div>
+
+                                            <div className="flex flex-col">
+                                                <label htmlFor="address">
+                                                    Alamat
+                                                </label>
+                                                <InputTextarea
+                                                    value={data.partner.address}
+                                                    onChange={(e) =>
+                                                        setData("partner", {
+                                                            ...data.partner,
+                                                            address:
+                                                                e.target.value,
+                                                        })
+                                                    }
+                                                    rows={5}
+                                                    cols={30}
+                                                />
+                                            </div>
+
+                                            <div className="flex flex-col">
                                                 <label htmlFor="register_date">
                                                     Tanggal Onboarding *
                                                 </label>
@@ -852,10 +1043,6 @@ export default function Index({ auth, partner }) {
                                                                     e.target.value
                                                                 ).getDate() - 1
                                                             );
-
-                                                        console.log(
-                                                            monitoring_date_after_3_month_live
-                                                        );
 
                                                         setData("partner", {
                                                             ...data.partner,
@@ -941,25 +1128,7 @@ export default function Index({ auth, partner }) {
                                                         });
                                                     }}
                                                     showIcon
-                                                    dateFormat="yy-mm-dd"
-                                                />
-                                            </div>
-
-                                            <div className="flex flex-col">
-                                                <label htmlFor="address">
-                                                    Alamat
-                                                </label>
-                                                <InputTextarea
-                                                    value={data.partner.address}
-                                                    onChange={(e) =>
-                                                        setData("partner", {
-                                                            ...data.partner,
-                                                            address:
-                                                                e.target.value,
-                                                        })
-                                                    }
-                                                    rows={5}
-                                                    cols={30}
+                                                    dateFormat="dd/mm/yy"
                                                 />
                                             </div>
 
@@ -990,7 +1159,10 @@ export default function Index({ auth, partner }) {
                                 {activeIndex == 1 && (
                                     <>
                                         <div className="flex flex-col justify-around gap-4 mt-1">
-                                            <div className="flex flex-col">
+                                            <div
+                                                ref={scrollForm}
+                                                className="flex flex-col"
+                                            >
                                                 <label htmlFor="name">
                                                     Nama *
                                                 </label>
@@ -1015,8 +1187,6 @@ export default function Index({ auth, partner }) {
                                                 </label>
                                                 <InputText
                                                     value={data.pic.email}
-                                                    keyfilter="int"
-                                                    min={0}
                                                     onChange={(e) =>
                                                         setData("pic", {
                                                             ...data.pic,
@@ -1066,24 +1236,6 @@ export default function Index({ auth, partner }) {
                                                     className="dark:bg-gray-300"
                                                     id="position"
                                                     aria-describedby="position-help"
-                                                />
-                                            </div>
-
-                                            <div className="flex flex-col">
-                                                <label htmlFor="address">
-                                                    Alamat *
-                                                </label>
-                                                <InputTextarea
-                                                    value={data.pic.address}
-                                                    onChange={(e) =>
-                                                        setData("pic", {
-                                                            ...data.pic,
-                                                            address:
-                                                                e.target.value,
-                                                        })
-                                                    }
-                                                    rows={5}
-                                                    cols={30}
                                                 />
                                             </div>
                                         </div>
@@ -1329,7 +1481,6 @@ export default function Index({ auth, partner }) {
                                                                     .subscription
                                                                     .nominal) /
                                                             100;
-                                                        console.log(ppn);
                                                         setData(
                                                             "subscription",
                                                             {
@@ -1350,6 +1501,7 @@ export default function Index({ auth, partner }) {
                                             <div className="flex flex-col">
                                                 <label htmlFor="ppn">
                                                     Total Tagihan(nominal + ppn)
+                                                    *
                                                 </label>
                                                 <InputNumber
                                                     value={
@@ -1406,1079 +1558,491 @@ export default function Index({ auth, partner }) {
                                             </div>
 
                                             <div className="flex flex-col">
-                                                <div className="flex justify-center">
-                                                    {!inputPriceCard && (
-                                                        <Button
-                                                            label="Input Tarif Kartu"
-                                                            className="text-purple-600 bg-transparent hover:text-white hover:bg-purple-600 hover:duration-100 text-sm"
-                                                            icon="pi pi-plus-circle"
-                                                            onClick={() =>
-                                                                setInputPriceCard(
-                                                                    (prev) =>
-                                                                        (prev = true)
+                                                <label htmlFor="price_card">
+                                                    Tarif Kartu
+                                                </label>
+
+                                                <div className="flex justify-between gap-1 w-full items-center">
+                                                    <div className="w-full flex gap-2 h-full">
+                                                        <InputNumber
+                                                            placeholder="tarif"
+                                                            value={
+                                                                data
+                                                                    .subscription
+                                                                    .price_card
+                                                                    .price
+                                                            }
+                                                            onValueChange={(
+                                                                e
+                                                            ) =>
+                                                                setData(
+                                                                    "subscription",
+                                                                    {
+                                                                        ...data.subscription,
+                                                                        price_card:
+                                                                            {
+                                                                                ...data
+                                                                                    .subscription
+                                                                                    .price_card,
+                                                                                price: e
+                                                                                    .target
+                                                                                    .value,
+                                                                            },
+                                                                    }
                                                                 )
                                                             }
-                                                            aria-controls="popup_menu_right"
-                                                            aria-haspopup
+                                                            className="dark:bg-gray-300 w-full"
+                                                            id="account_bank_name"
+                                                            aria-describedby="account_bank_name-help"
+                                                            locale="id-ID"
                                                         />
-                                                    )}
+                                                        <Dropdown
+                                                            value={
+                                                                data
+                                                                    .subscription
+                                                                    .price_card
+                                                                    .type
+                                                            }
+                                                            onChange={(e) =>
+                                                                setData(
+                                                                    "subscription",
+                                                                    {
+                                                                        ...data.subscription,
+                                                                        price_card:
+                                                                            {
+                                                                                ...data
+                                                                                    .subscription
+                                                                                    .price_card,
+                                                                                type: e
+                                                                                    .target
+                                                                                    .value,
+                                                                            },
+                                                                    }
+                                                                )
+                                                            }
+                                                            options={
+                                                                cardCategories
+                                                            }
+                                                            optionLabel="name"
+                                                            placeholder="kategori"
+                                                            className="w-full md:w-14rem"
+                                                        />
+                                                    </div>
                                                 </div>
-
-                                                {inputPriceCard && (
-                                                    <>
-                                                        <label htmlFor="price_card">
-                                                            Tarif Kartu
-                                                        </label>
-
-                                                        <div className="flex justify-between gap-1 w-full items-center">
-                                                            <div className="w-[93%] flex gap-2 h-full">
-                                                                <InputNumber
-                                                                    placeholder="tarif"
-                                                                    value={
-                                                                        data
-                                                                            .subscription
-                                                                            .price_card
-                                                                            .price
-                                                                    }
-                                                                    onValueChange={(
-                                                                        e
-                                                                    ) =>
-                                                                        setData(
-                                                                            "subscription",
-                                                                            {
-                                                                                ...data.subscription,
-                                                                                price_card:
-                                                                                    {
-                                                                                        ...data
-                                                                                            .subscription
-                                                                                            .price_card,
-                                                                                        price: e
-                                                                                            .target
-                                                                                            .value,
-                                                                                    },
-                                                                            }
-                                                                        )
-                                                                    }
-                                                                    className="dark:bg-gray-300 w-full"
-                                                                    id="account_bank_name"
-                                                                    aria-describedby="account_bank_name-help"
-                                                                    locale="id-ID"
-                                                                />
-                                                                <Dropdown
-                                                                    value={
-                                                                        data
-                                                                            .subscription
-                                                                            .price_card
-                                                                            .type
-                                                                    }
-                                                                    onChange={(
-                                                                        e
-                                                                    ) =>
-                                                                        setData(
-                                                                            "subscription",
-                                                                            {
-                                                                                ...data.subscription,
-                                                                                price_card:
-                                                                                    {
-                                                                                        ...data
-                                                                                            .subscription
-                                                                                            .price_card,
-                                                                                        type: e
-                                                                                            .target
-                                                                                            .value,
-                                                                                    },
-                                                                            }
-                                                                        )
-                                                                    }
-                                                                    options={
-                                                                        cardCategories
-                                                                    }
-                                                                    optionLabel="name"
-                                                                    placeholder="kategori"
-                                                                    className="w-full md:w-14rem"
-                                                                />
-                                                            </div>
-                                                            <div className="h-full flex items-center">
-                                                                <Button
-                                                                    className="bg-red-500 h-1 w-1 shadow-md rounded-full "
-                                                                    icon={() => (
-                                                                        <i
-                                                                            className="pi pi-minus"
-                                                                            style={{
-                                                                                fontSize:
-                                                                                    "0.7rem",
-                                                                            }}
-                                                                        ></i>
-                                                                    )}
-                                                                    onClick={() => {
-                                                                        setInputPriceCard(
-                                                                            (
-                                                                                prev
-                                                                            ) =>
-                                                                                (prev = false)
-                                                                        );
-                                                                        setData(
-                                                                            "subscription",
-                                                                            {
-                                                                                ...data.subscription,
-                                                                                price_card:
-                                                                                    {
-                                                                                        ...data
-                                                                                            .subscription
-                                                                                            .price_card,
-                                                                                        price: null,
-                                                                                        type: null,
-                                                                                    },
-                                                                            }
-                                                                        );
-                                                                    }}
-                                                                    aria-controls="popup_menu_right"
-                                                                    aria-haspopup
-                                                                />
-                                                            </div>
-                                                        </div>
-                                                    </>
-                                                )}
                                             </div>
 
                                             <div className="flex flex-col">
-                                                <div className="flex justify-center">
-                                                    {!inputPriceLanyard && (
-                                                        <Button
-                                                            label="Input Tarif Lanyard"
-                                                            className="text-purple-600 bg-transparent hover:text-white hover:bg-purple-600 hover:duration-100 text-sm"
-                                                            icon="pi pi-plus-circle"
-                                                            onClick={() =>
-                                                                setInputPriceLanyard(
-                                                                    (prev) =>
-                                                                        (prev = true)
-                                                                )
+                                                <label htmlFor="price_card">
+                                                    Tarif Lanyard
+                                                </label>
+
+                                                <div className="flex justify-between gap-1 w-full items-center">
+                                                    <div className="w-full flex gap-2 h-full">
+                                                        <Dropdown
+                                                            value={
+                                                                data
+                                                                    .subscription
+                                                                    .price_lanyard
                                                             }
-                                                            aria-controls="popup_menu_right"
-                                                            aria-haspopup
-                                                        />
-                                                    )}
-                                                </div>
-
-                                                {inputPriceLanyard && (
-                                                    <>
-                                                        <label htmlFor="price_card">
-                                                            Tarif Lanyard
-                                                        </label>
-
-                                                        <div className="flex justify-between gap-1 w-full items-center">
-                                                            <div className="w-[93%] flex gap-2 h-full">
-                                                                <Dropdown
-                                                                    value={
-                                                                        data
-                                                                            .subscription
-                                                                            .price_lanyard
-                                                                    }
-                                                                    onChange={(
-                                                                        e
-                                                                    ) =>
-                                                                        setData(
-                                                                            "subscription",
-                                                                            {
-                                                                                ...data.subscription,
-                                                                                price_lanyard:
-                                                                                    e
-                                                                                        .target
-                                                                                        .value,
-                                                                            }
-                                                                        )
-                                                                    }
-                                                                    options={
-                                                                        option_price_lanyard
-                                                                    }
-                                                                    optionLabel="price"
-                                                                    optionValue="price"
-                                                                    placeholder="Pilih Tarif"
-                                                                    editable
-                                                                    valueTemplate={
-                                                                        selectedOptionTrainingTemplate
-                                                                    }
-                                                                    itemTemplate={
-                                                                        optionTrainingTemplate
-                                                                    }
-                                                                    className="w-full md:w-14rem"
-                                                                />
-                                                            </div>
-                                                            <div className="h-full flex items-center">
-                                                                <Button
-                                                                    className="bg-red-500 h-1 w-1 shadow-md rounded-full "
-                                                                    icon={() => (
-                                                                        <i
-                                                                            className="pi pi-minus"
-                                                                            style={{
-                                                                                fontSize:
-                                                                                    "0.7rem",
-                                                                            }}
-                                                                        ></i>
-                                                                    )}
-                                                                    onClick={() => {
-                                                                        setInputPriceLanyard(
-                                                                            (
-                                                                                prev
-                                                                            ) =>
-                                                                                (prev = false)
-                                                                        );
-                                                                        setData(
-                                                                            "subscription",
-                                                                            {
-                                                                                ...data.subscription,
-                                                                                price_lanyard:
-                                                                                    null,
-                                                                            }
-                                                                        );
-                                                                    }}
-                                                                    aria-controls="popup_menu_right"
-                                                                    aria-haspopup
-                                                                />
-                                                            </div>
-                                                        </div>
-                                                    </>
-                                                )}
-                                            </div>
-
-                                            <div className="flex flex-col">
-                                                <div className="flex justify-center">
-                                                    {!inputPriceSubscriptionSystem && (
-                                                        <Button
-                                                            label="Input Tarif Langganan Sistem"
-                                                            className="text-purple-600 bg-transparent hover:text-white hover:bg-purple-600 hover:duration-100 text-sm"
-                                                            icon="pi pi-plus-circle"
-                                                            onClick={() =>
-                                                                setInputPriceSubscriptionSystem(
-                                                                    (prev) =>
-                                                                        (prev = true)
-                                                                )
-                                                            }
-                                                            aria-controls="popup_menu_right"
-                                                            aria-haspopup
-                                                        />
-                                                    )}
-                                                </div>
-
-                                                {inputPriceSubscriptionSystem && (
-                                                    <>
-                                                        <label htmlFor="price_card">
-                                                            Tarif Langganan
-                                                            Sistem
-                                                        </label>
-
-                                                        <div className="flex justify-between gap-1 w-full items-center">
-                                                            <div className="w-[93%] flex gap-2 h-full">
-                                                                <InputNumber
-                                                                    placeholder="tarif"
-                                                                    value={
-                                                                        data
-                                                                            .subscription
-                                                                            .price_subscription_system
-                                                                    }
-                                                                    onValueChange={(
-                                                                        e
-                                                                    ) =>
-                                                                        setData(
-                                                                            "subscription",
-                                                                            {
-                                                                                ...data.subscription,
-                                                                                price_subscription_system:
-                                                                                    e
-                                                                                        .target
-                                                                                        .value,
-                                                                            }
-                                                                        )
-                                                                    }
-                                                                    className="dark:bg-gray-300 w-full"
-                                                                    id="account_bank_name"
-                                                                    aria-describedby="account_bank_name-help"
-                                                                    locale="id-ID"
-                                                                />
-                                                            </div>
-                                                            <div className="h-full flex items-center">
-                                                                <Button
-                                                                    className="bg-red-500 h-1 w-1 shadow-md rounded-full "
-                                                                    icon={() => (
-                                                                        <i
-                                                                            className="pi pi-minus"
-                                                                            style={{
-                                                                                fontSize:
-                                                                                    "0.7rem",
-                                                                            }}
-                                                                        ></i>
-                                                                    )}
-                                                                    onClick={() => {
-                                                                        setInputPriceSubscriptionSystem(
-                                                                            (
-                                                                                prev
-                                                                            ) =>
-                                                                                (prev = false)
-                                                                        );
-                                                                        setData(
-                                                                            "subscription",
-                                                                            {
-                                                                                ...data.subscription,
-                                                                                price_subscription_system:
-                                                                                    null,
-                                                                            }
-                                                                        );
-                                                                    }}
-                                                                    aria-controls="popup_menu_right"
-                                                                    aria-haspopup
-                                                                />
-                                                            </div>
-                                                        </div>
-                                                    </>
-                                                )}
-                                            </div>
-
-                                            <div className="flex flex-col">
-                                                <div className="flex justify-center">
-                                                    {!inputPriceTrainingOffline && (
-                                                        <Button
-                                                            label="Input Tarif Training Offline"
-                                                            className="text-purple-600 bg-transparent hover:text-white hover:bg-purple-600 hover:duration-100 text-sm"
-                                                            icon="pi pi-plus-circle"
-                                                            onClick={() =>
-                                                                setInputPriceTrainingOffline(
-                                                                    (prev) =>
-                                                                        (prev = true)
-                                                                )
-                                                            }
-                                                            aria-controls="popup_menu_right"
-                                                            aria-haspopup
-                                                        />
-                                                    )}
-                                                </div>
-
-                                                {inputPriceTrainingOffline && (
-                                                    <>
-                                                        <label htmlFor="price_card">
-                                                            Tarif Pelatihan
-                                                            Offline
-                                                        </label>
-
-                                                        <div className="flex justify-between gap-1 w-full items-center">
-                                                            <div className="w-[93%] flex gap-2 h-full">
-                                                                <Dropdown
-                                                                    value={
-                                                                        data
-                                                                            .subscription
-                                                                            .price_training_offline
-                                                                    }
-                                                                    onChange={(
-                                                                        e
-                                                                    ) =>
-                                                                        setData(
-                                                                            "subscription",
-                                                                            {
-                                                                                ...data.subscription,
-                                                                                price_training_offline:
-                                                                                    e
-                                                                                        .target
-                                                                                        .value,
-                                                                            }
-                                                                        )
-                                                                    }
-                                                                    options={
-                                                                        option_training_offline
-                                                                    }
-                                                                    optionLabel="price"
-                                                                    optionValue="price"
-                                                                    placeholder="Pilih Tarif"
-                                                                    editable
-                                                                    valueTemplate={
-                                                                        selectedOptionTrainingTemplate
-                                                                    }
-                                                                    itemTemplate={
-                                                                        optionTrainingTemplate
-                                                                    }
-                                                                    className="w-full md:w-14rem"
-                                                                />
-                                                            </div>
-                                                            <div className="h-full flex items-center">
-                                                                <Button
-                                                                    className="bg-red-500 h-1 w-1 shadow-md rounded-full "
-                                                                    icon={() => (
-                                                                        <i
-                                                                            className="pi pi-minus"
-                                                                            style={{
-                                                                                fontSize:
-                                                                                    "0.7rem",
-                                                                            }}
-                                                                        ></i>
-                                                                    )}
-                                                                    onClick={() => {
-                                                                        setInputPriceTrainingOffline(
-                                                                            (
-                                                                                prev
-                                                                            ) =>
-                                                                                (prev = false)
-                                                                        );
-                                                                        setData(
-                                                                            "subscription",
-                                                                            {
-                                                                                ...data.subscription,
-                                                                                price_training_offline:
-                                                                                    null,
-                                                                            }
-                                                                        );
-                                                                    }}
-                                                                    aria-controls="popup_menu_right"
-                                                                    aria-haspopup
-                                                                />
-                                                            </div>
-                                                        </div>
-                                                    </>
-                                                )}
-                                            </div>
-
-                                            <div className="flex flex-col">
-                                                <div className="flex justify-center">
-                                                    {!inputPriceTrainingOnline && (
-                                                        <Button
-                                                            label="Input Tarif Training Online"
-                                                            className="text-purple-600 bg-transparent hover:text-white hover:bg-purple-600 hover:duration-100 text-sm"
-                                                            icon="pi pi-plus-circle"
-                                                            onClick={() =>
-                                                                setInputPriceTrainingOnline(
-                                                                    (prev) =>
-                                                                        (prev = true)
-                                                                )
-                                                            }
-                                                            aria-controls="popup_menu_right"
-                                                            aria-haspopup
-                                                        />
-                                                    )}
-                                                </div>
-
-                                                {inputPriceTrainingOnline && (
-                                                    <>
-                                                        <label htmlFor="price_card">
-                                                            Tarif Pelatihan
-                                                            Online
-                                                        </label>
-
-                                                        <div className="flex justify-between gap-1 w-full items-center">
-                                                            <div className="w-[93%] flex gap-2 h-full">
-                                                                <div className="p-inputgroup flex-1 h-full">
-                                                                    <InputNumber
-                                                                        value={
-                                                                            data
-                                                                                .subscription
-                                                                                .price_training_online
-                                                                        }
-                                                                        onChange={(
+                                                            onChange={(e) =>
+                                                                setData(
+                                                                    "subscription",
+                                                                    {
+                                                                        ...data.subscription,
+                                                                        price_lanyard:
                                                                             e
-                                                                        ) =>
-                                                                            setData(
-                                                                                "subscription",
-                                                                                {
-                                                                                    ...data.subscription,
-                                                                                    price_training_online:
-                                                                                        e.value,
-                                                                                }
-                                                                            )
-                                                                        }
-                                                                        className={`h-full`}
-                                                                        locale="id-ID"
-                                                                    />
+                                                                                .target
+                                                                                .value,
+                                                                    }
+                                                                )
+                                                            }
+                                                            options={
+                                                                option_price_lanyard
+                                                            }
+                                                            optionLabel="price"
+                                                            optionValue="price"
+                                                            placeholder="Pilih Tarif"
+                                                            editable
+                                                            valueTemplate={
+                                                                selectedOptionTrainingTemplate
+                                                            }
+                                                            itemTemplate={
+                                                                optionTrainingTemplate
+                                                            }
+                                                            className="w-full md:w-14rem"
+                                                        />
+                                                    </div>
+                                                </div>
+                                            </div>
 
-                                                                    <Button
-                                                                        type="button"
-                                                                        className="h-[35px]"
-                                                                        icon="pi pi-info-circle"
-                                                                        onClick={(
+                                            <div className="flex flex-col">
+                                                <label htmlFor="price_card">
+                                                    Tarif Langganan Sistem
+                                                </label>
+
+                                                <div className="flex justify-between gap-1 w-full items-center">
+                                                    <div className="w-full flex gap-2 h-full">
+                                                        <InputNumber
+                                                            placeholder="tarif"
+                                                            value={
+                                                                data
+                                                                    .subscription
+                                                                    .price_subscription_system
+                                                            }
+                                                            onValueChange={(
+                                                                e
+                                                            ) =>
+                                                                setData(
+                                                                    "subscription",
+                                                                    {
+                                                                        ...data.subscription,
+                                                                        price_subscription_system:
                                                                             e
-                                                                        ) =>
-                                                                            infoPriceTrainingOnlineRef.current.toggle(
-                                                                                e
-                                                                            )
+                                                                                .target
+                                                                                .value,
+                                                                    }
+                                                                )
+                                                            }
+                                                            className="dark:bg-gray-300 w-full"
+                                                            id="account_bank_name"
+                                                            aria-describedby="account_bank_name-help"
+                                                            locale="id-ID"
+                                                        />
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div className="flex flex-col">
+                                                <label htmlFor="price_card">
+                                                    Tarif Pelatihan Offline
+                                                </label>
+
+                                                <div className="flex justify-between gap-1 w-full items-center">
+                                                    <div className="w-full flex gap-2 h-full">
+                                                        <Dropdown
+                                                            value={
+                                                                data
+                                                                    .subscription
+                                                                    .price_training_offline
+                                                            }
+                                                            onChange={(e) =>
+                                                                setData(
+                                                                    "subscription",
+                                                                    {
+                                                                        ...data.subscription,
+                                                                        price_training_offline:
+                                                                            e
+                                                                                .target
+                                                                                .value,
+                                                                    }
+                                                                )
+                                                            }
+                                                            options={
+                                                                option_training_offline
+                                                            }
+                                                            optionLabel="price"
+                                                            optionValue="price"
+                                                            placeholder="Pilih Tarif"
+                                                            editable
+                                                            valueTemplate={
+                                                                selectedOptionTrainingTemplate
+                                                            }
+                                                            itemTemplate={
+                                                                optionTrainingTemplate
+                                                            }
+                                                            className="w-full md:w-14rem"
+                                                        />
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div className="flex flex-col">
+                                                <label htmlFor="price_card">
+                                                    Tarif Pelatihan Online
+                                                </label>
+
+                                                <div className="flex justify-between gap-1 w-full items-center">
+                                                    <div className="w-full flex gap-2 h-full">
+                                                        <div className="p-inputgroup flex-1 h-full">
+                                                            <InputNumber
+                                                                value={
+                                                                    data
+                                                                        .subscription
+                                                                        .price_training_online
+                                                                }
+                                                                onChange={(e) =>
+                                                                    setData(
+                                                                        "subscription",
+                                                                        {
+                                                                            ...data.subscription,
+                                                                            price_training_online:
+                                                                                e.value,
                                                                         }
-                                                                    />
-                                                                    <OverlayPanel
-                                                                        className="shadow-md"
-                                                                        ref={
-                                                                            infoPriceTrainingOnlineRef
-                                                                        }
-                                                                    >
-                                                                        <ul className="list-disc list-inside">
-                                                                            <li>
-                                                                                Harga
-                                                                                Implementasi
-                                                                                Training
-                                                                                dan/atau
-                                                                                sosialisasi
-                                                                                secara
-                                                                                Daring/Online
-                                                                            </li>
-                                                                            <li>
-                                                                                Harga
-                                                                                implementasi
-                                                                                3x
-                                                                                sesi
-                                                                                training
-                                                                                secara
-                                                                                gratis.
-                                                                                (Harga
-                                                                                yang
-                                                                                di
-                                                                                imput
-                                                                                adalah
-                                                                                harga
-                                                                                training
-                                                                                tambahan)
-                                                                            </li>
-                                                                        </ul>
-                                                                    </OverlayPanel>
-                                                                </div>
-                                                            </div>
-                                                            <div className="h-full flex items-center">
-                                                                <Button
-                                                                    className="bg-red-500 h-1 w-1 shadow-md rounded-full "
-                                                                    icon={() => (
-                                                                        <i
-                                                                            className="pi pi-minus"
-                                                                            style={{
-                                                                                fontSize:
-                                                                                    "0.7rem",
-                                                                            }}
-                                                                        ></i>
-                                                                    )}
-                                                                    onClick={() => {
-                                                                        setInputPriceTrainingOnline(
-                                                                            (
-                                                                                prev
-                                                                            ) =>
-                                                                                (prev = false)
-                                                                        );
-                                                                        setData(
-                                                                            "subscription",
-                                                                            {
-                                                                                ...data.subscription,
-                                                                                price_training_online:
-                                                                                    null,
-                                                                            }
-                                                                        );
-                                                                    }}
-                                                                    aria-controls="popup_menu_right"
-                                                                    aria-haspopup
-                                                                />
-                                                            </div>
+                                                                    )
+                                                                }
+                                                                className={`h-full`}
+                                                                locale="id-ID"
+                                                            />
+
+                                                            <Button
+                                                                type="button"
+                                                                className="h-[35px]"
+                                                                icon="pi pi-info-circle"
+                                                                onClick={(e) =>
+                                                                    infoPriceTrainingOnlineRef.current.toggle(
+                                                                        e
+                                                                    )
+                                                                }
+                                                            />
+                                                            <OverlayPanel
+                                                                className="shadow-md"
+                                                                ref={
+                                                                    infoPriceTrainingOnlineRef
+                                                                }
+                                                            >
+                                                                <ul className="list-disc list-inside">
+                                                                    <li>
+                                                                        Harga
+                                                                        Implementasi
+                                                                        Training
+                                                                        dan/atau
+                                                                        sosialisasi
+                                                                        secara
+                                                                        Daring/Online
+                                                                    </li>
+                                                                    <li>
+                                                                        Harga
+                                                                        implementasi
+                                                                        3x sesi
+                                                                        training
+                                                                        secara
+                                                                        gratis.
+                                                                        (Harga
+                                                                        yang di
+                                                                        imput
+                                                                        adalah
+                                                                        harga
+                                                                        training
+                                                                        tambahan)
+                                                                    </li>
+                                                                </ul>
+                                                            </OverlayPanel>
                                                         </div>
-                                                    </>
-                                                )}
+                                                    </div>
+                                                </div>
                                             </div>
 
                                             <div className="flex flex-col">
-                                                <div className="flex justify-center">
-                                                    {!inputFeePurchaseCazhpoin && (
-                                                        <Button
-                                                            label="Input Tarif Isi Kartu Via Cazhpoin"
-                                                            className="text-purple-600 bg-transparent hover:text-white hover:bg-purple-600 hover:duration-100 text-sm"
-                                                            icon="pi pi-plus-circle"
-                                                            onClick={() =>
-                                                                setInputFeePurchaseCazhpoin(
-                                                                    (prev) =>
-                                                                        (prev = true)
+                                                <label htmlFor="price_card">
+                                                    Tarif Isi Kartu Via Cazhpoin
+                                                </label>
+
+                                                <div className="flex justify-between gap-1 w-full items-center">
+                                                    <div className="w-full flex gap-2 h-full">
+                                                        <Dropdown
+                                                            value={
+                                                                data
+                                                                    .subscription
+                                                                    .fee_purchase_cazhpoin
+                                                            }
+                                                            onChange={(e) =>
+                                                                setData(
+                                                                    "subscription",
+                                                                    {
+                                                                        ...data.subscription,
+                                                                        fee_purchase_cazhpoin:
+                                                                            e
+                                                                                .target
+                                                                                .value,
+                                                                    }
                                                                 )
                                                             }
-                                                            aria-controls="popup_menu_right"
-                                                            aria-haspopup
+                                                            options={option_fee}
+                                                            optionLabel="name"
+                                                            optionValue="name"
+                                                            placeholder="Pilih Tarif"
+                                                            editable
+                                                            valueTemplate={
+                                                                selectedOptionTemplate
+                                                            }
+                                                            itemTemplate={
+                                                                optionTemplate
+                                                            }
+                                                            className="w-full md:w-14rem"
                                                         />
-                                                    )}
+                                                    </div>
                                                 </div>
-
-                                                {inputFeePurchaseCazhpoin && (
-                                                    <>
-                                                        <label htmlFor="price_card">
-                                                            Tarif Isi Kartu Via
-                                                            Cazhpoin
-                                                        </label>
-
-                                                        <div className="flex justify-between gap-1 w-full items-center">
-                                                            <div className="w-[93%] flex gap-2 h-full">
-                                                                <Dropdown
-                                                                    value={
-                                                                        data
-                                                                            .subscription
-                                                                            .fee_purchase_cazhpoin
-                                                                    }
-                                                                    onChange={(
-                                                                        e
-                                                                    ) =>
-                                                                        setData(
-                                                                            "subscription",
-                                                                            {
-                                                                                ...data.subscription,
-                                                                                fee_purchase_cazhpoin:
-                                                                                    e
-                                                                                        .target
-                                                                                        .value,
-                                                                            }
-                                                                        )
-                                                                    }
-                                                                    options={
-                                                                        option_fee
-                                                                    }
-                                                                    optionLabel="name"
-                                                                    optionValue="name"
-                                                                    placeholder="Pilih Tarif"
-                                                                    editable
-                                                                    valueTemplate={
-                                                                        selectedOptionTemplate
-                                                                    }
-                                                                    itemTemplate={
-                                                                        optionTemplate
-                                                                    }
-                                                                    className="w-full md:w-14rem"
-                                                                />
-                                                            </div>
-                                                            <div className="h-full flex items-center">
-                                                                <Button
-                                                                    className="bg-red-500 h-1 w-1 shadow-md rounded-full "
-                                                                    icon={() => (
-                                                                        <i
-                                                                            className="pi pi-minus"
-                                                                            style={{
-                                                                                fontSize:
-                                                                                    "0.7rem",
-                                                                            }}
-                                                                        ></i>
-                                                                    )}
-                                                                    onClick={() => {
-                                                                        setInputFeePurchaseCazhpoin(
-                                                                            (
-                                                                                prev
-                                                                            ) =>
-                                                                                (prev = false)
-                                                                        );
-                                                                        setData(
-                                                                            "subscription",
-                                                                            {
-                                                                                ...data.subscription,
-                                                                                fee_purchase_cazhpoin:
-                                                                                    null,
-                                                                            }
-                                                                        );
-                                                                    }}
-                                                                    aria-controls="popup_menu_right"
-                                                                    aria-haspopup
-                                                                />
-                                                            </div>
-                                                        </div>
-                                                    </>
-                                                )}
                                             </div>
 
                                             <div className="flex flex-col">
-                                                <div className="flex justify-center">
-                                                    {!inputFeeBillCazhpoin && (
-                                                        <Button
-                                                            label="Input Tarif Bayar Tagihan via CazhPOIN
-                                                            "
-                                                            className="text-purple-600 bg-transparent hover:text-white hover:bg-purple-600 hover:duration-100 text-sm"
-                                                            icon="pi pi-plus-circle"
-                                                            onClick={() =>
-                                                                setInputFeeBillCazhpoin(
-                                                                    (prev) =>
-                                                                        (prev = true)
+                                                <label htmlFor="price_card">
+                                                    Tarif Bayar Tagihan via
+                                                    CazhPOIN
+                                                </label>
+
+                                                <div className="flex justify-between gap-1 w-full items-center">
+                                                    <div className="w-full flex gap-2 h-full">
+                                                        <Dropdown
+                                                            value={
+                                                                data
+                                                                    .subscription
+                                                                    .fee_bill_cazhpoin
+                                                            }
+                                                            onChange={(e) =>
+                                                                setData(
+                                                                    "subscription",
+                                                                    {
+                                                                        ...data.subscription,
+                                                                        fee_bill_cazhpoin:
+                                                                            e
+                                                                                .target
+                                                                                .value,
+                                                                    }
                                                                 )
                                                             }
-                                                            aria-controls="popup_menu_right"
-                                                            aria-haspopup
+                                                            options={option_fee}
+                                                            optionLabel="name"
+                                                            optionValue="name"
+                                                            placeholder="Pilih Tarif"
+                                                            editable
+                                                            valueTemplate={
+                                                                selectedOptionTemplate
+                                                            }
+                                                            itemTemplate={
+                                                                optionTemplate
+                                                            }
+                                                            className="w-full md:w-14rem"
                                                         />
-                                                    )}
+                                                    </div>
                                                 </div>
-
-                                                {inputFeeBillCazhpoin && (
-                                                    <>
-                                                        <label htmlFor="price_card">
-                                                            Tarif Bayar Tagihan
-                                                            via CazhPOIN
-                                                        </label>
-
-                                                        <div className="flex justify-between gap-1 w-full items-center">
-                                                            <div className="w-[93%] flex gap-2 h-full">
-                                                                <Dropdown
-                                                                    value={
-                                                                        data
-                                                                            .subscription
-                                                                            .fee_bill_cazhpoin
-                                                                    }
-                                                                    onChange={(
-                                                                        e
-                                                                    ) =>
-                                                                        setData(
-                                                                            "subscription",
-                                                                            {
-                                                                                ...data.subscription,
-                                                                                fee_bill_cazhpoin:
-                                                                                    e
-                                                                                        .target
-                                                                                        .value,
-                                                                            }
-                                                                        )
-                                                                    }
-                                                                    options={
-                                                                        option_fee
-                                                                    }
-                                                                    optionLabel="name"
-                                                                    optionValue="name"
-                                                                    placeholder="Pilih Tarif"
-                                                                    editable
-                                                                    valueTemplate={
-                                                                        selectedOptionTemplate
-                                                                    }
-                                                                    itemTemplate={
-                                                                        optionTemplate
-                                                                    }
-                                                                    className="w-full md:w-14rem"
-                                                                />
-                                                            </div>
-                                                            <div className="h-full flex items-center">
-                                                                <Button
-                                                                    className="bg-red-500 h-1 w-1 shadow-md rounded-full "
-                                                                    icon={() => (
-                                                                        <i
-                                                                            className="pi pi-minus"
-                                                                            style={{
-                                                                                fontSize:
-                                                                                    "0.7rem",
-                                                                            }}
-                                                                        ></i>
-                                                                    )}
-                                                                    onClick={() => {
-                                                                        setInputFeeBillCazhpoin(
-                                                                            (
-                                                                                prev
-                                                                            ) =>
-                                                                                (prev = false)
-                                                                        );
-                                                                        setData(
-                                                                            "subscription",
-                                                                            {
-                                                                                ...data.subscription,
-                                                                                fee_bill_cazhpoin:
-                                                                                    null,
-                                                                            }
-                                                                        );
-                                                                    }}
-                                                                    aria-controls="popup_menu_right"
-                                                                    aria-haspopup
-                                                                />
-                                                            </div>
-                                                        </div>
-                                                    </>
-                                                )}
                                             </div>
 
                                             <div className="flex flex-col">
-                                                <div className="flex justify-center">
-                                                    {!inputFeeTopupCazhpos && (
-                                                        <Button
-                                                            label="Input Tarif TopUp Kartu via Cazh POS
-                                                            "
-                                                            className="text-purple-600 bg-transparent hover:text-white hover:bg-purple-600 hover:duration-100 text-sm"
-                                                            icon="pi pi-plus-circle"
-                                                            onClick={() =>
-                                                                setInputFeeTopupCazhpos(
-                                                                    (prev) =>
-                                                                        (prev = true)
+                                                <label htmlFor="price_card">
+                                                    Tarif TopUp Kartu via Cazh
+                                                    POS
+                                                </label>
+
+                                                <div className="flex justify-between gap-1 w-full items-center">
+                                                    <div className="w-full flex gap-2 h-full">
+                                                        <Dropdown
+                                                            value={
+                                                                data
+                                                                    .subscription
+                                                                    .fee_topup_cazhpos
+                                                            }
+                                                            onChange={(e) =>
+                                                                setData(
+                                                                    "subscription",
+                                                                    {
+                                                                        ...data.subscription,
+                                                                        fee_topup_cazhpos:
+                                                                            e
+                                                                                .target
+                                                                                .value,
+                                                                    }
                                                                 )
                                                             }
-                                                            aria-controls="popup_menu_right"
-                                                            aria-haspopup
+                                                            options={option_fee}
+                                                            optionLabel="name"
+                                                            optionValue="name"
+                                                            placeholder="Pilih Tarif"
+                                                            editable
+                                                            valueTemplate={
+                                                                selectedOptionTemplate
+                                                            }
+                                                            itemTemplate={
+                                                                optionTemplate
+                                                            }
+                                                            className="w-full md:w-14rem"
                                                         />
-                                                    )}
+                                                    </div>
                                                 </div>
-
-                                                {inputFeeTopupCazhpos && (
-                                                    <>
-                                                        <label htmlFor="price_card">
-                                                            Tarif TopUp Kartu
-                                                            via Cazh POS
-                                                        </label>
-
-                                                        <div className="flex justify-between gap-1 w-full items-center">
-                                                            <div className="w-[93%] flex gap-2 h-full">
-                                                                <Dropdown
-                                                                    value={
-                                                                        data
-                                                                            .subscription
-                                                                            .fee_topup_cazhpos
-                                                                    }
-                                                                    onChange={(
-                                                                        e
-                                                                    ) =>
-                                                                        setData(
-                                                                            "subscription",
-                                                                            {
-                                                                                ...data.subscription,
-                                                                                fee_topup_cazhpos:
-                                                                                    e
-                                                                                        .target
-                                                                                        .value,
-                                                                            }
-                                                                        )
-                                                                    }
-                                                                    options={
-                                                                        option_fee
-                                                                    }
-                                                                    optionLabel="name"
-                                                                    optionValue="name"
-                                                                    placeholder="Pilih Tarif"
-                                                                    editable
-                                                                    valueTemplate={
-                                                                        selectedOptionTemplate
-                                                                    }
-                                                                    itemTemplate={
-                                                                        optionTemplate
-                                                                    }
-                                                                    className="w-full md:w-14rem"
-                                                                />
-                                                            </div>
-                                                            <div className="h-full flex items-center">
-                                                                <Button
-                                                                    className="bg-red-500 h-1 w-1 shadow-md rounded-full "
-                                                                    icon={() => (
-                                                                        <i
-                                                                            className="pi pi-minus"
-                                                                            style={{
-                                                                                fontSize:
-                                                                                    "0.7rem",
-                                                                            }}
-                                                                        ></i>
-                                                                    )}
-                                                                    onClick={() => {
-                                                                        setInputFeeTopupCazhpos(
-                                                                            (
-                                                                                prev
-                                                                            ) =>
-                                                                                (prev = false)
-                                                                        );
-                                                                        setData(
-                                                                            "subscription",
-                                                                            {
-                                                                                ...data.subscription,
-                                                                                fee_topup_cazhpos:
-                                                                                    null,
-                                                                            }
-                                                                        );
-                                                                    }}
-                                                                    aria-controls="popup_menu_right"
-                                                                    aria-haspopup
-                                                                />
-                                                            </div>
-                                                        </div>
-                                                    </>
-                                                )}
                                             </div>
 
                                             <div className="flex flex-col">
-                                                <div className="flex justify-center">
-                                                    {!inputFeeWithdrawCazhpos && (
-                                                        <Button
-                                                            label="Input Penarikan Saldo Kartu via Cazh POS
-                                                            "
-                                                            className="text-purple-600 bg-transparent hover:text-white hover:bg-purple-600 hover:duration-100 text-sm"
-                                                            icon="pi pi-plus-circle"
-                                                            onClick={() =>
-                                                                setInputFeeWithdrawCazhpos(
-                                                                    (prev) =>
-                                                                        (prev = true)
+                                                <label htmlFor="price_card">
+                                                    Tarif Penarikan Saldo Kartu
+                                                    via Cazh POS
+                                                </label>
+
+                                                <div className="flex justify-between gap-1 w-full items-center">
+                                                    <div className="w-full flex gap-2 h-full">
+                                                        <Dropdown
+                                                            value={
+                                                                data
+                                                                    .subscription
+                                                                    .fee_withdraw_cazhpos
+                                                            }
+                                                            onChange={(e) =>
+                                                                setData(
+                                                                    "subscription",
+                                                                    {
+                                                                        ...data.subscription,
+                                                                        fee_withdraw_cazhpos:
+                                                                            e
+                                                                                .target
+                                                                                .value,
+                                                                    }
                                                                 )
                                                             }
-                                                            aria-controls="popup_menu_right"
-                                                            aria-haspopup
+                                                            options={option_fee}
+                                                            optionLabel="name"
+                                                            optionValue="name"
+                                                            placeholder="Pilih Tarif"
+                                                            editable
+                                                            valueTemplate={
+                                                                selectedOptionTemplate
+                                                            }
+                                                            itemTemplate={
+                                                                optionTemplate
+                                                            }
+                                                            className="w-full md:w-14rem"
                                                         />
-                                                    )}
+                                                    </div>
                                                 </div>
-
-                                                {inputFeeWithdrawCazhpos && (
-                                                    <>
-                                                        <label htmlFor="price_card">
-                                                            Tarif Penarikan
-                                                            Saldo Kartu via Cazh
-                                                            POS
-                                                        </label>
-
-                                                        <div className="flex justify-between gap-1 w-full items-center">
-                                                            <div className="w-[93%] flex gap-2 h-full">
-                                                                <Dropdown
-                                                                    value={
-                                                                        data
-                                                                            .subscription
-                                                                            .fee_withdraw_cazhpos
-                                                                    }
-                                                                    onChange={(
-                                                                        e
-                                                                    ) =>
-                                                                        setData(
-                                                                            "subscription",
-                                                                            {
-                                                                                ...data.subscription,
-                                                                                fee_withdraw_cazhpos:
-                                                                                    e
-                                                                                        .target
-                                                                                        .value,
-                                                                            }
-                                                                        )
-                                                                    }
-                                                                    options={
-                                                                        option_fee
-                                                                    }
-                                                                    optionLabel="name"
-                                                                    optionValue="name"
-                                                                    placeholder="Pilih Tarif"
-                                                                    editable
-                                                                    valueTemplate={
-                                                                        selectedOptionTemplate
-                                                                    }
-                                                                    itemTemplate={
-                                                                        optionTemplate
-                                                                    }
-                                                                    className="w-full md:w-14rem"
-                                                                />
-                                                            </div>
-                                                            <div className="h-full flex items-center">
-                                                                <Button
-                                                                    className="bg-red-500 h-1 w-1 shadow-md rounded-full "
-                                                                    icon={() => (
-                                                                        <i
-                                                                            className="pi pi-minus"
-                                                                            style={{
-                                                                                fontSize:
-                                                                                    "0.7rem",
-                                                                            }}
-                                                                        ></i>
-                                                                    )}
-                                                                    onClick={() => {
-                                                                        setInputFeeWithdrawCazhpos(
-                                                                            (
-                                                                                prev
-                                                                            ) =>
-                                                                                (prev = false)
-                                                                        );
-                                                                        setData(
-                                                                            "subscription",
-                                                                            {
-                                                                                ...data.subscription,
-                                                                                fee_withdraw_cazhpos:
-                                                                                    null,
-                                                                            }
-                                                                        );
-                                                                    }}
-                                                                    aria-controls="popup_menu_right"
-                                                                    aria-haspopup
-                                                                />
-                                                            </div>
-                                                        </div>
-                                                    </>
-                                                )}
                                             </div>
                                             <div className="flex flex-col">
-                                                <div className="flex justify-center">
-                                                    {!inputFeeBillSaldokartu && (
-                                                        <Button
-                                                            label="Input Pembayaran Tagihan via Saldo Kartu
-                                                            "
-                                                            className="text-purple-600 bg-transparent hover:text-white hover:bg-purple-600 hover:duration-100 text-sm"
-                                                            icon="pi pi-plus-circle"
-                                                            onClick={() =>
-                                                                setInputFeeBillSaldokartu(
-                                                                    (prev) =>
-                                                                        (prev = true)
+                                                <label htmlFor="price_card">
+                                                    Tarif Pembayaran Tagihan via
+                                                    Saldo Kartu
+                                                </label>
+
+                                                <div className="flex justify-between gap-1 w-full items-center">
+                                                    <div className="w-full flex gap-2 h-full">
+                                                        <Dropdown
+                                                            value={
+                                                                data
+                                                                    .subscription
+                                                                    .fee_bill_saldokartu
+                                                            }
+                                                            onChange={(e) =>
+                                                                setData(
+                                                                    "subscription",
+                                                                    {
+                                                                        ...data.subscription,
+                                                                        fee_bill_saldokartu:
+                                                                            e
+                                                                                .target
+                                                                                .value,
+                                                                    }
                                                                 )
                                                             }
-                                                            aria-controls="popup_menu_right"
-                                                            aria-haspopup
+                                                            options={option_fee}
+                                                            optionLabel="name"
+                                                            optionValue="name"
+                                                            placeholder="Pilih Tarif"
+                                                            editable
+                                                            valueTemplate={
+                                                                selectedOptionTemplate
+                                                            }
+                                                            itemTemplate={
+                                                                optionTemplate
+                                                            }
+                                                            className="w-full md:w-14rem"
                                                         />
-                                                    )}
+                                                    </div>
                                                 </div>
-
-                                                {inputFeeBillSaldokartu && (
-                                                    <>
-                                                        <label htmlFor="price_card">
-                                                            Tarif Pembayaran
-                                                            Tagihan via Saldo
-                                                            Kartu
-                                                        </label>
-
-                                                        <div className="flex justify-between gap-1 w-full items-center">
-                                                            <div className="w-[93%] flex gap-2 h-full">
-                                                                <Dropdown
-                                                                    value={
-                                                                        data
-                                                                            .subscription
-                                                                            .fee_bill_saldokartu
-                                                                    }
-                                                                    onChange={(
-                                                                        e
-                                                                    ) =>
-                                                                        setData(
-                                                                            "subscription",
-                                                                            {
-                                                                                ...data.subscription,
-                                                                                fee_bill_saldokartu:
-                                                                                    e
-                                                                                        .target
-                                                                                        .value,
-                                                                            }
-                                                                        )
-                                                                    }
-                                                                    options={
-                                                                        option_fee
-                                                                    }
-                                                                    optionLabel="name"
-                                                                    optionValue="name"
-                                                                    placeholder="Pilih Tarif"
-                                                                    editable
-                                                                    valueTemplate={
-                                                                        selectedOptionTemplate
-                                                                    }
-                                                                    itemTemplate={
-                                                                        optionTemplate
-                                                                    }
-                                                                    className="w-full md:w-14rem"
-                                                                />
-                                                            </div>
-                                                            <div className="h-full flex items-center">
-                                                                <Button
-                                                                    className="bg-red-500 h-1 w-1 shadow-md rounded-full "
-                                                                    icon={() => (
-                                                                        <i
-                                                                            className="pi pi-minus"
-                                                                            style={{
-                                                                                fontSize:
-                                                                                    "0.7rem",
-                                                                            }}
-                                                                        ></i>
-                                                                    )}
-                                                                    onClick={() => {
-                                                                        setInputFeeBillSaldokartu(
-                                                                            (
-                                                                                prev
-                                                                            ) =>
-                                                                                (prev = false)
-                                                                        );
-                                                                        setData(
-                                                                            "subscription",
-                                                                            {
-                                                                                ...data.subscription,
-                                                                                fee_bill_saldokartu:
-                                                                                    null,
-                                                                            }
-                                                                        );
-                                                                    }}
-                                                                    aria-controls="popup_menu_right"
-                                                                    aria-haspopup
-                                                                />
-                                                            </div>
-                                                        </div>
-                                                    </>
-                                                )}
                                             </div>
                                         </div>
                                     </>
@@ -2585,6 +2149,113 @@ export default function Index({ auth, partner }) {
                                             options={account_managers}
                                             optionLabel="name"
                                             placeholder="Pilih Account Manager (AM)"
+                                            filter
+                                            valueTemplate={
+                                                selectedOptionTemplate
+                                            }
+                                            itemTemplate={optionTemplate}
+                                            className="w-full md:w-14rem"
+                                        />
+                                    </div>
+
+                                    <div className="flex flex-col">
+                                        <label htmlFor="province">
+                                            Provinsi *
+                                        </label>
+                                        <Dropdown
+                                            value={
+                                                data.partner.province
+                                                    ? JSON.parse(
+                                                          data.partner.province
+                                                      )
+                                                    : null
+                                            }
+                                            onChange={(e) => {
+                                                setcodeProvince(
+                                                    (prev) =>
+                                                        (prev =
+                                                            e.target.value.code)
+                                                );
+                                                setData("partner", {
+                                                    ...data.partner,
+                                                    province: JSON.stringify(
+                                                        e.target.value
+                                                    ),
+                                                });
+                                            }}
+                                            options={provinces}
+                                            optionLabel="name"
+                                            placeholder="Pilih Provinsi"
+                                            filter
+                                            valueTemplate={
+                                                selectedOptionTemplate
+                                            }
+                                            itemTemplate={optionTemplate}
+                                            className="w-full md:w-14rem"
+                                        />
+                                    </div>
+
+                                    <div className="flex flex-col">
+                                        <label htmlFor="regency">
+                                            Kabupaten *
+                                        </label>
+                                        <Dropdown
+                                            value={
+                                                data.partner.regency
+                                                    ? JSON.parse(
+                                                          data.partner.regency
+                                                      )
+                                                    : null
+                                            }
+                                            onChange={(e) => {
+                                                setcodeRegency(
+                                                    (prev) =>
+                                                        (prev =
+                                                            e.target.value.code)
+                                                );
+                                                setData("partner", {
+                                                    ...data.partner,
+                                                    regency: JSON.stringify(
+                                                        e.target.value
+                                                    ),
+                                                });
+                                            }}
+                                            options={regencys}
+                                            optionLabel="name"
+                                            placeholder="Pilih Kabupaten"
+                                            filter
+                                            valueTemplate={
+                                                selectedOptionTemplate
+                                            }
+                                            itemTemplate={optionTemplate}
+                                            className="w-full md:w-14rem"
+                                        />
+                                    </div>
+
+                                    <div className="flex flex-col">
+                                        <label htmlFor="subdistrict">
+                                            Kecamatan
+                                        </label>
+                                        <Dropdown
+                                            value={
+                                                data.partner.subdistrict
+                                                    ? JSON.parse(
+                                                          data.partner
+                                                              .subdistrict
+                                                      )
+                                                    : null
+                                            }
+                                            onChange={(e) =>
+                                                setData("partner", {
+                                                    ...data.partner,
+                                                    subdistrict: JSON.stringify(
+                                                        e.target.value
+                                                    ),
+                                                })
+                                            }
+                                            options={subdistricts}
+                                            optionLabel="name"
+                                            placeholder="Pilih Kecamatan"
                                             filter
                                             valueTemplate={
                                                 selectedOptionTemplate
@@ -2829,7 +2500,7 @@ export default function Index({ auth, partner }) {
                                                     rowData
                                                 )
                                             }
-                                            className="hover:text-blue-700"
+                                            className="hover:text-blue-700 text-left"
                                         >
                                             {rowData.name}
                                         </button>
@@ -2867,10 +2538,47 @@ export default function Index({ auth, partner }) {
                                 <Column
                                     header="Account Manager"
                                     body={(rowData) =>
-                                        rowData.account_manager.name
+                                        rowData.account_manager !== null
+                                            ? rowData.account_manager.name
+                                            : "belum diisi"
                                     }
                                     className="dark:border-none"
                                     headerClassName="dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300"
+                                    align="left"
+                                    style={{ minWidth: "8rem" }}
+                                ></Column>
+                                <Column
+                                    field="province"
+                                    className="dark:border-none"
+                                    headerClassName="dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300"
+                                    header="Provinsi"
+                                    body={(rowData) => {
+                                        return JSON.parse(rowData.province)
+                                            .name;
+                                    }}
+                                    align="left"
+                                    style={{ minWidth: "8rem" }}
+                                ></Column>
+                                <Column
+                                    field="regency"
+                                    className="dark:border-none"
+                                    headerClassName="dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300"
+                                    header="Kabupaten"
+                                    body={(rowData) => {
+                                        return JSON.parse(rowData.regency).name;
+                                    }}
+                                    align="left"
+                                    style={{ minWidth: "8rem" }}
+                                ></Column>
+                                <Column
+                                    field="subdistrict"
+                                    className="dark:border-none"
+                                    headerClassName="dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300"
+                                    header="Kecamatan"
+                                    body={(rowData) => {
+                                        return JSON.parse(rowData.subdistrict)
+                                            .name;
+                                    }}
                                     align="left"
                                     style={{ minWidth: "8rem" }}
                                 ></Column>
@@ -2889,9 +2597,11 @@ export default function Index({ auth, partner }) {
                                 <Column
                                     header="Tanggal live"
                                     body={(rowData) =>
-                                        new Date(
-                                            rowData.live_date
-                                        ).toLocaleDateString("id")
+                                        rowData.live_date !== null
+                                            ? new Date(
+                                                  rowData.live_date
+                                              ).toLocaleDateString("id")
+                                            : "belum diisi"
                                     }
                                     className="dark:border-none"
                                     headerClassName="dark:border-none  bg-transparent dark:bg-transparent dark:text-gray-300"
@@ -2913,7 +2623,9 @@ export default function Index({ auth, partner }) {
                                 <Column
                                     header="Umur Onboarding"
                                     body={(rowData) =>
-                                        rowData.onboarding_age + " hari"
+                                        rowData.onboarding_age !== null
+                                            ? rowData.onboarding_age + " hari"
+                                            : "belum diisi"
                                     }
                                     className="dark:border-none"
                                     headerClassName="dark:border-none  bg-transparent dark:bg-transparent dark:text-gray-300"
@@ -2923,17 +2635,9 @@ export default function Index({ auth, partner }) {
                                 <Column
                                     header="Umur Live"
                                     body={(rowData) =>
-                                        rowData.live_age + " hari"
-                                    }
-                                    className="dark:border-none"
-                                    headerClassName="dark:border-none  bg-transparent dark:bg-transparent dark:text-gray-300"
-                                    align="left"
-                                    style={{ minWidth: "8rem" }}
-                                ></Column>
-                                <Column
-                                    header="Umur Live"
-                                    body={(rowData) =>
-                                        rowData.live_age + " hari"
+                                        rowData.live_age !== null
+                                            ? rowData.live_age + " hari"
+                                            : "belum diisi"
                                     }
                                     className="dark:border-none"
                                     headerClassName="dark:border-none  bg-transparent dark:bg-transparent dark:text-gray-300"
@@ -3032,6 +2736,21 @@ export default function Index({ auth, partner }) {
                     <DetailPartner
                         partners={partners}
                         detailPartner={selectedDetailPartner}
+                        sales={sales}
+                        account_managers={account_managers}
+                        status={status}
+                        provinces={provinces}
+                        regencys={regencys}
+                        getProvince={getProvince}
+                        getRegencys={getRegencys}
+                        getSubdistricts={getSubdistricts}
+                        subdistricts={subdistricts}
+                        codeProvince={codeProvince}
+                        codeRegency={codeRegency}
+                        setcodeProvince={setcodeProvince}
+                        setcodeRegency={setcodeRegency}
+                        showSuccess={showSuccess}
+                        showError={showError}
                     />
                 </TabPanel>
             </TabView>

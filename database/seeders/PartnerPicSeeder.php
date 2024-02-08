@@ -21,7 +21,6 @@ class PartnerPicSeeder extends Seeder
                 'number' => '123456789' . $i,
                 'email' => 'pic' . $i . '@gmail.com',
                 'position' => 'Position ' . $i,
-                'address' => 'Address ' . $i,
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);

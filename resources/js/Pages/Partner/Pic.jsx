@@ -53,7 +53,6 @@ const Pic = ({
         name: "",
         number: "",
         position: "",
-        address: "",
         email: "",
     });
 
@@ -337,18 +336,6 @@ const Pic = ({
                                     aria-describedby="position-help"
                                 />
                             </div>
-
-                            <div className="flex flex-col">
-                                <label htmlFor="address">Alamat</label>
-                                <InputTextarea
-                                    value={dataPIC.address}
-                                    onChange={(e) =>
-                                        setDataPIC("address", e.target.value)
-                                    }
-                                    rows={5}
-                                    cols={30}
-                                />
-                            </div>
                         </div>
                         <div className="flex justify-center mt-5">
                             <Button
@@ -556,14 +543,7 @@ const Pic = ({
                             align="left"
                             style={{ minWidth: "8rem" }}
                         ></Column>
-                        <Column
-                            field="address"
-                            className="dark:border-none"
-                            headerClassName="dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300"
-                            header="Alamat"
-                            align="left"
-                            style={{ minWidth: "8rem" }}
-                        ></Column>
+
                         <Column
                             header="Action"
                             body={actionBodyTemplatePIC}

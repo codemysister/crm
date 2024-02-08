@@ -233,6 +233,11 @@
         color: rgba(0, 0, 0, 0); /* Warna akhir dengan transparansi 0 */
       }
     }
+
+   /* button */
+   .p-button.p-component.p-fileupload-choose{
+    width: 100%;
+   }
     
 }
 

@@ -41,6 +41,11 @@ class Partner extends Authenticatable
 
     public function subscription()
     {
-        return $this->hasOne(PartnerSubscription::class);
+        return $this->hasMany(PartnerSubscription::class);
+    }
+
+    public function invoice_generals()
+    {
+        return $this->hasMany(InvoiceGeneral::class);
     }
 }

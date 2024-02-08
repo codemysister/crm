@@ -16,10 +16,14 @@ return new class extends Migration {
             $table->foreignId('sales_id')->constrained('users', 'id')->onDelete('cascade');
             $table->foreignId('account_manager_id')->nullable()->constrained('users', 'id')->onDelete('cascade');
             $table->string('name');
+            $table->string('logo')->nullable();
             $table->string('phone_number');
-            $table->string('address');
+            $table->json('province');
+            $table->json('regency');
+            $table->json('subdistrict');
+            $table->string('address')->nullable();
             $table->date('onboarding_date');
-            $table->date('live_date')->nullable();
+            $table->date('live_date')->nullable()->default(null);
             $table->integer('onboarding_age')->nullable();
             $table->integer('live_age')->nullable();
             $table->date('monitoring_date_after_3_month_live')->nullable();

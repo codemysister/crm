@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\PartnerGeneralRequest;
 use App\Models\Partner;
 use App\Models\PartnerAccountSetting;
 use App\Models\PartnerBank;
@@ -11,6 +12,7 @@ use App\Models\User;
 use DateTime;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
 
@@ -38,20 +40,33 @@ class PartnerController extends Controller
         return Inertia::render("Partner/Index", compact('partner'));
     }
 
-    public function store(Request $request)
+    public function store(PartnerGeneralRequest $request)
     {
+        $validate = $request->validated();
+        $pathLogo = '';
+        if ($request->hasFile('partner.logo.files.0')) {
+            $file = $request->file('partner.logo')['files'][0];
+            $filename = time() . '.' . $file->getClientOriginalExtension();
+            $pathLogo = "images/logo/" . $filename;
+            Storage::putFileAs('public/images/logo', $file, $filename);
+
+        }
 
         $partner = Partner::create([
             'uuid' => Str::uuid(),
             'name' => $request['partner']['name'],
+            'logo' => $pathLogo,
             'phone_number' => $request['partner']['phone_number'],
             'sales_id' => $request['partner']['sales']['id'],
             'account_manager_id' => $request['partner']['account_manager']['id'],
             'onboarding_date' => (new DateTime($request['partner']['onboarding_date']))->format('Y-m-d H:i:s'),
-            'live_date' => (new DateTime($request['partner']['live_date']))->format('Y-m-d H:i:s'),
+            'live_date' => $request['partner']['live_date'] !== null ? (new DateTime($request['partner']['live_date']))->format('Y-m-d H:i:s') : null,
             'onboarding_age' => $request['partner']['onboarding_age'],
             'live_age' => $request['partner']['live_age'],
             'monitoring_date_after_3_month_live' => (new DateTime($request['partner']['monitoring_date_after_3_month_live']))->format('Y-m-d H:i:s'),
+            'province' => $request['partner']['province'],
+            'regency' => $request['partner']['regency'],
+            'subdistrict' => $request['partner']['subdistrict'],
             'address' => $request['partner']['address'],
             'status' => $request['partner']['status']['name']
         ]);
@@ -63,7 +78,6 @@ class PartnerController extends Controller
             'number' => $request['pic']['number'],
             'email' => $request['pic']['email'],
             'position' => $request['pic']['position'],
-            'address' => $request['pic']['address']
         ]);
 
         $bank = PartnerBank::create([
@@ -119,8 +133,32 @@ class PartnerController extends Controller
             'onboarding_age' => $request['partner']['onboarding_age'],
             'live_age' => $request['partner']['live_age'],
             'monitoring_date_after_3_month_live' => (new DateTime($request['partner']['monitoring_date_after_3_month_live']))->format('Y-m-d H:i:s'),
+            'province' => $request['partner']['province'],
+            'regency' => $request['partner']['regency'],
+            'subdistrict' => $request['partner']['subdistrict'],
             'address' => $request['partner']['address'],
             'status' => $request['partner']['status']
+        ]);
+    }
+
+    public function updateDetailPartner(Request $request, $uuid)
+    {
+
+        Partner::where('uuid', $uuid)->first()->update([
+            'name' => $request['name'],
+            'phone_number' => $request['phone_number'],
+            'sales_id' => $request['sales']['id'],
+            'account_manager_id' => $request['account_manager']['id'],
+            'onboarding_date' => (new DateTime($request['onboarding_date']))->format('Y-m-d H:i:s'),
+            'live_date' => (new DateTime($request['live_date']))->format('Y-m-d H:i:s'),
+            'onboarding_age' => $request['onboarding_age'],
+            'live_age' => $request['live_age'],
+            'monitoring_date_after_3_month_live' => (new DateTime($request['monitoring_date_after_3_month_live']))->format('Y-m-d H:i:s'),
+            'province' => $request['province'],
+            'regency' => $request['regency'],
+            'subdistrict' => $request['subdistrict'],
+            'address' => $request['address'],
+            'status' => $request['status']
         ]);
     }
 
@@ -143,7 +181,7 @@ class PartnerController extends Controller
             'banks' => function ($query) {
                 $query->latest();
             }
-        ])->get();
+        ])->latest()->get();
         $salesDefault = User::role('sales')->get();
         $accountManagerDefault = User::role('account manager')->get();
 
