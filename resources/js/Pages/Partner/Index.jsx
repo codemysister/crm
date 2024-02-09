@@ -24,9 +24,14 @@ import DetailPartner from "./DetailPartner/DetailPartner.jsx";
 import Bank from "./Bank.jsx";
 import Account from "./Account.jsx";
 import Subscription from "./Subscription.jsx";
+import { FilePond, registerPlugin } from "react-filepond";
+import FilePondPluginFileValidateSize from "filepond-plugin-file-validate-size";
+import "filepond/dist/filepond.min.css";
+registerPlugin(FilePondPluginFileValidateSize);
 
 export default function Index({ auth, partner }) {
     const [partners, setPartners] = useState("");
+    const [detailPartner, setDetailPartner] = useState(partner);
     const [sales, setSales] = useState("");
     const [account_managers, setAccountManagers] = useState("");
     const [provinces, setProvinces] = useState([]);
@@ -36,6 +41,7 @@ export default function Index({ auth, partner }) {
     const [codeRegency, setcodeRegency] = useState(null);
     const [activeIndexTab, setActiveIndexTab] = useState(0);
     const [isLoadingData, setIsLoadingData] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
     const [modalPartnersIsVisible, setModalPartnersIsVisible] = useState(false);
     const [modalEditPartnersIsVisible, setModalEditPartnersIsVisible] =
         useState(false);
@@ -48,12 +54,9 @@ export default function Index({ auth, partner }) {
     const [activeIndex, setActiveIndex] = useState(0);
     const dummyArray = Array.from({ length: 5 }, (v, i) => i);
     const [preRenderLoad, setPreRenderLoad] = useState(true);
-    const [selectedDetailPartner, setSelectedDetailPartner] = useState(partner);
-    const [totalSize, setTotalSize] = useState(0);
-    const fileUploadRef = useRef(null);
-
+    const [files, setFiles] = useState([]);
     useEffect(() => {
-        if (selectedDetailPartner) {
+        if (partner) {
             setActiveIndexTab(5);
         }
     }, []);
@@ -476,64 +479,6 @@ export default function Index({ auth, partner }) {
     const renderHeader = () => {
         return (
             <div className="flex flex-row justify-between gap-2 align-items-center items-end">
-                {activeIndexTab == 2 && (
-                    <Button
-                        label="Tambah"
-                        className="bg-purple-600 text-sm shadow-md rounded-lg mr-2"
-                        icon={addButtonIcon}
-                        onClick={() => {
-                            setModalBankIsVisible((prev) => (prev = true));
-                            resetBank();
-                        }}
-                        aria-controls="popup_menu_right"
-                        aria-haspopup
-                    />
-                )}
-
-                {activeIndexTab == 3 && (
-                    <Button
-                        label="Tambah"
-                        className="bg-purple-600 text-sm shadow-md rounded-lg mr-2"
-                        icon={addButtonIcon}
-                        onClick={() => {
-                            setModalAccountIsVisible((prev) => (prev = true));
-                            resetAccount();
-                        }}
-                        aria-controls="popup_menu_right"
-                        aria-haspopup
-                    />
-                )}
-
-                {activeIndexTab == 4 && (
-                    <Button
-                        label="Tambah"
-                        className="bg-purple-600 text-sm shadow-md rounded-lg mr-2"
-                        icon={addButtonIcon}
-                        onClick={() => {
-                            setModalSubscriptionIsVisible(
-                                (prev) => (prev = true)
-                            );
-                            resetSubscription();
-                        }}
-                        aria-controls="popup_menu_right"
-                        aria-haspopup
-                    />
-                )}
-
-                {activeIndexTab == 5 && (
-                    <Button
-                        label="Tambah"
-                        className="bg-purple-600 text-sm shadow-md rounded-lg mr-2"
-                        icon={addButtonIcon}
-                        onClick={() => {
-                            setModalSubscriptionIsVisible(
-                                (prev) => (prev = true)
-                            );
-                        }}
-                        aria-controls="popup_menu_right"
-                        aria-haspopup
-                    />
-                )}
                 <div>
                     <Button
                         label="Tambah"
@@ -633,9 +578,17 @@ export default function Index({ auth, partner }) {
         setActiveIndex((prev = prev = 0));
     };
 
+    const getSelectedDetailPartner = async (partner) => {
+        setIsLoading((prev) => (prev = true));
+        let response = await fetch("/partners/" + partner.uuid);
+        let data = await response.json();
+        setDetailPartner((prev) => (prev = data));
+        setIsLoading((prev) => (prev = false));
+    };
+
     const handleSelectedDetailPartner = (partner) => {
-        setSelectedDetailPartner(partner);
-        setActiveIndexTab((prev) => (prev = 5));
+        getSelectedDetailPartner(partner);
+        setActiveIndexTab(5);
     };
 
     if (preRenderLoad) {
@@ -731,18 +684,24 @@ export default function Index({ auth, partner }) {
                                                 <label htmlFor="name">
                                                     Logo
                                                 </label>
-                                                <FileUpload
-                                                    mode="basic"
-                                                    className="flex w-full p-1"
-                                                    onSelect={(rowData) => {
-                                                        setData("partner", {
-                                                            ...data.partner,
-                                                            logo: rowData,
-                                                        });
-                                                    }}
-                                                    accept="image/*"
-                                                    maxFileSize={1000000}
-                                                />
+
+                                                <div className="App">
+                                                    <FilePond
+                                                        onaddfile={(
+                                                            error,
+                                                            fileItems
+                                                        ) => {
+                                                            setData("partner", {
+                                                                ...data.partner,
+                                                                logo: fileItems.file,
+                                                            });
+                                                        }}
+                                                        maxFileSize="2mb"
+                                                        labelMaxFileSizeExceeded="File terlalu besar"
+                                                        name="files" /* sets the file input name, it's filepond by default */
+                                                        labelIdle='Drag & Drop your files or <span class="filepond--label-action">Browse</span>'
+                                                    />
+                                                </div>
                                             </div>
 
                                             <div className="flex flex-col">
@@ -2735,15 +2694,16 @@ export default function Index({ auth, partner }) {
                 <TabPanel header="Detail Partner">
                     <DetailPartner
                         partners={partners}
-                        detailPartner={selectedDetailPartner}
+                        detailPartner={detailPartner}
+                        handleSelectedDetailPartner={
+                            handleSelectedDetailPartner
+                        }
                         sales={sales}
                         account_managers={account_managers}
                         status={status}
+                        isLoading={isLoading}
                         provinces={provinces}
                         regencys={regencys}
-                        getProvince={getProvince}
-                        getRegencys={getRegencys}
-                        getSubdistricts={getSubdistricts}
                         subdistricts={subdistricts}
                         codeProvince={codeProvince}
                         codeRegency={codeRegency}

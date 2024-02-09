@@ -23,18 +23,17 @@ class PartnerRequest extends FormRequest
     {
         return [
             'name' => 'required|string|max:255',
-            'logo' => 'nullable|string',
             'phone_number' => 'required|string|max:20',
-            'province' => 'required|array',
-            'regency' => 'required|array',
-            'subdistrict' => 'required|array',
+            'province' => 'required',
+            'regency' => 'required',
+            'subdistrict' => 'required',
             'address' => 'nullable|string',
             'onboarding_date' => 'required|date',
             'live_date' => 'nullable|date',
             'onboarding_age' => 'nullable|integer',
             'live_age' => 'nullable|integer',
             'monitoring_date_after_3_month_live' => 'nullable|date',
-            'status' => 'required|in:Proses,Aktif,Non Aktif,Cancel,CLBK',
+            'status' => 'required',
         ];
     }
 }

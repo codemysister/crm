@@ -15,13 +15,13 @@ class UserController extends Controller
      * Display a listing of the resource.
      */
     public function index()
-    {        
+    {
         return Inertia::render('User/Index');
     }
 
     public function apiGetUsers()
     {
-        $usersDefault = User::with('roles')->get();
+        $usersDefault = User::with('roles')->latest()->get();
         $rolesDefault = Role::all();
         $usersDefault = $usersDefault->map(function ($user) {
             $role = $user->roles->first();
@@ -29,6 +29,7 @@ class UserController extends Controller
                 'id' => $user->id,
                 'name' => $user->name,
                 'email' => $user->email,
+                'number' => $user->number,
                 'role' => $role->name,
                 'role_id' => $role->id,
             ];
@@ -36,7 +37,7 @@ class UserController extends Controller
 
         return response()->json([
             'users' => $usersDefault,
-            'roles' =>$rolesDefault
+            'roles' => $rolesDefault
         ]);
     }
 
@@ -48,16 +49,16 @@ class UserController extends Controller
         //
     }
 
-    
+
     /**
      * Store a newly created resource in storage.
      */
     public function store(Request $request)
     {
-
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
+            'number' => $request->number ? $request->number : null,
             'password' => Hash::make($request->password),
         ]);
         $user->assignRole($request->role["name"]);
@@ -70,7 +71,14 @@ class UserController extends Controller
     public function update(Request $request, $id)
     {
         $user = User::with('roles')->findOrFail($id);
-        $user->update($request->all());
+        if ($request->new_password) {
+            $user->update(['password' => Hash::make($request->new_password)]);
+        }
+        $user->update([
+            'name' => $request->name,
+            'email' => $request->email,
+            'number' => $request->number ? $request->number : null,
+        ]);
         $user->syncRoles($request->role);
     }
 

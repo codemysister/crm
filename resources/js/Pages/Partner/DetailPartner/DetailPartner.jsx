@@ -12,10 +12,17 @@ import { InputTextarea } from "primereact/inputtextarea";
 import { ProgressSpinner } from "primereact/progressspinner";
 import { Image } from "primereact/image";
 import DetailPIC from "./DetailPIC";
+import DetailBank from "./DetailBank";
+import DetailSubscription from "./DetailSubscription";
+import { FilePond, registerPlugin } from "react-filepond";
+import FilePondPluginFileValidateSize from "filepond-plugin-file-validate-size";
+import "filepond/dist/filepond.min.css";
+registerPlugin(FilePondPluginFileValidateSize);
 
 const DetailPartner = ({
     partners,
     detailPartner,
+    handleSelectedDetailPartner,
     sales,
     account_managers,
     showSuccess,
@@ -23,32 +30,23 @@ const DetailPartner = ({
     provinces,
     regencys,
     subdistricts,
-    codeProvince,
-    codeRegency,
     setcodeProvince,
     setcodeRegency,
-    getProvince,
-    getRegencys,
-    getSubdistricts,
+    isLoading,
 }) => {
     const [partner, setPartner] = useState(detailPartner);
     const [activeMenu, setActiveMenu] = useState("lembaga");
-    const [isLoading, setIsLoading] = useState(false);
-    const [isDropdownLoading, setIsDropdownLoading] = useState(false);
     const [modalEditPartnersIsVisible, setModalEditPartnersIsVisible] =
         useState(false);
 
-    const getSelectedDetailPartner = async (partner) => {
-        setIsLoading((prev) => (prev = true));
-        let response = await fetch("/partners/" + partner.uuid);
-        let data = await response.json();
-        setPartner((prev) => (prev = data));
-        setIsLoading((prev) => (prev = false));
-    };
+    useEffect(() => {
+        setPartner((prev) => (prev = detailPartner));
+    }, [detailPartner]);
 
     const {
         data,
         setData,
+        post,
         put,
         delete: destroy,
         reset,
@@ -62,6 +60,7 @@ const DetailPartner = ({
             id: null,
         },
         name: "",
+        logo: null,
         phone_number: "",
         onboarding_date: new Date(),
         onboarding_age: null,
@@ -106,6 +105,13 @@ const DetailPartner = ({
                 setActiveMenu((prev) => (prev = "langganan"));
             },
         },
+        {
+            label: "Surat Penawaran Harga",
+            className: `${activeMenu == "sph" ? "p-menuitem-active" : ""}`,
+            command: () => {
+                setActiveMenu((prev) => (prev = "sph"));
+            },
+        },
     ];
 
     const selectedOptionTemplate = (option, props) => {
@@ -134,9 +140,10 @@ const DetailPartner = ({
                 <div className="flex w-full gap-5 items-center ">
                     <Dropdown
                         optionLabel="name"
+                        dataKey="id"
                         value={partner}
                         onChange={(e) =>
-                            getSelectedDetailPartner(e.target.value)
+                            handleSelectedDetailPartner(e.target.value)
                         }
                         options={partners}
                         placeholder="Pilih Partner"
@@ -145,8 +152,8 @@ const DetailPartner = ({
                         itemTemplate={optionTemplate}
                         className="w-[40%] flex justify-center rounded-lg shadow-md border-none"
                     />
-                    <div className="text-center w-full flex items-center gap-1 justify-center">
-                        {partner.logo ? (
+                    <div className="text-center w-full flex items-center gap-2 justify-center">
+                        {partner?.logo ? (
                             <Image
                                 src={`storage/${partner.logo}`}
                                 alt="Image"
@@ -166,6 +173,7 @@ const DetailPartner = ({
             ...prevData,
             uuid: partner.uuid,
             name: partner.name,
+            logo: partner.logo,
             phone_number: partner.phone_number,
             sales: partner.sales,
             account_manager: partner.account_manager,
@@ -181,6 +189,7 @@ const DetailPartner = ({
             address: partner.address,
             status: partner.status,
         }));
+
         setcodeRegency(JSON.parse(partner.regency).code);
         setcodeProvince(JSON.parse(partner.province).code);
 
@@ -196,12 +205,13 @@ const DetailPartner = ({
 
     const handleSubmitForm = (e) => {
         e.preventDefault();
-        put("api/partner/detail/" + data.uuid, {
+
+        post("api/partner/detail/" + data.uuid, {
             onSuccess: () => {
                 showSuccess("Update");
                 setModalEditPartnersIsVisible((prev) => false);
-                getSelectedDetailPartner(data);
-                reset();
+                handleSelectedDetailPartner(data);
+                // reset();
             },
             onError: () => {
                 showError("Update");
@@ -248,7 +258,7 @@ const DetailPartner = ({
                             className="w-full rounded-lg"
                         />
                     </div>
-                    <div class="w-full rounded-lg bg-gray-50/50 border overflow-y-auto min-h-[300px] h-full max-h-full p-4">
+                    <div class="w-full rounded-lg bg-gray-50/50 border overflow-y-auto min-h-[300px] max-h-[300px] h-full  p-4">
                         {partner ? (
                             <>
                                 {isLoading ? (
@@ -511,55 +521,23 @@ const DetailPartner = ({
                                         )}
 
                                         {activeMenu === "bank" && (
-                                            <table class="w-full">
-                                                <tr class="border-b">
-                                                    <td class="pt-2 pb-1 text-gray-700 text-base font-bold w-1/5">
-                                                        Bank
-                                                    </td>
-                                                    <td class="pt-2 pb-1 text-gray-700 text-base w-[2%]">
-                                                        :
-                                                    </td>
-                                                    <td class="pt-2 pb-1 text-gray-700 text-base w-7/12">
-                                                        {partner.banks[0].bank}
-                                                    </td>
-                                                </tr>
-                                                <tr class="border-b">
-                                                    <td class="pt-2 pb-1 text-gray-700 text-base font-bold w-1/5">
-                                                        No. Rekening
-                                                    </td>
-                                                    <td class="pt-2 pb-1 text-gray-700 text-base w-[2%]">
-                                                        :
-                                                    </td>
-                                                    <td class="pt-2 pb-1 text-gray-700 text-base w-7/12">
-                                                        {
-                                                            partner.banks[0]
-                                                                .account_bank_number
-                                                        }
-                                                    </td>
-                                                </tr>
-                                                <tr class="border-b">
-                                                    <td class="pt-2 pb-1 text-gray-700 text-base font-bold w-1/5">
-                                                        Atas Nama
-                                                    </td>
-                                                    <td class="pt-2 pb-1 text-gray-700 text-base w-[2%]">
-                                                        :
-                                                    </td>
-                                                    <td class="pt-2 pb-1 text-gray-700 text-base w-7/12">
-                                                        {
-                                                            partner.banks[0]
-                                                                .account_bank_name
-                                                        }
-                                                    </td>
-                                                </tr>
-                                            </table>
+                                            <DetailBank
+                                                partner={partner}
+                                                partners={partners}
+                                                handleSelectedDetailPartner={
+                                                    handleSelectedDetailPartner
+                                                }
+                                                showSuccess={showSuccess}
+                                                showError={showError}
+                                            />
                                         )}
 
                                         {activeMenu === "pic" && (
                                             <DetailPIC
                                                 partner={partner}
                                                 partners={partners}
-                                                getSelectedDetailPartner={
-                                                    getSelectedDetailPartner
+                                                handleSelectedDetailPartner={
+                                                    handleSelectedDetailPartner
                                                 }
                                                 showSuccess={showSuccess}
                                                 showError={showError}
@@ -567,65 +545,27 @@ const DetailPartner = ({
                                         )}
 
                                         {activeMenu === "langganan" && (
-                                            <table class="w-full">
-                                                <tr class="border-b">
-                                                    <td class="pt-2 pb-1 text-gray-700 text-base font-bold w-1/5">
-                                                        Nominal
-                                                    </td>
-                                                    <td class="pt-2 pb-1 text-gray-700 text-base w-[2%]">
-                                                        :
-                                                    </td>
-                                                    <td class="pt-2 pb-1 text-gray-700 text-base w-7/12">
-                                                        {
-                                                            partner.subscription
-                                                                .nominal
-                                                        }
-                                                    </td>
-                                                </tr>
-                                                <tr class="border-b">
-                                                    <td class="pt-2 pb-1 text-gray-700 text-base font-bold w-1/5">
-                                                        Periode
-                                                    </td>
-                                                    <td class="pt-2 pb-1 text-gray-700 text-base w-[2%]">
-                                                        :
-                                                    </td>
-                                                    <td class="pt-2 pb-1 text-gray-700 text-base w-7/12">
-                                                        {
-                                                            partner.subscription
-                                                                .period
-                                                        }{" "}
-                                                        bulan
-                                                    </td>
-                                                </tr>
+                                            <DetailSubscription
+                                                partner={partner}
+                                                partners={partners}
+                                                handleSelectedDetailPartner={
+                                                    handleSelectedDetailPartner
+                                                }
+                                                showSuccess={showSuccess}
+                                                showError={showError}
+                                            />
+                                        )}
 
-                                                {partner.subscription
-                                                    .price_card !== {} && (
-                                                    <tr class="border-b">
-                                                        <td class="pt-2 pb-1 text-gray-700 text-base font-bold w-1/5">
-                                                            Kartu{" "}
-                                                            {
-                                                                JSON.parse(
-                                                                    partner
-                                                                        .subscription
-                                                                        .price_card
-                                                                ).type
-                                                            }
-                                                        </td>
-                                                        <td class="pt-2 pb-1 text-gray-700 text-base w-[2%]">
-                                                            :
-                                                        </td>
-                                                        <td class="pt-2 pb-1 text-gray-700 text-base w-7/12">
-                                                            {
-                                                                JSON.parse(
-                                                                    partner
-                                                                        .subscription
-                                                                        .price_card
-                                                                ).price
-                                                            }
-                                                        </td>
-                                                    </tr>
-                                                )}
-                                            </table>
+                                        {activeMenu === "sph" && (
+                                            <DetailSubscription
+                                                partner={partner}
+                                                partners={partners}
+                                                handleSelectedDetailPartner={
+                                                    handleSelectedDetailPartner
+                                                }
+                                                showSuccess={showSuccess}
+                                                showError={showError}
+                                            />
                                         )}
                                     </>
                                 )}
@@ -651,9 +591,12 @@ const DetailPartner = ({
                     visible={modalEditPartnersIsVisible}
                     onHide={() => setModalEditPartnersIsVisible(false)}
                 >
-                    <form onSubmit={(e) => handleSubmitForm(e)}>
+                    <form
+                        onSubmit={(e) => handleSubmitForm(e)}
+                        enctype="multipart/form-data"
+                    >
                         <div className="flex flex-col justify-around gap-4 mt-1">
-                            <div className="flex flex-col">
+                            <div className="flex flex-col mt-2">
                                 <label htmlFor="name">Nama *</label>
                                 <InputText
                                     value={data.name}
@@ -665,7 +608,54 @@ const DetailPartner = ({
                                     aria-describedby="name-help"
                                 />
                             </div>
-
+                            <div className="flex flex-col">
+                                <label htmlFor="name">Logo</label>
+                                <div className="App">
+                                    {data.logo !== null &&
+                                    typeof data.logo == "string" ? (
+                                        <>
+                                            <FilePond
+                                                files={"storage/" + data.logo}
+                                                onaddfile={(
+                                                    error,
+                                                    fileItems
+                                                ) => {
+                                                    setData(
+                                                        "logo",
+                                                        fileItems.file
+                                                    );
+                                                }}
+                                                onremovefile={() => {
+                                                    reset("logo");
+                                                }}
+                                                maxFileSize="2mb"
+                                                labelMaxFileSizeExceeded="File terlalu besar"
+                                                labelIdle='Drag & Drop your files or <span class="filepond--label-action">Browse</span>'
+                                            />
+                                        </>
+                                    ) : (
+                                        <>
+                                            <FilePond
+                                                onaddfile={(
+                                                    error,
+                                                    fileItems
+                                                ) => {
+                                                    setData(
+                                                        "logo",
+                                                        fileItems.file
+                                                    );
+                                                }}
+                                                onremovefile={() => {
+                                                    reset("logo");
+                                                }}
+                                                maxFileSize="2mb"
+                                                labelMaxFileSizeExceeded="File terlalu besar"
+                                                labelIdle='Drag & Drop your files or <span class="filepond--label-action">Browse</span>'
+                                            />
+                                        </>
+                                    )}
+                                </div>
+                            </div>
                             <div className="flex flex-col">
                                 <label htmlFor="name">Nomor Telepon *</label>
                                 <InputText

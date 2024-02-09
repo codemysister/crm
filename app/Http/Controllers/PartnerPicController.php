@@ -10,19 +10,7 @@ class PartnerPicController extends Controller
 {
     public function apiGetPIC()
     {
-        $pics = PartnerPIC::with([
-            'partner.sales',
-            'partner.account_manager',
-            'partner.pics' => function ($query) {
-                $query->latest();
-            },
-            'partner.subscription' => function ($query) {
-                $query->latest();
-            },
-            'partner.banks' => function ($query) {
-                $query->latest();
-            }
-        ])
+        $pics = PartnerPIC::with('partner')
             ->orderBy('created_at', 'desc')->get();
 
         $pics->each(function ($pic) {

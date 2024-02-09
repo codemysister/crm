@@ -10,19 +10,7 @@ class PartnerBankController extends Controller
 {
     public function apiGetPIC()
     {
-        $partnerBanks = PartnerBank::with([
-            'partner.sales',
-            'partner.account_manager',
-            'partner.pics' => function ($query) {
-                $query->latest();
-            },
-            'partner.subscription' => function ($query) {
-                $query->latest();
-            },
-            'partner.banks' => function ($query) {
-                $query->latest();
-            }
-        ])
+        $partnerBanks = PartnerBank::with('partner')
             ->get();
         return response()->json($partnerBanks);
     }

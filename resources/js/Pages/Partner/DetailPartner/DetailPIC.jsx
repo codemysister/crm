@@ -7,8 +7,7 @@ import { useState } from "react";
 
 const DetailPIC = ({
     partner,
-    partners,
-    getSelectedDetailPartner,
+    handleSelectedDetailPartner,
     showSuccess,
     showError,
 }) => {
@@ -74,7 +73,7 @@ const DetailPIC = ({
             onSuccess: () => {
                 showSuccess("Update");
                 setModalEditPicIsVisible((prev) => false);
-                getSelectedDetailPartner(dataPIC.partner);
+                handleSelectedDetailPartner(dataPIC.partner);
                 resetPIC("partner", "name", "number", "position", "address");
             },
             onError: () => {
@@ -110,6 +109,15 @@ const DetailPIC = ({
                     <td class="pt-2 pb-1 text-gray-700 text-base w-[2%]">:</td>
                     <td class="pt-2 pb-1 text-gray-700 text-base w-7/12">
                         {partner.pics[0].number}
+                    </td>
+                </tr>
+                <tr class="border-b">
+                    <td class="pt-2 pb-1 text-gray-700 text-base font-bold w-1/5">
+                        Email
+                    </td>
+                    <td class="pt-2 pb-1 text-gray-700 text-base w-[2%]">:</td>
+                    <td class="pt-2 pb-1 text-gray-700 text-base w-7/12">
+                        {partner.pics[0].email}
                     </td>
                 </tr>
                 <tr class="border-b">

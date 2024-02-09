@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\PartnerGeneralRequest;
+use App\Http\Requests\PartnerRequest;
 use App\Models\Partner;
 use App\Models\PartnerAccountSetting;
 use App\Models\PartnerBank;
@@ -34,7 +35,10 @@ class PartnerController extends Controller
                 },
                 'banks' => function ($query) {
                     $query->latest();
-                }
+                },
+                'sph' => function ($query) {
+                    $query->latest();
+                },
             ])->where('uuid', '=', $uuid)->first();
         }
         return Inertia::render("Partner/Index", compact('partner'));
@@ -43,9 +47,10 @@ class PartnerController extends Controller
     public function store(PartnerGeneralRequest $request)
     {
         $validate = $request->validated();
+
         $pathLogo = '';
-        if ($request->hasFile('partner.logo.files.0')) {
-            $file = $request->file('partner.logo')['files'][0];
+        if ($request->hasFile('partner.logo')) {
+            $file = $request->file('partner.logo');
             $filename = time() . '.' . $file->getClientOriginalExtension();
             $pathLogo = "images/logo/" . $filename;
             Storage::putFileAs('public/images/logo', $file, $filename);
@@ -122,7 +127,6 @@ class PartnerController extends Controller
 
     public function update(Request $request, $uuid)
     {
-
         Partner::where('uuid', $uuid)->first()->update([
             'name' => $request['partner']['name'],
             'phone_number' => $request['partner']['phone_number'],
@@ -143,12 +147,31 @@ class PartnerController extends Controller
 
     public function updateDetailPartner(Request $request, $uuid)
     {
+        $partner = Partner::where('uuid', $uuid)->first();
+        $pathLogo = null;
+        if ($request->hasFile('logo')) {
+            $file = $request->file('logo');
+            if ($file->getClientOriginalName() == 'blob') {
+                $pathLogo = $partner->logo;
+            } else {
+                Storage::delete('public/' . $partner->logo);
+                $filename = time() . '.' . $file->getClientOriginalExtension();
+                $pathLogo = "images/logo/" . $filename;
+                Storage::putFileAs('public/images/logo', $file, $filename);
+            }
+        } else {
+            if (!$partner->logo) {
+                Storage::delete('public/' . $partner->logo);
+                $pathLogo = null;
+            }
+        }
 
-        Partner::where('uuid', $uuid)->first()->update([
+        $partner->update([
             'name' => $request['name'],
             'phone_number' => $request['phone_number'],
+            'logo' => $pathLogo,
             'sales_id' => $request['sales']['id'],
-            'account_manager_id' => $request['account_manager']['id'],
+            'account_manager_id' => $request['account_manager'] ? $request['account_manager']['id'] : null,
             'onboarding_date' => (new DateTime($request['onboarding_date']))->format('Y-m-d H:i:s'),
             'live_date' => (new DateTime($request['live_date']))->format('Y-m-d H:i:s'),
             'onboarding_age' => $request['onboarding_age'],
@@ -180,7 +203,8 @@ class PartnerController extends Controller
             },
             'banks' => function ($query) {
                 $query->latest();
-            }
+            },
+
         ])->latest()->get();
         $salesDefault = User::role('sales')->get();
         $accountManagerDefault = User::role('account manager')->get();
@@ -205,29 +229,35 @@ class PartnerController extends Controller
             },
             'banks' => function ($query) {
                 $query->latest();
-            }
+            },
+
+
         ])->where('uuid', '=', $uuid)->first();
         return response()->json($partner);
     }
 
-    public function apiGetPartner($uuid)
-    {
-        $partner = Partner::with([
-            'sales',
-            'account_manager',
-            'pics' => function ($query) {
-                $query->latest();
-            },
-            'subscription' => function ($query) {
-                $query->latest();
-            },
-            'banks' => function ($query) {
-                $query->latest();
-            }
-        ])->where('uuid', $uuid)->get();
+    // public function apiGetPartner($uuid)
+    // {
+    //     dd('oke');
+    //     $partner = Partner::with([
+    //         'sales',
+    //         'account_manager',
+    //         'pics' => function ($query) {
+    //             $query->latest();
+    //         },
+    //         'subscription' => function ($query) {
+    //             $query->latest();
+    //         },
+    //         'banks' => function ($query) {
+    //             $query->latest();
+    //         },
+    //         'accounts' => function ($query) {
+    //             $query->latest();
+    //         }
+    //     ])->where('uuid', $uuid)->get();
 
-        return response()->json([
-            'partner' => $partner
-        ]);
-    }
+    //     return response()->json([
+    //         'partner' => $partner
+    //     ]);
+    // }
 }

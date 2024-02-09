@@ -44,6 +44,11 @@ class Partner extends Authenticatable
         return $this->hasMany(PartnerSubscription::class);
     }
 
+    public function sph()
+    {
+        return $this->hasOne(SPH::class, 'partner_id', 'id');
+    }
+
     public function invoice_generals()
     {
         return $this->hasMany(InvoiceGeneral::class);
