@@ -19,6 +19,8 @@ use App\Http\Controllers\UserController;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
+use PhpOffice\PhpWord\Element\Table;
+use PhpOffice\PhpWord\SimpleType\TblWidth;
 use Spatie\Browsershot\Browsershot;
 use Illuminate\Http\Response;
 
@@ -67,7 +69,58 @@ Route::get('/browsershot', function () {
 Route::redirect('/', '/login', 301);
 
 Route::get('/tes', function () {
-    return view('pdf.mou');
+    $phpWord = new \PhpOffice\PhpWord\TemplateProcessor('assets/template/invoice_umum.docx');
+    $phpWord->setValues([
+        'nama_partner' => "SMKN 1 Purwokerto",
+        'nomor_invoice' => "1/CAZH-INVOICE/X",
+        'xendit' => 'u1124-r14821-jh24'
+    ]);
+
+    $values = [
+        ['produk' => 'kopi', 'kuantitas' => 1, 'harga' => 2000, 'total' => 2000, 'ppn' => "0 "],
+        ['produk' => 'parfum', 'kuantitas' => 1, 'harga' => 10000, 'total' => 10000, 'ppn' => "0 "],
+    ];
+
+    $table = new Table(
+        array(
+            'borderSize' => 8,
+            'borderColor' => 'D9D2E9',
+            'width' => 100 * 50,
+            'alignment' => \PhpOffice\PhpWord\SimpleType\JcTable::CENTER,
+            'layout' => \PhpOffice\PhpWord\Style\Table::LAYOUT_FIXED,
+            'unit' => TblWidth::PERCENT
+        )
+    );
+    $table->addRow(400);
+    $pStyle = array('spaceAfter' => 20, 'align' => 'center');
+    $table->addCell(3000, ['bgColor' => '#674EA7', 'valign' => 'center'])->addText('Produk', ['color' => 'FFFFFF', 'name' => 'Inter', 'size' => 10, 'bold' => true], $pStyle);
+    $table->addCell(1500, ['bgColor' => '#674EA7', 'valign' => 'center'])->addText('Kuantitas', ['color' => 'FFFFFF', 'name' => 'Inter', 'size' => 10, 'bold' => true], $pStyle);
+    $table->addCell(2000, ['bgColor' => '#674EA7', 'valign' => 'center'])->addText('Harga', ['color' => 'FFFFFF', 'name' => 'Inter', 'size' => 10, 'bold' => true], $pStyle);
+    $table->addCell(2000, ['bgColor' => '#674EA7', 'valign' => 'center'])->addText('Total Harga', ['color' => 'FFFFFF', 'name' => 'Inter', 'size' => 10, 'bold' => true], $pStyle);
+    $table->addCell(2000, ['bgColor' => '#674EA7', 'valign' => 'center'])->addText('PPN', ['color' => 'FFFFFF', 'name' => 'Inter', 'size' => 10, 'bold' => true], $pStyle);
+
+    foreach ($values as $key => $value) {
+        $table->addRow(400);
+
+        if ($key % 2 == 0) {
+            $table->addCell(null, ['valign' => 'center'])->addText($value['produk'], ['name' => 'Inter', 'size' => 10], ['spaceAfter' => 20, 'align' => 'left']);
+            $table->addCell(null, ['valign' => 'center'])->addText($value['kuantitas'], ['name' => 'Inter', 'size' => 10], ['spaceAfter' => 20, 'align' => 'center']);
+            $table->addCell(null, ['valign' => 'center'])->addText("Rp" . $value['harga'], ['name' => 'Inter', 'size' => 10], ['spaceAfter' => 20, 'align' => 'right']);
+            $table->addCell(null, ['valign' => 'center'])->addText("Rp" . $value['total'], ['name' => 'Inter', 'size' => 10], ['spaceAfter' => 20, 'align' => 'right']);
+            $table->addCell(null, ['valign' => 'center'])->addText("Rp" . $value['ppn'], ['name' => 'Inter', 'size' => 10], ['spaceAfter' => 20, 'align' => 'right']);
+        } else {
+            $table->addCell(null, ['bgColor' => '#F3F3F3', 'valign' => 'center'])->addText($value['produk'], ['name' => 'Inter', 'size' => 10], ['align' => 'left']);
+            $table->addCell(null, ['bgColor' => '#F3F3F3', 'valign' => 'center'])->addText($value['kuantitas'], ['name' => 'Inter', 'size' => 10], ['align' => 'center']);
+            $table->addCell(null, ['bgColor' => '#F3F3F3', 'valign' => 'center'])->addText("Rp" . $value['harga'], ['name' => 'Inter', 'size' => 10], ['align' => 'right']);
+            $table->addCell(null, ['bgColor' => '#F3F3F3', 'valign' => 'center'])->addText("Rp" . $value['total'], ['name' => 'Inter', 'size' => 10], ['align' => 'right']);
+            $table->addCell(null, ['bgColor' => '#F3F3F3', 'valign' => 'center'])->addText("Rp" . $value['ppn'], ['name' => 'Inter', 'size' => 10], ['align' => 'right']);
+        }
+
+    }
+    $phpWord->setComplexBlock('table', $table);
+
+    $phpWord->setImageValue('tanda_tangan', array('path' => public_path('/assets/img/signatures/ttd.png')));
+    $phpWord->saveAs('edit.docx');
 });
 
 Route::middleware('auth')->group(function () {
