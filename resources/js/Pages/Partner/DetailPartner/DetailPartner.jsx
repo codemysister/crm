@@ -17,6 +17,7 @@ import DetailSubscription from "./DetailSubscription";
 import { FilePond, registerPlugin } from "react-filepond";
 import FilePondPluginFileValidateSize from "filepond-plugin-file-validate-size";
 import "filepond/dist/filepond.min.css";
+import DetailSPH from "./DetailSPH";
 registerPlugin(FilePondPluginFileValidateSize);
 
 const DetailPartner = ({
@@ -556,10 +557,10 @@ const DetailPartner = ({
                                             />
                                         )}
 
+                                        {console.log(partner)}
                                         {activeMenu === "sph" && (
-                                            <DetailSubscription
+                                            <DetailSPH
                                                 partner={partner}
-                                                partners={partners}
                                                 handleSelectedDetailPartner={
                                                     handleSelectedDetailPartner
                                                 }

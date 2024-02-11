@@ -37,7 +37,7 @@ class PartnerController extends Controller
                     $query->latest();
                 },
                 'sph' => function ($query) {
-                    $query->latest();
+                    $query->with(['user', 'products'])->latest();
                 },
             ])->where('uuid', '=', $uuid)->first();
         }
@@ -229,6 +229,9 @@ class PartnerController extends Controller
             },
             'banks' => function ($query) {
                 $query->latest();
+            },
+            'sph' => function ($query) {
+                $query->with(['user', 'products'])->latest();
             },
 
 
