@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "41144005194a15cd4725b7e481b3ea97",
+    "content-hash": "79642f2a125e9ca37af09e2060fa3ce6",
     "packages": [
         {
             "name": "barryvdh/laravel-dompdf",
@@ -404,6 +404,76 @@
                 "source": "https://github.com/dflydev/dflydev-dot-access-data/tree/v3.0.2"
             },
             "time": "2022-10-27T11:44:00+00:00"
+        },
+        {
+            "name": "dipantry/rupiah",
+            "version": "v1.0.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/Dipantry/rupiah.git",
+                "reference": "c2207185d4fc02dbf40047fa4a3f6aca90319e0f"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/Dipantry/rupiah/zipball/c2207185d4fc02dbf40047fa4a3f6aca90319e0f",
+                "reference": "c2207185d4fc02dbf40047fa4a3f6aca90319e0f",
+                "shasum": ""
+            },
+            "require": {
+                "ext-dom": "*",
+                "ext-fileinfo": "*",
+                "ext-libxml": "*",
+                "illuminate/support": "^9.0.0 | ^10.0.0",
+                "php": "^8.0"
+            },
+            "require-dev": {
+                "ext-openssl": "*",
+                "orchestra/testbench": "^7.0",
+                "php-coveralls/php-coveralls": "^2.1",
+                "phpunit/phpunit": "^9.5.0"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Dipantry\\Rupiah\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Auriga Aristo",
+                    "email": "aurigaaristo@gmail.com",
+                    "homepage": "https://aurigaaristo.com",
+                    "role": "Developer"
+                }
+            ],
+            "description": "All-in-one Indonesian Rupiah library",
+            "keywords": [
+                "Bank",
+                "currency",
+                "indonesia",
+                "kurs",
+                "money",
+                "rupiah"
+            ],
+            "support": {
+                "issues": "https://github.com/Dipantry/rupiah/issues",
+                "source": "https://github.com/Dipantry/rupiah/tree/v1.0.1"
+            },
+            "funding": [
+                {
+                    "url": "https://saweria.co/rigsto",
+                    "type": "custom"
+                },
+                {
+                    "url": "https://github.com/Rigsto",
+                    "type": "github"
+                }
+            ],
+            "time": "2023-03-07T04:39:56+00:00"
         },
         {
             "name": "doctrine/inflector",

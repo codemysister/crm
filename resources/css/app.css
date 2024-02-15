@@ -238,6 +238,22 @@
    .p-button.p-component.p-fileupload-choose{
     width: 100%;
    }
+
+   /* message */
+   .p-inline-message {
+    gap: 5px;
+    text-align: left;
+    justify-content: start;
+  }
+  .p-inline-message-text{
+    font-size: 13px;
+    
+  }
+  .p-inline-message-icon{
+    color: #fff;
+    fill: #fff;
+  }
+  /* end message */
     
 }
 

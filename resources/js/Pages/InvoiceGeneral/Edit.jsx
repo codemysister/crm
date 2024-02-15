@@ -17,10 +17,9 @@ import { Calendar } from "primereact/calendar";
 
 const BASE_URL = import.meta.env.VITE_BASE_URL;
 
-const Create = ({ usersProp, partnersProp, salesProp, productsProp }) => {
+const Edit = ({ usersProp, partnersProp, productsProp, invoiceGeneral }) => {
     const [users, setUsers] = useState(usersProp);
     const [partners, setPartners] = useState(partnersProp);
-    const [sales, setSales] = useState(salesProp);
     const [products, setProducts] = useState(productsProp);
     const [dialogVisible, setDialogVisible] = useState(false);
     const [dialogProductVisible, setDialogProductVisible] = useState(false);
@@ -51,37 +50,36 @@ const Create = ({ usersProp, partnersProp, salesProp, productsProp }) => {
         processing,
         errors,
     } = useForm({
-        uuid: "",
-        code: `#INV/121/XI/${new Date().getFullYear()}`,
-        products: [],
-        total: 0,
-        total_ppn: 0,
-        total_all_ppn: 0,
+        uuid: invoiceGeneral.uuid,
+        code: invoiceGeneral.code,
+        products: invoiceGeneral.products,
+        total: invoiceGeneral.total,
+        total_ppn: invoiceGeneral.total_all_ppn,
+        total_all_ppn: invoiceGeneral.total_all_ppn,
         partner: {
-            id: null,
-            name: null,
-            province: null,
-            regency: null,
-            number: null,
-            pic: null,
+            id: invoiceGeneral.partner_id,
+            name: invoiceGeneral.partner_name,
+            province: invoiceGeneral.partner_province,
+            regency: invoiceGeneral.partner_regency,
+            number: invoiceGeneral.partner_phone_number,
         },
-        date: null,
-        due_date: null,
-        paid_off: 0,
-        rest_of_bill: 0,
-        payment_metode: null,
-        xendit_link: "https://checkout.xendit.co/web/",
+        date: invoiceGeneral.date,
+        due_date: invoiceGeneral.due_date,
+        paid_off: invoiceGeneral.paid_off,
+        rest_of_bill: invoiceGeneral.rest_of_bill,
+        payment_metode: invoiceGeneral.payment_metode,
+        xendit_link: invoiceGeneral.xendit_link,
         created_by: null,
         signature: {
-            name: null,
-            position: null,
-            image: null,
+            name: invoiceGeneral.signature_name,
+            image: invoiceGeneral.signature_image,
         },
     });
 
     useEffect(() => {
         const fetchData = async () => {
             await getProvince();
+            await getRegencys();
         };
 
         fetchData();
@@ -392,7 +390,7 @@ const Create = ({ usersProp, partnersProp, salesProp, productsProp }) => {
     const handleSubmitForm = (e) => {
         e.preventDefault();
 
-        post("/invoice_generals", {
+        put("/invoice_generals/" + data.uuid, {
             onSuccess: () => {
                 showSuccess("Tambah");
                 window.location = BASE_URL + "/invoice_generals";
@@ -617,6 +615,7 @@ const Create = ({ usersProp, partnersProp, salesProp, productsProp }) => {
                                         }}
                                         options={regencys}
                                         optionLabel="name"
+                                        dataKey="name"
                                         placeholder="Pilih Kabupaten"
                                         filter
                                         valueTemplate={selectedOptionTemplate}
@@ -1407,4 +1406,4 @@ const Create = ({ usersProp, partnersProp, salesProp, productsProp }) => {
     );
 };
 
-export default Create;
+export default Edit;

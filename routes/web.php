@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\InvoiceGeneralController;
+use App\Http\Controllers\InvoiceGeneralTransactionController;
 use App\Http\Controllers\MOUController;
 use App\Http\Controllers\PartnerAccountSettingController;
 use App\Http\Controllers\PartnerBankController;
@@ -64,64 +65,24 @@ Route::get('/browsershot', function () {
 
 });
 
-
-
 Route::redirect('/', '/login', 301);
 
-Route::get('/tes', function () {
-    $phpWord = new \PhpOffice\PhpWord\TemplateProcessor('assets/template/invoice_umum.docx');
-    $phpWord->setValues([
-        'nama_partner' => "SMKN 1 Purwokerto",
-        'nomor_invoice' => "1/CAZH-INVOICE/X",
-        'xendit' => 'u1124-r14821-jh24'
-    ]);
+Route::get('/pdf', function () {
 
-    $values = [
-        ['produk' => 'kopi', 'kuantitas' => 1, 'harga' => 2000, 'total' => 2000, 'ppn' => "0 "],
-        ['produk' => 'parfum', 'kuantitas' => 1, 'harga' => 10000, 'total' => 10000, 'ppn' => "0 "],
-    ];
+    $html = view('pdf.receipt')->render();
 
-    $table = new Table(
-        array(
-            'borderSize' => 8,
-            'borderColor' => 'D9D2E9',
-            'width' => 100 * 50,
-            'alignment' => \PhpOffice\PhpWord\SimpleType\JcTable::CENTER,
-            'layout' => \PhpOffice\PhpWord\Style\Table::LAYOUT_FIXED,
-            'unit' => TblWidth::PERCENT
-        )
-    );
-    $table->addRow(400);
-    $pStyle = array('spaceAfter' => 20, 'align' => 'center');
-    $table->addCell(3000, ['bgColor' => '#674EA7', 'valign' => 'center'])->addText('Produk', ['color' => 'FFFFFF', 'name' => 'Inter', 'size' => 10, 'bold' => true], $pStyle);
-    $table->addCell(1500, ['bgColor' => '#674EA7', 'valign' => 'center'])->addText('Kuantitas', ['color' => 'FFFFFF', 'name' => 'Inter', 'size' => 10, 'bold' => true], $pStyle);
-    $table->addCell(2000, ['bgColor' => '#674EA7', 'valign' => 'center'])->addText('Harga', ['color' => 'FFFFFF', 'name' => 'Inter', 'size' => 10, 'bold' => true], $pStyle);
-    $table->addCell(2000, ['bgColor' => '#674EA7', 'valign' => 'center'])->addText('Total Harga', ['color' => 'FFFFFF', 'name' => 'Inter', 'size' => 10, 'bold' => true], $pStyle);
-    $table->addCell(2000, ['bgColor' => '#674EA7', 'valign' => 'center'])->addText('PPN', ['color' => 'FFFFFF', 'name' => 'Inter', 'size' => 10, 'bold' => true], $pStyle);
+    $pdf = Browsershot::html($html)
+        ->setIncludedPath(config('services.browsershot.included_path'))
+        ->showBackground()
+        ->showBrowserHeaderAndFooter()
+        ->headerHtml('<div></div>')
+        ->footerHtml('<div style="text-align: left; font-size: 10px; width:100%; margin-left: 2.5cm; margin-bottom: 1cm;">*) Tarif produk/layanan tidak termasuk biaya admin transaksi <span style="font-style:italic;">user</span> aplikasi <span style="font-style:italic;">mobile</span>.</div>')
+        ->save('demo.pdf');
 
-    foreach ($values as $key => $value) {
-        $table->addRow(400);
 
-        if ($key % 2 == 0) {
-            $table->addCell(null, ['valign' => 'center'])->addText($value['produk'], ['name' => 'Inter', 'size' => 10], ['spaceAfter' => 20, 'align' => 'left']);
-            $table->addCell(null, ['valign' => 'center'])->addText($value['kuantitas'], ['name' => 'Inter', 'size' => 10], ['spaceAfter' => 20, 'align' => 'center']);
-            $table->addCell(null, ['valign' => 'center'])->addText("Rp" . $value['harga'], ['name' => 'Inter', 'size' => 10], ['spaceAfter' => 20, 'align' => 'right']);
-            $table->addCell(null, ['valign' => 'center'])->addText("Rp" . $value['total'], ['name' => 'Inter', 'size' => 10], ['spaceAfter' => 20, 'align' => 'right']);
-            $table->addCell(null, ['valign' => 'center'])->addText("Rp" . $value['ppn'], ['name' => 'Inter', 'size' => 10], ['spaceAfter' => 20, 'align' => 'right']);
-        } else {
-            $table->addCell(null, ['bgColor' => '#F3F3F3', 'valign' => 'center'])->addText($value['produk'], ['name' => 'Inter', 'size' => 10], ['align' => 'left']);
-            $table->addCell(null, ['bgColor' => '#F3F3F3', 'valign' => 'center'])->addText($value['kuantitas'], ['name' => 'Inter', 'size' => 10], ['align' => 'center']);
-            $table->addCell(null, ['bgColor' => '#F3F3F3', 'valign' => 'center'])->addText("Rp" . $value['harga'], ['name' => 'Inter', 'size' => 10], ['align' => 'right']);
-            $table->addCell(null, ['bgColor' => '#F3F3F3', 'valign' => 'center'])->addText("Rp" . $value['total'], ['name' => 'Inter', 'size' => 10], ['align' => 'right']);
-            $table->addCell(null, ['bgColor' => '#F3F3F3', 'valign' => 'center'])->addText("Rp" . $value['ppn'], ['name' => 'Inter', 'size' => 10], ['align' => 'right']);
-        }
-
-    }
-    $phpWord->setComplexBlock('table', $table);
-
-    $phpWord->setImageValue('tanda_tangan', array('path' => public_path('/assets/img/signatures/ttd.png')));
-    $phpWord->saveAs('edit.docx');
+    // Storage::put("public/$path", $pdf);
 });
+
 
 Route::middleware('auth')->group(function () {
     Route::get('/dashboard', function () {
@@ -251,6 +212,13 @@ Route::middleware('auth')->group(function () {
     Route::put('/invoice_generals/{invoice_generals:uuid}', [InvoiceGeneralController::class, 'update'])->name('invoice_generals.update')->middleware(['can:edit produk']);
     Route::delete('/invoice_generals/{invoice_generals:uuid}', [InvoiceGeneralController::class, 'destroy'])->name('invoice_generals.destroy')->middleware(['can:hapus produk']);
     Route::get('/api/invoice_generals', [InvoiceGeneralController::class, 'apiGetInvoiceGenerals'])->name('api.invoice_generals');
+
+    // Invoice Umum Transaksi
+    Route::get('/invoice_generals/transaction', [InvoiceGeneralTransactionController::class, 'index'])->name('invoice_generals.transaction.view')->middleware(['can:lihat produk']);
+    Route::post('/invoice_generals/transaction', [InvoiceGeneralTransactionController::class, 'store'])->name('invoice_generals.transaction.store')->middleware(['can:tambah produk']);
+    Route::put('/invoice_generals/transaction/{transaction:uuid}', [InvoiceGeneralTransactionController::class, 'update'])->name('invoice_generals.transaction.update')->middleware(['can:edit produk']);
+    Route::delete('/invoice_generals/transaction/{transaction:uuid}', [InvoiceGeneralTransactionController::class, 'destroy'])->name('invoice_generals.transaction.destroy')->middleware(['can:edit produk']);
+
 });
 
 

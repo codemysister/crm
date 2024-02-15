@@ -22,4 +22,9 @@ class InvoiceGeneral extends Model
         return $this->hasMany(InvoiceGeneralProducts::class);
     }
 
+    public function transactions()
+    {
+        return $this->hasMany(InvoiceGeneralTransaction::class);
+    }
+
 }

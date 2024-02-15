@@ -9,8 +9,12 @@ use App\Models\InvoiceGeneralProducts;
 use App\Models\Partner;
 use App\Models\Product;
 use Carbon\Carbon;
+use Dipantry\Rupiah\RupiahService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
 use PhpOffice\PhpWord\Element\Table;
@@ -20,7 +24,8 @@ class InvoiceGeneralController extends Controller
 {
     public function index()
     {
-        return Inertia::render('InvoiceGeneral/Index');
+        $partnersProp = Partner::all();
+        return Inertia::render('InvoiceGeneral/Index', compact('partnersProp'));
     }
 
     public function create()
@@ -32,9 +37,39 @@ class InvoiceGeneralController extends Controller
         return Inertia::render('InvoiceGeneral/Create', compact('partnersProp', 'productsProp'));
     }
 
+    public function edit($uuid)
+    {
+        $partnersProp = Partner::with(
+            'pics'
+        )->get();
+        $productsProp = Product::all();
+        $invoiceGeneral = InvoiceGeneral::with('products', 'transactions', 'partner')->where('uuid', '=', $uuid)->first();
+        return Inertia::render('InvoiceGeneral/Edit', compact('partnersProp', 'productsProp', 'invoiceGeneral'));
+    }
+
     public function generateInvoiceGeneral($invoice_general, $products)
     {
-        $phpWord = new \PhpOffice\PhpWord\TemplateProcessor('assets/template/invoice_umum.docx');
+        $templateInvoice = 'assets/template/invoice_umum.docx';
+
+        if ($invoice_general->total_ppn == 0) {
+            if ($invoice_general->payment_metode === "payment link") {
+                $templateInvoice = 'assets/template/invoice_umum_tanpa_pajak_xendit.docx';
+            } else if ($invoice_general->payment_metode === "cazhbox") {
+                $templateInvoice = 'assets/template/invoice_umum_tanpa_pajak_cazhbox.docx';
+            } else {
+                $templateInvoice = 'assets/template/invoice_umum_tanpa_pajak.docx';
+            }
+        } else {
+            if ($invoice_general->payment_metode === "payment link") {
+                $templateInvoice = 'assets/template/invoice_umum_xendit.docx';
+            } else if ($invoice_general->payment_metode === "cazhbox") {
+                $templateInvoice = 'assets/template/invoice_umum_cazhbox.docx';
+            } else {
+                $templateInvoice = 'assets/template/invoice_umum.docx';
+            }
+        }
+
+        $phpWord = new \PhpOffice\PhpWord\TemplateProcessor($templateInvoice);
         $phpWord->setValues([
             'nomor_invoice' => $invoice_general->code,
             'tanggal_invoice' => Carbon::parse($invoice_general->date)->format('d-m-Y'),
@@ -48,6 +83,7 @@ class InvoiceGeneralController extends Controller
             'terbayar' => "Rp" . number_format($invoice_general->paid_off, 0, ',', '.'),
             'tagihan' => "Rp" . number_format($invoice_general->rest_of_bill, 0, ',', '.'),
             'xendit' => $invoice_general->xendit_link,
+            'metode' => ucwords($invoice_general->payment_metode),
             'tanggal_dibuat' => Carbon::parse($invoice_general->created_at)->locale('id-ID')->isoFormat('D MMMM YYYY'),
             'atas_nama' => $invoice_general->signature_name,
         ]);
@@ -72,10 +108,8 @@ class InvoiceGeneralController extends Controller
         $table->addCell(2000, ['bgColor' => '#674EA7', 'valign' => 'center'])->addText('PPN', ['color' => 'FFFFFF', 'name' => 'Inter', 'size' => 10, 'bold' => true], $pStyle);
 
         $values = collect($products)->map(function ($product) {
-            return ['produk' => $product['name'], 'kuantitas' => $product['qty'], 'harga' => number_format($product['price'], 0, ',', '.'), 'total' => number_format($product['total'], 0, ',', '.'), 'ppn' => $product['total_ppn'] !== 0 ? number_format($product['total_ppn'], 0, ',', '.') : "0 "];
+            return ['produk' => $product['name'], 'kuantitas' => $product['quantity'], 'harga' => number_format($product['price'], 0, ',', '.'), 'total' => number_format($product['total'], 0, ',', '.'), 'ppn' => $product['total_ppn'] !== 0 ? number_format($product['total_ppn'], 0, ',', '.') : "0 "];
         });
-
-
 
         foreach ($values as $key => $value) {
             $table->addRow(400);
@@ -100,7 +134,27 @@ class InvoiceGeneralController extends Controller
         $phpWord->setImageValue('tanda_tangan', array('path' => public_path($invoice_general->signature_image)));
         $fileName = $invoice_general->uuid . '.docx';
         $phpWord->saveAs(storage_path('app/public/invoice_umum/' . $fileName));
+        $invoice_general->update(['invoice_general_doc' => 'invoice_umum/' . $fileName]);
 
+    }
+
+    public function generateCode()
+    {
+        $currentMonth = date('n');
+        $currentYear = date('Y');
+
+        function intToRoman($number)
+        {
+            $map = array('I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII');
+            return $map[$number - 1];
+        }
+
+        $romanMonth = intToRoman($currentMonth);
+        $latestData = InvoiceGeneral::latest()->first() ?? "#INV/000/$romanMonth/$currentYear";
+        $lastCode = $latestData ? explode('/', $latestData->code ?? $latestData)[1] : 0;
+        $newCode = str_pad((int) $lastCode + 1, 3, '0', STR_PAD_LEFT);
+        $newCode = "#INV/$newCode/$romanMonth/$currentYear";
+        return $newCode;
     }
 
     public function store(InvoiceGeneralRequest $request)
@@ -110,9 +164,11 @@ class InvoiceGeneralController extends Controller
         $date_now = Carbon::now()->setTimezone('GMT+7');
         $invoice_age = $date_now->diffInDays($date, false) + 1;
 
+        $code = $this->generateCode();
+
         $invoice_general = InvoiceGeneral::create([
             'uuid' => Str::uuid(),
-            'code' => $request->code,
+            'code' => $code,
             'partner_id' => $request['partner']['id'],
             'partner_name' => $request['partner']['name'],
             'partner_province' => $request['partner']['province'],
@@ -123,13 +179,15 @@ class InvoiceGeneralController extends Controller
             'invoice_age' => $invoice_age,
             'total' => $request->total,
             'total_all_ppn' => $request->total_all_ppn,
+            'total_final_with_ppn' => $request->total_all_ppn + $request->total,
             'paid_off' => $request->paid_off,
             'rest_of_bill' => $request->rest_of_bill,
+            'rest_of_bill_locked' => $request->rest_of_bill,
             'signature_name' => $request['signature']['name'],
             'signature_image' => $request['signature']['image'],
             'payment_metode' => $request->payment_metode,
             'xendit_link' => $request->xendit_link,
-            'status' => 'unpaid',
+            'status' => 'belum terbayar',
             'invoice_general_doc' => '',
             'created_by' => Auth::user()->id
         ]);
@@ -139,7 +197,8 @@ class InvoiceGeneralController extends Controller
                 'uuid' => Str::uuid(),
                 'invoice_general_id' => $invoice_general->id,
                 'name' => $product['name'],
-                'quantity' => $product['qty'],
+                'description' => $product['description'],
+                'quantity' => $product['quantity'],
                 'price' => $product['price'],
                 'total' => $product['total'],
                 'total_ppn' => $product['total_ppn'],
@@ -151,11 +210,129 @@ class InvoiceGeneralController extends Controller
 
     }
 
+    public function calculateRestOfBill($invoice_general)
+    {
+        $rest_of_bill = $invoice_general->rest_of_bill_locked;
 
+        $totalNominalTransaction = $invoice_general->transactions->reduce(function ($counter, $transaction) {
+            return $counter + $transaction->nominal;
+        });
+
+        return $rest_of_bill - $totalNominalTransaction;
+    }
+
+    function updateProducts($invoice_general, $oldData, $newData)
+    {
+        $oldIds = $oldData->pluck('id');
+        $newIds = array_filter(Arr::pluck($newData, 'id'), 'is_numeric');
+
+        $delete = collect($oldData)
+            ->filter(function ($model) use ($newIds) {
+                return !in_array($model->id, $newIds);
+            });
+
+        $update = collect($newData)
+            ->filter(function ($model) use ($oldIds) {
+                return array_key_exists('id', $model) && in_array($model['id'], $oldIds->toArray());
+            });
+
+        $create = collect($newData)
+            ->filter(function ($model) use ($oldIds) {
+                if (array_key_exists('id', $model)) {
+                    return !in_array($model['id'], $oldIds->toArray());
+                } else {
+                    return true;
+                }
+            });
+
+        InvoiceGeneralProducts::destroy($delete->pluck('id')->toArray());
+        foreach ($update as $product) {
+            $product = InvoiceGeneralProducts::find($product['id'])->first();
+            $product->update([
+                'name' => $product['name'],
+                'description' => $product['description'],
+                'quantity' => $product['quantity'],
+                'price' => $product['price'],
+                'total' => $product['total'],
+                'total_ppn' => $product['total_ppn'],
+                'ppn' => $product['ppn'],
+            ]);
+        }
+        foreach ($create as $product) {
+            InvoiceGeneralProducts::create([
+                'uuid' => Str::uuid(),
+                'invoice_general_id' => $invoice_general->id,
+                'name' => $product['name'],
+                'description' => $product['description'],
+                'quantity' => $product['quantity'],
+                'price' => $product['price'],
+                'total' => $product['total'],
+                'total_ppn' => $product['total_ppn'],
+                'ppn' => $product['ppn'],
+            ]);
+        }
+
+
+        return true;
+    }
+
+    public function update(InvoiceGeneralRequest $request, $uuid)
+    {
+        $date = Carbon::parse($request->date)->setTimezone('GMT+7')->format('Y-m-d H:i:s');
+        $due_date = Carbon::parse($request->due_date)->setTimezone('GMT+7')->format('Y-m-d H:i:s');
+        $date_now = Carbon::now()->setTimezone('GMT+7');
+        $invoice_age = $date_now->diffInDays($date, false) + 1;
+
+        $invoice_general = InvoiceGeneral::with('transactions', 'products')->where('uuid', '=', $uuid)->first();
+
+        $invoice_general->update([
+            'partner_id' => $request['partner']['id'],
+            'partner_name' => $request['partner']['name'],
+            'partner_province' => $request['partner']['province'],
+            'partner_regency' => $request['partner']['regency'],
+            'partner_phone_number' => $request['partner']['number'],
+            'date' => $date,
+            'due_date' => $due_date,
+            'invoice_age' => $invoice_age,
+            'total' => $request->total,
+            'total_all_ppn' => $request->total_all_ppn,
+            'total_final_with_ppn' => $request->total_all_ppn + $request->total,
+            'paid_off' => $request->paid_off,
+            'rest_of_bill' => $request->rest_of_bill,
+            'rest_of_bill_locked' => $request->rest_of_bill,
+            'signature_name' => $request['signature']['name'],
+            'signature_image' => $request['signature']['image'],
+            'payment_metode' => $request->payment_metode,
+            'xendit_link' => $request->xendit_link,
+            'status' => 'belum terbayar',
+            'invoice_general_doc' => '',
+        ]);
+        $results = $this->updateProducts($invoice_general, $invoice_general->products, $request->products);
+        $rest_of_bill = $this->calculateRestOfBill($invoice_general);
+
+        $status = "belum terbayar";
+        if ($rest_of_bill !== 0 && count($invoice_general->transactions) > 0) {
+            $status = "sebagian";
+        } else {
+            $status = "lunas";
+        }
+
+        $invoice_general->update(['rest_of_bill' => $rest_of_bill, 'status' => $status, 'bill_date' => Carbon::now()->format('Y-m-d H:i:s')]);
+
+        $this->generateInvoiceGeneral($invoice_general, $request->products);
+
+    }
 
     public function apiGetInvoiceGenerals()
     {
-        $invoiceGenerals = InvoiceGeneral::with('partner')->get();
+        $invoiceGenerals = InvoiceGeneral::with(['partner', 'products', 'transactions.user'])->get();
         return response()->json($invoiceGenerals);
+    }
+
+    public function destroy($uuid)
+    {
+        $invoice_general = InvoiceGeneral::where('uuid', '=', $uuid)->first();
+        Storage::disk('public')->delete($invoice_general->invoice_general_doc);
+        $invoice_general->delete();
     }
 }

@@ -25,13 +25,15 @@ return new class extends Migration {
             $table->date('bill_date')->nullable();
             $table->bigInteger('total');
             $table->bigInteger('total_all_ppn');
+            $table->bigInteger('total_final_with_ppn');
             $table->bigInteger('paid_off');
             $table->bigInteger('rest_of_bill')->nullable();
+            $table->bigInteger('rest_of_bill_locked')->nullable();
             $table->string('signature_name');
             $table->string('signature_image');
-            $table->enum('payment_metode', ['cazhbox', 'paymentlink']);
+            $table->string('payment_metode');
             $table->string('xendit_link')->nullable();
-            $table->enum('status', ['paid', 'unpaid', 'parsial']);
+            $table->enum('status', ['lunas', 'belum terbayar', 'sebagian', 'terlambat']);
             $table->text('reason_late')->nullable();
             $table->string('invoice_general_doc')->nullable();
             $table->foreignId('created_by')->constrained('users', 'id')->onDelete('cascade');

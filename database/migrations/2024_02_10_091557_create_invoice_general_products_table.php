@@ -16,6 +16,7 @@ return new class extends Migration {
             $table->foreignId('invoice_general_id')->constrained('invoice_generals', 'id')->onDelete('cascade');
             $table->string('name');
             $table->integer('quantity');
+            $table->text('description');
             $table->bigInteger('price');
             $table->bigInteger('total');
             $table->bigInteger('total_ppn');
