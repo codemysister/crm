@@ -24,6 +24,7 @@
         "chart.js": "^4.4.1",
         "filepond": "^4.30.6",
         "filepond-plugin-file-validate-size": "^2.2.8",
+        "lodash": "^4.17.21",
         "primeicons": "^6.0.1",
         "primereact": "^10.2.1",
         "puppeteer": "^21.9.0",

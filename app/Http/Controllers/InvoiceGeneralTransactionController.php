@@ -53,7 +53,10 @@ class InvoiceGeneralTransactionController extends Controller
 
 
         if ($rest_of_bill < $request->nominal) {
-            return response()->json(['error' => 'Pembayaran melebihi sisa tagihan'], 422);
+            // return response()->json(['error' => 'Pembayaran melebihi sisa tagihan']);
+            return redirect()->back()->withErrors([
+                'error' => 'Pembayaran melebihi sisa tagihan'
+            ]);
         }
         $rest_of_bill = $rest_of_bill - $request->nominal;
         $status = "belum terbayar";

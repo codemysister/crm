@@ -339,11 +339,11 @@ export default function Index({ auth, invoiceGeneralProps, partnersProp }) {
         });
     };
 
-    const showError = (type) => {
+    const showError = (type, message) => {
         toast.current.show({
             severity: "error",
             summary: "Error",
-            detail: `${type} data gagal`,
+            detail: message ?? `${type} data gagal`,
             life: 3000,
         });
     };
@@ -737,8 +737,8 @@ export default function Index({ auth, invoiceGeneralProps, partnersProp }) {
                         "signature"
                     );
                 },
-                onError: () => {
-                    showError("Tambah");
+                onError: (errors) => {
+                    showError("Tambah", errors.error);
                 },
             });
         } else {

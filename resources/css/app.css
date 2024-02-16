@@ -238,6 +238,9 @@
    .p-button.p-component.p-fileupload-choose{
     width: 100%;
    }
+   .p-image-preview-indicator{
+    width: 50%;
+   }
 
    /* message */
    .p-inline-message {
