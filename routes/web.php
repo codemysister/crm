@@ -83,6 +83,15 @@ Route::get('/pdf', function () {
     // Storage::put("public/$path", $pdf);
 });
 
+Route::get('/tes', function () {
+    $phpWord = new \PhpOffice\PhpWord\TemplateProcessor('assets/template/mou.docx');
+    $phpWord->setValues([
+        'lembaga' => 'SMKN 1 Purwokerto'
+    ]);
+    $phpWord->saveAs('sample.docx');
+
+});
+
 
 Route::middleware('auth')->group(function () {
     Route::get('/dashboard', function () {
@@ -113,6 +122,12 @@ Route::middleware('auth')->group(function () {
     // Roles & Permission sync
     Route::put('/role-permission-sync/{id}', [PermissionController::class, 'permissionSync'])->name('permissions.sync')->middleware(['can:setting role permission']);
 
+    // Signature
+    Route::get('/signatures', [SignatureController::class, 'index'])->name('signatures.view')->middleware(['can:lihat user']);
+    Route::post('/signatures', [SignatureController::class, 'store'])->name('signatures.store')->middleware(['can:tambah user']);
+    Route::post('/signatures/{signature:uuid}', [SignatureController::class, 'update'])->name('signatures.update')->middleware(['can:edit user']);
+    Route::delete('/signatures/{signature:uuid}', [SignatureController::class, 'destroy'])->name('signatures.delete')->middleware(['can:hapus user']);
+    Route::get('api/signatures', [SignatureController::class, 'apiGetSignatures'])->name('api.signatures');
 
     // User
     Route::get('/users', [UserController::class, 'index'])->name('users.view')->middleware(['can:lihat user']);
@@ -198,10 +213,10 @@ Route::middleware('auth')->group(function () {
     Route::get('/sla/create', [SLAController::class, 'create'])->name('sla.create');
     Route::post('/sla', [SLAController::class, 'store'])->name('sla.store')->middleware(['can:tambah produk']);
     Route::get('/sla/{sla:uuid}', [SLAController::class, 'edit'])->name('sla.edit')->middleware(['can:edit produk']);
-    Route::put('/sla/{sla:uuid}', [SLAController::class, 'update'])->name('sla.update')->middleware(['can:edit produk']);
+    Route::post('/sla/{sla:uuid}', [SLAController::class, 'update'])->name('sla.update')->middleware(['can:edit produk']);
     Route::delete('/sla/{sla:uuid}', [SLAController::class, 'destroy'])->name('sla.destroy')->middleware(['can:hapus produk']);
     Route::get('/api/sla', [SLAController::class, 'apiGetSla'])->name('api.sla');
-    Route::put('/activity/{activity:uuid}', [SLAController::class, 'activityUpdate'])->name('activity.update')->middleware(['can:hapus produk']);
+    Route::post('/activity/{activity:uuid}', [SLAController::class, 'activityUpdate'])->name('activity.update')->middleware(['can:hapus produk']);
     Route::delete('/activity/{activity:uuid}', [SLAController::class, 'activityDestroy'])->name('activity.destroy')->middleware(['can:hapus produk']);
 
     // Invoice Umum

@@ -27,5 +27,7 @@ class RolePermissionSeeder extends Seeder
         $role->syncPermissions($permissions);
         $role = Role::find(5);
         $role->syncPermissions($permissions);
+        $role = Role::find(6);
+        $role->syncPermissions($permissions);
     }
 }

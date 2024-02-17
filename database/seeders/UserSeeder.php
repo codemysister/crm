@@ -25,16 +25,16 @@ class UserSeeder extends Seeder
 
         $super_admin->assignRole("super admin");
 
-        // Sales
+        // AE
         for ($i = 1; $i <= 5; $i++) {
             $sales = User::create([
-                "name" => "Sales $i",
-                "email" => "sales$i@gmail.com",
+                "name" => "Account Executive $i",
+                "email" => "account_executive$i@gmail.com",
                 "number" => "085178612434",
-                "password" => bcrypt("sales123")
+                "password" => bcrypt("ae123")
             ]);
 
-            $sales->assignRole("sales");
+            $sales->assignRole("account executive");
         }
 
         // Account Manager
@@ -49,6 +49,18 @@ class UserSeeder extends Seeder
             $am->assignRole("account manager");
         }
 
+        // Account Representative
+        for ($i = 1; $i <= 2; $i++) {
+            $am = User::create([
+                "name" => "Account Representative $i",
+                "email" => "account_representative$i@gmail.com",
+                "number" => "085178612434",
+                "password" => bcrypt("ar123")
+            ]);
+
+            $am->assignRole("account representative");
+        }
+
 
         // Admin
         $admin = User::create([
@@ -58,15 +70,15 @@ class UserSeeder extends Seeder
             "password" => bcrypt("admin123")
         ]);
 
-        $admin->assignRole("admin");
+        $admin->assignRole("general admin");
 
         // DPD
-        $dpd = User::create([
-            "name" => "Design Print Delivery",
-            "email" => "design_print_delivery@gmail.com",
+        $designer = User::create([
+            "name" => "Graphics Designer",
+            "email" => "graphic_designer@gmail.com",
             "number" => "085178612434",
-            "password" => bcrypt("dpd123")
+            "password" => bcrypt("designer123")
         ]);
-        $dpd->assignRole("design print delivery");
+        $designer->assignRole("graphics designer");
     }
 }
