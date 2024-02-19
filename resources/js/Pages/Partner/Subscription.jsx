@@ -40,44 +40,7 @@ const Subscription = ({
         useState(false);
     const [isLoadingData, setIsLoadingData] = useState(false);
     const infoPriceTrainingOnlineRef = useRef(null);
-    const [visibleColumnsSubscription, setVisibleColumnsSubscription] =
-        useState([
-            { field: "nominal", header: "Nominal" },
-            { field: "ppn", header: "PPN (%)" },
-            { field: "total_bill", header: "Total Tagihan (nominal + ppn)" },
-            { field: "period", header: "Periode Langganan" },
-            { field: "price_lanyard", header: "Tarif Lanyard" },
-        ]);
-    const columnsSubscription = [
-        { field: "nominal", header: "Nominal" },
-        { field: "ppn", header: "PPN (%)" },
-        { field: "total_bill", header: "Total Tagihan (nominal + ppn)" },
-        { field: "period", header: "Periode Langganan" },
-        { field: "price_lanyard", header: "Tarif Lanyard" },
-        {
-            field: "price_subscription_system",
-            header: "Tarif Langganan Sistem",
-        },
-        { field: "price_training_offline", header: "Tarif Training Offline" },
-        { field: "price_training_online", header: "Tarif Training Online" },
-        {
-            field: "fee_purchase_cazhpoin",
-            header: "Fee Isi Kartu via CazhPOIN",
-        },
-        {
-            field: "fee_bill_cazhpoin",
-            header: "Fee Bayar Tagihan via CazhPOIN",
-        },
-        { field: "fee_topup_cazhpos", header: "Fee Topup Kartu via CazhPos" },
-        {
-            field: "fee_withdraw_cazhpos",
-            header: "Fee Withdraw Kartu via Cazh POS",
-        },
-        {
-            field: "fee_bill_saldokartu",
-            header: "Fee Bayar Tagihan via Saldo Kartu",
-        },
-    ];
+
     const [filters, setFilters] = useState({
         global: { value: null, matchMode: FilterMatchMode.CONTAINS },
     });
@@ -104,23 +67,11 @@ const Subscription = ({
     } = useForm({
         uuid: "",
         partner: {},
+        bill: null,
         nominal: 0,
-        period: null,
-        price_card: {
-            price: "",
-            type: "",
-        },
         ppn: 0,
+        total_ppn: 0,
         total_bill: 0,
-        price_training_online: null,
-        price_training_offline: null,
-        price_lanyard: null,
-        price_subscription_system: null,
-        fee_purchase_cazhpoin: null,
-        fee_bill_cazhpoin: null,
-        fee_topup_cazhpos: null,
-        fee_withdraw_cazhpos: null,
-        fee_bill_saldokartu: null,
     });
 
     const getSubscriptions = async () => {
@@ -166,15 +117,6 @@ const Subscription = ({
         { name: "Bali", price: 26000000 },
         { name: "Jabodetabek", price: 15000000 },
     ];
-
-    const onColumnToggle = (event) => {
-        let selectedColumns = event.value;
-        let orderedSelectedColumns = columnsSubscription.filter((col) =>
-            selectedColumns.some((sCol) => sCol.field === col.field)
-        );
-
-        setVisibleColumnsSubscription(orderedSelectedColumns);
-    };
 
     const addButtonIcon = () => {
         return (
@@ -251,7 +193,7 @@ const Subscription = ({
     };
 
     const headerSubscription = (
-        <div className="flex flex-col md:flex-row justify-between items-center">
+        <div className="flex flex-col sm:flex-row justify-between items-center">
             <div>
                 <Button
                     label="Tambah"
@@ -278,14 +220,6 @@ const Subscription = ({
                     </span>
                 </div>
             </div>
-            <MultiSelect
-                value={visibleColumnsSubscription}
-                options={columnsSubscription}
-                optionLabel="header"
-                onChange={onColumnToggle}
-                className="w-full sm:w-[30%] p-0"
-                display="chip"
-            />
         </div>
     );
 
@@ -298,14 +232,7 @@ const Subscription = ({
                     showSuccess("Tambah");
                     setModalSubscriptionIsVisible((prev) => (prev = false));
                     getSubscriptions();
-                    resetSubscription(
-                        "partner",
-                        "nominal",
-                        "period",
-                        "bank",
-                        "account_bank_number",
-                        "account_bank_name"
-                    );
+                    resetSubscription();
                 },
                 onError: () => {
                     showError("Tambah");
@@ -321,14 +248,7 @@ const Subscription = ({
                             (prev) => (prev = false)
                         );
                         getSubscriptions();
-                        resetSubscription(
-                            "partner",
-                            "nominal",
-                            "period",
-                            "bank",
-                            "account_bank_number",
-                            "account_bank_name"
-                        );
+                        resetSubscription();
                     },
                     onError: () => {
                         showError("Update");
@@ -343,20 +263,11 @@ const Subscription = ({
             ...data,
             uuid: subscription.uuid,
             partner: subscription.partner,
+            bill: subscription.bill,
             nominal: subscription.nominal,
-            period: subscription.period,
-            price_card: JSON.parse(subscription.price_card),
             ppn: subscription.ppn,
+            total_ppn: subscription.total_ppn,
             total_bill: subscription.total_bill,
-            price_training_online: subscription.price_training_online,
-            price_training_offline: subscription.price_training_offline,
-            price_lanyard: subscription.price_lanyard,
-            price_subscription_system: subscription.price_subscription_system,
-            fee_purchase_cazhpoin: subscription.fee_purchase_cazhpoin,
-            fee_bill_cazhpoin: subscription.fee_bill_cazhpoin,
-            fee_topup_cazhpos: subscription.fee_topup_cazhpos,
-            fee_withdraw_cazhpos: subscription.fee_withdraw_cazhpos,
-            fee_bill_saldokartu: subscription.fee_bill_saldokartu,
         }));
 
         setModalEditSubscriptionIsVisible(true);
@@ -403,7 +314,7 @@ const Subscription = ({
                         }
                     >
                         <div className="flex flex-col justify-around gap-4 mt-1">
-                            <div className="flex flex-col">
+                            <div className="flex flex-col mt-3">
                                 <label htmlFor="partner_subcription">
                                     Partner
                                 </label>
@@ -425,22 +336,38 @@ const Subscription = ({
                                 />
                             </div>
                             <div className="flex flex-col">
+                                <label htmlFor="bill">Tagihan *</label>
+
+                                <InputText
+                                    value={dataSubscription.bill}
+                                    onChange={(e) =>
+                                        setDataSubscription(
+                                            "bill",
+                                            e.target.value
+                                        )
+                                    }
+                                    className="dark:bg-gray-300"
+                                    id="bill"
+                                    aria-describedby="bill-help"
+                                />
+                            </div>
+                            <div className="flex flex-col">
                                 <label htmlFor="nominal">
                                     Nominal Langganan *
                                 </label>
                                 <InputNumber
                                     value={dataSubscription.nominal}
-                                    onValueChange={(e) => {
+                                    onChange={(e) => {
                                         const total_bill =
-                                            (e.target.value *
-                                                dataSubscription.ppn) /
+                                            (e.value * dataSubscription.ppn) /
                                             100;
                                         setDataSubscription({
                                             ...dataSubscription,
-                                            nominal: e.target.value,
+                                            nominal: e.value,
+                                            total_ppn: total_bill,
                                             total_bill:
                                                 dataSubscription.ppn === 0
-                                                    ? e.target.value
+                                                    ? e.value
                                                     : total_bill,
                                         });
                                     }}
@@ -452,16 +379,18 @@ const Subscription = ({
                                 <label htmlFor="ppn">PPN(%)</label>
                                 <InputNumber
                                     value={dataSubscription.ppn}
-                                    onValueChange={(e) => {
-                                        const ppn =
-                                            (e.target.value *
+                                    onChange={(e) => {
+                                        const total_ppn =
+                                            (e.value *
                                                 dataSubscription.nominal) /
                                             100;
                                         setDataSubscription({
                                             ...dataSubscription,
-                                            ppn: e.target.value,
+                                            ppn: e.value,
+                                            total_ppn: total_ppn,
                                             total_bill:
-                                                dataSubscription.nominal + ppn,
+                                                dataSubscription.nominal +
+                                                total_ppn,
                                         });
                                     }}
                                     locale="id-ID"
@@ -469,398 +398,32 @@ const Subscription = ({
                             </div>
 
                             <div className="flex flex-col">
-                                <label htmlFor="ppn">
-                                    Total Tagihan(nominal + ppn)
-                                </label>
+                                <label htmlFor="ppn">Jumlah Pajak</label>
                                 <InputNumber
-                                    value={dataSubscription.total_bill}
-                                    onValueChange={(e) => {
-                                        setDataSubscription({
-                                            ...dataSubscription,
-                                            total_bill: e.target.value,
-                                        });
-                                    }}
-                                    locale="id-ID"
-                                />
-                            </div>
-
-                            <div className="flex flex-col">
-                                <label htmlFor="period">Periode*</label>
-                                <Dropdown
-                                    value={dataSubscription.period}
+                                    value={dataSubscription.total_ppn}
                                     onChange={(e) => {
                                         setDataSubscription({
                                             ...dataSubscription,
-                                            period: e.target.value,
+                                            total_ppn: e.value,
                                         });
                                     }}
-                                    options={option_period_subscription}
-                                    optionLabel="name"
-                                    optionValue="name"
-                                    placeholder="Langganan Per-"
-                                    valueTemplate={selectedOptionTemplate}
-                                    itemTemplate={optionTemplate}
-                                    className={`w-full md:w-14rem`}
+                                    locale="id-ID"
                                 />
                             </div>
-
                             <div className="flex flex-col">
-                                <label htmlFor="price_card">Tarif Kartu</label>
-
-                                <div className="flex justify-between gap-1 w-full items-center">
-                                    <div className="w-full flex gap-2 h-full">
-                                        <InputNumber
-                                            placeholder="tarif"
-                                            value={
-                                                dataSubscription.price_card
-                                                    .price
-                                            }
-                                            onValueChange={(e) =>
-                                                setDataSubscription({
-                                                    ...dataSubscription,
-                                                    price_card: {
-                                                        ...dataSubscription.price_card,
-                                                        price: e.target.value,
-                                                    },
-                                                })
-                                            }
-                                            className="dark:bg-gray-300 w-full"
-                                            id="account_bank_name"
-                                            aria-describedby="account_bank_name-help"
-                                            locale="id-ID"
-                                        />
-                                        <Dropdown
-                                            value={
-                                                dataSubscription.price_card.type
-                                            }
-                                            onChange={(e) =>
-                                                setDataSubscription({
-                                                    ...dataSubscription,
-                                                    price_card: {
-                                                        ...dataSubscription.price_card,
-                                                        type: e.target.value,
-                                                    },
-                                                })
-                                            }
-                                            options={cardCategories}
-                                            optionLabel="name"
-                                            optionValue="name"
-                                            placeholder="kategori"
-                                            className="w-full md:w-14rem"
-                                        />
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className="flex flex-col">
-                                <label htmlFor="price_card">
-                                    Tarif Lanyard
+                                <label htmlFor="ppn">
+                                    Total Tagihan(nominal + pajak)
                                 </label>
-                                <div className="flex justify-between gap-1 w-full items-center">
-                                    <div className="w-full flex gap-2 h-full">
-                                        <Dropdown
-                                            value={
-                                                dataSubscription.price_lanyard
-                                            }
-                                            onChange={(e) =>
-                                                setDataSubscription({
-                                                    ...dataSubscription,
-                                                    price_lanyard:
-                                                        e.target.value,
-                                                })
-                                            }
-                                            options={option_price_lanyard}
-                                            optionLabel="price"
-                                            optionValue="price"
-                                            placeholder="Pilih Tarif"
-                                            editable
-                                            valueTemplate={
-                                                selectedOptionTrainingTemplate
-                                            }
-                                            itemTemplate={
-                                                optionTrainingTemplate
-                                            }
-                                            className="w-full md:w-14rem"
-                                        />
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className="flex flex-col">
-                                <label htmlFor="price_card">
-                                    Tarif Langganan Sistem
-                                </label>
-                                <div className="flex justify-between gap-1 w-full items-center">
-                                    <div className="w-full flex gap-2 h-full">
-                                        <InputNumber
-                                            placeholder="tarif"
-                                            value={
-                                                dataSubscription.price_subscription_system
-                                            }
-                                            onValueChange={(e) =>
-                                                setDataSubscription({
-                                                    ...dataSubscription,
-                                                    price_subscription_system:
-                                                        e.target.value,
-                                                })
-                                            }
-                                            className="dark:bg-gray-300 w-full"
-                                            id="account_bank_name"
-                                            aria-describedby="account_bank_name-help"
-                                            locale="id-ID"
-                                        />
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className="flex flex-col">
-                                <label htmlFor="price_card">
-                                    Tarif Pelatihan Offline
-                                </label>
-                                <div className="flex justify-between gap-1 w-full items-center">
-                                    <div className="w-full flex gap-2 h-full">
-                                        <Dropdown
-                                            value={
-                                                dataSubscription.price_training_offline
-                                            }
-                                            onChange={(e) =>
-                                                setDataSubscription({
-                                                    ...dataSubscription,
-                                                    price_training_offline:
-                                                        e.target.value,
-                                                })
-                                            }
-                                            options={option_training_offline}
-                                            optionLabel="price"
-                                            optionValue="price"
-                                            placeholder="Pilih Tarif"
-                                            editable
-                                            valueTemplate={
-                                                selectedOptionTrainingTemplate
-                                            }
-                                            itemTemplate={
-                                                optionTrainingTemplate
-                                            }
-                                            className="w-full md:w-14rem"
-                                        />
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className="flex flex-col">
-                                <label htmlFor="price_card">
-                                    Tarif Pelatihan Online
-                                </label>
-                                <div className="flex justify-between gap-1 w-full items-center">
-                                    <div className="w-full flex gap-2 h-full">
-                                        <div className="p-inputgroup flex-1 h-full">
-                                            <InputNumber
-                                                value={
-                                                    dataSubscription.price_training_online
-                                                }
-                                                onChange={(e) =>
-                                                    setDataSubscription({
-                                                        ...dataSubscription,
-                                                        price_training_online:
-                                                            e.value,
-                                                    })
-                                                }
-                                                className={`h-full`}
-                                                locale="id-ID"
-                                            />
-                                            <Button
-                                                type="button"
-                                                className="h-[35px]"
-                                                icon="pi pi-info-circle"
-                                                onClick={(e) =>
-                                                    infoPriceTrainingOnlineRef.current.toggle(
-                                                        e
-                                                    )
-                                                }
-                                            />
-                                            <OverlayPanel
-                                                className="shadow-md"
-                                                ref={infoPriceTrainingOnlineRef}
-                                            >
-                                                <ul className="list-disc list-inside">
-                                                    <li>
-                                                        Harga Implementasi
-                                                        Training dan/atau
-                                                        sosialisasi secara
-                                                        Daring/Online
-                                                    </li>
-                                                    <li>
-                                                        Harga implementasi 3x
-                                                        sesi training secara
-                                                        gratis. (Harga yang di
-                                                        imput adalah harga
-                                                        training tambahan)
-                                                    </li>
-                                                </ul>
-                                            </OverlayPanel>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className="flex flex-col">
-                                <label htmlFor="price_card">
-                                    Tarif Isi Kartu Via Cazhpoin
-                                </label>
-                                <div className="flex justify-between gap-1 w-full items-center">
-                                    <div className="w-full flex gap-2 h-full">
-                                        <Dropdown
-                                            value={
-                                                dataSubscription.fee_purchase_cazhpoin
-                                            }
-                                            onChange={(e) =>
-                                                setDataSubscription({
-                                                    ...dataSubscription,
-                                                    fee_purchase_cazhpoin:
-                                                        e.target.value,
-                                                })
-                                            }
-                                            options={option_fee}
-                                            optionLabel="name"
-                                            optionValue="name"
-                                            placeholder="Pilih Tarif"
-                                            editable
-                                            valueTemplate={
-                                                selectedOptionTemplate
-                                            }
-                                            itemTemplate={optionTemplate}
-                                            className="w-full md:w-14rem"
-                                        />
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className="flex flex-col">
-                                <label htmlFor="price_card">
-                                    Tarif Bayar Tagihan via CazhPOIN
-                                </label>
-                                <div className="flex justify-between gap-1 w-full items-center">
-                                    <div className="w-full flex gap-2 h-full">
-                                        <Dropdown
-                                            value={
-                                                dataSubscription.fee_bill_cazhpoin
-                                            }
-                                            onChange={(e) =>
-                                                setDataSubscription({
-                                                    ...dataSubscription,
-                                                    fee_bill_cazhpoin:
-                                                        e.target.value,
-                                                })
-                                            }
-                                            options={option_fee}
-                                            optionLabel="name"
-                                            optionValue="name"
-                                            placeholder="Pilih Tarif"
-                                            editable
-                                            valueTemplate={
-                                                selectedOptionTemplate
-                                            }
-                                            itemTemplate={optionTemplate}
-                                            className="w-full md:w-14rem"
-                                        />
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className="flex flex-col">
-                                <label htmlFor="price_card">
-                                    Tarif TopUp Kartu via Cazh POS
-                                </label>
-                                <div className="flex justify-between gap-1 w-full items-center">
-                                    <div className="w-full flex gap-2 h-full">
-                                        <Dropdown
-                                            value={
-                                                dataSubscription.fee_topup_cazhpos
-                                            }
-                                            onChange={(e) =>
-                                                setDataSubscription({
-                                                    ...dataSubscription,
-                                                    fee_topup_cazhpos:
-                                                        e.target.value,
-                                                })
-                                            }
-                                            options={option_fee}
-                                            optionLabel="name"
-                                            optionValue="name"
-                                            placeholder="Pilih Tarif"
-                                            editable
-                                            valueTemplate={
-                                                selectedOptionTemplate
-                                            }
-                                            itemTemplate={optionTemplate}
-                                            className="w-full md:w-14rem"
-                                        />
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className="flex flex-col">
-                                <label htmlFor="price_card">
-                                    Tarif Penarikan Saldo Kartu via Cazh POS
-                                </label>
-                                <div className="flex justify-between gap-1 w-full items-center">
-                                    <div className="w-full flex gap-2 h-full">
-                                        <Dropdown
-                                            value={
-                                                dataSubscription.fee_withdraw_cazhpos
-                                            }
-                                            onChange={(e) =>
-                                                setDataSubscription({
-                                                    ...dataSubscription,
-                                                    fee_withdraw_cazhpos:
-                                                        e.target.value,
-                                                })
-                                            }
-                                            options={option_fee}
-                                            optionLabel="name"
-                                            optionValue="name"
-                                            placeholder="Pilih Tarif"
-                                            editable
-                                            valueTemplate={
-                                                selectedOptionTemplate
-                                            }
-                                            itemTemplate={optionTemplate}
-                                            className="w-full md:w-14rem"
-                                        />
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className="flex flex-col">
-                                <label htmlFor="price_card">
-                                    Tarif Pembayaran Tagihan via Saldo Kartu
-                                </label>
-                                <div className="flex justify-between gap-1 w-full items-center">
-                                    <div className="w-full flex gap-2 h-full">
-                                        <Dropdown
-                                            value={
-                                                dataSubscription.fee_bill_saldokartu
-                                            }
-                                            onChange={(e) =>
-                                                setDataSubscription({
-                                                    ...dataSubscription,
-                                                    fee_bill_saldokartu:
-                                                        e.target.value,
-                                                })
-                                            }
-                                            options={option_fee}
-                                            optionLabel="name"
-                                            optionValue="name"
-                                            placeholder="Pilih Tarif"
-                                            editable
-                                            valueTemplate={
-                                                selectedOptionTemplate
-                                            }
-                                            itemTemplate={optionTemplate}
-                                            className="w-full md:w-14rem"
-                                        />
-                                    </div>
-                                </div>
+                                <InputNumber
+                                    value={dataSubscription.total_bill}
+                                    onChange={(e) => {
+                                        setDataSubscription({
+                                            ...dataSubscription,
+                                            total_bill: e.value,
+                                        });
+                                    }}
+                                    locale="id-ID"
+                                />
                             </div>
                         </div>
                         <div className="flex justify-center mt-5">
@@ -873,7 +436,6 @@ const Subscription = ({
                     </form>
                 </Dialog>
             </div>
-
             {/* Modal edit langganan */}
             <div className="card flex justify-content-center">
                 <Dialog
@@ -890,25 +452,20 @@ const Subscription = ({
                         }
                     >
                         <div className="flex flex-col justify-around gap-4 mt-1">
-                            <div className="flex flex-col">
-                                <label htmlFor="partner_subcription">
-                                    Partner
-                                </label>
-                                <Dropdown
-                                    optionLabel="name"
-                                    value={dataSubscription.partner}
+                            <div className="flex flex-col mt-3">
+                                <label htmlFor="bill">Tagihan *</label>
+
+                                <InputText
+                                    value={dataSubscription.bill}
                                     onChange={(e) =>
                                         setDataSubscription(
-                                            "partner",
+                                            "bill",
                                             e.target.value
                                         )
                                     }
-                                    options={partners}
-                                    placeholder="Pilih Partner"
-                                    filter
-                                    valueTemplate={selectedOptionTemplate}
-                                    itemTemplate={optionTemplate}
-                                    className="w-full md:w-14rem"
+                                    className="dark:bg-gray-300"
+                                    id="bill"
+                                    aria-describedby="bill-help"
                                 />
                             </div>
                             <div className="flex flex-col">
@@ -917,17 +474,17 @@ const Subscription = ({
                                 </label>
                                 <InputNumber
                                     value={dataSubscription.nominal}
-                                    onValueChange={(e) => {
+                                    onChange={(e) => {
                                         const total_bill =
-                                            (e.target.value *
-                                                dataSubscription.ppn) /
+                                            (e.value * dataSubscription.ppn) /
                                             100;
                                         setDataSubscription({
                                             ...dataSubscription,
-                                            nominal: e.target.value,
+                                            nominal: e.value,
+                                            total_ppn: total_bill,
                                             total_bill:
                                                 dataSubscription.ppn === 0
-                                                    ? e.target.value
+                                                    ? e.value
                                                     : total_bill,
                                         });
                                     }}
@@ -939,16 +496,18 @@ const Subscription = ({
                                 <label htmlFor="ppn">PPN(%)</label>
                                 <InputNumber
                                     value={dataSubscription.ppn}
-                                    onValueChange={(e) => {
-                                        const ppn =
-                                            (e.target.value *
+                                    onChange={(e) => {
+                                        const total_ppn =
+                                            (e.value *
                                                 dataSubscription.nominal) /
                                             100;
                                         setDataSubscription({
                                             ...dataSubscription,
-                                            ppn: e.target.value,
+                                            ppn: e.value,
+                                            total_ppn: total_ppn,
                                             total_bill:
-                                                dataSubscription.nominal + ppn,
+                                                dataSubscription.nominal +
+                                                total_ppn,
                                         });
                                     }}
                                     locale="id-ID"
@@ -956,398 +515,32 @@ const Subscription = ({
                             </div>
 
                             <div className="flex flex-col">
-                                <label htmlFor="ppn">
-                                    Total Tagihan(nominal + ppn)
-                                </label>
+                                <label htmlFor="ppn">Jumlah Pajak</label>
                                 <InputNumber
-                                    value={dataSubscription.total_bill}
-                                    onValueChange={(e) => {
-                                        setDataSubscription({
-                                            ...dataSubscription,
-                                            total_bill: e.target.value,
-                                        });
-                                    }}
-                                    locale="id-ID"
-                                />
-                            </div>
-
-                            <div className="flex flex-col">
-                                <label htmlFor="period">Periode*</label>
-                                <Dropdown
-                                    value={dataSubscription.period}
+                                    value={dataSubscription.total_ppn}
                                     onChange={(e) => {
                                         setDataSubscription({
                                             ...dataSubscription,
-                                            period: e.target.value,
+                                            total_ppn: e.value,
                                         });
                                     }}
-                                    options={option_period_subscription}
-                                    optionLabel="name"
-                                    optionValue="name"
-                                    placeholder="Langganan Per-"
-                                    valueTemplate={selectedOptionTemplate}
-                                    itemTemplate={optionTemplate}
-                                    className={`w-full md:w-14rem`}
+                                    locale="id-ID"
                                 />
                             </div>
-
                             <div className="flex flex-col">
-                                <label htmlFor="price_card">Tarif Kartu</label>
-
-                                <div className="flex justify-between gap-1 w-full items-center">
-                                    <div className="w-full flex gap-2 h-full">
-                                        <InputNumber
-                                            placeholder="tarif"
-                                            value={
-                                                dataSubscription.price_card
-                                                    .price
-                                            }
-                                            onValueChange={(e) =>
-                                                setDataSubscription({
-                                                    ...dataSubscription,
-                                                    price_card: {
-                                                        ...dataSubscription.price_card,
-                                                        price: e.target.value,
-                                                    },
-                                                })
-                                            }
-                                            className="dark:bg-gray-300 w-full"
-                                            id="account_bank_name"
-                                            aria-describedby="account_bank_name-help"
-                                            locale="id-ID"
-                                        />
-                                        <Dropdown
-                                            value={
-                                                dataSubscription.price_card.type
-                                            }
-                                            onChange={(e) =>
-                                                setDataSubscription({
-                                                    ...dataSubscription,
-                                                    price_card: {
-                                                        ...dataSubscription.price_card,
-                                                        type: e.target.value,
-                                                    },
-                                                })
-                                            }
-                                            options={cardCategories}
-                                            optionLabel="name"
-                                            optionValue="name"
-                                            placeholder="kategori"
-                                            className="w-full md:w-14rem"
-                                        />
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className="flex flex-col">
-                                <label htmlFor="price_card">
-                                    Tarif Lanyard
+                                <label htmlFor="ppn">
+                                    Total Tagihan(nominal + pajak)
                                 </label>
-                                <div className="flex justify-between gap-1 w-full items-center">
-                                    <div className="w-full flex gap-2 h-full">
-                                        <Dropdown
-                                            value={
-                                                dataSubscription.price_lanyard
-                                            }
-                                            onChange={(e) =>
-                                                setDataSubscription({
-                                                    ...dataSubscription,
-                                                    price_lanyard:
-                                                        e.target.value,
-                                                })
-                                            }
-                                            options={option_price_lanyard}
-                                            optionLabel="price"
-                                            optionValue="price"
-                                            placeholder="Pilih Tarif"
-                                            editable
-                                            valueTemplate={
-                                                selectedOptionTrainingTemplate
-                                            }
-                                            itemTemplate={
-                                                optionTrainingTemplate
-                                            }
-                                            className="w-full md:w-14rem"
-                                        />
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className="flex flex-col">
-                                <label htmlFor="price_card">
-                                    Tarif Langganan Sistem
-                                </label>
-                                <div className="flex justify-between gap-1 w-full items-center">
-                                    <div className="w-full flex gap-2 h-full">
-                                        <InputNumber
-                                            placeholder="tarif"
-                                            value={
-                                                dataSubscription.price_subscription_system
-                                            }
-                                            onValueChange={(e) =>
-                                                setDataSubscription({
-                                                    ...dataSubscription,
-                                                    price_subscription_system:
-                                                        e.target.value,
-                                                })
-                                            }
-                                            className="dark:bg-gray-300 w-full"
-                                            id="account_bank_name"
-                                            aria-describedby="account_bank_name-help"
-                                            locale="id-ID"
-                                        />
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className="flex flex-col">
-                                <label htmlFor="price_card">
-                                    Tarif Pelatihan Offline
-                                </label>
-                                <div className="flex justify-between gap-1 w-full items-center">
-                                    <div className="w-full flex gap-2 h-full">
-                                        <Dropdown
-                                            value={
-                                                dataSubscription.price_training_offline
-                                            }
-                                            onChange={(e) =>
-                                                setDataSubscription({
-                                                    ...dataSubscription,
-                                                    price_training_offline:
-                                                        e.target.value,
-                                                })
-                                            }
-                                            options={option_training_offline}
-                                            optionLabel="price"
-                                            optionValue="price"
-                                            placeholder="Pilih Tarif"
-                                            editable
-                                            valueTemplate={
-                                                selectedOptionTrainingTemplate
-                                            }
-                                            itemTemplate={
-                                                optionTrainingTemplate
-                                            }
-                                            className="w-full md:w-14rem"
-                                        />
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className="flex flex-col">
-                                <label htmlFor="price_card">
-                                    Tarif Pelatihan Online
-                                </label>
-                                <div className="flex justify-between gap-1 w-full items-center">
-                                    <div className="w-full flex gap-2 h-full">
-                                        <div className="p-inputgroup flex-1 h-full">
-                                            <InputNumber
-                                                value={
-                                                    dataSubscription.price_training_online
-                                                }
-                                                onChange={(e) =>
-                                                    setDataSubscription({
-                                                        ...dataSubscription,
-                                                        price_training_online:
-                                                            e.value,
-                                                    })
-                                                }
-                                                className={`h-full`}
-                                                locale="id-ID"
-                                            />
-                                            <Button
-                                                type="button"
-                                                className="h-[35px]"
-                                                icon="pi pi-info-circle"
-                                                onClick={(e) =>
-                                                    infoPriceTrainingOnlineRef.current.toggle(
-                                                        e
-                                                    )
-                                                }
-                                            />
-                                            <OverlayPanel
-                                                className="shadow-md"
-                                                ref={infoPriceTrainingOnlineRef}
-                                            >
-                                                <ul className="list-disc list-inside">
-                                                    <li>
-                                                        Harga Implementasi
-                                                        Training dan/atau
-                                                        sosialisasi secara
-                                                        Daring/Online
-                                                    </li>
-                                                    <li>
-                                                        Harga implementasi 3x
-                                                        sesi training secara
-                                                        gratis. (Harga yang di
-                                                        imput adalah harga
-                                                        training tambahan)
-                                                    </li>
-                                                </ul>
-                                            </OverlayPanel>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className="flex flex-col">
-                                <label htmlFor="price_card">
-                                    Tarif Isi Kartu Via Cazhpoin
-                                </label>
-                                <div className="flex justify-between gap-1 w-full items-center">
-                                    <div className="w-full flex gap-2 h-full">
-                                        <Dropdown
-                                            value={
-                                                dataSubscription.fee_purchase_cazhpoin
-                                            }
-                                            onChange={(e) =>
-                                                setDataSubscription({
-                                                    ...dataSubscription,
-                                                    fee_purchase_cazhpoin:
-                                                        e.target.value,
-                                                })
-                                            }
-                                            options={option_fee}
-                                            optionLabel="name"
-                                            optionValue="name"
-                                            placeholder="Pilih Tarif"
-                                            editable
-                                            valueTemplate={
-                                                selectedOptionTemplate
-                                            }
-                                            itemTemplate={optionTemplate}
-                                            className="w-full md:w-14rem"
-                                        />
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className="flex flex-col">
-                                <label htmlFor="price_card">
-                                    Tarif Bayar Tagihan via CazhPOIN
-                                </label>
-                                <div className="flex justify-between gap-1 w-full items-center">
-                                    <div className="w-full flex gap-2 h-full">
-                                        <Dropdown
-                                            value={
-                                                dataSubscription.fee_bill_cazhpoin
-                                            }
-                                            onChange={(e) =>
-                                                setDataSubscription({
-                                                    ...dataSubscription,
-                                                    fee_bill_cazhpoin:
-                                                        e.target.value,
-                                                })
-                                            }
-                                            options={option_fee}
-                                            optionLabel="name"
-                                            optionValue="name"
-                                            placeholder="Pilih Tarif"
-                                            editable
-                                            valueTemplate={
-                                                selectedOptionTemplate
-                                            }
-                                            itemTemplate={optionTemplate}
-                                            className="w-full md:w-14rem"
-                                        />
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className="flex flex-col">
-                                <label htmlFor="price_card">
-                                    Tarif TopUp Kartu via Cazh POS
-                                </label>
-                                <div className="flex justify-between gap-1 w-full items-center">
-                                    <div className="w-full flex gap-2 h-full">
-                                        <Dropdown
-                                            value={
-                                                dataSubscription.fee_topup_cazhpos
-                                            }
-                                            onChange={(e) =>
-                                                setDataSubscription({
-                                                    ...dataSubscription,
-                                                    fee_topup_cazhpos:
-                                                        e.target.value,
-                                                })
-                                            }
-                                            options={option_fee}
-                                            optionLabel="name"
-                                            optionValue="name"
-                                            placeholder="Pilih Tarif"
-                                            editable
-                                            valueTemplate={
-                                                selectedOptionTemplate
-                                            }
-                                            itemTemplate={optionTemplate}
-                                            className="w-full md:w-14rem"
-                                        />
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className="flex flex-col">
-                                <label htmlFor="price_card">
-                                    Tarif Penarikan Saldo Kartu via Cazh POS
-                                </label>
-                                <div className="flex justify-between gap-1 w-full items-center">
-                                    <div className="w-full flex gap-2 h-full">
-                                        <Dropdown
-                                            value={
-                                                dataSubscription.fee_withdraw_cazhpos
-                                            }
-                                            onChange={(e) =>
-                                                setDataSubscription({
-                                                    ...dataSubscription,
-                                                    fee_withdraw_cazhpos:
-                                                        e.target.value,
-                                                })
-                                            }
-                                            options={option_fee}
-                                            optionLabel="name"
-                                            optionValue="name"
-                                            placeholder="Pilih Tarif"
-                                            editable
-                                            valueTemplate={
-                                                selectedOptionTemplate
-                                            }
-                                            itemTemplate={optionTemplate}
-                                            className="w-full md:w-14rem"
-                                        />
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className="flex flex-col">
-                                <label htmlFor="price_card">
-                                    Tarif Pembayaran Tagihan via Saldo Kartu
-                                </label>
-                                <div className="flex justify-between gap-1 w-full items-center">
-                                    <div className="w-full flex gap-2 h-full">
-                                        <Dropdown
-                                            value={
-                                                dataSubscription.fee_bill_saldokartu
-                                            }
-                                            onChange={(e) =>
-                                                setDataSubscription({
-                                                    ...dataSubscription,
-                                                    fee_bill_saldokartu:
-                                                        e.target.value,
-                                                })
-                                            }
-                                            options={option_fee}
-                                            optionLabel="name"
-                                            optionValue="name"
-                                            placeholder="Pilih Tarif"
-                                            editable
-                                            valueTemplate={
-                                                selectedOptionTemplate
-                                            }
-                                            itemTemplate={optionTemplate}
-                                            className="w-full md:w-14rem"
-                                        />
-                                    </div>
-                                </div>
+                                <InputNumber
+                                    value={dataSubscription.total_bill}
+                                    onChange={(e) => {
+                                        setDataSubscription({
+                                            ...dataSubscription,
+                                            total_bill: e.value,
+                                        });
+                                    }}
+                                    locale="id-ID"
+                                />
                             </div>
                         </div>
                         <div className="flex justify-center mt-5">
@@ -1387,7 +580,7 @@ const Subscription = ({
                             body={(_, { rowIndex }) => rowIndex + 1}
                             className="dark:border-none pl-6"
                             headerClassName="dark:border-none pl-6 bg-transparent dark:bg-transparent dark:text-gray-300"
-                            style={{ width: "3%" }}
+                            style={{ width: "2rem" }}
                         />
                         <Column
                             header="Partner"
@@ -1406,46 +599,63 @@ const Subscription = ({
                             className="dark:border-none"
                             headerClassName="dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300"
                             align="left"
-                            style={{ width: "10%" }}
+                            style={{ minWidth: "6rem" }}
                         ></Column>
 
                         <Column
-                            header="Tarif Kartu"
-                            body={(rowData) =>
-                                JSON.parse(
-                                    rowData.price_card
-                                ).price?.toLocaleString("id-ID")
-                                    ? JSON.parse(
-                                          rowData.price_card
-                                      ).price.toLocaleString("id-ID") +
-                                      ` (${
-                                          JSON.parse(rowData.price_card).type
-                                      })`
-                                    : "Tidak diset"
-                            }
+                            header="Nominal"
+                            body={(rowData) => {
+                                return (
+                                    "Rp " +
+                                    rowData.nominal?.toLocaleString("id-ID")
+                                );
+                            }}
+                            className="dark:border-none"
+                            headerClassName="dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300"
+                            align="left"
+                            style={{ minWidth: "6rem" }}
+                        ></Column>
+
+                        <Column
+                            header="Pajak"
+                            body={(rowData) => {
+                                return rowData.ppn + "%" ?? "tidak ada";
+                            }}
+                            className="dark:border-none"
+                            headerClassName="dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300"
+                            align="left"
+                            style={{ minWidth: "6rem" }}
+                        ></Column>
+
+                        <Column
+                            header="Jumlah Pajak"
+                            body={(rowData) => {
+                                return (
+                                    "Rp " +
+                                        rowData.total_ppn.toLocaleString(
+                                            "id-ID"
+                                        ) ?? "tidak ada"
+                                );
+                            }}
                             className="dark:border-none"
                             headerClassName="dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300"
                             align="left"
                             style={{ minWidth: "8rem" }}
                         ></Column>
 
-                        {visibleColumnsSubscription.map((col) => (
-                            <Column
-                                key={col.field}
-                                style={{ minWidth: "10rem" }}
-                                field={col.field}
-                                header={col.header}
-                                body={(rowData) => {
-                                    return rowData[col.field]?.toLocaleString(
-                                        "id-ID"
-                                    )
-                                        ? rowData[col.field].toLocaleString(
-                                              "id-ID"
-                                          )
-                                        : "Tidak diset";
-                                }}
-                            />
-                        ))}
+                        <Column
+                            header="Total Tagihan"
+                            body={(rowData) => {
+                                return (
+                                    "Rp " +
+                                    rowData.total_bill.toLocaleString("id-ID")
+                                );
+                            }}
+                            className="dark:border-none"
+                            headerClassName="dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300"
+                            align="left"
+                            style={{ minWidth: "8rem" }}
+                        ></Column>
 
                         <Column
                             header="Action"

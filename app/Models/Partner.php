@@ -44,6 +44,11 @@ class Partner extends Authenticatable
         return $this->hasMany(PartnerSubscription::class);
     }
 
+    public function price_list()
+    {
+        return $this->hasOne(PartnerPriceList::class);
+    }
+
     public function sph()
     {
         return $this->hasOne(SPH::class, 'partner_id', 'id');

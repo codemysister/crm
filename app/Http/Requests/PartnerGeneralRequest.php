@@ -37,6 +37,8 @@ class PartnerGeneralRequest extends FormRequest
             'partner.live_age' => 'nullable|integer',
             'partner.monitoring_date_after_3_month_live' => 'nullable|date',
             'partner.status' => 'required',
+            'partner.payment_metode' => 'required',
+            'partner.period' => 'required',
 
             'pic.name' => 'required|string|max:255',
             'pic.number' => 'required|string|max:20',
@@ -47,20 +49,22 @@ class PartnerGeneralRequest extends FormRequest
             'bank.account_bank_number' => 'required|string',
             'bank.account_bank_name' => 'required|string',
 
+            'subscription.bill' => 'required',
             'subscription.nominal' => 'required|numeric',
-            'subscription.period' => 'required',
-            'subscription.price_card' => 'required',
             'subscription.ppn' => 'required|numeric',
+            'subscription.total_ppn' => 'required|numeric',
             'subscription.total_bill' => 'required|numeric',
-            'subscription.price_training_online' => 'nullable|numeric',
-            'subscription.price_training_offline' => 'nullable|numeric',
-            'subscription.price_lanyard' => 'nullable|numeric',
-            'subscription.price_subscription_system' => 'nullable|numeric',
-            'subscription.fee_purchase_cazhpoin' => 'nullable|numeric',
-            'subscription.fee_bill_cazhpoin' => 'nullable|numeric',
-            'subscription.fee_topup_cazhpos' => 'nullable|numeric',
-            'subscription.fee_withdraw_cazhpos' => 'nullable|numeric',
-            'subscription.fee_bill_saldokartu' => 'nullable|numeric',
+
+            'price_list.price_card' => 'required',
+            'price_list.price_training_online' => 'nullable|numeric',
+            'price_list.price_training_offline' => 'nullable|numeric',
+            'price_list.price_lanyard' => 'nullable|numeric',
+            'price_list.price_subscription_system' => 'nullable|numeric',
+            'price_list.fee_purchase_cazhpoin' => 'nullable|numeric',
+            'price_list.fee_bill_cazhpoin' => 'nullable|numeric',
+            'price_list.fee_topup_cazhpos' => 'nullable|numeric',
+            'price_list.fee_withdraw_cazhpos' => 'nullable|numeric',
+            'price_list.fee_bill_saldokartu' => 'nullable|numeric',
         ];
     }
 }

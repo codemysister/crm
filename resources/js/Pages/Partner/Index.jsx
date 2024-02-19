@@ -24,6 +24,7 @@ import DetailPartner from "./DetailPartner/DetailPartner.jsx";
 import Bank from "./Bank.jsx";
 import Account from "./Account.jsx";
 import Subscription from "./Subscription.jsx";
+import PriceList from "./PriceList.jsx";
 import { FilePond, registerPlugin } from "react-filepond";
 import FilePondPluginFileValidateSize from "filepond-plugin-file-validate-size";
 import "filepond/dist/filepond.min.css";
@@ -48,6 +49,12 @@ export default function Index({ auth, partner }) {
     const toast = useRef(null);
     const btnSubmit = useRef(null);
     const modalPartner = useRef(null);
+    const stepPartnerRef = useRef(null);
+    const stepPicRef = useRef(null);
+    const stepBankRef = useRef(null);
+    const stepAccountRef = useRef(null);
+    const stepSubscriptionRef = useRef(null);
+    const stepPriceListRef = useRef(null);
     const scrollForm = useRef(null);
     const infoPriceTrainingOnlineRef = useRef(null);
     const { roles, permissions } = auth.user;
@@ -57,7 +64,7 @@ export default function Index({ auth, partner }) {
     const [files, setFiles] = useState([]);
     useEffect(() => {
         if (partner) {
-            setActiveIndexTab(5);
+            setActiveIndexTab(6);
         }
     }, []);
 
@@ -90,6 +97,33 @@ export default function Index({ auth, partner }) {
             getSubdistricts(codeProvince, codeRegency);
         }
     }, [codeProvince, codeRegency]);
+
+    useEffect(() => {
+        if (activeIndex == 0) {
+            triggerInputFocus(stepPartnerRef);
+        } else if (activeIndex == 1) {
+            triggerInputFocus(stepPicRef);
+        } else if (activeIndex == 2) {
+            triggerInputFocus(stepBankRef);
+        } else if (activeIndex == 3) {
+            triggerInputFocus(stepAccountRef);
+        } else if (activeIndex == 4) {
+            console.log("oke");
+            triggerInputFocus(stepSubscriptionRef);
+        } else {
+            triggerInputFocus(stepPriceListRef);
+        }
+    }, [activeIndex]);
+
+    const triggerInputFocus = (ref) => {
+        if (ref.current) {
+            ref.current.scrollIntoView({
+                behavior: "smooth",
+                block: "center",
+            });
+        }
+        return null;
+    };
 
     const getProvince = async () => {
         const options = {
@@ -231,6 +265,8 @@ export default function Index({ auth, partner }) {
             live_date: null,
             live_age: null,
             monitoring_date_after_3_month_live: null,
+            period: null,
+            payment_metode: null,
             status: "",
         },
         pic: {
@@ -251,14 +287,17 @@ export default function Index({ auth, partner }) {
             account_bank_name: "",
         },
         subscription: {
+            bill: "Tagihan bulan",
             nominal: 0,
-            period: null,
+            ppn: 0,
+            total_ppn: 0,
+            total_bill: 0,
+        },
+        price_list: {
             price_card: {
                 price: "",
                 type: "",
             },
-            ppn: 0,
-            total_bill: 0,
             price_training_online: null,
             price_training_offline: null,
             price_lanyard: null,
@@ -375,21 +414,73 @@ export default function Index({ auth, partner }) {
 
     let cardCategories = [{ name: "digital" }, { name: "cetak" }];
 
+    const itemRenderer = (item, itemIndex, ref) => {
+        const isActiveItem = activeIndex === itemIndex;
+        const backgroundColor = isActiveItem ? "#673AB7" : "#9e9d9e";
+        const textColor = isActiveItem
+            ? "var(--surface-b)"
+            : "var(--text-color-secondary)";
+
+        return (
+            <li
+                id="pr_id_376_4"
+                class="p-steps-item p-highlight p-steps-current"
+                data-pc-section="menuitem"
+                ref={ref}
+            >
+                <a
+                    href="#"
+                    class="p-menuitem-link"
+                    tabindex="-1"
+                    data-pc-section="action"
+                >
+                    <span
+                        class="p-steps-number"
+                        data-pc-section="step"
+                        style={{
+                            backgroundColor: backgroundColor,
+                            color: "white",
+                        }}
+                    >
+                        {itemIndex + 1}
+                    </span>
+                    <span
+                        class="p-steps-title"
+                        className={`${
+                            isActiveItem ? "font-bold" : "font-medium"
+                        }`}
+                        data-pc-section="label"
+                    >
+                        {item.label}
+                    </span>
+                </a>
+            </li>
+        );
+    };
     const items = [
         {
             label: "Lembaga",
+            template: (item) => itemRenderer(item, 0, stepPartnerRef),
         },
         {
             label: "PIC",
+            template: (item) => itemRenderer(item, 1, stepPicRef),
         },
         {
             label: "Bank",
+            template: (item) => itemRenderer(item, 2, stepBankRef),
         },
         {
             label: "Akun",
+            template: (item) => itemRenderer(item, 3, stepAccountRef),
+        },
+        {
+            label: "Langganan",
+            template: (item) => itemRenderer(item, 4, stepSubscriptionRef),
         },
         {
             label: "Tarif",
+            template: (item) => itemRenderer(item, 5, stepPriceListRef),
         },
     ];
 
@@ -523,14 +614,14 @@ export default function Index({ auth, partner }) {
                 <Button
                     type="submit"
                     label="Submit"
-                    disabled={processing || activeIndex !== 4}
+                    disabled={processing || activeIndex !== 5}
                     className="bg-purple-600 text-sm shadow-md rounded-lg"
                     onClick={() => btnSubmit.current.click()}
                 />
                 <Button
                     type="button"
                     icon="pi pi-angle-right"
-                    disabled={activeIndex == 4}
+                    disabled={activeIndex == 5}
                     onClick={() => {
                         setActiveIndex((prev) => prev + 1);
                     }}
@@ -575,7 +666,7 @@ export default function Index({ auth, partner }) {
             });
         }
 
-        setActiveIndex((prev = prev = 0));
+        setActiveIndex((prev) => (prev = 0));
     };
 
     const getSelectedDetailPartner = async (partner) => {
@@ -588,7 +679,7 @@ export default function Index({ auth, partner }) {
 
     const handleSelectedDetailPartner = (partner) => {
         getSelectedDetailPartner(partner);
-        setActiveIndexTab(5);
+        setActiveIndexTab(6);
     };
 
     if (preRenderLoad) {
@@ -642,7 +733,7 @@ export default function Index({ auth, partner }) {
                             ref={modalPartner}
                             header="Partner"
                             headerClassName="dark:glass dark:text-white"
-                            className="bg-white w-[80%] md:w-[60%] lg:w-[35%] dark:glass dark:text-white"
+                            className="bg-white min-h-[500px] max-h-[80%] w-[80%] md:w-[60%] lg:w-[35%] dark:glass dark:text-white"
                             contentClassName=" dark:glass dark:text-white"
                             visible={modalPartnersIsVisible}
                             onHide={() => setModalPartnersIsVisible(false)}
@@ -651,16 +742,17 @@ export default function Index({ auth, partner }) {
                             <Steps
                                 model={items}
                                 activeIndex={activeIndex}
-                                className="sticky top-0 bg-white z-10 text-sm"
+                                className="sticky top-0 bg-white overflow-y-auto z-10 text-sm"
                             />
 
                             <form
                                 onSubmit={(e) => handleSubmitForm(e, "tambah")}
+                                className="my-4"
                             >
                                 {/* form partner */}
                                 {activeIndex == 0 && (
                                     <>
-                                        <div className="flex flex-col justify-around gap-4 mt-1">
+                                        <div className="flex flex-col justify-around gap-4">
                                             <div className="flex flex-col">
                                                 <label htmlFor="name">
                                                     Nama *
@@ -1092,6 +1184,72 @@ export default function Index({ auth, partner }) {
                                             </div>
 
                                             <div className="flex flex-col">
+                                                <label htmlFor="period">
+                                                    Periode Langganan*
+                                                </label>
+                                                <Dropdown
+                                                    dataKey="name"
+                                                    value={data.partner.period}
+                                                    onChange={(e) => {
+                                                        setData("partner", {
+                                                            ...data.partner,
+                                                            period: e.target
+                                                                .value,
+                                                        });
+                                                    }}
+                                                    options={
+                                                        option_period_subscription
+                                                    }
+                                                    optionLabel="name"
+                                                    placeholder="Langganan Per-"
+                                                    valueTemplate={
+                                                        selectedOptionTemplate
+                                                    }
+                                                    itemTemplate={
+                                                        optionTemplate
+                                                    }
+                                                    className={`w-full md:w-14rem 
+                                        `}
+                                                />
+                                            </div>
+
+                                            <div className="flex flex-col">
+                                                <label htmlFor="payment_metode">
+                                                    Metode Pembayaran *
+                                                </label>
+                                                <Dropdown
+                                                    value={
+                                                        data.partner
+                                                            .payment_metode
+                                                    }
+                                                    onChange={(e) => {
+                                                        setData("partner", {
+                                                            ...data.partner,
+                                                            payment_metode:
+                                                                e.target.value,
+                                                        });
+                                                    }}
+                                                    options={[
+                                                        { name: "cazhbox" },
+                                                        {
+                                                            name: "payment link",
+                                                        },
+                                                    ]}
+                                                    optionLabel="name"
+                                                    optionValue="name"
+                                                    placeholder="Pilih Metode Pembayaran"
+                                                    valueTemplate={
+                                                        selectedOptionTemplate
+                                                    }
+                                                    itemTemplate={
+                                                        optionTemplate
+                                                    }
+                                                    className="w-full md:w-14rem"
+                                                    editable
+                                                />
+                                            </div>
+
+                                            <div className="flex flex-col">
                                                 <label htmlFor="status">
                                                     Status *
                                                 </label>
@@ -1383,139 +1541,120 @@ export default function Index({ auth, partner }) {
                                     </>
                                 )}
 
-                                {/* form langganan */}
                                 {activeIndex == 4 && (
+                                    <div className="flex flex-col justify-around gap-4 mt-1">
+                                        <div className="flex flex-col">
+                                            <label htmlFor="bill">
+                                                Tagihan *
+                                            </label>
+
+                                            <InputText
+                                                value={data.subscription.bill}
+                                                onChange={(e) =>
+                                                    setData("subscription", {
+                                                        ...data.subscription,
+                                                        bill: e.target.value,
+                                                    })
+                                                }
+                                                className="dark:bg-gray-300"
+                                                id="bill"
+                                                aria-describedby="bill-help"
+                                            />
+                                        </div>
+                                        <div className="flex flex-col">
+                                            <label htmlFor="nominal">
+                                                Nominal Langganan *
+                                            </label>
+                                            <InputNumber
+                                                value={
+                                                    data.subscription.nominal
+                                                }
+                                                onChange={(e) => {
+                                                    const total_bill =
+                                                        (e.value *
+                                                            data.subscription
+                                                                .ppn) /
+                                                        100;
+                                                    setData("subscription", {
+                                                        ...data.subscription,
+                                                        nominal: e.value,
+                                                        total_ppn: total_bill,
+                                                        total_bill:
+                                                            data.subscription
+                                                                .ppn === 0
+                                                                ? e.value
+                                                                : total_bill,
+                                                    });
+                                                }}
+                                                locale="id-ID"
+                                            />
+                                        </div>
+                                        <div className="flex flex-col">
+                                            <label htmlFor="ppn">
+                                                Pajak (%)
+                                            </label>
+                                            <InputNumber
+                                                value={data.subscription.ppn}
+                                                onChange={(e) => {
+                                                    const total_ppn =
+                                                        (e.value *
+                                                            data.subscription
+                                                                .nominal) /
+                                                        100;
+                                                    setData("subscription", {
+                                                        ...data.subscription,
+                                                        ppn: e.value,
+                                                        total_ppn: total_ppn,
+                                                        total_bill:
+                                                            data.subscription
+                                                                .nominal +
+                                                            total_ppn,
+                                                    });
+                                                }}
+                                                locale="id-ID"
+                                            />
+                                        </div>
+                                        <div className="flex flex-col">
+                                            <label htmlFor="ppn">
+                                                Jumlah PPN
+                                            </label>
+                                            <InputNumber
+                                                value={
+                                                    data.subscription.total_ppn
+                                                }
+                                                onChange={(e) => {
+                                                    setData("subscription", {
+                                                        ...data.subscription,
+                                                        total_ppn: e.value,
+                                                    });
+                                                }}
+                                                locale="id-ID"
+                                            />
+                                        </div>
+                                        <div className="flex flex-col">
+                                            <label htmlFor="ppn">
+                                                Total Tagihan(nominal + ppn) *
+                                            </label>
+                                            <InputNumber
+                                                value={
+                                                    data.subscription.total_bill
+                                                }
+                                                onChange={(e) => {
+                                                    setData("subscription", {
+                                                        ...data.subscription,
+                                                        total_bill: e.value,
+                                                    });
+                                                }}
+                                                locale="id-ID"
+                                            />
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* form tarif */}
+                                {activeIndex == 5 && (
                                     <>
                                         <div className="flex flex-col justify-around gap-4 mt-1">
-                                            <div className="flex flex-col">
-                                                <label htmlFor="nominal">
-                                                    Nominal Langganan *
-                                                </label>
-                                                <InputNumber
-                                                    value={
-                                                        data.subscription
-                                                            .nominal
-                                                    }
-                                                    onValueChange={(e) => {
-                                                        const total_bill =
-                                                            (e.target.value *
-                                                                data
-                                                                    .subscription
-                                                                    .ppn) /
-                                                            100;
-                                                        setData(
-                                                            "subscription",
-                                                            {
-                                                                ...data.subscription,
-                                                                nominal:
-                                                                    e.target
-                                                                        .value,
-                                                                total_bill:
-                                                                    data
-                                                                        .subscription
-                                                                        .ppn ===
-                                                                    0
-                                                                        ? e
-                                                                              .target
-                                                                              .value
-                                                                        : total_bill,
-                                                            }
-                                                        );
-                                                    }}
-                                                    locale="id-ID"
-                                                />
-                                            </div>
-                                            <div className="flex flex-col">
-                                                <label htmlFor="ppn">
-                                                    PPN(%)
-                                                </label>
-                                                <InputNumber
-                                                    value={
-                                                        data.subscription.ppn
-                                                    }
-                                                    onValueChange={(e) => {
-                                                        const ppn =
-                                                            (e.target.value *
-                                                                data
-                                                                    .subscription
-                                                                    .nominal) /
-                                                            100;
-                                                        setData(
-                                                            "subscription",
-                                                            {
-                                                                ...data.subscription,
-                                                                ppn: e.target
-                                                                    .value,
-                                                                total_bill:
-                                                                    data
-                                                                        .subscription
-                                                                        .nominal +
-                                                                    ppn,
-                                                            }
-                                                        );
-                                                    }}
-                                                    locale="id-ID"
-                                                />
-                                            </div>
-                                            <div className="flex flex-col">
-                                                <label htmlFor="ppn">
-                                                    Total Tagihan(nominal + ppn)
-                                                    *
-                                                </label>
-                                                <InputNumber
-                                                    value={
-                                                        data.subscription
-                                                            .total_bill
-                                                    }
-                                                    onValueChange={(e) => {
-                                                        setData(
-                                                            "subscription",
-                                                            {
-                                                                ...data.subscription,
-                                                                total_bill:
-                                                                    e.target
-                                                                        .value,
-                                                            }
-                                                        );
-                                                    }}
-                                                    locale="id-ID"
-                                                />
-                                            </div>
-
-                                            <div className="flex flex-col">
-                                                <label htmlFor="period">
-                                                    Periode*
-                                                </label>
-                                                <Dropdown
-                                                    value={
-                                                        data.subscription.period
-                                                    }
-                                                    onChange={(e) => {
-                                                        setData(
-                                                            "subscription",
-                                                            {
-                                                                ...data.subscription,
-                                                                period: e.target
-                                                                    .value,
-                                                            }
-                                                        );
-                                                    }}
-                                                    options={
-                                                        option_period_subscription
-                                                    }
-                                                    optionLabel="name"
-                                                    placeholder="Langganan Per-"
-                                                    valueTemplate={
-                                                        selectedOptionTemplate
-                                                    }
-                                                    itemTemplate={
-                                                        optionTemplate
-                                                    }
-                                                    className={`w-full md:w-14rem 
-                                        `}
-                                                />
-                                            </div>
-
                                             <div className="flex flex-col">
                                                 <label htmlFor="price_card">
                                                     Tarif Kartu
@@ -1526,8 +1665,7 @@ export default function Index({ auth, partner }) {
                                                         <InputNumber
                                                             placeholder="tarif"
                                                             value={
-                                                                data
-                                                                    .subscription
+                                                                data.price_list
                                                                     .price_card
                                                                     .price
                                                             }
@@ -1535,13 +1673,13 @@ export default function Index({ auth, partner }) {
                                                                 e
                                                             ) =>
                                                                 setData(
-                                                                    "subscription",
+                                                                    "price_list",
                                                                     {
-                                                                        ...data.subscription,
+                                                                        ...data.price_list,
                                                                         price_card:
                                                                             {
                                                                                 ...data
-                                                                                    .subscription
+                                                                                    .price_list
                                                                                     .price_card,
                                                                                 price: e
                                                                                     .target
@@ -1557,20 +1695,19 @@ export default function Index({ auth, partner }) {
                                                         />
                                                         <Dropdown
                                                             value={
-                                                                data
-                                                                    .subscription
+                                                                data.price_list
                                                                     .price_card
                                                                     .type
                                                             }
                                                             onChange={(e) =>
                                                                 setData(
-                                                                    "subscription",
+                                                                    "price_list",
                                                                     {
-                                                                        ...data.subscription,
+                                                                        ...data.price_list,
                                                                         price_card:
                                                                             {
                                                                                 ...data
-                                                                                    .subscription
+                                                                                    .price_list
                                                                                     .price_card,
                                                                                 type: e
                                                                                     .target
@@ -1599,15 +1736,14 @@ export default function Index({ auth, partner }) {
                                                     <div className="w-full flex gap-2 h-full">
                                                         <Dropdown
                                                             value={
-                                                                data
-                                                                    .subscription
+                                                                data.price_list
                                                                     .price_lanyard
                                                             }
                                                             onChange={(e) =>
                                                                 setData(
-                                                                    "subscription",
+                                                                    "price_list",
                                                                     {
-                                                                        ...data.subscription,
+                                                                        ...data.price_list,
                                                                         price_lanyard:
                                                                             e
                                                                                 .target
@@ -1644,18 +1780,17 @@ export default function Index({ auth, partner }) {
                                                         <InputNumber
                                                             placeholder="tarif"
                                                             value={
-                                                                data
-                                                                    .subscription
-                                                                    .price_subscription_system
+                                                                data.price_list
+                                                                    .price_price_list_system
                                                             }
                                                             onValueChange={(
                                                                 e
                                                             ) =>
                                                                 setData(
-                                                                    "subscription",
+                                                                    "price_list",
                                                                     {
-                                                                        ...data.subscription,
-                                                                        price_subscription_system:
+                                                                        ...data.price_list,
+                                                                        price_price_list_system:
                                                                             e
                                                                                 .target
                                                                                 .value,
@@ -1680,15 +1815,14 @@ export default function Index({ auth, partner }) {
                                                     <div className="w-full flex gap-2 h-full">
                                                         <Dropdown
                                                             value={
-                                                                data
-                                                                    .subscription
+                                                                data.price_list
                                                                     .price_training_offline
                                                             }
                                                             onChange={(e) =>
                                                                 setData(
-                                                                    "subscription",
+                                                                    "price_list",
                                                                     {
-                                                                        ...data.subscription,
+                                                                        ...data.price_list,
                                                                         price_training_offline:
                                                                             e
                                                                                 .target
@@ -1726,14 +1860,14 @@ export default function Index({ auth, partner }) {
                                                             <InputNumber
                                                                 value={
                                                                     data
-                                                                        .subscription
+                                                                        .price_list
                                                                         .price_training_online
                                                                 }
                                                                 onChange={(e) =>
                                                                     setData(
-                                                                        "subscription",
+                                                                        "price_list",
                                                                         {
-                                                                            ...data.subscription,
+                                                                            ...data.price_list,
                                                                             price_training_online:
                                                                                 e.value,
                                                                         }
@@ -1800,15 +1934,14 @@ export default function Index({ auth, partner }) {
                                                     <div className="w-full flex gap-2 h-full">
                                                         <Dropdown
                                                             value={
-                                                                data
-                                                                    .subscription
+                                                                data.price_list
                                                                     .fee_purchase_cazhpoin
                                                             }
                                                             onChange={(e) =>
                                                                 setData(
-                                                                    "subscription",
+                                                                    "price_list",
                                                                     {
-                                                                        ...data.subscription,
+                                                                        ...data.price_list,
                                                                         fee_purchase_cazhpoin:
                                                                             e
                                                                                 .target
@@ -1843,15 +1976,14 @@ export default function Index({ auth, partner }) {
                                                     <div className="w-full flex gap-2 h-full">
                                                         <Dropdown
                                                             value={
-                                                                data
-                                                                    .subscription
+                                                                data.price_list
                                                                     .fee_bill_cazhpoin
                                                             }
                                                             onChange={(e) =>
                                                                 setData(
-                                                                    "subscription",
+                                                                    "price_list",
                                                                     {
-                                                                        ...data.subscription,
+                                                                        ...data.price_list,
                                                                         fee_bill_cazhpoin:
                                                                             e
                                                                                 .target
@@ -1886,15 +2018,14 @@ export default function Index({ auth, partner }) {
                                                     <div className="w-full flex gap-2 h-full">
                                                         <Dropdown
                                                             value={
-                                                                data
-                                                                    .subscription
+                                                                data.price_list
                                                                     .fee_topup_cazhpos
                                                             }
                                                             onChange={(e) =>
                                                                 setData(
-                                                                    "subscription",
+                                                                    "price_list",
                                                                     {
-                                                                        ...data.subscription,
+                                                                        ...data.price_list,
                                                                         fee_topup_cazhpos:
                                                                             e
                                                                                 .target
@@ -1929,15 +2060,14 @@ export default function Index({ auth, partner }) {
                                                     <div className="w-full flex gap-2 h-full">
                                                         <Dropdown
                                                             value={
-                                                                data
-                                                                    .subscription
+                                                                data.price_list
                                                                     .fee_withdraw_cazhpos
                                                             }
                                                             onChange={(e) =>
                                                                 setData(
-                                                                    "subscription",
+                                                                    "price_list",
                                                                     {
-                                                                        ...data.subscription,
+                                                                        ...data.price_list,
                                                                         fee_withdraw_cazhpos:
                                                                             e
                                                                                 .target
@@ -1971,15 +2101,14 @@ export default function Index({ auth, partner }) {
                                                     <div className="w-full flex gap-2 h-full">
                                                         <Dropdown
                                                             value={
-                                                                data
-                                                                    .subscription
+                                                                data.price_list
                                                                     .fee_bill_saldokartu
                                                             }
                                                             onChange={(e) =>
                                                                 setData(
-                                                                    "subscription",
+                                                                    "price_list",
                                                                     {
-                                                                        ...data.subscription,
+                                                                        ...data.price_list,
                                                                         fee_bill_saldokartu:
                                                                             e
                                                                                 .target
@@ -2682,6 +2811,17 @@ export default function Index({ auth, partner }) {
 
                 <TabPanel header="Langganan">
                     <Subscription
+                        partners={partners}
+                        showSuccess={showSuccess}
+                        showError={showError}
+                        handleSelectedDetailPartner={
+                            handleSelectedDetailPartner
+                        }
+                    />
+                </TabPanel>
+
+                <TabPanel header="Tarif">
+                    <PriceList
                         partners={partners}
                         showSuccess={showSuccess}
                         showError={showError}

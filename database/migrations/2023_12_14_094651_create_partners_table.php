@@ -27,6 +27,8 @@ return new class extends Migration {
             $table->integer('onboarding_age')->nullable();
             $table->integer('live_age')->nullable();
             $table->date('monitoring_date_after_3_month_live')->nullable();
+            $table->string('period');
+            $table->string('payment_metode')->default('payment link');
             $table->enum('status', ['Proses', 'Aktif', 'Non Aktif', 'Cancel', 'CLBK']);
             $table->timestamps();
         });

@@ -8,6 +8,7 @@ use App\Models\Partner;
 use App\Models\PartnerAccountSetting;
 use App\Models\PartnerBank;
 use App\Models\PartnerPIC;
+use App\Models\PartnerPriceList;
 use App\Models\PartnerSubscription;
 use App\Models\User;
 use DateTime;
@@ -46,8 +47,6 @@ class PartnerController extends Controller
 
     public function store(PartnerGeneralRequest $request)
     {
-        $validate = $request->validated();
-
         $pathLogo = '';
         if ($request->hasFile('partner.logo')) {
             $file = $request->file('partner.logo');
@@ -73,7 +72,10 @@ class PartnerController extends Controller
             'regency' => $request['partner']['regency'],
             'subdistrict' => $request['partner']['subdistrict'],
             'address' => $request['partner']['address'],
-            'status' => $request['partner']['status']['name']
+            'status' => $request['partner']['status']['name'],
+            'payment_metode' => $request['partner']['payment_metode'],
+            'period' => $request['partner']['period']['name'],
+
         ]);
 
         $pic = PartnerPIC::create([
@@ -105,23 +107,29 @@ class PartnerController extends Controller
         $subscription = PartnerSubscription::create([
             'uuid' => Str::uuid(),
             'partner_id' => $partner->id,
+            'bill' => $request['subscription']['bill'],
             'nominal' => $request['subscription']['nominal'],
             'ppn' => $request['subscription']['ppn'],
+            'total_ppn' => $request['subscription']['total_ppn'],
             'total_bill' => $request['subscription']['total_bill'],
-            'period' => $request['subscription']['period']['name'],
+        ]);
+
+        $price_list = PartnerPriceList::create([
+            'uuid' => Str::uuid(),
+            'partner_id' => $partner->id,
             'price_card' => json_encode([
-                'price' => $request['subscription']['price_card']['price'],
-                'type' => $request['subscription']['price_card']['price'] !== null ? $request['subscription']['price_card']['type']['name'] : '',
+                'price' => $request['price_list']['price_card']['price'],
+                'type' => $request['price_list']['price_card']['price'] !== null ? $request['price_list']['price_card']['type']['name'] : '',
             ]),
-            'price_lanyard' => $request['subscription']['price_lanyard'],
-            'price_subscription_system' => $request['subscription']['price_subscription_system'],
-            'price_training_offline' => $request['subscription']['price_training_offline'],
-            'price_training_online' => $request['subscription']['price_training_online'],
-            'fee_purchase_cazhpoin' => $request['subscription']['fee_purchase_cazhpoin'],
-            'fee_bill_cazhpoin' => $request['subscription']['fee_bill_cazhpoin'],
-            'fee_topup_cazhpos' => $request['subscription']['fee_topup_cazhpos'],
-            'fee_withdraw_cazhpos' => $request['subscription']['fee_withdraw_cazhpos'],
-            'fee_bill_saldokartu' => $request['subscription']['fee_bill_saldokartu'],
+            'price_lanyard' => $request['price_list']['price_lanyard'],
+            'price_subscription_system' => $request['price_list']['price_subscription_system'],
+            'price_training_offline' => $request['price_list']['price_training_offline'],
+            'price_training_online' => $request['price_list']['price_training_online'],
+            'fee_purchase_cazhpoin' => $request['price_list']['fee_purchase_cazhpoin'],
+            'fee_bill_cazhpoin' => $request['price_list']['fee_bill_cazhpoin'],
+            'fee_topup_cazhpos' => $request['price_list']['fee_topup_cazhpos'],
+            'fee_withdraw_cazhpos' => $request['price_list']['fee_withdraw_cazhpos'],
+            'fee_bill_saldokartu' => $request['price_list']['fee_bill_saldokartu'],
         ]);
     }
 
@@ -206,7 +214,7 @@ class PartnerController extends Controller
             },
 
         ])->latest()->get();
-        $salesDefault = User::role('sales')->get();
+        $salesDefault = User::role('account executive')->get();
         $accountManagerDefault = User::role('account manager')->get();
 
         return response()->json([

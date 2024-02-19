@@ -14,20 +14,11 @@ return new class extends Migration {
             $table->id();
             $table->uuid('uuid');
             $table->foreignId('partner_id')->constrained('partners', 'id')->onDelete('cascade');
+            $table->string('bill');
             $table->bigInteger('nominal');
             $table->integer('ppn')->nullable()->default(0);
+            $table->integer('total_ppn')->nullable()->default(0);
             $table->bigInteger('total_bill');
-            $table->string('period');
-            $table->json('price_card')->nullable();
-            $table->bigInteger('price_lanyard')->nullable();
-            $table->bigInteger('price_subscription_system')->nullable();
-            $table->bigInteger('price_training_offline')->nullable();
-            $table->bigInteger('price_training_online')->nullable();
-            $table->bigInteger('fee_purchase_cazhpoin')->nullable();
-            $table->bigInteger('fee_bill_cazhpoin')->nullable();
-            $table->bigInteger('fee_topup_cazhpos')->nullable();
-            $table->bigInteger('fee_withdraw_cazhpos')->nullable();
-            $table->bigInteger('fee_bill_saldokartu')->nullable();
             $table->timestamps();
         });
     }

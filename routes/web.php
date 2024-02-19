@@ -2,11 +2,13 @@
 
 use App\Http\Controllers\InvoiceGeneralController;
 use App\Http\Controllers\InvoiceGeneralTransactionController;
+use App\Http\Controllers\InvoiceSubscriptionController;
 use App\Http\Controllers\MOUController;
 use App\Http\Controllers\PartnerAccountSettingController;
 use App\Http\Controllers\PartnerBankController;
 use App\Http\Controllers\PartnerController;
 use App\Http\Controllers\PartnerPicController;
+use App\Http\Controllers\PartnerPriceListController;
 use App\Http\Controllers\PartnerSubscriptionController;
 use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\ProductController;
@@ -69,7 +71,7 @@ Route::redirect('/', '/login', 301);
 
 Route::get('/pdf', function () {
 
-    $html = view('pdf.receipt')->render();
+    $html = view('pdf.invoice_subscription')->render();
 
     $pdf = Browsershot::html($html)
         ->setIncludedPath(config('services.browsershot.included_path'))
@@ -91,6 +93,21 @@ Route::get('/tes', function () {
     $phpWord->saveAs('sample.docx');
 
 });
+// Route::get('/convert', function () {
+
+//     $domPdfPath = base_path('vendor/dompdf/dompdf');
+
+//     \PhpOffice\PhpWord\Settings::setPdfRendererPath($domPdfPath);
+//     \PhpOffice\PhpWord\Settings::setPdfRendererName('DomPDF');
+//     $Content = \PhpOffice\PhpWord\IOFactory::load(public_path('storage/invoice_langganan/4b883efd-313b-4155-a0ee-338479c81607.docx'));
+//     $PDFWriter = \PhpOffice\PhpWord\IOFactory::createWriter($Content, 'PDF');
+
+//     $pdfFileName = time() . '.pdf';
+//     $PDFWriter->save(storage_path('app/public/invoice_langganan/' . $pdfFileName));
+
+//     return response()->download(storage_path('app/public/invoice_langganan/' . $pdfFileName));
+
+// });
 
 
 Route::middleware('auth')->group(function () {
@@ -103,7 +120,7 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
 
-    // Roles
+    // Role
     Route::get('/role-permission', [RoleController::class, 'index'])->name('role-permission.view');
     Route::post('/roles', [RoleController::class, 'store'])->name('roles.store')->middleware(['can:tambah role']);
     Route::get('/api/roles', [RoleController::class, 'apiGetRole'])->name('api.roles');
@@ -111,7 +128,7 @@ Route::middleware('auth')->group(function () {
     Route::delete('/api/roles/{id}', [RoleController::class, 'apiDeleteRole'])->name('api.roles.delete')->middleware(['can:hapus role']);
 
 
-    // Permission
+    // Perizinan
     Route::get('/permissions', [PermissionController::class, 'index'])->name('permissions.view')->middleware(['can:lihat permission']);
     Route::post('/permissions', [PermissionController::class, 'store'])->name('permissions.store')->middleware(['can:tambah permission']);
     Route::get('/api/permissions', [PermissionController::class, 'apiGetPermission'])->name('api.permissions');
@@ -119,10 +136,10 @@ Route::middleware('auth')->group(function () {
     Route::delete('/api/permissions/{id}', [PermissionController::class, 'apiDeletePermission'])->name('api.permissions.delete')->middleware(['can:hapus permission']);
 
 
-    // Roles & Permission sync
+    // Role & Perizinan
     Route::put('/role-permission-sync/{id}', [PermissionController::class, 'permissionSync'])->name('permissions.sync')->middleware(['can:setting role permission']);
 
-    // Signature
+    // Tanda Tangan
     Route::get('/signatures', [SignatureController::class, 'index'])->name('signatures.view')->middleware(['can:lihat user']);
     Route::post('/signatures', [SignatureController::class, 'store'])->name('signatures.store')->middleware(['can:tambah user']);
     Route::post('/signatures/{signature:uuid}', [SignatureController::class, 'update'])->name('signatures.update')->middleware(['can:edit user']);
@@ -137,7 +154,7 @@ Route::middleware('auth')->group(function () {
     Route::delete('/users/{id}', [UserController::class, 'destroy'])->name('users.delete')->middleware(['can:hapus user']);
 
 
-    // Product
+    // Produk
     Route::get('/products', [ProductController::class, 'index'])->name('products.view')->middleware(['can:lihat produk']);
     Route::post('/products', [ProductController::class, 'store'])->name('products.store')->middleware(['can:tambah produk']);
     Route::put('/products/{product:uuid}', [ProductController::class, 'update'])->name('products.update')->middleware(['can:edit produk']);
@@ -169,17 +186,23 @@ Route::middleware('auth')->group(function () {
     Route::put('/partners/banks/{uuid}', [PartnerBankController::class, 'update'])->name('partners.banks.update');
     Route::delete('/partners/banks/{uuid}', [PartnerBankController::class, 'destroy'])->name('partners.banks.destroy');
 
-    // Partner Account
+    // Partner Akun
     Route::post('/partners/accounts', [PartnerAccountSettingController::class, 'store'])->name('partners.accounts.store');
     Route::get('/api/partners/accounts', [PartnerAccountSettingController::class, 'apiGetAccounts'])->name('api.partners.accounts');
     Route::put('/partners/accounts/{uuid}', [PartnerAccountSettingController::class, 'update'])->name('partners.accounts.update');
     Route::delete('/partners/accounts/{uuid}', [PartnerAccountSettingController::class, 'destroy'])->name('partners.accounts.destroy');
 
-    // Partner Subscription
+    // Partner Langganan
     Route::post('/partners/subscriptions', [PartnerSubscriptionController::class, 'store'])->name('partners.subscriptions.store');
     Route::get('/api/partners/subscriptions', [PartnerSubscriptionController::class, 'apiGetSubscription'])->name('api.partners.subscriptions');
     Route::put('/partners/subscriptions/{uuid}', [PartnerSubscriptionController::class, 'update'])->name('partners.subscriptions.update');
     Route::delete('/partners/subscriptions/{uuid}', [PartnerSubscriptionController::class, 'destroy'])->name('partners.subscriptions.destroy');
+
+    // Partner Tarif
+    Route::post('/partners/prices', [PartnerPriceListController::class, 'store'])->name('partners.prices.store');
+    Route::get('/api/partners/prices', [PartnerPriceListController::class, 'apiGetPriceLists'])->name('api.partners.prices');
+    Route::put('/partners/prices/{uuid}', [PartnerPriceListController::class, 'update'])->name('partners.prices.update');
+    Route::delete('/partners/prices/{uuid}', [PartnerPriceListController::class, 'destroy'])->name('partners.prices.destroy');
 
     // STPD
     Route::get('/stpd', [STPDController::class, 'index'])->name('stpd.view')->middleware(['can:lihat produk']);
@@ -233,6 +256,16 @@ Route::middleware('auth')->group(function () {
     Route::post('/invoice_generals/transaction', [InvoiceGeneralTransactionController::class, 'store'])->name('invoice_generals.transaction.store')->middleware(['can:tambah produk']);
     Route::put('/invoice_generals/transaction/{transaction:uuid}', [InvoiceGeneralTransactionController::class, 'update'])->name('invoice_generals.transaction.update')->middleware(['can:edit produk']);
     Route::delete('/invoice_generals/transaction/{transaction:uuid}', [InvoiceGeneralTransactionController::class, 'destroy'])->name('invoice_generals.transaction.destroy')->middleware(['can:edit produk']);
+
+    // Invoice Langganan
+    Route::get('/invoice_subscriptions', [InvoiceSubscriptionController::class, 'index'])->name('invoice_subscriptions.view')->middleware(['can:lihat produk']);
+    Route::get('/invoice_subscriptions/create', [InvoiceSubscriptionController::class, 'create'])->name('invoice_subscriptions.create');
+    Route::post('/invoice_subscriptions', [InvoiceSubscriptionController::class, 'store'])->name('invoice_subscriptions.store')->middleware(['can:tambah produk']);
+    Route::get('/invoice_subscriptions/zip', [InvoiceSubscriptionController::class, 'zipAll'])->name('invoice_subscriptions.zip')->middleware(['can:lihat produk']);
+    Route::get('/invoice_subscriptions/{invoice_subscriptions:uuid}', [InvoiceSubscriptionController::class, 'edit'])->name('invoice_subscriptions.edit')->middleware(['can:edit produk']);
+    Route::put('/invoice_subscriptions/{invoice_subscriptions:uuid}', [InvoiceSubscriptionController::class, 'update'])->name('invoice_subscriptions.update')->middleware(['can:edit produk']);
+    Route::delete('/invoice_subscriptions/{invoice_subscriptions:uuid}', [InvoiceSubscriptionController::class, 'destroy'])->name('invoice_subscriptions.destroy')->middleware(['can:hapus produk']);
+    Route::get('/api/invoice_subscriptions', [InvoiceSubscriptionController::class, 'apiGetInvoiceSubscriptionsWithBundle'])->name('api.invoice_subscriptions');
 
 });
 
