@@ -18,11 +18,15 @@ import { InputTextarea } from "primereact/inputtextarea";
 import "./Create.css";
 import { InputNumber } from "primereact/inputnumber";
 import { OverlayPanel } from "primereact/overlaypanel";
+import { Message } from "primereact/message";
 const BASE_URL = import.meta.env.VITE_BASE_URL;
 
 const Edit = ({ usersProp, partnersProp, mou }) => {
     const [users, setUsers] = useState(usersProp);
     const [partners, setPartners] = useState(partnersProp);
+    const [provinces, setProvinces] = useState([]);
+    const [regencys, setRegencys] = useState([]);
+    const [codeProvince, setcodeProvince] = useState(null);
 
     const toast = useRef(null);
     const partnerScrollRef = useRef(null);
@@ -32,6 +36,8 @@ const Edit = ({ usersProp, partnersProp, mou }) => {
     const infoPriceLanyardRef = useRef(null);
     const animateDay = useRef(null);
     const animateDate = useRef(null);
+    const animatePartnerNameRef = useRef(null);
+    const animatePartnerNumberRef = useRef(null);
     const animatePartnerId = useRef(null);
     const animatePartnerName = useRef(null);
     const animatePartnerPIC = useRef(null);
@@ -55,9 +61,11 @@ const Edit = ({ usersProp, partnersProp, mou }) => {
     const animateExpiredDate = useRef(null);
     const animateProfitSharing = useRef(null);
     const animateProfitSharingDetail = useRef(null);
-    const animateSignatureName = useRef(null);
     const animateReferral = useRef(null);
     const animateReferralName = useRef(null);
+    const animateSignatureName = useRef(null);
+    const animatePartnerProvinceRef = useRef(null);
+    const animatePartnerRegencyRef = useRef(null);
 
     const {
         data,
@@ -72,12 +80,16 @@ const Edit = ({ usersProp, partnersProp, mou }) => {
         uuid: mou.uuid,
         code: mou.code,
         day: mou.day,
-        date: new Date(mou.date),
-        partner_id: mou.partner_id,
-        partner_name: mou.partner_name,
-        partner_pic: mou.partner_pic,
-        partner_pic_position: mou.partner_pic_position,
-        partner_address: mou.partner_address,
+        date: mou.date,
+        partner: {
+            id: mou.partner_id,
+            name: mou.partner_name,
+            pic: mou.partner_pic,
+            pic_position: mou.partner_pic_position,
+            province: mou.partner_province,
+            regency: mou.partner_regency,
+        },
+
         url_subdomain: mou.url_subdomain,
         price_card: mou.price_card,
         price_lanyard: mou.price_lanyard,
@@ -93,23 +105,35 @@ const Edit = ({ usersProp, partnersProp, mou }) => {
         bank: mou.bank,
         account_bank_number: mou.account_bank_number,
         account_bank_name: mou.account_bank_name,
-        expired_date: new Date(mou.expired_date),
-        profit_sharing: Boolean(mou.profit_sharing),
+        expired_date: mou.expired_date,
+        profit_sharing: mou.profit_sharing,
         profit_sharing_detail: mou.profit_sharing_detail,
-        referral: Boolean(mou.referral),
+        referral: mou.referral,
         referral_name: mou.referral_name,
-        signature_name: mou.signature_name,
-        signature_position: mou.signature_position,
-        signature_image: mou.signature_image,
-        mou_doc: "mou_path",
+        signature: {
+            name: mou.signature_name,
+            position: mou.signature_position,
+            image: mou.signature_image,
+        },
+        mou_doc: mou.mou_doc,
     });
 
-    const option_period_subscription = [
-        { name: "kartu/bulan" },
-        { name: "kartu/tahun" },
-        { name: "lembaga/bulan" },
-        { name: "lembaga/tahun" },
-    ];
+    useEffect(() => {
+        setcodeProvince(
+            (prev) => (prev = JSON.parse(mou.partner_province).code)
+        );
+        const fetchData = async () => {
+            await getProvince();
+        };
+
+        fetchData();
+    }, []);
+
+    useEffect(() => {
+        if (codeProvince) {
+            getRegencys(codeProvince);
+        }
+    }, [codeProvince]);
 
     const signatures = [
         {
@@ -118,6 +142,75 @@ const Edit = ({ usersProp, partnersProp, mou }) => {
             image: "/assets/img/signatures/ttd.png",
         },
     ];
+
+    const option_price_lanyard = [
+        { name: "Lanyard Polos", price: 10000 },
+        { name: "Lanyard Sablon", price: 12000 },
+        { name: "Lanyard Printing", price: 20000 },
+    ];
+
+    const getProvince = async () => {
+        const options = {
+            method: "GET",
+            url: `/api/wilayah/provinsi/`,
+            headers: {
+                "Content-Type": "application/json",
+            },
+        };
+
+        try {
+            const response = await axios.request(options);
+            const dataArray = Object.entries(response.data).map(
+                ([key, value]) => ({
+                    code: key,
+                    name: value
+                        .toLowerCase()
+                        .split(" ")
+                        .map(
+                            (word) =>
+                                word.charAt(0).toUpperCase() + word.slice(1)
+                        )
+                        .join(" "),
+                })
+            );
+            setProvinces((prev) => (prev = dataArray));
+        } catch (error) {
+            console.log(error);
+        }
+    };
+
+    const getRegencys = async (code) => {
+        let url = code
+            ? `/api/wilayah/kabupaten?provinsi=${code}`
+            : `/api/wilayah/kabupaten`;
+        const options = {
+            method: "GET",
+            url: url,
+            headers: {
+                "Content-Type": "application/json",
+            },
+        };
+
+        try {
+            const response = await axios.request(options);
+            const dataArray = Object.entries(response.data).map(
+                ([key, value]) => ({
+                    code: key,
+                    name: value
+                        .toLowerCase()
+                        .split(" ")
+                        .map(
+                            (word) =>
+                                word.charAt(0).toUpperCase() + word.slice(1)
+                        )
+                        .join(" "),
+                })
+            );
+            setRegencys((prev) => (prev = dataArray));
+        } catch (error) {
+            console.log(error);
+        }
+    };
 
     document.querySelector("body").classList.add("overflow-hidden");
 
@@ -160,6 +253,46 @@ const Edit = ({ usersProp, partnersProp, mou }) => {
         );
     };
 
+    const option_fee = [{ name: 1000 }, { name: 2000 }, { name: 2500 }];
+
+    const option_training_offline = [
+        { name: "Jawa", price: 15000000 },
+        { name: "Kalimantan", price: 25000000 },
+        { name: "Sulawesi", price: 27000000 },
+        { name: "Sumatra", price: 23000000 },
+        { name: "Bali", price: 26000000 },
+        { name: "Jabodetabek", price: 15000000 },
+    ];
+
+    const option_period_subscription = [
+        { name: "kartu/bulan" },
+        { name: "kartu/tahun" },
+        { name: "lembaga/bulan" },
+        { name: "lembaga/tahun" },
+    ];
+
+    const selectedOptionTrainingTemplate = (option, props) => {
+        if (option) {
+            return (
+                <div className="flex align-items-center">
+                    <div>{option.price}</div>
+                </div>
+            );
+        }
+
+        return <span>{props.placeholder}</span>;
+    };
+
+    const optionTrainingTemplate = (option) => {
+        return (
+            <div className="flex align-items-center">
+                <div>
+                    {option.name} - {option.price}
+                </div>
+            </div>
+        );
+    };
+
     // fungsi toast
     const showSuccess = (type) => {
         toast.current.show({
@@ -183,12 +316,11 @@ const Edit = ({ usersProp, partnersProp, mou }) => {
         if (ref.current) {
             ref.current.classList.add("twinkle");
             ref.current.focus();
-            setTimeout(() => {
-                ref.current.scrollIntoView({
-                    behavior: "smooth",
-                    block: "center",
-                });
-            }, 200);
+
+            ref.current.scrollIntoView({
+                behavior: "smooth",
+                block: "center",
+            });
         }
         return null;
     };
@@ -202,14 +334,15 @@ const Edit = ({ usersProp, partnersProp, mou }) => {
     const handleSubmitForm = (e) => {
         e.preventDefault();
 
-        put("/mou/" + mou.uuid, {
+        put("/mou/" + data.uuid, {
             onSuccess: () => {
-                showSuccess("Update");
+                showSuccess("Tambah");
+                window.location = BASE_URL + "/mou";
                 // reset("name", "category", "price", "unit", "description");
             },
 
             onError: () => {
-                showError("Update");
+                showError("Tambah");
             },
         });
     };
@@ -220,7 +353,7 @@ const Edit = ({ usersProp, partnersProp, mou }) => {
             <Toast ref={toast} />
             <div className="h-screen max-h-screen overflow-y-hidden">
                 <div className="flex flex-col h-screen max-h-screen overflow-hidden md:flex-row z-40 relative gap-5">
-                    <div className="md:w-[40%] overflow-y-auto h-screen max-h-screen p-5">
+                    <div className="md:w-[35%] overflow-y-auto h-screen max-h-screen p-5">
                         <Card>
                             <div className="flex justify-between items-center mb-4">
                                 <h1 className="font-bold text-2xl">Mou</h1>
@@ -260,29 +393,16 @@ const Edit = ({ usersProp, partnersProp, mou }) => {
                                         Hari Kesepakatan *
                                     </label>
                                     <div className="card flex justify-content-center">
-                                        <Dropdown
+                                        <InputText
                                             value={data.day}
                                             onChange={(e) =>
-                                                // if(e.target.value === 'object')
-                                                setData("day", e.value)
+                                                setData("day", e.target.value)
                                             }
-                                            options={[
-                                                { name: "Senin" },
-                                                { name: "Selasa" },
-                                                { name: "Rabu" },
-                                                { name: "Kamis" },
-                                                { name: "Jum'at" },
-                                                { name: "Sabtu" },
-                                                { name: "Minggu" },
-                                            ]}
-                                            optionLabel="name"
-                                            optionValue="name"
-                                            placeholder="Pilih Hari"
-                                            filter
-                                            editable
-                                            valueTemplate={
-                                                selectedOptionTemplate
-                                            }
+                                            className={`dark:bg-gray-300 w-full ${
+                                                errors.day && "p-invalid"
+                                            }`}
+                                            id="day"
+                                            aria-describedby="day-help"
                                             onFocus={() => {
                                                 triggerInputFocus(animateDay);
                                             }}
@@ -291,10 +411,6 @@ const Edit = ({ usersProp, partnersProp, mou }) => {
                                                     animateDay
                                                 );
                                             }}
-                                            itemTemplate={optionTemplate}
-                                            className={`w-full md:w-14rem ${
-                                                errors.day && "p-invalid"
-                                            }`}
                                         />
                                     </div>
                                     {errors.day && (
@@ -332,7 +448,7 @@ const Edit = ({ usersProp, partnersProp, mou }) => {
                                             stopAnimateInputFocus(animateDate);
                                         }}
                                         showIcon
-                                        dateFormat="dd/mm/yy"
+                                        dateFormat="yy-mm-dd"
                                         className={`w-full md:w-14rem ${
                                             errors.date && "p-invalid"
                                         }`}
@@ -349,167 +465,201 @@ const Edit = ({ usersProp, partnersProp, mou }) => {
                                 <div className="flex flex-col mt-3">
                                     <label htmlFor="lembaga">Lembaga *</label>
                                     <Dropdown
-                                        value={data.partner_name}
+                                        value={data.partner}
+                                        dataKey="id"
                                         onChange={(e) => {
-                                            if (
-                                                typeof e.target.value ===
-                                                "object"
-                                            ) {
-                                                setData({
-                                                    ...data,
-                                                    partner_id:
-                                                        e.target.value.id,
-                                                    partner_name:
-                                                        e.target.value.name,
-                                                    partner_address:
-                                                        e.target.value.address,
-                                                    partner_pic:
-                                                        e.target.value.pics[0]
-                                                            .name,
-                                                    partner_pic_position:
+                                            setData((data) => ({
+                                                ...data,
+                                                partner: {
+                                                    ...data.partner,
+                                                    id: e.target.value.id,
+                                                    name: e.target.value.name,
+                                                    province:
+                                                        e.target.value.province,
+                                                    regency:
+                                                        e.target.value.regency,
+                                                    number: e.target.value
+                                                        .phone_number,
+                                                    pic: e.target.value.pics[0]
+                                                        .name,
+                                                    pic_position:
                                                         e.target.value.pics[0]
                                                             .position,
-                                                    url_subdomain:
-                                                        e.target.value
-                                                            .accounts[0]
-                                                            .subdomain,
-                                                    period_subscription:
-                                                        e.target.value
-                                                            .subscription[0]
-                                                            .period,
-                                                    price_card: JSON.parse(
-                                                        e.target.value
-                                                            .subscription[0]
-                                                            .price_card
-                                                    ).price,
-                                                    price_lanyard:
-                                                        e.target.value
-                                                            .subscription[0]
-                                                            .price_lanyard,
-                                                    price_subscription_system:
-                                                        e.target.value
-                                                            .subscription[0]
-                                                            .price_subscription_system,
-                                                    price_training_offline:
-                                                        e.target.value
-                                                            .subscription[0]
-                                                            .price_training_offline,
-                                                    price_training_online:
-                                                        e.target.value
-                                                            .subscription[0]
-                                                            .price_training_online,
-                                                    fee_purchase_cazhpoin:
-                                                        e.target.value
-                                                            .subscription[0]
-                                                            .fee_purchase_cazhpoin,
-                                                    fee_bill_cazhpoin:
-                                                        e.target.value
-                                                            .subscription[0]
-                                                            .fee_bill_cazhpoin,
-                                                    fee_topup_cazhpos:
-                                                        e.target.value
-                                                            .subscription[0]
-                                                            .fee_topup_cazhpos,
-                                                    fee_withdraw_cazhpos:
-                                                        e.target.value
-                                                            .subscription[0]
-                                                            .fee_withdraw_cazhpos,
-                                                    fee_bill_saldokartu:
-                                                        e.target.value
-                                                            .subscription[0]
-                                                            .fee_bill_saldokartu,
-                                                    bank: e.target.value
-                                                        .banks[0].bank,
-                                                    account_bank_name:
-                                                        e.target.value.banks[0]
-                                                            .account_bank_name,
-                                                    account_bank_number:
-                                                        e.target.value.banks[0]
-                                                            .account_bank_number,
-                                                });
-                                            } else {
-                                                setData({
-                                                    ...data,
-
-                                                    partner_name:
-                                                        e.target.value,
-                                                });
-                                            }
+                                                },
+                                                url_subdomain:
+                                                    e.target.value.accounts[0]
+                                                        .subdomain,
+                                                period_subscription:
+                                                    e.target.value.period,
+                                                price_card: JSON.parse(
+                                                    e.target.value.price_list
+                                                        .price_card
+                                                ).price,
+                                                price_lanyard:
+                                                    e.target.value.price_list
+                                                        .price_lanyard,
+                                                price_subscription_system:
+                                                    e.target.value.price_list
+                                                        .price_subscription_system,
+                                                price_training_offline:
+                                                    e.target.value.price_list
+                                                        .price_training_offline,
+                                                price_training_online:
+                                                    e.target.value.price_list
+                                                        .price_training_online,
+                                                fee_purchase_cazhpoin:
+                                                    e.target.value.price_list
+                                                        .fee_purchase_cazhpoin,
+                                                fee_bill_cazhpoin:
+                                                    e.target.value.price_list
+                                                        .fee_bill_cazhpoin,
+                                                fee_topup_cazhpos:
+                                                    e.target.value.price_list
+                                                        .fee_topup_cazhpos,
+                                                fee_withdraw_cazhpos:
+                                                    e.target.value.price_list
+                                                        .fee_withdraw_cazhpos,
+                                                fee_bill_saldokartu:
+                                                    e.target.value.price_list
+                                                        .fee_bill_saldokartu,
+                                                bank: e.target.value.banks[0]
+                                                    .bank,
+                                                account_bank_name:
+                                                    e.target.value.banks[0]
+                                                        .account_bank_name,
+                                                account_bank_number:
+                                                    e.target.value.banks[0]
+                                                        .account_bank_number,
+                                            }));
+                                            setcodeProvince(
+                                                (prev) =>
+                                                    (prev = JSON.parse(
+                                                        e.target.value.province
+                                                    ).code)
+                                            );
                                         }}
+                                        onShow={() => {
+                                            triggerInputFocus(
+                                                animatePartnerNameRef
+                                            );
+                                        }}
+                                        onHide={() => {
+                                            stopAnimateInputFocus(
+                                                animatePartnerNameRef
+                                            );
+                                        }}
+                                        showOnFocus
                                         options={partners}
                                         optionLabel="name"
                                         placeholder="Pilih Lembaga"
                                         filter
                                         valueTemplate={selectedOptionTemplate}
                                         itemTemplate={optionTemplate}
-                                        className={`w-full md:w-14rem ${
-                                            errors.partner_name && "p-invalid"
-                                        }`}
-                                        editable
-                                        onFocus={() => {
-                                            triggerInputFocus(
-                                                animatePartnerName
-                                            );
-                                        }}
-                                        onBlur={() => {
-                                            stopAnimateInputFocus(
-                                                animatePartnerName
-                                            );
-                                        }}
+                                        className="w-full md:w-14rem"
                                     />
-                                    {errors.partner_name && (
-                                        <Message
-                                            className="bg-transparent p-0 my-2 justify-start text-xs"
-                                            severity="error"
-                                            text={errors.partner_name}
-                                        />
-                                    )}
                                 </div>
+
                                 <div className="flex flex-col mt-3">
-                                    <label htmlFor="partner_address">
-                                        Lokasi *
-                                    </label>
-                                    <InputText
-                                        value={data.partner_address}
-                                        onChange={(e) =>
-                                            setData({
-                                                ...data,
-                                                partner_address: e.target.value,
-                                            })
+                                    <label htmlFor="province">Provinsi *</label>
+
+                                    <Dropdown
+                                        value={
+                                            data.partner.province
+                                                ? JSON.parse(
+                                                      data.partner.province
+                                                  )
+                                                : null
                                         }
-                                        className={`dark:bg-gray-300 ${
-                                            errors.partner_address &&
-                                            "p-invalid"
-                                        }`}
-                                        id="partner_address"
-                                        aria-describedby="partner_address-help"
+                                        onChange={(e) => {
+                                            setcodeProvince(
+                                                (prev) =>
+                                                    (prev = e.target.value.code)
+                                            );
+                                            setData("partner", {
+                                                ...data.partner,
+                                                province: JSON.stringify(
+                                                    e.target.value
+                                                ),
+                                            });
+                                        }}
+                                        dataKey="name"
+                                        options={provinces}
+                                        optionLabel="name"
+                                        placeholder="Pilih Provinsi"
+                                        filter
+                                        valueTemplate={selectedOptionTemplate}
+                                        itemTemplate={optionTemplate}
+                                        className="w-full md:w-14rem"
                                         onFocus={() => {
                                             triggerInputFocus(
-                                                animatePartnerAddress
+                                                animatePartnerProvinceRef
                                             );
                                         }}
-                                        onBlur={() => {
+                                        onShow={() => {
+                                            triggerInputFocus(
+                                                animatePartnerProvinceRef
+                                            );
+                                        }}
+                                        onHide={() => {
                                             stopAnimateInputFocus(
-                                                animatePartnerAddress
+                                                animatePartnerProvinceRef
                                             );
                                         }}
                                     />
-                                    {errors.partner_address && (
-                                        <Message
-                                            className="bg-transparent p-0 my-2 justify-start text-xs"
-                                            severity="error"
-                                            text={errors.partner_address}
-                                        />
-                                    )}
                                 </div>
+
+                                <div className="flex flex-col mt-3">
+                                    <label htmlFor="regency">Kabupaten *</label>
+                                    <Dropdown
+                                        value={
+                                            data.partner.regency
+                                                ? JSON.parse(
+                                                      data.partner.regency
+                                                  )
+                                                : null
+                                        }
+                                        onChange={(e) => {
+                                            setData("partner", {
+                                                ...data.partner,
+                                                regency: JSON.stringify(
+                                                    e.target.value
+                                                ),
+                                            });
+                                        }}
+                                        onFocus={() => {
+                                            triggerInputFocus(
+                                                animatePartnerRegencyRef
+                                            );
+                                        }}
+                                        onShow={() => {
+                                            triggerInputFocus(
+                                                animatePartnerRegencyRef
+                                            );
+                                        }}
+                                        onHide={() => {
+                                            stopAnimateInputFocus(
+                                                animatePartnerRegencyRef
+                                            );
+                                        }}
+                                        dataKey="name"
+                                        options={regencys}
+                                        optionLabel="name"
+                                        placeholder="Pilih Kabupaten"
+                                        filter
+                                        valueTemplate={selectedOptionTemplate}
+                                        itemTemplate={optionTemplate}
+                                        className="w-full md:w-14rem"
+                                    />
+                                </div>
+
                                 <div className="flex flex-col mt-3">
                                     <label htmlFor="partner_pic">PIC *</label>
                                     <InputText
-                                        value={data.partner_pic}
+                                        value={data.partner.pic}
                                         onChange={(e) =>
-                                            setData({
-                                                ...data,
-                                                partner_pic: e.target.value,
+                                            setData("partner", {
+                                                ...data.partner,
+                                                pic: e.target.value,
                                             })
                                         }
                                         className={`dark:bg-gray-300 ${
@@ -541,12 +691,11 @@ const Edit = ({ usersProp, partnersProp, mou }) => {
                                         Jabatan PIC *
                                     </label>
                                     <InputText
-                                        value={data.partner_pic_position}
+                                        value={data.partner.pic_position}
                                         onChange={(e) =>
-                                            setData({
-                                                ...data,
-                                                partner_pic_position:
-                                                    e.target.value,
+                                            setData("partner", {
+                                                ...data.partner,
+                                                pic_position: e.target.value,
                                             })
                                         }
                                         className={`dark:bg-gray-300 ${
@@ -631,6 +780,7 @@ const Edit = ({ usersProp, partnersProp, mou }) => {
                                         className={`${
                                             errors.price_card && "p-invalid"
                                         }`}
+                                        locale="id-ID"
                                     />
                                     {errors.price_card && (
                                         <Message
@@ -644,41 +794,37 @@ const Edit = ({ usersProp, partnersProp, mou }) => {
                                     <label htmlFor="price_lanyard">
                                         Harga Lanyard *
                                     </label>
-
-                                    <div className="p-inputgroup flex-1 h-full">
-                                        <InputNumber
-                                            value={data.price_lanyard}
-                                            onChange={(e) =>
-                                                setData(
-                                                    "price_lanyard",
-                                                    e.value
-                                                )
-                                            }
-                                            onFocus={() => {
-                                                triggerInputFocus(
-                                                    animatePriceLanyard
-                                                );
-                                            }}
-                                            onBlur={() => {
-                                                stopAnimateInputFocus(
-                                                    animatePriceLanyard
-                                                );
-                                            }}
-                                            className={`${
-                                                errors.price_lanyard &&
-                                                "p-invalid"
-                                            }`}
-                                        />
-                                        <Button
-                                            className="h-[35px]"
-                                            icon="pi pi-info-circle"
-                                            onClick={(e) =>
-                                                infoPriceLanyardRef.current.toggle(
-                                                    e
-                                                )
-                                            }
-                                        />
-                                    </div>
+                                    <Dropdown
+                                        value={data.price_lanyard}
+                                        onChange={(e) =>
+                                            setData(
+                                                "price_lanyard",
+                                                Number(
+                                                    e.target.value
+                                                ).toLocaleString("id-ID")
+                                            )
+                                        }
+                                        options={option_price_lanyard}
+                                        optionLabel="price"
+                                        optionValue="price"
+                                        placeholder="Pilih Tarif"
+                                        editable
+                                        valueTemplate={
+                                            selectedOptionTrainingTemplate
+                                        }
+                                        itemTemplate={optionTrainingTemplate}
+                                        onFocus={() => {
+                                            triggerInputFocus(
+                                                animatePriceLanyard
+                                            );
+                                        }}
+                                        onBlur={() => {
+                                            stopAnimateInputFocus(
+                                                animatePriceLanyard
+                                            );
+                                        }}
+                                        className="w-full md:w-14rem"
+                                    />
                                     {errors.price_lanyard && (
                                         <Message
                                             className="bg-transparent p-0 my-2 justify-start text-xs"
@@ -686,22 +832,6 @@ const Edit = ({ usersProp, partnersProp, mou }) => {
                                             text={errors.price_lanyard}
                                         />
                                     )}
-                                    <OverlayPanel
-                                        className="shadow-md"
-                                        ref={infoPriceLanyardRef}
-                                    >
-                                        <ul className="list-disc list-inside">
-                                            <li>10.000/pcs (lanyard polos)</li>
-                                            <li>
-                                                12.000/pcs (lanyard sablon 1
-                                                warna)
-                                            </li>
-                                            <li>
-                                                20.000/pcs (lanyard printing 2
-                                                sisi)
-                                            </li>
-                                        </ul>
-                                    </OverlayPanel>
                                 </div>
                                 <div className="flex flex-col mt-3">
                                     <label htmlFor="price_subscription_system">
@@ -709,6 +839,7 @@ const Edit = ({ usersProp, partnersProp, mou }) => {
                                     </label>
 
                                     <InputNumber
+                                        locale="id-ID"
                                         value={data.price_subscription_system}
                                         onChange={(e) =>
                                             setData(
@@ -750,11 +881,12 @@ const Edit = ({ usersProp, partnersProp, mou }) => {
                                         onChange={(e) => {
                                             setData(
                                                 "period_subscription",
-                                                e.target.value.name
+                                                e.target.value
                                             );
                                         }}
                                         options={option_period_subscription}
                                         optionLabel="name"
+                                        optionValue="name"
                                         placeholder="Langganan Per-"
                                         filter
                                         valueTemplate={selectedOptionTemplate}
@@ -763,7 +895,6 @@ const Edit = ({ usersProp, partnersProp, mou }) => {
                                             errors.period_subscription &&
                                             "p-invalid"
                                         }`}
-                                        editable
                                         onFocus={() => {
                                             triggerInputFocus(
                                                 animatePeriodSubscription
@@ -787,59 +918,38 @@ const Edit = ({ usersProp, partnersProp, mou }) => {
                                     <label htmlFor="period_subscription">
                                         Training Lokasi*
                                     </label>
-                                    {/* <Dropdown
+
+                                    <Dropdown
                                         value={data.price_training_offline}
-                                        onChange={(e) => {
+                                        onChange={(e) =>
                                             setData(
                                                 "price_training_offline",
-                                                e.target.value
+                                                Number(
+                                                    e.target.value
+                                                ).toLocaleString("id-ID")
+                                            )
+                                        }
+                                        options={option_training_offline}
+                                        optionLabel="price"
+                                        optionValue="price"
+                                        placeholder="Pilih Tarif"
+                                        editable
+                                        valueTemplate={
+                                            selectedOptionTrainingTemplate
+                                        }
+                                        itemTemplate={optionTrainingTemplate}
+                                        onFocus={() => {
+                                            triggerInputFocus(
+                                                animatePriceTrainingOffline
                                             );
                                         }}
-                                        options={prices_training_offline}
-                                        optionLabel="price"
-                                        placeholder="Harga training"
-                                        filter
-                                        valueTemplate={
-                                            selectedPriceOptionTemplate
-                                        }
-                                        itemTemplate={priceOptionTemplate}
+                                        onBlur={() => {
+                                            stopAnimateInputFocus(
+                                                animatePriceTrainingOffline
+                                            );
+                                        }}
                                         className="w-full md:w-14rem"
-                                        editable
-                                    /> */}
-                                    <div className="p-inputgroup flex-1 h-full">
-                                        <InputNumber
-                                            value={data.price_training_offline}
-                                            onChange={(e) =>
-                                                setData(
-                                                    "price_training_offline",
-                                                    e.value
-                                                )
-                                            }
-                                            className={`h-full${
-                                                errors.price_training_offline &&
-                                                "p-invalid"
-                                            }`}
-                                            onFocus={() => {
-                                                triggerInputFocus(
-                                                    animatePriceTrainingOffline
-                                                );
-                                            }}
-                                            onBlur={() => {
-                                                stopAnimateInputFocus(
-                                                    animatePriceTrainingOffline
-                                                );
-                                            }}
-                                        />
-                                        <Button
-                                            className="h-[35px]"
-                                            icon="pi pi-info-circle"
-                                            onClick={(e) =>
-                                                infoPriceTrainingRef.current.toggle(
-                                                    e
-                                                )
-                                            }
-                                        />
-                                    </div>
+                                    />
                                     {errors.price_training_offline && (
                                         <Message
                                             className="bg-transparent p-0 my-2 justify-start text-xs"
@@ -847,19 +957,6 @@ const Edit = ({ usersProp, partnersProp, mou }) => {
                                             text={errors.price_training_offline}
                                         />
                                     )}
-                                    <OverlayPanel
-                                        className="shadow-md"
-                                        ref={infoPriceTrainingRef}
-                                    >
-                                        <ul className="list-disc list-inside">
-                                            <li>Jawa: 15jt</li>
-                                            <li>Kalimantan: 25jt</li>
-                                            <li>Sulawesi: 27jt</li>
-                                            <li>Sumatra: 23jt</li>
-                                            <li>Bali: 26jt</li>
-                                            <li>Jabodetabek: 15jt</li>
-                                        </ul>
-                                    </OverlayPanel>
                                 </div>
                                 <div className="flex flex-col mt-3">
                                     <label htmlFor="price_training_online">
@@ -867,6 +964,7 @@ const Edit = ({ usersProp, partnersProp, mou }) => {
                                     </label>
                                     <div className="p-inputgroup flex-1 h-full">
                                         <InputNumber
+                                            locale="id-ID"
                                             value={data.price_training_online}
                                             onChange={(e) =>
                                                 setData(
@@ -929,20 +1027,36 @@ const Edit = ({ usersProp, partnersProp, mou }) => {
                                     <label htmlFor="fee_purchase_cazhpoin">
                                         Fee isi kartu via CazhPOIN*
                                     </label>
-                                    <InputNumber
+
+                                    <Dropdown
                                         value={data.fee_purchase_cazhpoin}
                                         onChange={(e) =>
                                             setData(
                                                 "fee_purchase_cazhpoin",
-                                                e.value
+                                                Number(
+                                                    e.target.value
+                                                ).toLocaleString("id-ID")
                                             )
                                         }
-                                        className={`h-full ${
-                                            errors.fee_purchase_cazhpoin &&
-                                            "p-invalid"
-                                        }`}
+                                        options={option_fee}
+                                        optionLabel="name"
+                                        optionValue="name"
+                                        placeholder="Pilih Tarif"
+                                        editable
+                                        showOnFocus
+                                        valueTemplate={selectedOptionTemplate}
                                         onFocus={() => {
                                             triggerInputFocus(
+                                                animateFeePurchaseCazhpoin
+                                            );
+                                        }}
+                                        onShow={() => {
+                                            triggerInputFocus(
+                                                animateFeePurchaseCazhpoin
+                                            );
+                                        }}
+                                        onHide={() => {
+                                            stopAnimateInputFocus(
                                                 animateFeePurchaseCazhpoin
                                             );
                                         }}
@@ -951,6 +1065,8 @@ const Edit = ({ usersProp, partnersProp, mou }) => {
                                                 animateFeePurchaseCazhpoin
                                             );
                                         }}
+                                        itemTemplate={optionTemplate}
+                                        className="w-full md:w-14rem"
                                     />
                                     {errors.fee_purchase_cazhpoin && (
                                         <Message
@@ -964,18 +1080,24 @@ const Edit = ({ usersProp, partnersProp, mou }) => {
                                     <label htmlFor="fee_bill_cazhpoin">
                                         Fee bayar tagihan via CazhPOIN*
                                     </label>
-                                    <InputNumber
+
+                                    <Dropdown
                                         value={data.fee_bill_cazhpoin}
                                         onChange={(e) =>
                                             setData(
                                                 "fee_bill_cazhpoin",
-                                                e.value
+                                                Number(
+                                                    e.target.value
+                                                ).toLocaleString("id-ID")
                                             )
                                         }
-                                        className={`h-full ${
-                                            errors.fee_bill_cazhpoin &&
-                                            "p-invalid"
-                                        }`}
+                                        options={option_fee}
+                                        optionLabel="name"
+                                        optionValue="name"
+                                        placeholder="Pilih Tarif"
+                                        editable
+                                        showOnFocus
+                                        valueTemplate={selectedOptionTemplate}
                                         onFocus={() => {
                                             triggerInputFocus(
                                                 animateFeeBillCazhpoin
@@ -986,7 +1108,10 @@ const Edit = ({ usersProp, partnersProp, mou }) => {
                                                 animateFeeBillCazhpoin
                                             );
                                         }}
+                                        itemTemplate={optionTemplate}
+                                        className="w-full md:w-14rem"
                                     />
+
                                     {errors.fee_bill_cazhpoin && (
                                         <Message
                                             className="bg-transparent p-0 my-2 justify-start text-xs"
@@ -999,18 +1124,24 @@ const Edit = ({ usersProp, partnersProp, mou }) => {
                                     <label htmlFor="fee_topup_cazhpos">
                                         Fee topup kartu via CazhPOIN*
                                     </label>
-                                    <InputNumber
+
+                                    <Dropdown
                                         value={data.fee_topup_cazhpos}
                                         onChange={(e) =>
                                             setData(
                                                 "fee_topup_cazhpos",
-                                                e.value
+                                                Number(
+                                                    e.target.value
+                                                ).toLocaleString("id-ID")
                                             )
                                         }
-                                        className={`h-full ${
-                                            errors.fee_topup_cazhpos &&
-                                            "p-invalid"
-                                        }`}
+                                        options={option_fee}
+                                        optionLabel="name"
+                                        optionValue="name"
+                                        placeholder="Pilih Tarif"
+                                        editable
+                                        showOnFocus
+                                        valueTemplate={selectedOptionTemplate}
                                         onFocus={() => {
                                             triggerInputFocus(
                                                 animateFeeTopupCazhpos
@@ -1021,7 +1152,10 @@ const Edit = ({ usersProp, partnersProp, mou }) => {
                                                 animateFeeTopupCazhpos
                                             );
                                         }}
+                                        itemTemplate={optionTemplate}
+                                        className="w-full md:w-14rem"
                                     />
+
                                     {errors.fee_topup_cazhpos && (
                                         <Message
                                             className="bg-transparent p-0 my-2 justify-start text-xs"
@@ -1034,18 +1168,24 @@ const Edit = ({ usersProp, partnersProp, mou }) => {
                                     <label htmlFor="fee_withdraw_cazhpos">
                                         Fee penarikan saldo kartu via CazhPOIN*
                                     </label>
-                                    <InputNumber
+
+                                    <Dropdown
                                         value={data.fee_withdraw_cazhpos}
                                         onChange={(e) =>
                                             setData(
                                                 "fee_withdraw_cazhpos",
-                                                e.value
+                                                Number(
+                                                    e.target.value
+                                                ).toLocaleString("id-ID")
                                             )
                                         }
-                                        className={`h-full ${
-                                            errors.fee_withdraw_cazhpos &&
-                                            "p-invalid"
-                                        }`}
+                                        options={option_fee}
+                                        optionLabel="name"
+                                        optionValue="name"
+                                        placeholder="Pilih Tarif"
+                                        editable
+                                        showOnFocus
+                                        valueTemplate={selectedOptionTemplate}
                                         onFocus={() => {
                                             triggerInputFocus(
                                                 animateFeeWithdrawCazhpos
@@ -1056,7 +1196,10 @@ const Edit = ({ usersProp, partnersProp, mou }) => {
                                                 animateFeeWithdrawCazhpos
                                             );
                                         }}
+                                        itemTemplate={optionTemplate}
+                                        className="w-full md:w-14rem"
                                     />
+
                                     {errors.fee_withdraw_cazhpos && (
                                         <Message
                                             className="bg-transparent p-0 my-2 justify-start text-xs"
@@ -1069,18 +1212,24 @@ const Edit = ({ usersProp, partnersProp, mou }) => {
                                     <label htmlFor="fee_bill_saldokartu">
                                         Fee bayar tagihan via Saldo Kartu*
                                     </label>
-                                    <InputNumber
+
+                                    <Dropdown
                                         value={data.fee_bill_saldokartu}
                                         onChange={(e) =>
                                             setData(
                                                 "fee_bill_saldokartu",
-                                                e.value
+                                                Number(
+                                                    e.target.value
+                                                ).toLocaleString("id-ID")
                                             )
                                         }
-                                        className={`h-full ${
-                                            errors.fee_bill_saldokartu &&
-                                            "p-invalid"
-                                        }`}
+                                        options={option_fee}
+                                        optionLabel="name"
+                                        optionValue="name"
+                                        placeholder="Pilih Tarif"
+                                        editable
+                                        showOnFocus
+                                        valueTemplate={selectedOptionTemplate}
                                         onFocus={() => {
                                             triggerInputFocus(
                                                 animateFeeBillSaldokartu
@@ -1091,7 +1240,10 @@ const Edit = ({ usersProp, partnersProp, mou }) => {
                                                 animateFeeBillSaldokartu
                                             );
                                         }}
+                                        itemTemplate={optionTemplate}
+                                        className="w-full md:w-14rem"
                                     />
+
                                     {errors.fee_bill_saldokartu && (
                                         <Message
                                             className="bg-transparent p-0 my-2 justify-start text-xs"
@@ -1101,9 +1253,7 @@ const Edit = ({ usersProp, partnersProp, mou }) => {
                                     )}
                                 </div>
                                 <div className="flex flex-col mt-3">
-                                    <label htmlFor="fee_withdraw_cazhpos">
-                                        Bank*
-                                    </label>
+                                    <label htmlFor="bank">Bank*</label>
                                     <Dropdown
                                         value={data.bank}
                                         onChange={(e) =>
@@ -1286,7 +1436,7 @@ const Edit = ({ usersProp, partnersProp, mou }) => {
                                 {data.profit_sharing && (
                                     <div className="flex flex-col mt-3">
                                         <label htmlFor="profit_sharing_detail">
-                                            Ketentuan Bagi hasil*
+                                            Ketentuan Bagi hasil
                                         </label>
 
                                         <InputTextarea
@@ -1312,6 +1462,87 @@ const Edit = ({ usersProp, partnersProp, mou }) => {
                                         />
                                     </div>
                                 )}
+
+                                <div className="flex flex-col mt-3">
+                                    <label htmlFor="signature">
+                                        Tanda Tangan *
+                                    </label>
+
+                                    <Dropdown
+                                        value={data.signature}
+                                        onChange={(e) => {
+                                            setData({
+                                                ...data,
+                                                signature: {
+                                                    name: e.target.value.name,
+                                                    position:
+                                                        e.target.value.position,
+                                                    image: e.target.value.image,
+                                                },
+                                            });
+                                        }}
+                                        dataKey="name"
+                                        options={signatures}
+                                        optionLabel="name"
+                                        placeholder="Pilih Tanda Tangan"
+                                        filter
+                                        valueTemplate={selectedOptionTemplate}
+                                        itemTemplate={optionSignatureTemplate}
+                                        className={`w-full md:w-14rem ${
+                                            errors.signature_name && "p-invalid"
+                                        }`}
+                                        onFocus={() => {
+                                            triggerInputFocus(
+                                                animateSignatureName
+                                            );
+                                        }}
+                                        onShow={() => {
+                                            triggerInputFocus(
+                                                animateSignatureName
+                                            );
+                                        }}
+                                        onHide={() => {
+                                            stopAnimateInputFocus(
+                                                animateSignatureName
+                                            );
+                                        }}
+                                        showOnFocus
+                                    />
+                                    {/* <Dropdown
+                                        value={data.signature_name}
+                                        onChange={(e) => {
+                                            setData({
+                                                ...data,
+                                                signature_name:
+                                                    e.target.value.name,
+                                                signature_position:
+                                                    e.target.value.position,
+                                                signature_image:
+                                                    e.target.value.image,
+                                            });
+                                        }}
+                                        dataKey="name"
+                                        options={signatures}
+                                        optionLabel="name"
+                                        placeholder="Pilih Tanda Tangan"
+                                        filter
+                                        valueTemplate={selectedOptionTemplate}
+                                        itemTemplate={optionSignatureTemplate}
+                                        className={`w-full md:w-14rem ${
+                                            errors.signature_name && "p-invalid"
+                                        }`}
+                                        onShow={(e) => {
+                                            triggerInputFocus(
+                                                animateSignatureName
+                                            );
+                                        }}
+                                        onHide={() => {
+                                            stopAnimateInputFocus(
+                                                animateSignatureName
+                                            );
+                                        }}
+                                    /> */}
+                                </div>
 
                                 <div className="flex flex-col mt-3">
                                     <label htmlFor="referral">Referral</label>
@@ -1372,46 +1603,6 @@ const Edit = ({ usersProp, partnersProp, mou }) => {
                                     </div>
                                 )}
 
-                                <div className="flex flex-col mt-3">
-                                    <label htmlFor="signature">
-                                        Tanda Tangan *
-                                    </label>
-                                    <Dropdown
-                                        value={data.signature_name}
-                                        onChange={(e) => {
-                                            setData({
-                                                ...data,
-                                                signature_name:
-                                                    e.target.value.name,
-                                                signature_position:
-                                                    e.target.value.position,
-                                                signature_image:
-                                                    e.target.value.image,
-                                            });
-                                        }}
-                                        options={signatures}
-                                        optionLabel="name"
-                                        placeholder="Pilih Tanda Tangan"
-                                        filter
-                                        valueTemplate={selectedOptionTemplate}
-                                        itemTemplate={optionSignatureTemplate}
-                                        className={`w-full md:w-14rem ${
-                                            errors.signature_name && "p-invalid"
-                                        }`}
-                                        editable
-                                        onFocus={() => {
-                                            triggerInputFocus(
-                                                animateSignatureName
-                                            );
-                                        }}
-                                        onBlur={() => {
-                                            stopAnimateInputFocus(
-                                                animateSignatureName
-                                            );
-                                        }}
-                                    />
-                                </div>
-
                                 <div className="flex-flex-col mt-3">
                                     <form onSubmit={handleSubmitForm}>
                                         <Button className="mx-auto justify-center block">
@@ -1423,7 +1614,7 @@ const Edit = ({ usersProp, partnersProp, mou }) => {
                         </Card>
                     </div>
 
-                    <div className="md:w-[60%] h-screen max-h-screen text-sm overflow-y-auto p-5">
+                    <div className="md:w-[65%] hidden md:block h-screen max-h-screen text-sm overflow-y-auto p-5">
                         <header>
                             <div className="flex justify-center leading-6 text-center flex-col">
                                 <h1 className="font-bold">
@@ -1433,7 +1624,7 @@ const Edit = ({ usersProp, partnersProp, mou }) => {
                                     KEMITRAAN PT CAZH TEKNOLOGI INOVASI
                                 </h1>
                                 <h1 className="font-bold">
-                                    DENGAN {data.partner_name ?? "{{partner}}"}
+                                    DENGAN {data.partner.name ?? "{{partner}}"}
                                 </h1>
                             </div>
                         </header>
@@ -1549,7 +1740,7 @@ const Edit = ({ usersProp, partnersProp, mou }) => {
                                                                 animatePartnerPIC
                                                             }
                                                         >
-                                                            {data.partner_pic ??
+                                                            {data.partner.pic ??
                                                                 "{nama_pic}"}
                                                         </b>
                                                     </td>
@@ -1565,7 +1756,8 @@ const Edit = ({ usersProp, partnersProp, mou }) => {
                                                                 animatePartnerPICPosition
                                                             }
                                                         >
-                                                            {data.partner_pic_position ??
+                                                            {data.partner
+                                                                .pic_position ??
                                                                 "{jabatan_pic}"}
                                                         </b>
                                                     </td>
@@ -1578,10 +1770,11 @@ const Edit = ({ usersProp, partnersProp, mou }) => {
                                                         :{" "}
                                                         <b
                                                             ref={
-                                                                animatePartnerName
+                                                                animatePartnerNameRef
                                                             }
                                                         >
-                                                            {data.partner_name ??
+                                                            {data.partner
+                                                                .name ??
                                                                 "{lembaga}"}
                                                         </b>
                                                     </td>
@@ -1592,13 +1785,36 @@ const Edit = ({ usersProp, partnersProp, mou }) => {
                                                     </td>
                                                     <td>
                                                         :{" "}
-                                                        <b
-                                                            ref={
-                                                                animatePartnerAddress
-                                                            }
-                                                        >
-                                                            {data.partner_address ??
-                                                                "{lokasi}"}
+                                                        <b>
+                                                            <span
+                                                                ref={
+                                                                    animatePartnerRegencyRef
+                                                                }
+                                                            >
+                                                                {data.partner
+                                                                    .regency
+                                                                    ? JSON.parse(
+                                                                          data
+                                                                              .partner
+                                                                              .regency
+                                                                      ).name
+                                                                    : "{{kabupaten}}"}
+                                                            </span>
+                                                            {", "}
+                                                            <span
+                                                                ref={
+                                                                    animatePartnerProvinceRef
+                                                                }
+                                                            >
+                                                                {data.partner
+                                                                    .province
+                                                                    ? JSON.parse(
+                                                                          data
+                                                                              .partner
+                                                                              .province
+                                                                      ).name
+                                                                    : "{{provinsi}}"}
+                                                            </span>
                                                         </b>
                                                     </td>
                                                 </tr>
@@ -2923,10 +3139,7 @@ const Edit = ({ usersProp, partnersProp, mou }) => {
                                             </td>
                                         </tr>
                                         <tr>
-                                            <td
-                                                className="font-bold align-text-top w-[3%]"
-                                                ref={animateProfitSharing}
-                                            >
+                                            <td className="font-bold align-text-top w-[3%]">
                                                 7.
                                             </td>
                                             <td>
@@ -3100,6 +3313,7 @@ const Edit = ({ usersProp, partnersProp, mou }) => {
                                     </tbody>
                                 </table>
                             </div>
+
                             <div className="px-8 flex flex-row mt-5 justify-between">
                                 <div
                                     className="w-[30%]"
@@ -3107,13 +3321,13 @@ const Edit = ({ usersProp, partnersProp, mou }) => {
                                 >
                                     <p>Pihak Pertama</p>
                                     <img
-                                        src={BASE_URL + data.signature_image}
+                                        src={BASE_URL + data.signature.image}
                                         alt=""
                                         className="min-h-20"
                                     />
                                     <p>
                                         <b>
-                                            {data.signature_name ??
+                                            {data.signature.name ??
                                                 "{{nama_pihak_pertama}}"}
                                         </b>
                                     </p>
@@ -3124,7 +3338,7 @@ const Edit = ({ usersProp, partnersProp, mou }) => {
                                     <div className="min-h-20"></div>
                                     <p>
                                         <b>
-                                            {data.partner_pic ??
+                                            {data.partner.pic ??
                                                 "{{nama_pihak_kedua}}"}
                                         </b>
                                     </p>

@@ -10,7 +10,7 @@ class PartnerAccountSettingController extends Controller
 {
     public function apiGetAccounts()
     {
-        $partnerAccount = PartnerAccountSetting::with('partner')->get();
+        $partnerAccount = PartnerAccountSetting::with('partner')->latest()->get();
         return response()->json($partnerAccount);
     }
 

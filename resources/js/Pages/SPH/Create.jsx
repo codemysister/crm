@@ -12,6 +12,7 @@ import { Dropdown } from "primereact/dropdown";
 import React from "react";
 import { Toast } from "primereact/toast";
 import { Badge } from "primereact/badge";
+import { InputNumber } from "primereact/inputnumber";
 
 const BASE_URL = import.meta.env.VITE_BASE_URL;
 
@@ -26,6 +27,18 @@ const Create = ({ usersProp, partnersProp, salesProp, productsProp }) => {
     const [selectedProducts, setSelectedProducts] = useState([]);
     const toast = useRef(null);
     const partnerScrollRef = useRef(null);
+    const [provinces, setProvinces] = useState([]);
+    const [regencys, setRegencys] = useState([]);
+    const [codeProvince, setcodeProvince] = useState(null);
+
+    const animatePartnerNameRef = useRef(null);
+    const animatePartnerPicRef = useRef(null);
+    const animatePartnerProvinceRef = useRef(null);
+    const animatePartnerRegencyRef = useRef(null);
+    const animateSalesNameRef = useRef(null);
+    const animateSalesWaRef = useRef(null);
+    const animateSalesEmailRef = useRef(null);
+    const animateSignatureNameRef = useRef(null);
 
     const {
         data,
@@ -42,19 +55,104 @@ const Create = ({ usersProp, partnersProp, salesProp, productsProp }) => {
             Math.random() * 1000
         )}/CAZH-SPH/X/${new Date().getFullYear()}`,
         products: [],
-        partner_id: null,
-        partner_name: null,
-        partner_pic: null,
-        partner_address: null,
-        sales_name: null,
-        sales_wa: null,
-        sales_address: null,
+        partner: {
+            id: null,
+            name: null,
+            province: null,
+            regency: null,
+            pic: null,
+        },
+        sales: {
+            id: null,
+            name: null,
+            email: null,
+            address: null,
+            wa: null,
+        },
         created_by: null,
-        signature_name: null,
-        signature_position: null,
-        signature_image: null,
+        signature: {
+            name: null,
+            position: null,
+            image: null,
+        },
     });
 
+    useEffect(() => {
+        const fetchData = async () => {
+            await getProvince();
+        };
+
+        fetchData();
+    }, []);
+
+    useEffect(() => {
+        if (codeProvince) {
+            getRegencys(codeProvince);
+        }
+    }, [codeProvince]);
+
+    const getProvince = async () => {
+        const options = {
+            method: "GET",
+            url: `/api/wilayah/provinsi/`,
+            headers: {
+                "Content-Type": "application/json",
+            },
+        };
+
+        try {
+            const response = await axios.request(options);
+            const dataArray = Object.entries(response.data).map(
+                ([key, value]) => ({
+                    code: key,
+                    name: value
+                        .toLowerCase()
+                        .split(" ")
+                        .map(
+                            (word) =>
+                                word.charAt(0).toUpperCase() + word.slice(1)
+                        )
+                        .join(" "),
+                })
+            );
+            setProvinces((prev) => (prev = dataArray));
+        } catch (error) {
+            console.log(error);
+        }
+    };
+
+    const getRegencys = async (code) => {
+        let url = code
+            ? `/api/wilayah/kabupaten?provinsi=${code}`
+            : `/api/wilayah/kabupaten`;
+        const options = {
+            method: "GET",
+            url: url,
+            headers: {
+                "Content-Type": "application/json",
+            },
+        };
+
+        try {
+            const response = await axios.request(options);
+            const dataArray = Object.entries(response.data).map(
+                ([key, value]) => ({
+                    code: key,
+                    name: value
+                        .toLowerCase()
+                        .split(" ")
+                        .map(
+                            (word) =>
+                                word.charAt(0).toUpperCase() + word.slice(1)
+                        )
+                        .join(" "),
+                })
+            );
+            setRegencys((prev) => (prev = dataArray));
+        } catch (error) {
+            console.log(error);
+        }
+    };
     const signatures = [
         {
             name: "Muh Arif Mahfudin",
@@ -93,31 +191,35 @@ const Create = ({ usersProp, partnersProp, salesProp, productsProp }) => {
     };
 
     const onDoneSelect = () => {
-        const updatedProducts = [...data.products, ...selectedProducts];
+        const filtered = selectedProducts.filter((product) => {
+            return !data.products.includes(product);
+        });
+
+        const mapped = filtered.map((product) => {
+            return { ...product, qty: 1, total: 1 * product.price };
+        });
+
+        const updatedProducts = [...data.products, ...mapped];
         setData("products", updatedProducts);
         setDialogProductVisible(false);
         setSelectedProducts((prev) => (prev = []));
     };
 
-    const ubahFormatTanggal = (tanggal) => {
-        if (!tanggal) {
-            return "N/A";
+    const triggerInputFocus = (ref) => {
+        if (ref.current) {
+            ref.current.classList.add("twinkle");
+            ref.current.focus();
         }
-        let tanggalAngka = tanggal.getDate();
-        let bulanAngka = tanggal.getMonth() + 1;
-        let tahunAngka = tanggal.getFullYear();
+        return null;
+    };
 
-        let bulanFormat = bulanAngka < 10 ? "0" + bulanAngka : bulanAngka;
-        let tahunFormat = tahunAngka;
+    const stopAnimateInputFocus = (ref) => {
+        ref.current.classList.remove("twinkle");
 
-        let formatTanggal =
-            tanggalAngka + "/" + bulanFormat + "/" + tahunFormat;
-
-        return formatTanggal;
+        return null;
     };
 
     const selectedOptionTemplate = (option, props) => {
-        console.log(option);
         if (option) {
             return (
                 <div className="flex align-items-center">
@@ -191,26 +293,6 @@ const Create = ({ usersProp, partnersProp, salesProp, productsProp }) => {
         });
     };
 
-    const onRowSelect = (event) => {
-        const selectedProduct = {
-            ...event.data,
-            total: event.data.price,
-            qty: 1,
-        };
-        const currentProducts = data.products;
-        const updatedProducts = [...currentProducts, selectedProduct];
-        setData("products", updatedProducts);
-    };
-
-    const onRowUnselect = (event) => {
-        toast.current.show({
-            severity: "warn",
-            summary: "Product Unselected",
-            detail: `Name: ${event.data.name}`,
-            life: 3000,
-        });
-    };
-
     const handleInputChange = (index, field, value) => {
         const updatedProducts = [...data.products];
 
@@ -247,7 +329,7 @@ const Create = ({ usersProp, partnersProp, salesProp, productsProp }) => {
             <Toast ref={toast} />
             <div className="h-screen max-h-screen overflow-y-hidden">
                 <div className="flex flex-col h-screen max-h-screen overflow-hidden md:flex-row z-40 relative gap-5">
-                    <div className="md:w-[40%] overflow-y-auto h-screen max-h-screen p-5">
+                    <div className="md:w-[35%] overflow-y-auto h-screen max-h-screen p-5">
                         <Card>
                             <div className="flex justify-between items-center mb-4">
                                 <h1 className="font-bold text-2xl">
@@ -293,18 +375,40 @@ const Create = ({ usersProp, partnersProp, salesProp, productsProp }) => {
                                 <div className="flex flex-col mt-3">
                                     <label htmlFor="lembaga">Lembaga *</label>
                                     <Dropdown
-                                        value={data.partner_name}
+                                        value={data.partner}
+                                        dataKey="id"
                                         onChange={(e) => {
-                                            setData({
-                                                ...data,
-                                                partner_id: e.target.value.id,
-                                                partner_name:
-                                                    e.target.value.name,
-                                                partner_address:
-                                                    e.target.value.address,
-                                                partner_pic:
-                                                    e.target.value.pics[0].name,
+                                            setData("partner", {
+                                                ...data.partner,
+                                                id: e.target.value.id,
+                                                name: e.target.value.name,
+                                                province:
+                                                    e.target.value.province,
+                                                regency: e.target.value.regency,
+                                                pic: e.target.value.pics[0]
+                                                    .name,
                                             });
+                                            setcodeProvince(
+                                                (prev) =>
+                                                    (prev = JSON.parse(
+                                                        e.target.value.province
+                                                    ).code)
+                                            );
+                                        }}
+                                        onFocus={() => {
+                                            triggerInputFocus(
+                                                animatePartnerNameRef
+                                            );
+                                        }}
+                                        onShow={() => {
+                                            triggerInputFocus(
+                                                animatePartnerNameRef
+                                            );
+                                        }}
+                                        onBlur={() => {
+                                            stopAnimateInputFocus(
+                                                animatePartnerNameRef
+                                            );
                                         }}
                                         options={partners}
                                         optionLabel="name"
@@ -313,53 +417,132 @@ const Create = ({ usersProp, partnersProp, salesProp, productsProp }) => {
                                         valueTemplate={selectedOptionTemplate}
                                         itemTemplate={optionTemplate}
                                         className="w-full md:w-14rem"
-                                        editable
                                     />
                                 </div>
+
                                 <div className="flex flex-col mt-3">
-                                    <label htmlFor="partner_address">
-                                        Lokasi *
-                                    </label>
-                                    <InputText
-                                        value={data.partner_address}
-                                        onChange={(e) =>
-                                            setData({
-                                                ...data,
-                                                partner_address: e.target.value,
-                                            })
+                                    <label htmlFor="province">Provinsi *</label>
+
+                                    <Dropdown
+                                        value={
+                                            data.partner.province
+                                                ? JSON.parse(
+                                                      data.partner.province
+                                                  )
+                                                : null
                                         }
-                                        className="dark:bg-gray-300"
-                                        id="partner_address"
-                                        aria-describedby="partner_address-help"
+                                        onChange={(e) => {
+                                            setcodeProvince(
+                                                (prev) =>
+                                                    (prev = e.target.value.code)
+                                            );
+                                            setData("partner", {
+                                                ...data.partner,
+                                                province: JSON.stringify(
+                                                    e.target.value
+                                                ),
+                                            });
+                                        }}
+                                        dataKey="name"
+                                        options={provinces}
+                                        optionLabel="name"
+                                        placeholder="Pilih Provinsi"
+                                        filter
+                                        valueTemplate={selectedOptionTemplate}
+                                        itemTemplate={optionTemplate}
+                                        className="w-full md:w-14rem"
+                                        onFocus={() => {
+                                            triggerInputFocus(
+                                                animatePartnerProvinceRef
+                                            );
+                                        }}
+                                        onShow={() => {
+                                            triggerInputFocus(
+                                                animatePartnerProvinceRef
+                                            );
+                                        }}
+                                        onBlur={() => {
+                                            stopAnimateInputFocus(
+                                                animatePartnerProvinceRef
+                                            );
+                                        }}
+                                    />
+                                </div>
+
+                                <div className="flex flex-col mt-3">
+                                    <label htmlFor="regency">Kabupaten *</label>
+                                    <Dropdown
+                                        value={
+                                            data.partner.regency
+                                                ? JSON.parse(
+                                                      data.partner.regency
+                                                  )
+                                                : null
+                                        }
+                                        onChange={(e) => {
+                                            setcodeRegency(
+                                                (prev) =>
+                                                    (prev = e.target.value.code)
+                                            );
+                                            setData("partner", {
+                                                ...data.partner,
+                                                regency: JSON.stringify(
+                                                    e.target.value
+                                                ),
+                                            });
+                                        }}
+                                        options={regencys}
+                                        optionLabel="name"
+                                        placeholder="Pilih Kabupaten"
+                                        filter
+                                        valueTemplate={selectedOptionTemplate}
+                                        itemTemplate={optionTemplate}
+                                        className="w-full md:w-14rem"
                                     />
                                 </div>
                                 <div className="flex flex-col mt-3">
                                     <label htmlFor="partner_pic">PIC *</label>
                                     <InputText
-                                        value={data.partner_pic}
+                                        value={data.partner.pic}
                                         onChange={(e) =>
-                                            setData({
-                                                ...data,
-                                                partner_pic: e.target.value,
+                                            setData("partner", {
+                                                ...data.partner,
+                                                pic: e.target.value,
                                             })
                                         }
                                         className="dark:bg-gray-300"
                                         id="partner_pic"
                                         aria-describedby="partner_pic-help"
+                                        onFocus={() => {
+                                            triggerInputFocus(
+                                                animatePartnerRegencyRef
+                                            );
+                                        }}
+                                        onShow={() => {
+                                            triggerInputFocus(
+                                                animatePartnerRegencyRef
+                                            );
+                                        }}
+                                        onBlur={() => {
+                                            stopAnimateInputFocus(
+                                                animatePartnerRegencyRef
+                                            );
+                                        }}
                                     />
                                 </div>
                                 <div className="flex flex-col mt-3">
                                     <label htmlFor="sales">Sales *</label>
                                     <Dropdown
-                                        value={data.sales_name}
+                                        value={data.sales}
                                         onChange={(e) => {
-                                            setData({
-                                                ...data,
-                                                sales_name: e.target.value.name,
-                                                sales_email:
-                                                    e.target.value.email,
+                                            setData("sales", {
+                                                ...data.sales,
+                                                name: e.target.value.name,
+                                                wa: e.target.value.number,
+                                                email: e.target.value.email,
                                             });
                                         }}
+                                        dataKey="name"
                                         options={sales}
                                         optionLabel="name"
                                         placeholder="Pilih Sales"
@@ -367,7 +550,21 @@ const Create = ({ usersProp, partnersProp, salesProp, productsProp }) => {
                                         valueTemplate={selectedOptionTemplate}
                                         itemTemplate={optionTemplate}
                                         className="w-full md:w-14rem"
-                                        editable
+                                        onFocus={() => {
+                                            triggerInputFocus(
+                                                animateSalesNameRef
+                                            );
+                                        }}
+                                        onShow={() => {
+                                            triggerInputFocus(
+                                                animateSalesNameRef
+                                            );
+                                        }}
+                                        onBlur={() => {
+                                            stopAnimateInputFocus(
+                                                animateSalesNameRef
+                                            );
+                                        }}
                                     />
                                 </div>
                                 <div className="flex flex-col mt-3">
@@ -375,16 +572,26 @@ const Create = ({ usersProp, partnersProp, salesProp, productsProp }) => {
                                         Whatsapp Sales *
                                     </label>
                                     <InputText
-                                        value={data.sales_wa}
+                                        value={data.sales.wa}
                                         onChange={(e) => {
-                                            setData({
-                                                ...data,
-                                                sales_wa: e.target.value,
+                                            setData("sales", {
+                                                ...data.sales,
+                                                wa: e.target.value,
                                             });
                                         }}
                                         className="dark:bg-gray-300"
                                         id="sales-whatsapp"
                                         aria-describedby="sales-whatsapp-help"
+                                        onFocus={() => {
+                                            triggerInputFocus(
+                                                animateSalesWaRef
+                                            );
+                                        }}
+                                        onBlur={() => {
+                                            stopAnimateInputFocus(
+                                                animateSalesWaRef
+                                            );
+                                        }}
                                     />
                                 </div>
                                 <div className="flex flex-col mt-3">
@@ -392,16 +599,26 @@ const Create = ({ usersProp, partnersProp, salesProp, productsProp }) => {
                                         Email Sales *
                                     </label>
                                     <InputText
-                                        value={data.sales_email}
+                                        value={data.sales.email}
                                         onChange={(e) =>
-                                            setData({
-                                                ...data,
-                                                sales_email: e.target.value,
+                                            setData("sales", {
+                                                ...data.sales,
+                                                email: e.target.value,
                                             })
                                         }
                                         className="dark:bg-gray-300"
                                         id="sales-email"
                                         aria-describedby="sales-email-help"
+                                        onFocus={() => {
+                                            triggerInputFocus(
+                                                animateSalesEmailRef
+                                            );
+                                        }}
+                                        onBlur={() => {
+                                            stopAnimateInputFocus(
+                                                animateSalesEmailRef
+                                            );
+                                        }}
                                     />
                                 </div>
                                 <div className="flex flex-col mt-3">
@@ -409,18 +626,17 @@ const Create = ({ usersProp, partnersProp, salesProp, productsProp }) => {
                                         Tanda Tangan *
                                     </label>
                                     <Dropdown
-                                        value={data.signature_name}
+                                        value={data.signature}
                                         onChange={(e) => {
-                                            setData({
-                                                ...data,
-                                                signature_name:
-                                                    e.target.value.name,
-                                                signature_position:
+                                            setData("signature", {
+                                                ...data.signature,
+                                                name: e.target.value.name,
+                                                position:
                                                     e.target.value.position,
-                                                signature_image:
-                                                    e.target.value.image,
+                                                image: e.target.value.image,
                                             });
                                         }}
+                                        dataKey="name"
                                         options={signatures}
                                         optionLabel="name"
                                         placeholder="Pilih Tanda Tangan"
@@ -428,7 +644,21 @@ const Create = ({ usersProp, partnersProp, salesProp, productsProp }) => {
                                         valueTemplate={selectedOptionTemplate}
                                         itemTemplate={optionSignatureTemplate}
                                         className="w-full md:w-14rem"
-                                        editable
+                                        onFocus={() => {
+                                            triggerInputFocus(
+                                                animateSignatureNameRef
+                                            );
+                                        }}
+                                        onShow={() => {
+                                            triggerInputFocus(
+                                                animateSignatureNameRef
+                                            );
+                                        }}
+                                        onBlur={() => {
+                                            stopAnimateInputFocus(
+                                                animateSignatureNameRef
+                                            );
+                                        }}
                                     />
                                 </div>
 
@@ -467,7 +697,7 @@ const Create = ({ usersProp, partnersProp, salesProp, productsProp }) => {
                                         name: "",
                                         price: "",
                                         qty: "",
-                                        detail: "",
+                                        detail: null,
                                         total: "",
                                     };
 
@@ -485,7 +715,7 @@ const Create = ({ usersProp, partnersProp, salesProp, productsProp }) => {
                             const no = index + 1;
                             return (
                                 <div
-                                    className="flex gap-5 mt-2 items-center justify-center"
+                                    className="flex gap-5 mt-2 items-center"
                                     key={product + index}
                                 >
                                     <div>
@@ -516,19 +746,19 @@ const Create = ({ usersProp, partnersProp, salesProp, productsProp }) => {
                                             <label htmlFor="partner_address">
                                                 Harga *
                                             </label>
-                                            <InputText
+                                            <InputNumber
                                                 value={product.price}
                                                 onChange={(e) =>
                                                     handleInputChange(
                                                         index,
                                                         "price",
-                                                        e.target.value
+                                                        e.value
                                                     )
                                                 }
                                                 className="dark:bg-gray-300"
                                                 id="partner_address"
                                                 aria-describedby="partner_address-help"
-                                                keyfilter="int"
+                                                locale="id-ID"
                                             />
                                         </div>
                                     </div>
@@ -538,7 +768,7 @@ const Create = ({ usersProp, partnersProp, salesProp, productsProp }) => {
                                             <label htmlFor="partner_address">
                                                 Kuantitas *
                                             </label>
-                                            <InputText
+                                            <InputNumber
                                                 value={product.qty}
                                                 onChange={(e) =>
                                                     handleInputChange(
@@ -551,6 +781,7 @@ const Create = ({ usersProp, partnersProp, salesProp, productsProp }) => {
                                                 id="partner_address"
                                                 aria-describedby="partner_address-help"
                                                 keyfilter="int"
+                                                locale="id-ID"
                                             />
                                         </div>
                                     </div>
@@ -581,11 +812,12 @@ const Create = ({ usersProp, partnersProp, salesProp, productsProp }) => {
                                             <label htmlFor="partner_address">
                                                 Jumlah *
                                             </label>
-                                            <InputText
+                                            <InputNumber
                                                 value={product.total}
                                                 className="dark:bg-gray-300"
                                                 id="partner_address"
                                                 aria-describedby="partner_address-help"
+                                                locale="id-ID"
                                             />
                                         </div>
                                     </div>
@@ -667,14 +899,14 @@ const Create = ({ usersProp, partnersProp, salesProp, productsProp }) => {
                         </Dialog>
                     </Dialog>
 
-                    <div className="md:w-[60%] h-screen max-h-screen overflow-y-auto p-5">
+                    <div className="md:w-[65%] hidden md:block text-sm h-screen max-h-screen overflow-y-auto p-5">
                         <header>
                             <div className="flex justify-between items-center">
                                 <div className="w-full">
                                     <img
                                         src="/assets/img/cazh.png"
                                         alt=""
-                                        className="float-left w-1/2 h-1/2"
+                                        className="float-left w-1/3 h-1/3"
                                     />
                                 </div>
                                 <div className="w-full text-right text-xs">
@@ -700,13 +932,32 @@ const Create = ({ usersProp, partnersProp, salesProp, productsProp }) => {
 
                         <div className="mt-5" ref={partnerScrollRef}>
                             <h1>Kepada Yth.</h1>
-                            <h1 className="font-bold">
-                                {data.partner_pic ?? "{{pic}}"}
+                            <h1
+                                className="font-bold"
+                                ref={animatePartnerPicRef}
+                            >
+                                {data.partner.pic ?? "{{pic}}"}
                             </h1>
-                            <h1 className="font-bold">
-                                {data.partner_name ?? "{{partner}}"}
+                            <h1
+                                className="font-bold"
+                                ref={animatePartnerNameRef}
+                            >
+                                {data.partner.name ?? "{{partner}}"}
                             </h1>
-                            <h1>di {data.partner_address ?? "{{alamat}}"}</h1>
+                            <h1>
+                                di{" "}
+                                <span ref={animatePartnerRegencyRef}>
+                                    {data.partner.regency
+                                        ? JSON.parse(data.partner.regency).name
+                                        : "{{alamat}}"}
+                                </span>
+                                {", "}
+                                <span ref={animatePartnerProvinceRef}>
+                                    {data.partner.province
+                                        ? JSON.parse(data.partner.province).name
+                                        : "{{alamat}}"}
+                                </span>
+                            </h1>
                         </div>
 
                         <div className="mt-5">
@@ -717,9 +968,9 @@ const Create = ({ usersProp, partnersProp, salesProp, productsProp }) => {
                             <h1>
                                 Menindaklanjuti komunikasi yang telah dilakukan
                                 oleh tim marketing kami{" "}
-                                {data.sales_name ?? "{{sales}}"} dengan
+                                {data.sales.name ?? "{{sales}}"} dengan
                                 perwakilan dari{" "}
-                                {data.partner_name ?? "{{partner}}"}, dengan ini
+                                {data.partner.name ?? "{{partner}}"}, dengan ini
                                 kami sampaikan penawaran sebagai berikut:
                             </h1>
                         </div>
@@ -759,9 +1010,17 @@ const Create = ({ usersProp, partnersProp, salesProp, productsProp }) => {
                                 Untuk konfirmasi persetujuan silakan hubungi :
                             </h1>
                             <h1>
-                                <b>{data.sales_name ?? "{{sales}}"}</b> via WA :{" "}
-                                <b>{data.sales_wa ?? "{{wa_sales}}"}</b>, email
-                                : <b>{data.sales_email ?? "{{email_sales}}"}</b>
+                                <b ref={animateSalesNameRef}>
+                                    {data.sales.name ?? "{{sales}}"}
+                                </b>{" "}
+                                via WA :{" "}
+                                <b ref={animateSalesWaRef}>
+                                    {data.sales.wa ?? "{{wa_sales}}"}
+                                </b>
+                                , email :{" "}
+                                <b ref={animateSalesEmailRef}>
+                                    {data.sales.email ?? "{{email_sales}}"}
+                                </b>
                             </h1>
                         </div>
 
@@ -774,11 +1033,14 @@ const Create = ({ usersProp, partnersProp, salesProp, productsProp }) => {
                             </h1>
                         </div>
 
-                        <div className="flex flex-col mt-5 justify-start w-[30%]">
+                        <div
+                            className="flex flex-col mt-5 justify-start w-[30%]"
+                            ref={animateSignatureNameRef}
+                        >
                             <p>Purwokerto, {new Date().getFullYear()}</p>
-                            <img src={BASE_URL + data.signature_image} alt="" />
-                            <p>{data.signature_name}</p>
-                            <p>{data.signature_position}</p>
+                            <img src={BASE_URL + data.signature.image} alt="" />
+                            <p>{data.signature.name}</p>
+                            <p>{data.signature.position}</p>
                         </div>
                     </div>
                 </div>

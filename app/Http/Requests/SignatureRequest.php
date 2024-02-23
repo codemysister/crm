@@ -4,7 +4,7 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class SLARequest extends FormRequest
+class SignatureRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -22,16 +22,9 @@ class SLARequest extends FormRequest
     public function rules(): array
     {
         return [
-            "code" => "required",
-            "partner.name" => "required",
-            "partner.province" => "required",
-            "partner.regency" => "required",
-            "partner.phone_number" => "required",
-            "partner.pic" => "required",
-            "partner.pic_email" => "required",
-            "partner.pic_number" => "required",
-            "referral" => "required",
-            "signature" => "required",
+            'user' => 'required',
+            'image' => 'required',
+            'position' => 'required'
         ];
     }
 }

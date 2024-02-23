@@ -11,6 +11,7 @@ import { ConfirmDialog, confirmDialog } from "primereact/confirmdialog";
 import { Skeleton } from "primereact/skeleton";
 import { Link } from "@inertiajs/react";
 import { FilterMatchMode } from "primereact/api";
+import { ProgressSpinner } from "primereact/progressspinner";
 
 const BASE_URL = import.meta.env.VITE_BASE_URL;
 
@@ -141,6 +142,11 @@ export default function Index({ auth, sphsDefault }) {
         });
     };
 
+    const handleSelectedDetailPartner = (partner) => {
+        const newUrl = `/partners?uuid=${partner.uuid}`;
+        window.location = newUrl;
+    };
+
     const renderHeader = () => {
         return (
             <div className="flex flex-row justify-left gap-2 align-items-center items-end">
@@ -236,7 +242,14 @@ export default function Index({ auth, sphsDefault }) {
                         paginatorClassName="dark:bg-transparent paginator-custome dark:text-gray-300 rounded-b-lg"
                         header={renderHeader}
                         value={sphs}
-                        globalFilterFields={["partner", "sales"]}
+                        globalFilterFields={[
+                            "partner_name",
+                            "sales_name",
+                            "partner_province",
+                            "partner_regency",
+                            "code",
+                            "created_by",
+                        ]}
                         dataKey="id"
                     >
                         <Column
@@ -258,6 +271,18 @@ export default function Index({ auth, sphsDefault }) {
                             className="dark:border-none"
                             headerClassName="dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300"
                             header="Lembaga"
+                            body={(rowData) => (
+                                <button
+                                    onClick={() =>
+                                        handleSelectedDetailPartner(
+                                            rowData.partner
+                                        )
+                                    }
+                                    className="hover:text-blue-700"
+                                >
+                                    {rowData.partner.name}
+                                </button>
+                            )}
                             align="left"
                             style={{ minWidth: "8rem" }}
                         ></Column>
@@ -277,11 +302,26 @@ export default function Index({ auth, sphsDefault }) {
                             style={{ minWidth: "6rem" }}
                         ></Column>
                         <Column
-                            field="partner_address"
+                            field="partner_province"
                             className="dark:border-none"
                             headerClassName="dark:border-none  bg-transparent dark:bg-transparent dark:text-gray-300"
                             align="left"
-                            header="Alamat"
+                            header="Provinsi"
+                            body={(rowData) => {
+                                return JSON.parse(rowData.partner_province)
+                                    .name;
+                            }}
+                            style={{ minWidth: "8rem" }}
+                        ></Column>
+                        <Column
+                            field="partner_regency"
+                            className="dark:border-none"
+                            headerClassName="dark:border-none  bg-transparent dark:bg-transparent dark:text-gray-300"
+                            align="left"
+                            header="Kabupaten"
+                            body={(rowData) => {
+                                return JSON.parse(rowData.partner_regency).name;
+                            }}
                             style={{ minWidth: "8rem" }}
                         ></Column>
                         <Column
@@ -290,7 +330,7 @@ export default function Index({ auth, sphsDefault }) {
                             headerClassName="dark:border-none  bg-transparent dark:bg-transparent dark:text-gray-300"
                             align="left"
                             header="Sales"
-                            style={{ minWidth: "6rem" }}
+                            style={{ minWidth: "10rem" }}
                         ></Column>
                         <Column
                             field="sales_wa"
@@ -298,6 +338,7 @@ export default function Index({ auth, sphsDefault }) {
                             headerClassName="dark:border-none  bg-transparent dark:bg-transparent dark:text-gray-300"
                             align="left"
                             header="WA Sales"
+                            style={{ minWidth: "8rem" }}
                         ></Column>
                         <Column
                             field="sales_email"
@@ -305,17 +346,39 @@ export default function Index({ auth, sphsDefault }) {
                             headerClassName="dark:border-none  bg-transparent dark:bg-transparent dark:text-gray-300"
                             align="left"
                             header="Email Sales"
+                            style={{ minWidth: "8rem" }}
                         ></Column>
                         <Column
                             body={(rowData) => {
-                                return rowData.spd_doc == "" ? (
-                                    "dokumen sedang dibuat"
+                                return rowData.sph_doc == "" ? (
+                                    <ProgressSpinner
+                                        style={{
+                                            width: "30px",
+                                            height: "30px",
+                                        }}
+                                        strokeWidth="8"
+                                        fill="var(--surface-ground)"
+                                        animationDuration=".5s"
+                                    />
                                 ) : (
-                                    <a
-                                        href={BASE_URL + "/" + rowData.sph_doc}
-                                        download={`Surat_Tugas_Perjalanan_Dinas_${rowData.partner_name}`}
-                                        class="p-button font-bold text-center rounded-full block pi pi-file-pdf"
-                                    ></a>
+                                    <div className="flex w-full h-full items-center justify-center">
+                                        <a
+                                            href={
+                                                BASE_URL + "/" + rowData.sph_doc
+                                            }
+                                            download={`Surat_Tugas_Perjalanan_Dinas_${rowData.partner_name}`}
+                                            class="font-bold  w-full h-full text-center rounded-full "
+                                        >
+                                            <i
+                                                className="pi pi-file-pdf"
+                                                style={{
+                                                    width: "100%",
+                                                    height: "100%",
+                                                    fontSize: "1.5rem",
+                                                }}
+                                            ></i>
+                                        </a>
+                                    </div>
                                 );
                             }}
                             className="dark:border-none"

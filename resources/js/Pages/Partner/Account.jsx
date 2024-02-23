@@ -257,6 +257,7 @@ const Account = ({
                                     Partner
                                 </label>
                                 <Dropdown
+                                    dataKey="name"
                                     optionLabel="name"
                                     value={dataAccount.partner}
                                     onChange={(e) =>
@@ -374,6 +375,7 @@ const Account = ({
                                     Partner
                                 </label>
                                 <Dropdown
+                                    dataKey="name"
                                     optionLabel="name"
                                     value={dataAccount.partner}
                                     onChange={(e) =>
@@ -492,6 +494,11 @@ const Account = ({
                         globalFilterFields={[
                             "partner.name",
                             "account_bank_name",
+                            "subdomain",
+                            "email_super_admin",
+                            "cas_link_partner",
+                            "card_number",
+                            "",
                         ]}
                         value={accounts}
                         dataKey="id"
@@ -501,7 +508,10 @@ const Account = ({
                             body={(_, { rowIndex }) => rowIndex + 1}
                             className="dark:border-none pl-6"
                             headerClassName="dark:border-none pl-6 bg-transparent dark:bg-transparent dark:text-gray-300"
-                            style={{ width: "3%" }}
+                            style={{
+                                width: "max-content",
+                                whiteSpace: "nowrap",
+                            }}
                         />
                         <Column
                             header="Partner"
@@ -520,7 +530,10 @@ const Account = ({
                             className="dark:border-none"
                             headerClassName="dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300"
                             align="left"
-                            style={{ minWidth: "8rem" }}
+                            style={{
+                                width: "max-content",
+                                whiteSpace: "nowrap",
+                            }}
                         ></Column>
                         <Column
                             field="uuid"
@@ -536,7 +549,10 @@ const Account = ({
                             className="dark:border-none"
                             headerClassName="dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300"
                             align="left"
-                            style={{ minWidth: "8rem" }}
+                            style={{
+                                width: "max-content",
+                                whiteSpace: "nowrap",
+                            }}
                         ></Column>
                         <Column
                             field="email_super_admin"
@@ -544,7 +560,10 @@ const Account = ({
                             className="dark:border-none"
                             headerClassName="dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300"
                             align="left"
-                            style={{ minWidth: "8rem" }}
+                            style={{
+                                width: "max-content",
+                                whiteSpace: "nowrap",
+                            }}
                         ></Column>
                         <Column
                             field="cas_link_partner"
@@ -552,7 +571,10 @@ const Account = ({
                             className="dark:border-none"
                             headerClassName="dark:border-none  bg-transparent dark:bg-transparent dark:text-gray-300"
                             align="left"
-                            style={{ minWidth: "8rem" }}
+                            style={{
+                                width: "max-content",
+                                whiteSpace: "nowrap",
+                            }}
                         ></Column>
                         <Column
                             field="card_number"
@@ -560,12 +582,18 @@ const Account = ({
                             className="dark:border-none"
                             headerClassName="dark:border-none  bg-transparent dark:bg-transparent dark:text-gray-300"
                             align="left"
-                            style={{ minWidth: "8rem" }}
+                            style={{
+                                width: "max-content",
+                                whiteSpace: "nowrap",
+                            }}
                         ></Column>
                         <Column
                             header="Action"
                             body={actionBodyTemplateAccount}
-                            style={{ minWidth: "8rem" }}
+                            style={{
+                                width: "max-content",
+                                whiteSpace: "nowrap",
+                            }}
                             className="dark:border-none"
                             headerClassName="dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300"
                         ></Column>

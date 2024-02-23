@@ -12,6 +12,7 @@ import { Dropdown } from "primereact/dropdown";
 import React from "react";
 import { Toast } from "primereact/toast";
 import { Badge } from "primereact/badge";
+import { useEffect } from "react";
 
 const BASE_URL = import.meta.env.VITE_BASE_URL;
 
@@ -25,6 +26,132 @@ const Edit = ({ usersProp, partnersProp, salesProp, productsProp, sph }) => {
     const [rowClick, setRowClick] = useState(true);
     const toast = useRef(null);
     const [selectedProducts, setSelectedProducts] = useState("");
+    const [provinces, setProvinces] = useState([]);
+    const [regencys, setRegencys] = useState([]);
+    const [codeProvince, setcodeProvince] = useState(null);
+
+    const animatePartnerNameRef = useRef(null);
+    const animatePartnerPicRef = useRef(null);
+    const animatePartnerProvinceRef = useRef(null);
+    const animatePartnerRegencyRef = useRef(null);
+    const animateSalesNameRef = useRef(null);
+    const animateSalesWaRef = useRef(null);
+    const animateSalesEmailRef = useRef(null);
+    const animateSignatureNameRef = useRef(null);
+
+    const {
+        data,
+        setData,
+        post,
+        put,
+        delete: destroy,
+        reset,
+        processing,
+        errors,
+    } = useForm({
+        uuid: "",
+        code: `${Math.floor(
+            Math.random() * 1000
+        )}/CAZH-SPH/X/${new Date().getFullYear()}`,
+        products: [],
+        partner: {
+            id: sph.partner_id,
+            name: sph.partner_name,
+            province: sph.partner_province,
+            regency: sph.partner_regency,
+            pic: sph.partner_pic,
+        },
+        sales: {
+            name: sph.sales_name,
+            email: sph.sales_email,
+            wa: sph.sales_wa,
+        },
+        created_by: null,
+        signature: {
+            name: sph.signature_name,
+            position: sph.signature_position,
+            image: sph.signature_image,
+        },
+        products: sph.products,
+    });
+
+    useEffect(() => {
+        const fetchData = async () => {
+            await getProvince();
+            await getRegencys();
+        };
+
+        fetchData();
+    }, []);
+
+    useEffect(() => {
+        if (codeProvince) {
+            getRegencys(codeProvince);
+        }
+    }, [codeProvince]);
+
+    const getProvince = async () => {
+        const options = {
+            method: "GET",
+            url: `/api/wilayah/provinsi/`,
+            headers: {
+                "Content-Type": "application/json",
+            },
+        };
+
+        try {
+            const response = await axios.request(options);
+            const dataArray = Object.entries(response.data).map(
+                ([key, value]) => ({
+                    code: key,
+                    name: value
+                        .toLowerCase()
+                        .split(" ")
+                        .map(
+                            (word) =>
+                                word.charAt(0).toUpperCase() + word.slice(1)
+                        )
+                        .join(" "),
+                })
+            );
+            setProvinces((prev) => (prev = dataArray));
+        } catch (error) {
+            console.log(error);
+        }
+    };
+
+    const getRegencys = async (code) => {
+        let url = code
+            ? `/api/wilayah/kabupaten?provinsi=${code}`
+            : `/api/wilayah/kabupaten`;
+        const options = {
+            method: "GET",
+            url: url,
+            headers: {
+                "Content-Type": "application/json",
+            },
+        };
+
+        try {
+            const response = await axios.request(options);
+            const dataArray = Object.entries(response.data).map(
+                ([key, value]) => ({
+                    code: key,
+                    name: value
+                        .toLowerCase()
+                        .split(" ")
+                        .map(
+                            (word) =>
+                                word.charAt(0).toUpperCase() + word.slice(1)
+                        )
+                        .join(" "),
+                })
+            );
+            setRegencys((prev) => (prev = dataArray));
+        } catch (error) {
+            console.log(error);
+        }
+    };
 
     const signatures = [
         {
@@ -51,32 +178,19 @@ const Edit = ({ usersProp, partnersProp, salesProp, productsProp, sph }) => {
 
     document.querySelector("body").classList.add("overflow-hidden");
 
-    const {
-        data,
-        setData,
-        post,
-        put,
-        delete: destroy,
-        reset,
-        processing,
-        errors,
-    } = useForm({
-        uuid: "",
-        code: sph.code,
-        partner_id: sph.partner_id,
-        partner_name: sph.partner_name,
-        partner_pic: sph.partner_pic,
-        partner_address: sph.partner_address,
-        products: sph.products,
-        sales_name: sph.sales_name,
-        sales_wa: sph.sales_wa,
-        sales_address: sph.sales_address,
-        sales_email: sph.sales_email,
-        created_by: "",
-        signature_name: sph.signature_name,
-        signature_position: sph.signature_position,
-        signature_image: sph.signature_image,
-    });
+    const triggerInputFocus = (ref) => {
+        if (ref.current) {
+            ref.current.classList.add("twinkle");
+            ref.current.focus();
+        }
+        return null;
+    };
+
+    const stopAnimateInputFocus = (ref) => {
+        ref.current.classList.remove("twinkle");
+
+        return null;
+    };
 
     const dialogFooterTemplate = (type) => {
         return (
@@ -88,23 +202,6 @@ const Edit = ({ usersProp, partnersProp, salesProp, productsProp, sph }) => {
                 }
             />
         );
-    };
-
-    const ubahFormatTanggal = (tanggal) => {
-        if (!tanggal) {
-            return "N/A";
-        }
-        let tanggalAngka = tanggal.getDate();
-        let bulanAngka = tanggal.getMonth() + 1;
-        let tahunAngka = tanggal.getFullYear();
-
-        let bulanFormat = bulanAngka < 10 ? "0" + bulanAngka : bulanAngka;
-        let tahunFormat = tahunAngka;
-
-        let formatTanggal =
-            tanggalAngka + "/" + bulanFormat + "/" + tahunFormat;
-
-        return formatTanggal;
     };
 
     const selectedOptionTemplate = (option, props) => {
@@ -233,7 +330,7 @@ const Edit = ({ usersProp, partnersProp, salesProp, productsProp, sph }) => {
             <Toast ref={toast} />
             <div className="h-screen max-h-screen overflow-y-hidden">
                 <div className="flex flex-col h-screen max-h-screen overflow-hidden md:flex-row z-40 relative gap-5">
-                    <div className="md:w-[40%] overflow-y-auto h-screen max-h-screen p-5">
+                    <div className="md:w-[35%] overflow-y-auto h-screen max-h-screen p-5">
                         <Card>
                             <div className="flex justify-between items-center mb-4">
                                 <h1 className="font-bold text-2xl">
@@ -279,19 +376,40 @@ const Edit = ({ usersProp, partnersProp, salesProp, productsProp, sph }) => {
                                 <div className="flex flex-col mt-3">
                                     <label htmlFor="lembaga">Lembaga *</label>
                                     <Dropdown
-                                        value={data.partner_name}
+                                        value={data.partner}
+                                        dataKey="id"
                                         onChange={(e) => {
-                                            console.log(e.target.value);
-                                            setData({
-                                                ...data,
-                                                partner_id: e.target.value.id,
-                                                partner_name:
-                                                    e.target.value.name,
-                                                partner_address:
-                                                    e.target.value.address,
-                                                partner_pic:
-                                                    e.target.value.pics[0].name,
+                                            setData("partner", {
+                                                ...data.partner,
+                                                id: e.target.value.id,
+                                                name: e.target.value.name,
+                                                province:
+                                                    e.target.value.province,
+                                                regency: e.target.value.regency,
+                                                pic: e.target.value.pics[0]
+                                                    .name,
                                             });
+                                            setcodeProvince(
+                                                (prev) =>
+                                                    (prev = JSON.parse(
+                                                        e.target.value.province
+                                                    ).code)
+                                            );
+                                        }}
+                                        onFocus={() => {
+                                            triggerInputFocus(
+                                                animatePartnerNameRef
+                                            );
+                                        }}
+                                        onShow={() => {
+                                            triggerInputFocus(
+                                                animatePartnerNameRef
+                                            );
+                                        }}
+                                        onBlur={() => {
+                                            stopAnimateInputFocus(
+                                                animatePartnerNameRef
+                                            );
                                         }}
                                         options={partners}
                                         optionLabel="name"
@@ -300,51 +418,127 @@ const Edit = ({ usersProp, partnersProp, salesProp, productsProp, sph }) => {
                                         valueTemplate={selectedOptionTemplate}
                                         itemTemplate={optionTemplate}
                                         className="w-full md:w-14rem"
-                                        editable
                                     />
                                 </div>
+
                                 <div className="flex flex-col mt-3">
-                                    <label htmlFor="partner_address">
-                                        Lokasi *
-                                    </label>
-                                    <InputText
-                                        value={data.partner_pic}
-                                        onChange={(e) =>
-                                            setData({
-                                                ...data,
-                                                partner_pic: e.target.value,
-                                            })
+                                    <label htmlFor="province">Provinsi *</label>
+
+                                    <Dropdown
+                                        value={
+                                            data.partner.province
+                                                ? JSON.parse(
+                                                      data.partner.province
+                                                  )
+                                                : null
                                         }
-                                        className="dark:bg-gray-300"
-                                        id="partner_address"
-                                        aria-describedby="partner_address-help"
+                                        onChange={(e) => {
+                                            setcodeProvince(
+                                                (prev) =>
+                                                    (prev = e.target.value.code)
+                                            );
+                                            setData("partner", {
+                                                ...data.partner,
+                                                province: JSON.stringify(
+                                                    e.target.value
+                                                ),
+                                            });
+                                        }}
+                                        dataKey="name"
+                                        options={provinces}
+                                        optionLabel="name"
+                                        placeholder="Pilih Provinsi"
+                                        filter
+                                        valueTemplate={selectedOptionTemplate}
+                                        itemTemplate={optionTemplate}
+                                        className="w-full md:w-14rem"
+                                        onFocus={() => {
+                                            triggerInputFocus(
+                                                animatePartnerProvinceRef
+                                            );
+                                        }}
+                                        onShow={() => {
+                                            triggerInputFocus(
+                                                animatePartnerProvinceRef
+                                            );
+                                        }}
+                                        onBlur={() => {
+                                            stopAnimateInputFocus(
+                                                animatePartnerProvinceRef
+                                            );
+                                        }}
+                                    />
+                                </div>
+
+                                <div className="flex flex-col mt-3">
+                                    <label htmlFor="regency">Kabupaten *</label>
+                                    <Dropdown
+                                        dataKey="name"
+                                        value={
+                                            data.partner.regency
+                                                ? JSON.parse(
+                                                      data.partner.regency
+                                                  )
+                                                : null
+                                        }
+                                        onChange={(e) => {
+                                            setData("partner", {
+                                                ...data.partner,
+                                                regency: JSON.stringify(
+                                                    e.target.value
+                                                ),
+                                            });
+                                        }}
+                                        options={regencys}
+                                        optionLabel="name"
+                                        placeholder="Pilih Kabupaten"
+                                        filter
+                                        valueTemplate={selectedOptionTemplate}
+                                        itemTemplate={optionTemplate}
+                                        className="w-full md:w-14rem"
                                     />
                                 </div>
                                 <div className="flex flex-col mt-3">
                                     <label htmlFor="partner_pic">PIC *</label>
                                     <InputText
-                                        value={data.partner_pic}
+                                        value={data.partner.pic}
                                         onChange={(e) =>
-                                            setData({
-                                                ...data,
-                                                partner_pic: e.target.value,
+                                            setData("partner", {
+                                                ...data.partner,
+                                                pic: e.target.value,
                                             })
                                         }
                                         className="dark:bg-gray-300"
                                         id="partner_pic"
                                         aria-describedby="partner_pic-help"
+                                        onFocus={() => {
+                                            triggerInputFocus(
+                                                animatePartnerRegencyRef
+                                            );
+                                        }}
+                                        onShow={() => {
+                                            triggerInputFocus(
+                                                animatePartnerRegencyRef
+                                            );
+                                        }}
+                                        onBlur={() => {
+                                            stopAnimateInputFocus(
+                                                animatePartnerRegencyRef
+                                            );
+                                        }}
                                     />
                                 </div>
                                 <div className="flex flex-col mt-3">
                                     <label htmlFor="sales">Sales *</label>
                                     <Dropdown
-                                        value={data.sales_name}
+                                        dataKey="name"
+                                        value={data.sales}
                                         onChange={(e) => {
-                                            setData({
-                                                ...data,
-                                                sales_name: e.target.value.name,
-                                                sales_email:
-                                                    e.target.value.email,
+                                            setData("sales", {
+                                                ...data.sales,
+                                                name: e.target.value.name,
+                                                wa: e.target.value.number,
+                                                email: e.target.value.email,
                                             });
                                         }}
                                         options={sales}
@@ -354,7 +548,21 @@ const Edit = ({ usersProp, partnersProp, salesProp, productsProp, sph }) => {
                                         valueTemplate={selectedOptionTemplate}
                                         itemTemplate={optionTemplate}
                                         className="w-full md:w-14rem"
-                                        editable
+                                        onFocus={() => {
+                                            triggerInputFocus(
+                                                animateSalesNameRef
+                                            );
+                                        }}
+                                        onShow={() => {
+                                            triggerInputFocus(
+                                                animateSalesNameRef
+                                            );
+                                        }}
+                                        onBlur={() => {
+                                            stopAnimateInputFocus(
+                                                animateSalesNameRef
+                                            );
+                                        }}
                                     />
                                 </div>
                                 <div className="flex flex-col mt-3">
@@ -362,16 +570,26 @@ const Edit = ({ usersProp, partnersProp, salesProp, productsProp, sph }) => {
                                         Whatsapp Sales *
                                     </label>
                                     <InputText
-                                        value={data.sales_wa}
+                                        value={data.sales.wa}
                                         onChange={(e) => {
-                                            setData({
-                                                ...data,
-                                                sales_wa: e.target.value,
+                                            setData("sales", {
+                                                ...data.sales,
+                                                wa: e.target.value,
                                             });
                                         }}
                                         className="dark:bg-gray-300"
                                         id="sales-whatsapp"
                                         aria-describedby="sales-whatsapp-help"
+                                        onFocus={() => {
+                                            triggerInputFocus(
+                                                animateSalesWaRef
+                                            );
+                                        }}
+                                        onBlur={() => {
+                                            stopAnimateInputFocus(
+                                                animateSalesWaRef
+                                            );
+                                        }}
                                     />
                                 </div>
                                 <div className="flex flex-col mt-3">
@@ -379,16 +597,26 @@ const Edit = ({ usersProp, partnersProp, salesProp, productsProp, sph }) => {
                                         Email Sales *
                                     </label>
                                     <InputText
-                                        value={data.sales_email}
+                                        value={data.sales.email}
                                         onChange={(e) =>
-                                            setData({
-                                                ...data,
-                                                sales_email: e.target.value,
+                                            setData("sales", {
+                                                ...data.sales,
+                                                email: e.target.value,
                                             })
                                         }
                                         className="dark:bg-gray-300"
                                         id="sales-email"
                                         aria-describedby="sales-email-help"
+                                        onFocus={() => {
+                                            triggerInputFocus(
+                                                animateSalesEmailRef
+                                            );
+                                        }}
+                                        onBlur={() => {
+                                            stopAnimateInputFocus(
+                                                animateSalesEmailRef
+                                            );
+                                        }}
                                     />
                                 </div>
                                 <div className="flex flex-col mt-3">
@@ -396,18 +624,17 @@ const Edit = ({ usersProp, partnersProp, salesProp, productsProp, sph }) => {
                                         Tanda Tangan *
                                     </label>
                                     <Dropdown
-                                        value={data.signature_name}
+                                        value={data.signature}
                                         onChange={(e) => {
-                                            setData({
-                                                ...data,
-                                                signature_name:
-                                                    e.target.value.name,
-                                                signature_position:
+                                            setData("signature", {
+                                                ...data.signature,
+                                                name: e.target.value.name,
+                                                position:
                                                     e.target.value.position,
-                                                signature_image:
-                                                    e.target.value.image,
+                                                image: e.target.value.image,
                                             });
                                         }}
+                                        dataKey="name"
                                         options={signatures}
                                         optionLabel="name"
                                         placeholder="Pilih Tanda Tangan"
@@ -415,7 +642,21 @@ const Edit = ({ usersProp, partnersProp, salesProp, productsProp, sph }) => {
                                         valueTemplate={selectedOptionTemplate}
                                         itemTemplate={optionSignatureTemplate}
                                         className="w-full md:w-14rem"
-                                        editable
+                                        onFocus={() => {
+                                            triggerInputFocus(
+                                                animateSignatureNameRef
+                                            );
+                                        }}
+                                        onShow={() => {
+                                            triggerInputFocus(
+                                                animateSignatureNameRef
+                                            );
+                                        }}
+                                        onBlur={() => {
+                                            stopAnimateInputFocus(
+                                                animateSignatureNameRef
+                                            );
+                                        }}
                                     />
                                 </div>
 
@@ -454,7 +695,7 @@ const Edit = ({ usersProp, partnersProp, salesProp, productsProp, sph }) => {
                                         name: "",
                                         price: "",
                                         qty: "",
-                                        detail: "",
+                                        detail: null,
                                         total: "",
                                     };
 
@@ -515,6 +756,7 @@ const Edit = ({ usersProp, partnersProp, salesProp, productsProp, sph }) => {
                                                 className="dark:bg-gray-300"
                                                 id="partner_address"
                                                 aria-describedby="partner_address-help"
+                                                keyfilter="int"
                                             />
                                         </div>
                                     </div>
@@ -536,6 +778,7 @@ const Edit = ({ usersProp, partnersProp, salesProp, productsProp, sph }) => {
                                                 className="dark:bg-gray-300"
                                                 id="partner_address"
                                                 aria-describedby="partner_address-help"
+                                                keyfilter="int"
                                             />
                                         </div>
                                     </div>
@@ -575,7 +818,7 @@ const Edit = ({ usersProp, partnersProp, salesProp, productsProp, sph }) => {
                                         </div>
                                     </div>
 
-                                    <div className="flex self-center pt-4">
+                                    <div className="flex self-center pt-4 ">
                                         <Button
                                             className="bg-red-500 h-1 w-1 shadow-md rounded-full "
                                             icon={() => (
@@ -629,17 +872,19 @@ const Edit = ({ usersProp, partnersProp, salesProp, productsProp, sph }) => {
                                 scrollHeight="flex"
                                 tableStyle={{ minWidth: "50rem" }}
                                 selectionMode={rowClick ? null : "checkbox"}
-                                dataKey="uuid"
+                                // onSelectionChange={(e) => {
+                                //     setData("products", e.value);
+                                // }}
                                 selection={selectedProducts}
                                 onSelectionChange={(e) =>
                                     setSelectedProducts(e.value)
                                 }
+                                dataKey="id"
                             >
                                 <Column
                                     selectionMode="multiple"
                                     headerStyle={{ width: "3rem" }}
                                 ></Column>
-                                <Column field="id" header="id" hidden></Column>
                                 <Column field="name" header="Name"></Column>
                                 <Column
                                     field="category"
@@ -650,28 +895,26 @@ const Edit = ({ usersProp, partnersProp, salesProp, productsProp, sph }) => {
                         </Dialog>
                     </Dialog>
 
-                    <div className="md:w-[60%] h-screen max-h-screen overflow-y-auto p-5">
+                    <div className="md:w-[65%] hidden md:block text-sm h-screen max-h-screen overflow-y-auto p-5">
                         <header>
                             <div className="flex justify-between items-center">
                                 <div className="w-full">
                                     <img
                                         src="/assets/img/cazh.png"
                                         alt=""
-                                        className="float-left w-1/2 h-1/2"
+                                        className="float-left w-1/3 h-1/3"
                                     />
                                 </div>
-                                <div className="w-full text-right">
-                                    <h2 className="font-bold text-sm">
+                                <div className="w-full text-right text-xs">
+                                    <h2 className="font-bold">
                                         PT CAZH TEKNOLOGI INOVASI
                                     </h2>
-                                    <p className="text-xs ">
+                                    <p>
                                         Bonavida Park D1, Jl. Raya Karanggintung
                                     </p>
-                                    <p className="text-xs">
-                                        Kec. Sumbang, Kab. Banyumas,
-                                    </p>
-                                    <p className="text-xs">Jawa Tengah 53183</p>
-                                    <p className="text-xs">hello@cazh.id</p>
+                                    <p>Kec. Sumbang, Kab. Banyumas,</p>
+                                    <p>Jawa Tengah 53183</p>
+                                    <p>hello@cazh.id</p>
                                 </div>
                             </div>
                         </header>
@@ -685,13 +928,32 @@ const Edit = ({ usersProp, partnersProp, salesProp, productsProp, sph }) => {
 
                         <div className="mt-5">
                             <h1>Kepada Yth.</h1>
-                            <h1 className="font-bold">
-                                {data.partner_pic ?? "{{pic}}"}
+                            <h1
+                                className="font-bold"
+                                ref={animatePartnerPicRef}
+                            >
+                                {data.partner.pic ?? "{{pic}}"}
                             </h1>
-                            <h1 className="font-bold">
-                                {data.partner_name ?? "{{partner}}"}
+                            <h1
+                                className="font-bold"
+                                ref={animatePartnerNameRef}
+                            >
+                                {data.partner.name ?? "{{partner}}"}
                             </h1>
-                            <h1>di {data.partner_address ?? "{{alamat}}"}</h1>
+                            <h1>
+                                di{" "}
+                                <span ref={animatePartnerRegencyRef}>
+                                    {data.partner.regency
+                                        ? JSON.parse(data.partner.regency).name
+                                        : "{{alamat}}"}
+                                </span>
+                                {", "}
+                                <span ref={animatePartnerProvinceRef}>
+                                    {data.partner.province
+                                        ? JSON.parse(data.partner.province).name
+                                        : "{{alamat}}"}
+                                </span>
+                            </h1>
                         </div>
 
                         <div className="mt-5">
@@ -702,9 +964,9 @@ const Edit = ({ usersProp, partnersProp, salesProp, productsProp, sph }) => {
                             <h1>
                                 Menindaklanjuti komunikasi yang telah dilakukan
                                 oleh tim marketing kami{" "}
-                                {data.sales_name ?? "{{sales}}"} dengan
+                                {data.sales.name ?? "{{sales}}"} dengan
                                 perwakilan dari{" "}
-                                {data.partner_name ?? "{{partner}}"}, dengan ini
+                                {data.partner.name ?? "{{partner}}"}, dengan ini
                                 kami sampaikan penawaran sebagai berikut:
                             </h1>
                         </div>
@@ -744,9 +1006,17 @@ const Edit = ({ usersProp, partnersProp, salesProp, productsProp, sph }) => {
                                 Untuk konfirmasi persetujuan silakan hubungi :
                             </h1>
                             <h1>
-                                <b>{data.sales_name ?? "{{sales}}"}</b> via WA :{" "}
-                                <b>{data.sales_wa ?? "{{wa_sales}}"}</b>, email
-                                : <b>{data.sales_email ?? "{{email_sales}}"}</b>
+                                <b ref={animateSalesNameRef}>
+                                    {data.sales.name ?? "{{sales}}"}
+                                </b>{" "}
+                                via WA :{" "}
+                                <b ref={animateSalesWaRef}>
+                                    {data.sales.wa ?? "{{wa_sales}}"}
+                                </b>
+                                , email :{" "}
+                                <b ref={animateSalesEmailRef}>
+                                    {data.sales.email ?? "{{email_sales}}"}
+                                </b>
                             </h1>
                         </div>
 
@@ -759,11 +1029,14 @@ const Edit = ({ usersProp, partnersProp, salesProp, productsProp, sph }) => {
                             </h1>
                         </div>
 
-                        <div className="flex flex-col mt-5 justify-start w-[30%]">
+                        <div
+                            className="flex flex-col mt-5 justify-start w-[30%]"
+                            ref={animateSignatureNameRef}
+                        >
                             <p>Purwokerto, {new Date().getFullYear()}</p>
-                            <img src={BASE_URL + data.signature_image} alt="" />
-                            <p>{data.signature_name}</p>
-                            <p>{data.signature_position}</p>
+                            <img src={BASE_URL + data.signature.image} alt="" />
+                            <p>{data.signature.name}</p>
+                            <p>{data.signature.position}</p>
                         </div>
                     </div>
                 </div>

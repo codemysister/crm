@@ -21,7 +21,7 @@ registerPlugin(FilePondPluginFileValidateSize);
 
 const BASE_URL = import.meta.env.VITE_BASE_URL;
 
-const Create = ({ usersProp, partnersProp, rolesProp, productsProp }) => {
+const Edit = ({ usersProp, partnersProp, rolesProp, sla, productsProp }) => {
     const [users, setUsers] = useState(usersProp);
     const [roles, setRoles] = useState(rolesProp);
     const [partners, setPartners] = useState(partnersProp);
@@ -52,6 +52,9 @@ const Create = ({ usersProp, partnersProp, rolesProp, productsProp }) => {
         };
 
         fetchData();
+        setcodeProvince(
+            (prev) => (prev = JSON.parse(sla.partner_province).code)
+        );
     }, []);
 
     useEffect(() => {
@@ -70,217 +73,30 @@ const Create = ({ usersProp, partnersProp, rolesProp, productsProp }) => {
         processing,
         errors,
     } = useForm({
-        uuid: "",
-        code: `${Math.floor(
-            Math.random() * 1000
-        )}/CAZH-SLA/X/${new Date().getFullYear()}`,
-        activities: [
-            {
-                activity: "Pembuatan WA Group Sales-Partner",
-                cazh_pic: { name: "Account Executive" },
-                duration: "1 hari",
-                estimation_date: new Date().toISOString().split("T")[0],
-                realization_date: null,
-                link_drive_proof: null,
-            },
-            {
-                activity: "Perjanjian Kerja Sama",
-                cazh_pic: { name: "Account Executive" },
-                duration: "1 - 3 hari",
-                estimation_date: new Date(
-                    new Date().setDate(new Date().getDate() + 1)
-                )
-                    .toISOString()
-                    .split("T")[0],
-                realization_date: null,
-                link_drive_proof: null,
-            },
-            {
-                activity: "Pengumpulan Data (data siswa, foto siswa)",
-                cazh_pic: { name: "Account Executive" },
-                duration: "1 - 3 hari",
-                estimation_date: new Date(
-                    new Date().setDate(new Date().getDate() + 1)
-                )
-                    .toISOString()
-                    .split("T")[0],
-                realization_date: null,
-                link_drive_proof: null,
-            },
-            {
-                activity: "Pembuatan dan Pengiriman Invoice",
-                cazh_pic: { name: "Account Executive" },
-                duration: "1 - 5 hari",
-                estimation_date: new Date(
-                    new Date().setDate(new Date().getDate() + 1)
-                )
-                    .toISOString()
-                    .split("T")[0],
-                realization_date: null,
-                link_drive_proof: null,
-            },
-            {
-                activity: "Pembayaran invoice",
-                cazh_pic: { name: "Account Executive" },
-                duration: "1 - 5 hari",
-                estimation_date: new Date(
-                    new Date().setDate(new Date().getDate() + 2)
-                )
-                    .toISOString()
-                    .split("T")[0],
-                realization_date: null,
-                link_drive_proof: null,
-            },
-            {
-                activity: "Pendaftaran Partner",
-                cazh_pic: { name: "Account Executive" },
-                duration: "1 hari",
-                estimation_date: new Date(
-                    new Date().setDate(new Date().getDate() + 1)
-                )
-                    .toISOString()
-                    .split("T")[0],
-                realization_date: null,
-                link_drive_proof: null,
-            },
-            {
-                activity: "Persiapan Sistem",
-                cazh_pic: { name: "Account Manager" },
-                duration: "1 hari",
-                estimation_date: new Date(
-                    new Date().setDate(new Date().getDate() + 1)
-                )
-                    .toISOString()
-                    .split("T")[0],
-                realization_date: null,
-                link_drive_proof: null,
-            },
-            {
-                activity: "Introduction Meeting AM",
-                cazh_pic: { name: "Account Executive" },
-                duration: "1 hari",
-                estimation_date: new Date(
-                    new Date().setDate(new Date().getDate() + 1)
-                )
-                    .toISOString()
-                    .split("T")[0],
-                realization_date: null,
-                link_drive_proof: null,
-            },
-            {
-                activity: "Desain Kartu (versi digital dan cetak)",
-                cazh_pic: { name: "Graphics Designer" },
-                duration: "3 hari sejak pendaftaran",
-                estimation_date: new Date(
-                    new Date().setDate(new Date().getDate() + 4)
-                )
-                    .toISOString()
-                    .split("T")[0],
-                realization_date: null,
-                link_drive_proof: null,
-            },
-            {
-                activity: "Cetak Kartu (jika dicetak)",
-                cazh_pic: { name: "Graphics Designer" },
-                duration: "4 hari desain approve",
-                estimation_date: new Date(
-                    new Date().setDate(new Date().getDate() + 8)
-                )
-                    .toISOString()
-                    .split("T")[0],
-                realization_date: null,
-                link_drive_proof: null,
-            },
-            {
-                activity: "Pengiriman kartu dan device (bila ada)",
-                cazh_pic: { name: "Graphics Designer" },
-                duration: "7 hari sejak cetak kartu selesai",
-                estimation_date: new Date(
-                    new Date().setDate(new Date().getDate() + 15)
-                )
-                    .toISOString()
-                    .split("T")[0],
-                realization_date: null,
-                link_drive_proof: null,
-            },
-            {
-                activity: "Training Cazh School App (Staf Admin/Keu)",
-                cazh_pic: { name: "Account Manager" },
-                duration: "7 hari sejak cetak kartu sampai",
-                estimation_date: new Date(
-                    new Date().setDate(new Date().getDate() + 22)
-                )
-                    .toISOString()
-                    .split("T")[0],
-                realization_date: null,
-                link_drive_proof: null,
-            },
-            {
-                activity: "Training CARDS Kartu Digital (Staf Admin/Keu)",
-                cazh_pic: { name: "Account Manager" },
-                duration: "7 hari sejak cetak kartu sampai",
-                estimation_date: new Date(
-                    new Date().setDate(new Date().getDate() + 22)
-                )
-                    .toISOString()
-                    .split("T")[0],
-                realization_date: null,
-                link_drive_proof: null,
-            },
-            {
-                activity: "Training CazhPOS dan CPA (Kasir/Manager)",
-                cazh_pic: { name: "Account Manager" },
-                duration: "10 hari sejak kartu sampai",
-                estimation_date: new Date(
-                    new Date().setDate(new Date().getDate() + 25)
-                )
-                    .toISOString()
-                    .split("T")[0],
-                realization_date: null,
-                link_drive_proof: null,
-            },
-            {
-                activity: "Sosialisasi User (Orang Tua/Wali) - optional*",
-                cazh_pic: { name: "Account Manager" },
-                duration: "14 hari sejak kartu sampai",
-                estimation_date: new Date(
-                    new Date().setDate(new Date().getDate() + 29)
-                )
-                    .toISOString()
-                    .split("T")[0],
-                realization_date: null,
-                link_drive_proof: null,
-            },
-            {
-                activity: "Live - Partner Mandiri dan Mulai Transaksi",
-                cazh_pic: { name: "Account Manager" },
-                duration: "15 hari sejak sosialisasi user",
-                estimation_date: new Date(
-                    new Date().setDate(new Date().getDate() + 44)
-                )
-                    .toISOString()
-                    .split("T")[0],
-                realization_date: null,
-                link_drive_proof: null,
-            },
-        ],
+        uuid: sla.uuid,
+        code: sla.code,
+        activities: sla.activities.map((data) => {
+            return { ...data, cazh_pic: { name: data.cazh_pic } };
+        }),
         partner: {
-            id: null,
-            name: null,
-            phone_number: null,
-            pic: null,
-            pic_position: null,
-            pic_number: null,
-            pic_email: null,
-            pic_signature: null,
+            id: sla.partner_id,
+            name: sla.partner_name,
+            phone_number: sla.partner_phone_number,
+            province: sla.partner_province,
+            regency: sla.partner_regency,
+            pic: sla.partner_pic,
+            pic_position: sla.partner_pic_position,
+            pic_number: sla.partner_pic_number,
+            pic_email: sla.partner_pic_email,
+            pic_signature: sla.partner_pic_signature,
         },
 
-        referral: false,
-        referral_name: null,
-        referral_signature: null,
+        referral: Boolean(sla.referral),
+        referral_name: sla.referral_name,
+        referral_signature: sla.referral_signature,
         signature: {
-            name: null,
-            image: null,
+            name: sla.signature_name,
+            image: sla.signature_image,
         },
     });
 
@@ -377,18 +193,9 @@ const Create = ({ usersProp, partnersProp, rolesProp, productsProp }) => {
             <Button
                 label="OK"
                 icon="pi pi-check"
-                onClick={() =>
-                    type != "product" ? setDialogVisible(false) : onDoneSelect()
-                }
+                onClick={() => setDialogVisible(false)}
             />
         );
-    };
-
-    const onDoneSelect = () => {
-        const updatedProducts = [...data.products, ...selectedProducts];
-        setData("products", updatedProducts);
-        setDialogProductVisible(false);
-        setSelectedProducts((prev) => (prev = []));
     };
 
     const selectedOptionTemplate = (option, props) => {
@@ -438,27 +245,13 @@ const Create = ({ usersProp, partnersProp, rolesProp, productsProp }) => {
         return null;
     };
 
+    console.log(data);
+
     const stopAnimateInputFocus = (ref) => {
         ref.current.classList.remove("twinkle");
 
         return null;
     };
-
-    const header = (
-        <div className="flex flex-row justify-left gap-2 align-items-center items-end">
-            <div className="w-[30%]">
-                <span className="p-input-icon-left">
-                    <i className="pi pi-search dark:text-white" />
-                    <InputText
-                        className="dark:bg-transparent dark:placeholder-white"
-                        value={globalFilterValue}
-                        onChange={onGlobalFilterChange}
-                        placeholder="Keyword Search"
-                    />
-                </span>
-            </div>
-        </div>
-    );
 
     // fungsi toast
     const showSuccess = (type) => {
@@ -490,7 +283,7 @@ const Create = ({ usersProp, partnersProp, rolesProp, productsProp }) => {
     const handleSubmitForm = (e) => {
         e.preventDefault();
 
-        post("/sla", {
+        post("/sla/" + data.uuid, {
             onSuccess: () => {
                 showSuccess("Tambah");
                 window.location = BASE_URL + "/sla";
@@ -616,7 +409,6 @@ const Create = ({ usersProp, partnersProp, rolesProp, productsProp }) => {
                                 </div>
                                 <div className="flex flex-col mt-3">
                                     <label htmlFor="province">Provinsi *</label>
-
                                     <Dropdown
                                         value={
                                             data.partner.province
@@ -862,7 +654,6 @@ const Create = ({ usersProp, partnersProp, rolesProp, productsProp }) => {
                                             <>
                                                 <FilePond
                                                     files={
-                                                        "/storage/" +
                                                         data.partner
                                                             .pic_signature
                                                     }
@@ -1004,7 +795,6 @@ const Create = ({ usersProp, partnersProp, rolesProp, productsProp }) => {
                                                     <>
                                                         <FilePond
                                                             files={
-                                                                "/storage/" +
                                                                 data.referral_signature
                                                             }
                                                             onaddfile={(
@@ -1043,8 +833,9 @@ const Create = ({ usersProp, partnersProp, rolesProp, productsProp }) => {
                                                                 }
                                                             }}
                                                             onremovefile={() => {
-                                                                reset(
-                                                                    "referral_signature"
+                                                                setData(
+                                                                    "referral_signature",
+                                                                    null
                                                                 );
                                                             }}
                                                             maxFileSize="2mb"
@@ -1187,54 +978,6 @@ const Create = ({ usersProp, partnersProp, rolesProp, productsProp }) => {
                                     </div>
                                     <div className="flex">
                                         <div className="flex flex-col">
-                                            <label htmlFor="duration">
-                                                Estimasi Waktu *
-                                            </label>
-                                            <input
-                                                type="date"
-                                                id="birthday"
-                                                name="birthday"
-                                                value={activity.estimation_date}
-                                                style={{ height: "35px" }}
-                                                className="rounded-md border-gray-400 text-sm"
-                                                onChange={(e) => {
-                                                    handleInputChange(
-                                                        index,
-                                                        "estimation_date",
-                                                        e.target.value
-                                                    );
-                                                }}
-                                            />
-                                        </div>
-                                    </div>
-
-                                    {console.log(activity.estimation_date)}
-                                    <div className="flex">
-                                        <div className="flex flex-col">
-                                            <label htmlFor="duration">
-                                                Realisasi
-                                            </label>
-                                            <input
-                                                type="date"
-                                                id="birthday"
-                                                name="birthday"
-                                                value={
-                                                    activity.realization_date
-                                                }
-                                                style={{ height: "35px" }}
-                                                onChange={(e) => {
-                                                    handleInputChange(
-                                                        index,
-                                                        "realization_date",
-                                                        e.target.value
-                                                    );
-                                                }}
-                                                className="rounded-md border-gray-400 text-sm"
-                                            />
-                                        </div>
-                                    </div>
-                                    {/* <div className="flex">
-                                        <div className="flex flex-col">
                                             <label htmlFor="estimation_date">
                                                 Tanggal *
                                             </label>
@@ -1287,7 +1030,7 @@ const Create = ({ usersProp, partnersProp, rolesProp, productsProp }) => {
                                                 className="w-full min-w-[12rem] md:w-12rem"
                                             />{" "}
                                         </div>
-                                    </div> */}
+                                    </div>
 
                                     <div className="flex self-center pt-4">
                                         <Button
@@ -1566,9 +1309,14 @@ const Create = ({ usersProp, partnersProp, rolesProp, productsProp }) => {
                                 <p>Pihak Kedua</p>
                                 {data.partner.pic_signature ? (
                                     <img
-                                        src={URL.createObjectURL(
-                                            data.partner.pic_signature
-                                        )}
+                                        src={
+                                            typeof data.partner
+                                                .pic_signature === "string"
+                                                ? data.partner.pic_signature
+                                                : URL.createObjectURL(
+                                                      data.partner.pic_signature
+                                                  )
+                                        }
                                         className="min-h-20 max-h-20"
                                     />
                                 ) : (
@@ -1589,9 +1337,15 @@ const Create = ({ usersProp, partnersProp, rolesProp, productsProp }) => {
                                     <p>Pihak Ketiga</p>
                                     {data.referral_signature ? (
                                         <img
-                                            src={URL.createObjectURL(
-                                                data.referral_signature
-                                            )}
+                                            src={
+                                                typeof data.referral_signature ===
+                                                "string"
+                                                    ? data.partner
+                                                          .referral_signature
+                                                    : URL.createObjectURL(
+                                                          data.referral_signature
+                                                      )
+                                            }
                                             className="min-h-20 max-h-20"
                                         />
                                     ) : (
@@ -1615,4 +1369,4 @@ const Create = ({ usersProp, partnersProp, rolesProp, productsProp }) => {
     );
 };
 
-export default Create;
+export default Edit;

@@ -783,7 +783,7 @@ const Edit = ({ usersProp, partnersProp, productsProp, invoiceGeneral }) => {
                                     />
                                 </div>
 
-                                {data.payment_metode === "paymentlink" && (
+                                {data.payment_metode === "payment link" && (
                                     <div className="flex flex-col mt-3">
                                         <label htmlFor="partner_address">
                                             Link Xendit *
@@ -1350,7 +1350,7 @@ const Edit = ({ usersProp, partnersProp, productsProp, invoiceGeneral }) => {
                             className="flex w-full mt-16 justify-between items-center"
                         >
                             <div className="w-[50%] leading-6">
-                                {data.payment_metode === "paymentlink" && (
+                                {data.payment_metode === "payment link" && (
                                     <div>
                                         <h1 className="font-bold underline">
                                             Payment Link:

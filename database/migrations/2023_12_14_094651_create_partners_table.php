@@ -20,7 +20,7 @@ return new class extends Migration {
             $table->string('phone_number');
             $table->json('province');
             $table->json('regency');
-            $table->json('subdistrict');
+            $table->json('subdistrict')->nullable();
             $table->string('address')->nullable();
             $table->date('onboarding_date');
             $table->date('live_date')->nullable()->default(null);

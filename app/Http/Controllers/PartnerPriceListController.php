@@ -10,7 +10,7 @@ class PartnerPriceListController extends Controller
 {
     public function apiGetPriceLists()
     {
-        $priceLists = PartnerPriceList::with('partner')
+        $priceLists = PartnerPriceList::with('partner')->latest()
             ->get();
         return response()->json($priceLists);
     }

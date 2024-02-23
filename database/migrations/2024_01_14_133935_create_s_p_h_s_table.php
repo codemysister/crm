@@ -17,7 +17,8 @@ return new class extends Migration {
             $table->string('code');
             $table->string('partner_name');
             $table->string('partner_pic');
-            $table->string('partner_address');
+            $table->json('partner_province');
+            $table->json('partner_regency');
             $table->string('sales_name');
             $table->string('sales_wa');
             $table->string('sales_email');

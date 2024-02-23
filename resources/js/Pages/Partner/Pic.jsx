@@ -282,6 +282,7 @@ const Pic = ({
                             <div className="flex flex-col">
                                 <label htmlFor="pic_partner">Partner</label>
                                 <Dropdown
+                                    dataKey="name"
                                     optionLabel="name"
                                     value={dataPIC.partner}
                                     onChange={(e) =>
@@ -377,6 +378,7 @@ const Pic = ({
                                 <label htmlFor="pic_partner">Partner</label>
 
                                 <Dropdown
+                                    dataKey="name"
                                     value={dataPIC.partner}
                                     options={partners}
                                     onChange={(e) =>
@@ -431,18 +433,6 @@ const Pic = ({
                                     aria-describedby="position-help"
                                 />
                             </div>
-
-                            <div className="flex flex-col">
-                                <label htmlFor="address">Alamat</label>
-                                <InputTextarea
-                                    value={dataPIC.address}
-                                    onChange={(e) =>
-                                        setDataPIC("address", e.target.value)
-                                    }
-                                    rows={5}
-                                    cols={30}
-                                />
-                            </div>
                         </div>
 
                         <div className="flex justify-center mt-5">
@@ -473,7 +463,12 @@ const Pic = ({
                         paginatorClassName="dark:bg-transparent paginator-custome dark:text-gray-300 rounded-b-lg"
                         header={header}
                         filters={filters}
-                        globalFilterFields={["name", "partner.name"]}
+                        globalFilterFields={[
+                            "name",
+                            "partner.name",
+                            "email",
+                            "number",
+                        ]}
                         value={pics}
                         dataKey="id"
                     >
@@ -482,7 +477,10 @@ const Pic = ({
                             body={(_, { rowIndex }) => rowIndex + 1}
                             className="dark:border-none pl-6"
                             headerClassName="dark:border-none pl-6 bg-transparent dark:bg-transparent dark:text-gray-300"
-                            style={{ width: "3%" }}
+                            style={{
+                                width: "max-content",
+                                whiteSpace: "nowrap",
+                            }}
                         />
                         <Column
                             field="name"
@@ -490,7 +488,10 @@ const Pic = ({
                             className="dark:border-none"
                             headerClassName="dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300"
                             align="left"
-                            style={{ minWidth: "8rem" }}
+                            style={{
+                                width: "max-content",
+                                whiteSpace: "nowrap",
+                            }}
                         ></Column>
                         <Column
                             header="Partner"
@@ -509,7 +510,10 @@ const Pic = ({
                             className="dark:border-none"
                             headerClassName="dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300"
                             align="left"
-                            style={{ minWidth: "8rem" }}
+                            style={{
+                                width: "max-content",
+                                whiteSpace: "nowrap",
+                            }}
                         ></Column>
                         <Column
                             field="uuid"
@@ -525,7 +529,10 @@ const Pic = ({
                             className="dark:border-none"
                             headerClassName="dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300"
                             align="left"
-                            style={{ minWidth: "8rem" }}
+                            style={{
+                                width: "max-content",
+                                whiteSpace: "nowrap",
+                            }}
                         ></Column>
                         <Column
                             field="number"
@@ -533,7 +540,10 @@ const Pic = ({
                             className="dark:border-none"
                             headerClassName="dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300"
                             align="left"
-                            style={{ minWidth: "8rem" }}
+                            style={{
+                                width: "max-content",
+                                whiteSpace: "nowrap",
+                            }}
                         ></Column>
                         <Column
                             field="position"
@@ -541,13 +551,19 @@ const Pic = ({
                             className="dark:border-none"
                             headerClassName="dark:border-none  bg-transparent dark:bg-transparent dark:text-gray-300"
                             align="left"
-                            style={{ minWidth: "8rem" }}
+                            style={{
+                                width: "max-content",
+                                whiteSpace: "nowrap",
+                            }}
                         ></Column>
 
                         <Column
                             header="Action"
                             body={actionBodyTemplatePIC}
-                            style={{ width: "10%" }}
+                            style={{
+                                width: "max-content",
+                                whiteSpace: "nowrap",
+                            }}
                             className="dark:border-none"
                             headerClassName="dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300"
                         ></Column>

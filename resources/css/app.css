@@ -104,12 +104,15 @@
     /* Step */
     .p-steps .p-steps-item .p-menuitem-link{
       /* padding: 0.5rem 0.5rem; */
-      gap: 5px;
-      flex-direction: column;
+      gap: 8px;
+      flex-direction: row;
     }
 
     .p-steps {
       padding: 0;
+    }
+    .p-steps ol{
+      gap: 15px;
     }
 
     .p-steps .p-steps-item .p-menuitem-link .p-steps-title{

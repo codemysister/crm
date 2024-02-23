@@ -18,7 +18,7 @@ import { FilePond, registerPlugin } from "react-filepond";
 import FilePondPluginFileValidateSize from "filepond-plugin-file-validate-size";
 import "filepond/dist/filepond.min.css";
 registerPlugin(FilePondPluginFileValidateSize);
-import DetailSPH from "./DetailSPH";
+import DetailPriceList from "./DetailPriceList";
 
 const DetailPartner = ({
     partners,
@@ -107,10 +107,12 @@ const DetailPartner = ({
             },
         },
         {
-            label: "Surat Penawaran Harga",
-            className: `${activeMenu == "sph" ? "p-menuitem-active" : ""}`,
+            label: "Tarif",
+            className: `${
+                activeMenu == "price_list" ? "p-menuitem-active" : ""
+            }`,
             command: () => {
-                setActiveMenu((prev) => (prev = "sph"));
+                setActiveMenu((prev) => (prev = "price_list"));
             },
         },
     ];
@@ -247,6 +249,24 @@ const DetailPartner = ({
                 new Date(date).getDate() - 1
             );
         }
+    };
+
+    const calculateWorkdays = (startDate, endDate) => {
+        const start = new Date(startDate);
+        const end = new Date(endDate);
+        const weekdays = [1, 2, 3, 4, 5];
+
+        let count = 0;
+        let current = start;
+
+        while (current <= end) {
+            if (weekdays.includes(current.getDay())) {
+                count++;
+            }
+            current.setDate(current.getDate() + 1);
+        }
+
+        return count;
     };
 
     return (
@@ -456,9 +476,9 @@ const DetailPartner = ({
                                                         :
                                                     </td>
                                                     <td class="pt-2 pb-1 text-gray-700 text-base w-7/12">
-                                                        {partner.monitoring_date_after_3_month
+                                                        {partner.monitoring_date_after_3_month_live
                                                             ? new Date(
-                                                                  partner.live_date
+                                                                  partner.monitoring_date_after_3_month_live
                                                               ).toLocaleDateString(
                                                                   "id"
                                                               )
@@ -557,8 +577,8 @@ const DetailPartner = ({
                                             />
                                         )}
 
-                                        {activeMenu === "sph" && (
-                                            <DetailSPH
+                                        {activeMenu === "price_list" && (
+                                            <DetailPriceList
                                                 partner={partner}
                                                 handleSelectedDetailPartner={
                                                     handleSelectedDetailPartner
@@ -835,7 +855,9 @@ const DetailPartner = ({
                                     onChange={(e) => {
                                         const onboarding_age = Math.ceil(
                                             (e.target.value -
-                                                data.onboarding_date) /
+                                                new Date(
+                                                    data.onboarding_date
+                                                )) /
                                                 (1000 * 60 * 60 * 24)
                                         );
 
@@ -844,25 +866,36 @@ const DetailPartner = ({
                                                 (1000 * 60 * 60 * 24)
                                         );
 
+                                        let startDate = e.target.value;
+                                        let endDate = new Date(
+                                            new Date().setDate(
+                                                new Date().getDate() + 90
+                                            )
+                                        );
+
+                                        let workDayCount =
+                                            calculateWorkdays(
+                                                startDate,
+                                                endDate
+                                            ) - 1;
+
                                         const monitoring_date_after_3_month_live =
-                                            async () => {
-                                                let response =
-                                                    await monitoringDateCalculator(
-                                                        new Date(e.target.value)
-                                                    );
+                                            new Date(e.target.value).setDate(
+                                                new Date(
+                                                    e.target.value
+                                                ).getDate() + workDayCount
+                                            );
 
-                                                setData((data) => ({
-                                                    ...data,
-                                                    live_date: e.target.value,
-                                                    onboarding_age:
-                                                        onboarding_age,
-                                                    live_age: live_age,
-                                                    monitoring_date_after_3_month_live:
-                                                        new Date(response),
-                                                }));
-                                            };
-
-                                        monitoring_date_after_3_month_live();
+                                        setData((data) => ({
+                                            ...data,
+                                            live_date: e.target.value,
+                                            onboarding_age: onboarding_age,
+                                            live_age: live_age,
+                                            monitoring_date_after_3_month_live:
+                                                new Date(
+                                                    monitoring_date_after_3_month_live
+                                                ),
+                                        }));
                                     }}
                                     showIcon
                                     dateFormat="dd/mm/yy"

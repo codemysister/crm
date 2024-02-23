@@ -16,6 +16,11 @@ class SPH extends Model
         return $this->hasOne(User::class, 'id', 'created_by');
     }
 
+    public function partner()
+    {
+        return $this->belongsTo(Partner::class, 'partner_id', 'id');
+    }
+
     public function products()
     {
         return $this->hasMany(SPHProduct::class, 'sph_id', 'id');

@@ -16,6 +16,12 @@ import { Skeleton } from "primereact/skeleton";
 import { InputNumber } from "primereact/inputnumber";
 import { ProgressSpinner } from "primereact/progressspinner";
 import { Calendar } from "primereact/calendar";
+import { FilePond, registerPlugin } from "react-filepond";
+import FilePondPluginFileValidateSize from "filepond-plugin-file-validate-size";
+import "filepond/dist/filepond.min.css";
+import { OverlayPanel } from "primereact/overlaypanel";
+import { Image } from "primereact/image";
+registerPlugin(FilePondPluginFileValidateSize);
 const BASE_URL = import.meta.env.VITE_BASE_URL;
 
 export default function Index({ auth }) {
@@ -29,6 +35,7 @@ export default function Index({ auth }) {
     const [expandedRows, setExpandedRows] = useState(null);
     useState(false);
     const toast = useRef(null);
+    const op = useRef(null);
     const modalProduct = useRef(null);
     const { roles, permissions } = auth.user;
     const [filters, setFilters] = useState({
@@ -52,6 +59,8 @@ export default function Index({ auth }) {
         duration: "",
         estimation_date: "",
         realization_date: "",
+        realization: null,
+        information: null,
     });
 
     const [globalFilterValue, setGlobalFilterValue] = useState("");
@@ -137,7 +146,7 @@ export default function Index({ auth }) {
                         outlined
                         severity="danger"
                         onClick={() => {
-                            handleDeleteActivity(rowData);
+                            handleDeleteSla(rowData);
                         }}
                     />
                 )}
@@ -155,17 +164,6 @@ export default function Index({ auth }) {
                         outlined
                         className="mr-2"
                         onClick={() => handleEditActivity(rowData)}
-                    />
-                )}
-                {permissions.includes("hapus produk") && (
-                    <Button
-                        icon="pi pi-trash"
-                        rounded
-                        outlined
-                        severity="danger"
-                        onClick={() => {
-                            handleDeleteActivity(rowData);
-                        }}
                     />
                 )}
             </React.Fragment>
@@ -201,6 +199,8 @@ export default function Index({ auth }) {
             duration: activity.duration,
             estimation_date: activity.estimation_date,
             realization_date: activity.realization_date,
+            realization: activity.realization,
+            information: activity.information,
         }));
         setModalEditActivityIsVisible(true);
     };
@@ -225,6 +225,26 @@ export default function Index({ auth }) {
         });
     };
 
+    const handleDeleteSla = (sla) => {
+        confirmDialog({
+            message: "Apakah Anda yakin untuk menghapus ini?",
+            header: "Konfirmasi hapus",
+            icon: "pi pi-info-circle",
+            acceptClassName: "p-button-danger",
+            accept: async () => {
+                destroy("sla/" + sla.uuid, {
+                    onSuccess: () => {
+                        getSlas();
+                        showSuccess("Hapus");
+                    },
+                    onError: () => {
+                        showError("Hapus");
+                    },
+                });
+            },
+        });
+    };
+
     const allowExpansion = (rowData) => {
         return rowData.activities.length > 0;
     };
@@ -233,9 +253,12 @@ export default function Index({ auth }) {
         return (
             <div className="px-14 py-5 flex">
                 <DataTable
-                    headerClassName="bg-red-500"
                     value={data.activities}
-                    className=""
+                    paginator
+                    filters={filters}
+                    rows={5}
+                    emptyMessage="SLA tidak ditemukan."
+                    paginatorClassName="dark:bg-transparent paginator-custome dark:text-gray-300 rounded-b-lg"
                 >
                     <Column
                         header="No"
@@ -247,7 +270,7 @@ export default function Index({ auth }) {
                     <Column
                         field="activity"
                         header="Tahapan"
-                        style={{ minWidth: "10rem" }}
+                        style={{ minWidth: "10rem", maxWidth: "16rem" }}
                         headerClassName="dark:border-none bg-gray-50 dark:bg-transparent dark:text-gray-300"
                     ></Column>
                     <Column
@@ -259,7 +282,7 @@ export default function Index({ auth }) {
                     <Column
                         field="duration"
                         header="Estimasi Waktu"
-                        style={{ minWidth: "8rem" }}
+                        style={{ minWidth: "8rem", maxWidth: "14rem" }}
                         headerClassName="dark:border-none bg-gray-50 dark:bg-transparent dark:text-gray-300"
                     ></Column>
                     <Column
@@ -282,6 +305,57 @@ export default function Index({ auth }) {
                                       rowData.realization_date
                                   ).toLocaleDateString("id")
                                 : "belum diisi";
+                        }}
+                        style={{ minWidth: "8rem" }}
+                        headerClassName="dark:border-none bg-gray-50 dark:bg-transparent dark:text-gray-300"
+                    ></Column>
+                    <Column
+                        field="realization"
+                        header="Bukti"
+                        body={(rowData) => {
+                            return rowData.realization ? (
+                                <div className="flex justify-center">
+                                    <Image
+                                        src={"/storage/" + rowData.realization}
+                                        alt="Bukti"
+                                        width="50%"
+                                        height="50%"
+                                        preview
+                                        downloadable
+                                    />
+                                </div>
+                            ) : (
+                                "belum diisi"
+                            );
+                        }}
+                        style={{ width: "7rem" }}
+                        headerClassName="dark:border-none bg-gray-50 dark:bg-transparent dark:text-gray-300"
+                    ></Column>
+                    <Column
+                        field="realization"
+                        header="Catatan"
+                        body={(rowData) => {
+                            return rowData.information ? (
+                                <>
+                                    <Button
+                                        icon="pi pi-info"
+                                        rounded
+                                        outlined
+                                        severity="info"
+                                        aria-label="Info"
+                                        onClick={(e) => op.current.toggle(e)}
+                                    />
+                                    <OverlayPanel
+                                        className="shadow-md max-w-[40%]"
+                                        ref={op}
+                                        showCloseIcon
+                                    >
+                                        <p>{rowData.information}</p>
+                                    </OverlayPanel>
+                                </>
+                            ) : (
+                                "belum diisi"
+                            );
                         }}
                         style={{ minWidth: "8rem" }}
                         headerClassName="dark:border-none bg-gray-50 dark:bg-transparent dark:text-gray-300"
@@ -342,7 +416,7 @@ export default function Index({ auth }) {
                 },
             });
         } else {
-            put(`/activity/${data.uuid}`, {
+            post(`activity/${data.uuid}`, {
                 onSuccess: () => {
                     showSuccess("Update");
                     setModalEditActivityIsVisible((prev) => false);
@@ -482,11 +556,26 @@ export default function Index({ auth }) {
                             style={{ minWidth: "8rem" }}
                         ></Column>
                         <Column
-                            field="partner_address"
+                            field="partner_province"
                             className="dark:border-none"
-                            headerClassName="dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300"
-                            header="Alamat Lembaga"
+                            headerClassName="dark:border-none  bg-transparent dark:bg-transparent dark:text-gray-300"
                             align="left"
+                            header="Provinsi"
+                            body={(rowData) => {
+                                return JSON.parse(rowData.partner_province)
+                                    .name;
+                            }}
+                            style={{ minWidth: "8rem" }}
+                        ></Column>
+                        <Column
+                            field="partner_regency"
+                            className="dark:border-none"
+                            headerClassName="dark:border-none  bg-transparent dark:bg-transparent dark:text-gray-300"
+                            align="left"
+                            header="Kabupaten"
+                            body={(rowData) => {
+                                return JSON.parse(rowData.partner_regency).name;
+                            }}
                             style={{ minWidth: "8rem" }}
                         ></Column>
                         <Column
@@ -495,7 +584,7 @@ export default function Index({ auth }) {
                             headerClassName="dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300"
                             header="Nomor Telepon Lembaga"
                             align="left"
-                            style={{ minWidth: "8rem" }}
+                            style={{ minWidth: "14rem" }}
                         ></Column>
                         <Column
                             field="partner_pic"
@@ -519,11 +608,11 @@ export default function Index({ auth }) {
                             headerClassName="dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300"
                             header="Nomor Telepon PIC"
                             align="left"
-                            style={{ minWidth: "8rem" }}
+                            style={{ minWidth: "12rem" }}
                         ></Column>
                         <Column
                             body={(rowData) => {
-                                return rowData.sla_doc == "tes" ? (
+                                return rowData.sla_doc == "" ? (
                                     <ProgressSpinner
                                         style={{
                                             width: "30px",
@@ -534,11 +623,24 @@ export default function Index({ auth }) {
                                         animationDuration=".5s"
                                     />
                                 ) : (
-                                    <a
-                                        href={BASE_URL + "/" + rowData.sla_doc}
-                                        download={`SLA_${rowData.partner_name}`}
-                                        class="p-button font-bold text-center rounded-full block pi pi-file-pdf"
-                                    ></a>
+                                    <div className="flex w-full h-full items-center justify-center">
+                                        <a
+                                            href={
+                                                BASE_URL + "/" + rowData.sla_doc
+                                            }
+                                            download={`SLA-${rowData.partner_name}`}
+                                            class="font-bold  w-full h-full text-center rounded-full "
+                                        >
+                                            <i
+                                                className="pi pi-file-pdf"
+                                                style={{
+                                                    width: "100%",
+                                                    height: "100%",
+                                                    fontSize: "1.5rem",
+                                                }}
+                                            ></i>
+                                        </a>
+                                    </div>
                                 );
                             }}
                             className="dark:border-none"
@@ -656,6 +758,83 @@ export default function Index({ auth }) {
                                         }}
                                         showIcon
                                         dateFormat="dd/mm/yy"
+                                    />
+                                </div>
+                                <div className="flex flex-col">
+                                    <label htmlFor="realization">
+                                        Bukti (foto)
+                                    </label>
+                                    <div className="App">
+                                        {data.realization !== null &&
+                                        typeof data.realization == "string" ? (
+                                            <>
+                                                <FilePond
+                                                    files={
+                                                        "/storage/" +
+                                                        data.realization
+                                                    }
+                                                    onaddfile={(
+                                                        error,
+                                                        fileItems
+                                                    ) => {
+                                                        if (!error) {
+                                                            setData(
+                                                                "realization",
+                                                                fileItems.file
+                                                            );
+                                                        }
+                                                    }}
+                                                    onremovefile={() => {
+                                                        setData(
+                                                            "realization",
+                                                            null
+                                                        );
+                                                    }}
+                                                    maxFileSize="2mb"
+                                                    labelMaxFileSizeExceeded="File terlalu besar"
+                                                    labelIdle='Drag & Drop your files or <span class="filepond--label-action">Browse</span>'
+                                                />
+                                            </>
+                                        ) : (
+                                            <>
+                                                <FilePond
+                                                    onaddfile={(
+                                                        error,
+                                                        fileItems
+                                                    ) => {
+                                                        if (!error) {
+                                                            setData(
+                                                                "realization",
+                                                                fileItems.file
+                                                            );
+                                                        }
+                                                    }}
+                                                    onremovefile={() => {
+                                                        setData(
+                                                            "realization",
+                                                            null
+                                                        );
+                                                    }}
+                                                    maxFileSize="2mb"
+                                                    labelMaxFileSizeExceeded="File terlalu besar"
+                                                    labelIdle='Drag & Drop your files or <span class="filepond--label-action">Browse</span>'
+                                                />
+                                            </>
+                                        )}
+                                    </div>
+                                </div>
+                                <div className="flex flex-col">
+                                    <label htmlFor="information">Catatan</label>
+                                    <InputTextarea
+                                        value={data.information}
+                                        onChange={(e) =>
+                                            setData(
+                                                "information",
+                                                e.target.value
+                                            )
+                                        }
+                                        rows={5}
+                                        cols={30}
                                     />
                                 </div>
                             </div>

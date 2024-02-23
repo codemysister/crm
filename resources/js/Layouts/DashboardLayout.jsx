@@ -320,6 +320,31 @@ export default function DashboardLayout({ user, children }) {
                                         } w-full text-sm font-semibold transition-colors duration-150 hover:text-gray-800 dark:hover:text-gray-200 `}
                                         href={route("invoice_generals.view")}
                                     >
+                                        <i
+                                            className="pi pi-money-bill"
+                                            style={{ fontSize: "1.2rem" }}
+                                        ></i>
+                                        <span className="ml-4">
+                                            Invoice Umum
+                                        </span>
+                                    </Link>
+                                </li>
+                                <li className="relative px-6 py-3">
+                                    {currentPath ==
+                                        "/invoice_subscriptions" && (
+                                        <span className="absolute inset-y-0 left-0 w-1 bg-purple-600 rounded-tr-lg rounded-br-lg"></span>
+                                    )}
+                                    <Link
+                                        className={`inline-flex items-center ${
+                                            currentPath ==
+                                            "/invoice_subscriptions"
+                                                ? "text-gray-800 dark:text-gray-100"
+                                                : ""
+                                        } w-full text-sm font-semibold transition-colors duration-150 hover:text-gray-800 dark:hover:text-gray-200 `}
+                                        href={route(
+                                            "invoice_subscriptions.view"
+                                        )}
+                                    >
                                         <svg
                                             xmlns="http://www.w3.org/2000/svg"
                                             fill="none"
@@ -335,7 +360,7 @@ export default function DashboardLayout({ user, children }) {
                                             />
                                         </svg>
                                         <span className="ml-4">
-                                            Invoice Umum
+                                            Invoice Langganan
                                         </span>
                                     </Link>
                                 </li>

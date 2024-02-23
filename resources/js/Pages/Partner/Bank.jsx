@@ -7,6 +7,7 @@ import { InputText } from "primereact/inputtext";
 import { Dropdown } from "primereact/dropdown";
 import { useForm } from "@inertiajs/react";
 import { FilterMatchMode } from "primereact/api";
+import { ConfirmDialog, confirmDialog } from "primereact/confirmdialog";
 
 const Bank = ({
     partners,
@@ -246,6 +247,7 @@ const Bank = ({
                                     Partner
                                 </label>
                                 <Dropdown
+                                    dataKey="name"
                                     optionLabel="name"
                                     value={dataBank.partner}
                                     onChange={(e) =>
@@ -337,6 +339,7 @@ const Bank = ({
                                     Partner
                                 </label>
                                 <Dropdown
+                                    dataKey="name"
                                     optionLabel="name"
                                     value={dataBank.partner}
                                     onChange={(e) =>
@@ -431,6 +434,7 @@ const Bank = ({
                         globalFilterFields={[
                             "partner.name",
                             "account_bank_name",
+                            "account_bank_number",
                         ]}
                         value={banks}
                         dataKey="id"
@@ -440,7 +444,10 @@ const Bank = ({
                             body={(_, { rowIndex }) => rowIndex + 1}
                             className="dark:border-none pl-6"
                             headerClassName="dark:border-none pl-6 bg-transparent dark:bg-transparent dark:text-gray-300"
-                            style={{ minWidth: "3%" }}
+                            style={{
+                                width: "max-content",
+                                whiteSpace: "nowrap",
+                            }}
                         />
                         <Column
                             header="Partner"
@@ -459,7 +466,10 @@ const Bank = ({
                             className="dark:border-none"
                             headerClassName="dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300"
                             align="left"
-                            style={{ minWidth: "4rem" }}
+                            style={{
+                                width: "max-content",
+                                whiteSpace: "nowrap",
+                            }}
                         ></Column>
                         <Column
                             field="uuid"
@@ -475,7 +485,10 @@ const Bank = ({
                             className="dark:border-none"
                             headerClassName="dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300"
                             align="left"
-                            style={{ minWidth: "4rem" }}
+                            style={{
+                                width: "max-content",
+                                whiteSpace: "nowrap",
+                            }}
                         ></Column>
                         <Column
                             field="bank"
@@ -483,7 +496,10 @@ const Bank = ({
                             className="dark:border-none"
                             headerClassName="dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300"
                             align="left"
-                            style={{ minWidth: "4rem" }}
+                            style={{
+                                width: "max-content",
+                                whiteSpace: "nowrap",
+                            }}
                         ></Column>
                         <Column
                             field="account_bank_number"
@@ -491,12 +507,18 @@ const Bank = ({
                             className="dark:border-none"
                             headerClassName="dark:border-none  bg-transparent dark:bg-transparent dark:text-gray-300"
                             align="left"
-                            style={{ minWidth: "5rem" }}
+                            style={{
+                                width: "max-content",
+                                whiteSpace: "nowrap",
+                            }}
                         ></Column>
                         <Column
                             header="Action"
                             body={actionBodyTemplateBank}
-                            style={{ minWidth: "4rem" }}
+                            style={{
+                                width: "max-content",
+                                whiteSpace: "nowrap",
+                            }}
                             className="dark:border-none"
                             headerClassName="dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300"
                         ></Column>

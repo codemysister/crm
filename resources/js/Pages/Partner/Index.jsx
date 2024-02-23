@@ -43,6 +43,8 @@ export default function Index({ auth, partner }) {
     const [activeIndexTab, setActiveIndexTab] = useState(0);
     const [isLoadingData, setIsLoadingData] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
+    const [modalImportPartnerIsVisible, setModalImportPartnerIsVisible] =
+        useState(false);
     const [modalPartnersIsVisible, setModalPartnersIsVisible] = useState(false);
     const [modalEditPartnersIsVisible, setModalEditPartnersIsVisible] =
         useState(false);
@@ -268,6 +270,8 @@ export default function Index({ auth, partner }) {
             period: null,
             payment_metode: null,
             status: "",
+
+            excell: null,
         },
         pic: {
             name: "",
@@ -332,7 +336,30 @@ export default function Index({ auth, partner }) {
         { name: "Lanyard Printing", price: 20000 },
     ];
 
+    const option_fee_price = [
+        { name: "1", price: 1000 },
+        { name: "2", price: 2000 },
+        { name: "3", price: 2500 },
+    ];
     const option_fee = [{ name: 1000 }, { name: 2000 }, { name: 2500 }];
+
+    const calculateWorkdays = (startDate, endDate) => {
+        const start = new Date(startDate);
+        const end = new Date(endDate);
+        const weekdays = [1, 2, 3, 4, 5];
+
+        let count = 0;
+        let current = start;
+
+        while (current <= end) {
+            if (weekdays.includes(current.getDay())) {
+                count++;
+            }
+            current.setDate(current.getDate() + 1);
+        }
+
+        return count;
+    };
 
     const selectedOptionTemplate = (option, props) => {
         if (option) {
@@ -346,6 +373,25 @@ export default function Index({ auth, partner }) {
         return <span>{props.placeholder}</span>;
     };
 
+    const selectedOptionFeeTemplate = (option, props) => {
+        if (option) {
+            return (
+                <div className="flex align-items-center">
+                    <div>{option.price}</div>
+                </div>
+            );
+        }
+
+        return <span>{props.placeholder}</span>;
+    };
+
+    const optionFeeTemplate = (option) => {
+        return (
+            <div className="flex align-items-center">
+                <div>{option.price}</div>
+            </div>
+        );
+    };
     const optionTemplate = (option) => {
         return (
             <div className="flex align-items-center">
@@ -566,17 +612,39 @@ export default function Index({ auth, partner }) {
             ></i>
         );
     };
+    const importButtonIcon = () => {
+        return (
+            <i
+                className="pi pi-file-excel"
+                style={{ fontSize: "0.7rem", paddingRight: "5px" }}
+            ></i>
+        );
+    };
 
     const renderHeader = () => {
         return (
             <div className="flex flex-row justify-between gap-2 align-items-center items-end">
-                <div>
+                <div className="flex gap-2">
                     <Button
                         label="Tambah"
                         className="bg-purple-600 text-sm shadow-md rounded-lg mr-2"
                         icon={addButtonIcon}
                         onClick={() => {
                             setModalPartnersIsVisible((prev) => (prev = true));
+                            reset("partner");
+                            setActiveIndex((prev) => (prev = 0));
+                        }}
+                        aria-controls="popup_menu_right"
+                        aria-haspopup
+                    />
+                    <Button
+                        label="Import"
+                        className="bg-green-600 text-sm shadow-md rounded-lg mr-2"
+                        icon={importButtonIcon}
+                        onClick={() => {
+                            setModalImportPartnerIsVisible(
+                                (prev) => (prev = true)
+                            );
                             reset("partner");
                             setActiveIndex((prev) => (prev = 0));
                         }}
@@ -647,6 +715,8 @@ export default function Index({ auth, partner }) {
                         "account_setting",
                         "bank"
                     );
+
+                    setActiveIndex((prev) => (prev = 0));
                 },
                 onError: () => {
                     showError("Tambah");
@@ -659,14 +729,31 @@ export default function Index({ auth, partner }) {
                     setModalEditPartnersIsVisible((prev) => false);
                     getPartners();
                     reset("partner", "pic", "subscription");
+
+                    setActiveIndex((prev) => (prev = 0));
                 },
                 onError: () => {
                     showError("Update");
                 },
             });
         }
+    };
 
-        setActiveIndex((prev) => (prev = 0));
+    const handleSubmitImportPartnerForm = (e, type) => {
+        e.preventDefault();
+        post("/partners/import", {
+            onSuccess: () => {
+                showSuccess("Tambah");
+                setModalPartnersIsVisible((prev) => false);
+                getPartners();
+                reset();
+
+                setActiveIndex((prev) => (prev = 0));
+            },
+            onError: () => {
+                showError("Tambah");
+            },
+        });
     };
 
     const getSelectedDetailPartner = async (partner) => {
@@ -876,11 +963,13 @@ export default function Index({ auth, partner }) {
                                                 />
                                             </div>
 
+                                            {console.log(data.partner.province)}
                                             <div className="flex flex-col">
                                                 <label htmlFor="province">
                                                     Provinsi *
                                                 </label>
                                                 <Dropdown
+                                                    dataKey="name"
                                                     value={
                                                         data.partner.province
                                                             ? JSON.parse(
@@ -966,7 +1055,7 @@ export default function Index({ auth, partner }) {
 
                                             <div className="flex flex-col">
                                                 <label htmlFor="subdistrict">
-                                                    Kecamatan
+                                                    Kecamatan *
                                                 </label>
                                                 <Dropdown
                                                     value={
@@ -1082,17 +1171,29 @@ export default function Index({ auth, partner }) {
                                                                         24)
                                                             );
 
+                                                        let startDate =
+                                                            e.target.value;
+                                                        let endDate = new Date(
+                                                            new Date().setDate(
+                                                                new Date().getDate() +
+                                                                    90
+                                                            )
+                                                        );
+
+                                                        let workDayCount =
+                                                            calculateWorkdays(
+                                                                startDate,
+                                                                endDate
+                                                            ) - 1;
+
                                                         const monitoring_date_after_3_month_live =
                                                             new Date(
-                                                                e.target.value
-                                                            ).setMonth(
+                                                                "Thu Feb 22 2024 00:00:00 GMT+0700"
+                                                            ).setDate(
                                                                 new Date(
-                                                                    e.target.value
-                                                                ).getMonth() +
-                                                                    3,
-                                                                new Date(
-                                                                    e.target.value
-                                                                ).getDate() - 1
+                                                                    "Thu Feb 22 2024 00:00:00 GMT+0700"
+                                                                ).getDate() +
+                                                                    workDayCount
                                                             );
 
                                                         setData("partner", {
@@ -1264,6 +1365,7 @@ export default function Index({ auth, partner }) {
                                                     }
                                                     options={status}
                                                     optionLabel="name"
+                                                    optionValue="name"
                                                     placeholder="Pilih Status"
                                                     className="w-full md:w-14rem"
                                                 />
@@ -1681,9 +1783,11 @@ export default function Index({ auth, partner }) {
                                                                                 ...data
                                                                                     .price_list
                                                                                     .price_card,
-                                                                                price: e
-                                                                                    .target
-                                                                                    .value,
+                                                                                price: Number(
+                                                                                    e
+                                                                                        .target
+                                                                                        .value
+                                                                                ),
                                                                             },
                                                                     }
                                                                 )
@@ -1745,9 +1849,11 @@ export default function Index({ auth, partner }) {
                                                                     {
                                                                         ...data.price_list,
                                                                         price_lanyard:
-                                                                            e
-                                                                                .target
-                                                                                .value,
+                                                                            Number(
+                                                                                e
+                                                                                    .target
+                                                                                    .value
+                                                                            ),
                                                                     }
                                                                 )
                                                             }
@@ -1781,7 +1887,7 @@ export default function Index({ auth, partner }) {
                                                             placeholder="tarif"
                                                             value={
                                                                 data.price_list
-                                                                    .price_price_list_system
+                                                                    .price_subscription_system
                                                             }
                                                             onValueChange={(
                                                                 e
@@ -1790,7 +1896,7 @@ export default function Index({ auth, partner }) {
                                                                     "price_list",
                                                                     {
                                                                         ...data.price_list,
-                                                                        price_price_list_system:
+                                                                        price_subscription_system:
                                                                             e
                                                                                 .target
                                                                                 .value,
@@ -1824,9 +1930,11 @@ export default function Index({ auth, partner }) {
                                                                     {
                                                                         ...data.price_list,
                                                                         price_training_offline:
-                                                                            e
-                                                                                .target
-                                                                                .value,
+                                                                            Number(
+                                                                                e
+                                                                                    .target
+                                                                                    .value
+                                                                            ),
                                                                     }
                                                                 )
                                                             }
@@ -1933,32 +2041,37 @@ export default function Index({ auth, partner }) {
                                                 <div className="flex justify-between gap-1 w-full items-center">
                                                     <div className="w-full flex gap-2 h-full">
                                                         <Dropdown
+                                                            dataKey="name"
                                                             value={
                                                                 data.price_list
                                                                     .fee_purchase_cazhpoin
                                                             }
-                                                            onChange={(e) =>
+                                                            onChange={(e) => {
                                                                 setData(
                                                                     "price_list",
                                                                     {
                                                                         ...data.price_list,
                                                                         fee_purchase_cazhpoin:
-                                                                            e
-                                                                                .target
-                                                                                .value,
+                                                                            Number(
+                                                                                e
+                                                                                    .target
+                                                                                    .value
+                                                                            ),
                                                                     }
-                                                                )
+                                                                );
+                                                            }}
+                                                            options={
+                                                                option_fee_price
                                                             }
-                                                            options={option_fee}
-                                                            optionLabel="name"
-                                                            optionValue="name"
+                                                            optionLabel="price"
+                                                            optionValue="price"
                                                             placeholder="Pilih Tarif"
                                                             editable
                                                             valueTemplate={
-                                                                selectedOptionTemplate
+                                                                selectedOptionFeeTemplate
                                                             }
                                                             itemTemplate={
-                                                                optionTemplate
+                                                                optionFeeTemplate
                                                             }
                                                             className="w-full md:w-14rem"
                                                         />
@@ -1985,22 +2098,26 @@ export default function Index({ auth, partner }) {
                                                                     {
                                                                         ...data.price_list,
                                                                         fee_bill_cazhpoin:
-                                                                            e
-                                                                                .target
-                                                                                .value,
+                                                                            Number(
+                                                                                e
+                                                                                    .target
+                                                                                    .value
+                                                                            ),
                                                                     }
                                                                 )
                                                             }
-                                                            options={option_fee}
-                                                            optionLabel="name"
-                                                            optionValue="name"
+                                                            options={
+                                                                option_fee_price
+                                                            }
+                                                            optionLabel="price"
+                                                            optionValue="price"
                                                             placeholder="Pilih Tarif"
                                                             editable
                                                             valueTemplate={
-                                                                selectedOptionTemplate
+                                                                selectedOptionFeeTemplate
                                                             }
                                                             itemTemplate={
-                                                                optionTemplate
+                                                                optionFeeTemplate
                                                             }
                                                             className="w-full md:w-14rem"
                                                         />
@@ -2027,22 +2144,26 @@ export default function Index({ auth, partner }) {
                                                                     {
                                                                         ...data.price_list,
                                                                         fee_topup_cazhpos:
-                                                                            e
-                                                                                .target
-                                                                                .value,
+                                                                            Number(
+                                                                                e
+                                                                                    .target
+                                                                                    .value
+                                                                            ),
                                                                     }
                                                                 )
                                                             }
-                                                            options={option_fee}
-                                                            optionLabel="name"
-                                                            optionValue="name"
+                                                            options={
+                                                                option_fee_price
+                                                            }
+                                                            optionLabel="price"
+                                                            optionValue="price"
                                                             placeholder="Pilih Tarif"
                                                             editable
                                                             valueTemplate={
-                                                                selectedOptionTemplate
+                                                                selectedOptionFeeTemplate
                                                             }
                                                             itemTemplate={
-                                                                optionTemplate
+                                                                optionFeeTemplate
                                                             }
                                                             className="w-full md:w-14rem"
                                                         />
@@ -2069,22 +2190,26 @@ export default function Index({ auth, partner }) {
                                                                     {
                                                                         ...data.price_list,
                                                                         fee_withdraw_cazhpos:
-                                                                            e
-                                                                                .target
-                                                                                .value,
+                                                                            Number(
+                                                                                e
+                                                                                    .target
+                                                                                    .value
+                                                                            ),
                                                                     }
                                                                 )
                                                             }
-                                                            options={option_fee}
-                                                            optionLabel="name"
-                                                            optionValue="name"
+                                                            options={
+                                                                option_fee_price
+                                                            }
+                                                            optionLabel="price"
+                                                            optionValue="price"
                                                             placeholder="Pilih Tarif"
                                                             editable
                                                             valueTemplate={
-                                                                selectedOptionTemplate
+                                                                selectedOptionFeeTemplate
                                                             }
                                                             itemTemplate={
-                                                                optionTemplate
+                                                                optionFeeTemplate
                                                             }
                                                             className="w-full md:w-14rem"
                                                         />
@@ -2110,22 +2235,26 @@ export default function Index({ auth, partner }) {
                                                                     {
                                                                         ...data.price_list,
                                                                         fee_bill_saldokartu:
-                                                                            e
-                                                                                .target
-                                                                                .value,
+                                                                            Number(
+                                                                                e
+                                                                                    .target
+                                                                                    .value
+                                                                            ),
                                                                     }
                                                                 )
                                                             }
-                                                            options={option_fee}
-                                                            optionLabel="name"
-                                                            optionValue="name"
+                                                            options={
+                                                                option_fee_price
+                                                            }
+                                                            optionLabel="price"
+                                                            optionValue="price"
                                                             placeholder="Pilih Tarif"
                                                             editable
                                                             valueTemplate={
-                                                                selectedOptionTemplate
+                                                                selectedOptionFeeTemplate
                                                             }
                                                             itemTemplate={
-                                                                optionTemplate
+                                                                optionFeeTemplate
                                                             }
                                                             className="w-full md:w-14rem"
                                                         />
@@ -2144,6 +2273,52 @@ export default function Index({ auth, partner }) {
                                     hidden={true}
                                     className="bg-purple-600 text-sm hidden shadow-md rounded-lg"
                                 />
+                            </form>
+                        </Dialog>
+                    </div>
+
+                    {/* Modal import partner */}
+                    <div className="card flex justify-content-center">
+                        <Dialog
+                            header="Import Partner"
+                            headerClassName="dark:glass dark:text-white"
+                            className="bg-white max-h-[80%] w-[80%] md:w-[60%] lg:w-[35%] dark:glass dark:text-white"
+                            contentClassName=" dark:glass dark:text-white"
+                            visible={modalImportPartnerIsVisible}
+                            onHide={() => setModalImportPartnerIsVisible(false)}
+                            // footer={footerTemplate}
+                        >
+                            <form
+                                onSubmit={(e) =>
+                                    handleSubmitImportPartnerForm(e, "tambah")
+                                }
+                                className="my-4"
+                            >
+                                <div className="flex flex-col">
+                                    <label htmlFor="name">Excell</label>
+
+                                    <div className="App">
+                                        <FilePond
+                                            onaddfile={(error, fileItems) => {
+                                                setData("partner", {
+                                                    ...data.partner,
+                                                    excell: fileItems.file,
+                                                });
+                                            }}
+                                            maxFileSize="2mb"
+                                            labelMaxFileSizeExceeded="File terlalu besar"
+                                            name="files"
+                                            labelIdle='Drag & Drop your files or <span class="filepond--label-action">Browse</span>'
+                                        />
+                                    </div>
+                                </div>
+                                <div className="flex justify-center mt-3">
+                                    <Button
+                                        label="Submit"
+                                        disabled={processing}
+                                        className="bg-purple-600 text-sm shadow-md rounded-lg"
+                                    />
+                                </div>
                             </form>
                         </Dialog>
                     </div>
@@ -2251,6 +2426,7 @@ export default function Index({ auth, partner }) {
                                             Provinsi *
                                         </label>
                                         <Dropdown
+                                            dataKey="name"
                                             value={
                                                 data.partner.province
                                                     ? JSON.parse(
@@ -2322,7 +2498,7 @@ export default function Index({ auth, partner }) {
 
                                     <div className="flex flex-col">
                                         <label htmlFor="subdistrict">
-                                            Kecamatan
+                                            Kecamatan *
                                         </label>
                                         <Dropdown
                                             value={
@@ -2395,8 +2571,9 @@ export default function Index({ auth, partner }) {
                                                 const onboarding_age =
                                                     Math.ceil(
                                                         (e.target.value -
-                                                            data.partner
-                                                                .onboarding_date) /
+                                                            new Date(
+                                                                data.partner.onboarding_date
+                                                            )) /
                                                             (1000 *
                                                                 60 *
                                                                 60 *
@@ -2409,16 +2586,28 @@ export default function Index({ auth, partner }) {
                                                         (1000 * 60 * 60 * 24)
                                                 );
 
+                                                let startDate = e.target.value;
+                                                let endDate = new Date(
+                                                    new Date().setDate(
+                                                        new Date().getDate() +
+                                                            90
+                                                    )
+                                                );
+
+                                                let workDayCount =
+                                                    calculateWorkdays(
+                                                        startDate,
+                                                        endDate
+                                                    ) - 1;
+
                                                 const monitoring_date_after_3_month_live =
                                                     new Date(
                                                         e.target.value
-                                                    ).setMonth(
+                                                    ).setDate(
                                                         new Date(
                                                             e.target.value
-                                                        ).getMonth() + 3,
-                                                        new Date(
-                                                            e.target.value
-                                                        ).getDate() - 1
+                                                        ).getDate() +
+                                                            workDayCount
                                                     );
 
                                                 setData("partner", {
@@ -2498,7 +2687,7 @@ export default function Index({ auth, partner }) {
                                                 });
                                             }}
                                             showIcon
-                                            dateFormat="yy-mm-dd"
+                                            dateFormat="dd/mm/yy"
                                         />
                                     </div>
 
@@ -2563,6 +2752,12 @@ export default function Index({ auth, partner }) {
                                 filters={filters}
                                 globalFilterFields={[
                                     "name",
+                                    "status",
+                                    "province",
+                                    "regency",
+                                    "onboarding_date",
+                                    "live_date",
+                                    "monitoring_date_after_3_month_live",
                                     "sales.name",
                                     "account_manager.name",
                                 ]}
@@ -2577,7 +2772,10 @@ export default function Index({ auth, partner }) {
                                     body={(_, { rowIndex }) => rowIndex + 1}
                                     className="dark:border-none pl-6"
                                     headerClassName="dark:border-none pl-6 bg-transparent dark:bg-transparent dark:text-gray-300"
-                                    style={{ width: "3%" }}
+                                    style={{
+                                        width: "max-content",
+                                        whiteSpace: "nowrap",
+                                    }}
                                 />
                                 <Column
                                     header="Nama"
@@ -2596,141 +2794,10 @@ export default function Index({ auth, partner }) {
                                     className="dark:border-none"
                                     headerClassName="dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300"
                                     align="left"
-                                    style={{ minWidth: "8rem" }}
-                                ></Column>
-                                <Column
-                                    field="uuid"
-                                    hidden
-                                    className="dark:border-none"
-                                    headerClassName="dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300"
-                                    header="Nama"
-                                    align="left"
-                                    style={{ minWidth: "8rem" }}
-                                ></Column>
-                                <Column
-                                    field="phone_number"
-                                    className="dark:border-none"
-                                    headerClassName="dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300"
-                                    header="No. Telepon"
-                                    align="left"
-                                    style={{ minWidth: "8rem" }}
-                                ></Column>
-                                <Column
-                                    header="Sales"
-                                    body={(rowData) => rowData.sales.name}
-                                    className="dark:border-none"
-                                    headerClassName="dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300"
-                                    align="left"
-                                    style={{ minWidth: "8rem" }}
-                                ></Column>
-                                <Column
-                                    header="Account Manager"
-                                    body={(rowData) =>
-                                        rowData.account_manager !== null
-                                            ? rowData.account_manager.name
-                                            : "belum diisi"
-                                    }
-                                    className="dark:border-none"
-                                    headerClassName="dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300"
-                                    align="left"
-                                    style={{ minWidth: "8rem" }}
-                                ></Column>
-                                <Column
-                                    field="province"
-                                    className="dark:border-none"
-                                    headerClassName="dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300"
-                                    header="Provinsi"
-                                    body={(rowData) => {
-                                        return JSON.parse(rowData.province)
-                                            .name;
+                                    style={{
+                                        width: "max-content",
+                                        whiteSpace: "nowrap",
                                     }}
-                                    align="left"
-                                    style={{ minWidth: "8rem" }}
-                                ></Column>
-                                <Column
-                                    field="regency"
-                                    className="dark:border-none"
-                                    headerClassName="dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300"
-                                    header="Kabupaten"
-                                    body={(rowData) => {
-                                        return JSON.parse(rowData.regency).name;
-                                    }}
-                                    align="left"
-                                    style={{ minWidth: "8rem" }}
-                                ></Column>
-                                <Column
-                                    field="subdistrict"
-                                    className="dark:border-none"
-                                    headerClassName="dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300"
-                                    header="Kecamatan"
-                                    body={(rowData) => {
-                                        return JSON.parse(rowData.subdistrict)
-                                            .name;
-                                    }}
-                                    align="left"
-                                    style={{ minWidth: "8rem" }}
-                                ></Column>
-                                <Column
-                                    header="Tanggal onboarding"
-                                    body={(rowData) =>
-                                        new Date(
-                                            rowData.onboarding_date
-                                        ).toLocaleDateString("id")
-                                    }
-                                    className="dark:border-none"
-                                    headerClassName="dark:border-none  bg-transparent dark:bg-transparent dark:text-gray-300"
-                                    align="left"
-                                    style={{ minWidth: "8rem" }}
-                                ></Column>
-                                <Column
-                                    header="Tanggal live"
-                                    body={(rowData) =>
-                                        rowData.live_date !== null
-                                            ? new Date(
-                                                  rowData.live_date
-                                              ).toLocaleDateString("id")
-                                            : "belum diisi"
-                                    }
-                                    className="dark:border-none"
-                                    headerClassName="dark:border-none  bg-transparent dark:bg-transparent dark:text-gray-300"
-                                    align="left"
-                                    style={{ minWidth: "8rem" }}
-                                ></Column>
-                                <Column
-                                    header="Tanggal Monitoring (3 bulan setelah live)"
-                                    body={(rowData) =>
-                                        new Date(
-                                            rowData.monitoring_date_after_3_month_live
-                                        ).toLocaleDateString("id")
-                                    }
-                                    className="dark:border-none"
-                                    headerClassName="dark:border-none  bg-transparent dark:bg-transparent dark:text-gray-300"
-                                    align="left"
-                                    style={{ minWidth: "12rem" }}
-                                ></Column>
-                                <Column
-                                    header="Umur Onboarding"
-                                    body={(rowData) =>
-                                        rowData.onboarding_age !== null
-                                            ? rowData.onboarding_age + " hari"
-                                            : "belum diisi"
-                                    }
-                                    className="dark:border-none"
-                                    headerClassName="dark:border-none  bg-transparent dark:bg-transparent dark:text-gray-300"
-                                    align="left"
-                                    style={{ minWidth: "8rem" }}
-                                ></Column>
-                                <Column
-                                    header="Umur Live"
-                                    body={(rowData) =>
-                                        rowData.live_age !== null
-                                            ? rowData.live_age + " hari"
-                                            : "belum diisi"
-                                    }
-                                    className="dark:border-none"
-                                    headerClassName="dark:border-none  bg-transparent dark:bg-transparent dark:text-gray-300"
-                                    align="left"
-                                    style={{ minWidth: "8rem" }}
                                 ></Column>
                                 <Column
                                     header="Status"
@@ -2762,12 +2829,194 @@ export default function Index({ auth, partner }) {
                                     className="dark:border-none"
                                     headerClassName="dark:border-none  bg-transparent dark:bg-transparent dark:text-gray-300"
                                     align="left"
-                                    style={{ minWidth: "8rem" }}
+                                    style={{
+                                        width: "max-content",
+                                        whiteSpace: "nowrap",
+                                    }}
                                 ></Column>
+                                <Column
+                                    field="uuid"
+                                    hidden
+                                    className="dark:border-none"
+                                    headerClassName="dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300"
+                                    header="Nama"
+                                    align="left"
+                                    style={{
+                                        width: "max-content",
+                                        whiteSpace: "nowrap",
+                                    }}
+                                ></Column>
+                                <Column
+                                    field="phone_number"
+                                    className="dark:border-none"
+                                    headerClassName="dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300"
+                                    header="No. Telepon"
+                                    align="left"
+                                    style={{
+                                        width: "max-content",
+                                        whiteSpace: "nowrap",
+                                    }}
+                                ></Column>
+                                <Column
+                                    header="Sales"
+                                    body={(rowData) => rowData.sales.name}
+                                    className="dark:border-none"
+                                    headerClassName="dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300"
+                                    align="left"
+                                    style={{
+                                        width: "max-content",
+                                        whiteSpace: "nowrap",
+                                    }}
+                                ></Column>
+                                <Column
+                                    header="Account Manager"
+                                    body={(rowData) =>
+                                        rowData.account_manager !== null
+                                            ? rowData.account_manager.name
+                                            : "belum diisi"
+                                    }
+                                    className="dark:border-none"
+                                    headerClassName="dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300"
+                                    align="left"
+                                    style={{
+                                        width: "max-content",
+                                        whiteSpace: "nowrap",
+                                    }}
+                                ></Column>
+                                <Column
+                                    field="province"
+                                    className="dark:border-none"
+                                    headerClassName="dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300"
+                                    header="Provinsi"
+                                    body={(rowData) => {
+                                        return JSON.parse(rowData.province)
+                                            .name;
+                                    }}
+                                    align="left"
+                                    style={{
+                                        width: "max-content",
+                                        whiteSpace: "nowrap",
+                                    }}
+                                ></Column>
+                                <Column
+                                    field="regency"
+                                    className="dark:border-none"
+                                    headerClassName="dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300"
+                                    header="Kabupaten"
+                                    body={(rowData) => {
+                                        return JSON.parse(rowData.regency).name;
+                                    }}
+                                    align="left"
+                                    style={{
+                                        width: "max-content",
+                                        whiteSpace: "nowrap",
+                                    }}
+                                ></Column>
+                                <Column
+                                    field="subdistrict"
+                                    className="dark:border-none"
+                                    headerClassName="dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300"
+                                    header="Kecamatan"
+                                    body={(rowData) => {
+                                        return rowData.subdistrict
+                                            ? JSON.parse(rowData.subdistrict)
+                                                  .name
+                                            : "belum diisi";
+                                    }}
+                                    align="left"
+                                    style={{
+                                        width: "max-content",
+                                        whiteSpace: "nowrap",
+                                    }}
+                                ></Column>
+                                <Column
+                                    header="Tanggal onboarding"
+                                    body={(rowData) =>
+                                        new Date(
+                                            rowData.onboarding_date
+                                        ).toLocaleDateString("id")
+                                    }
+                                    className="dark:border-none"
+                                    headerClassName="dark:border-none  bg-transparent dark:bg-transparent dark:text-gray-300"
+                                    align="left"
+                                    style={{
+                                        width: "max-content",
+                                        whiteSpace: "nowrap",
+                                    }}
+                                ></Column>
+                                <Column
+                                    header="Tanggal live"
+                                    body={(rowData) =>
+                                        rowData.live_date !== null
+                                            ? new Date(
+                                                  rowData.live_date
+                                              ).toLocaleDateString("id")
+                                            : "belum diisi"
+                                    }
+                                    className="dark:border-none"
+                                    headerClassName="dark:border-none  bg-transparent dark:bg-transparent dark:text-gray-300"
+                                    align="left"
+                                    style={{
+                                        width: "max-content",
+                                        whiteSpace: "nowrap",
+                                    }}
+                                ></Column>
+                                <Column
+                                    header="Tanggal Monitoring (3 bulan setelah live)"
+                                    body={(rowData) =>
+                                        rowData.monitoring_date_after_3_month_live !==
+                                        null
+                                            ? new Date(
+                                                  rowData.monitoring_date_after_3_month_live
+                                              ).toLocaleDateString("id")
+                                            : "belum diisi"
+                                    }
+                                    className="dark:border-none"
+                                    headerClassName="dark:border-none  bg-transparent dark:bg-transparent dark:text-gray-300"
+                                    align="left"
+                                    style={{
+                                        width: "max-content",
+                                        whiteSpace: "nowrap",
+                                    }}
+                                ></Column>
+                                <Column
+                                    header="Umur Onboarding"
+                                    body={(rowData) =>
+                                        rowData.onboarding_age !== null
+                                            ? rowData.onboarding_age + " hari"
+                                            : "belum diisi"
+                                    }
+                                    className="dark:border-none"
+                                    headerClassName="dark:border-none  bg-transparent dark:bg-transparent dark:text-gray-300"
+                                    align="left"
+                                    style={{
+                                        width: "max-content",
+                                        whiteSpace: "nowrap",
+                                    }}
+                                ></Column>
+                                <Column
+                                    header="Umur Live"
+                                    body={(rowData) =>
+                                        rowData.live_age !== null
+                                            ? rowData.live_age + " hari"
+                                            : "belum diisi"
+                                    }
+                                    className="dark:border-none"
+                                    headerClassName="dark:border-none  bg-transparent dark:bg-transparent dark:text-gray-300"
+                                    align="left"
+                                    style={{
+                                        width: "max-content",
+                                        whiteSpace: "nowrap",
+                                    }}
+                                ></Column>
+
                                 <Column
                                     header="Action"
                                     body={actionBodyTemplate}
-                                    style={{ minWidth: "8rem" }}
+                                    style={{
+                                        width: "max-content",
+                                        whiteSpace: "nowrap",
+                                    }}
                                     className="dark:border-none"
                                     headerClassName="dark:border-none  bg-transparent dark:bg-transparent dark:text-gray-300"
                                 ></Column>

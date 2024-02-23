@@ -106,10 +106,14 @@
 
         <div class="flex w-full flex-start my-1" style="width: 40%">
             <div style="width: 100%">
-                <p class="text-sm">Purwokerto, {{date("d/m/Y")}}</p>
-                <img class="h-20 w-[15%]" style="width:100%;" src="{{ public_path($receipt->signature_image) }}"
-                    alt="Signature">
-                <div>{{$receipt->signature_name}}</div>
+                <p class="text-sm">Purwokerto, {{
+                    \Carbon\Carbon::parse(now())->locale('id')->isoFormat('D
+                    MMMM YYYY',
+                    'Do MMMM YYYY') }}</p>
+                <img class="h-20 w-[15%]" style="width:100%;" src="{{ public_path("/storage/$receipt->signature_image")
+                }}"
+                alt="Signature">
+                <div class="text-sm">{{$receipt->signature_name}}</div>
                 <div></div>
             </div>
         </div>

@@ -34,7 +34,7 @@ class PartnerSeeder extends Seeder
             ]);
 
         }
-        for ($i = 10; $i <= 20; $i++) {
+        for ($i = 11; $i <= 20; $i++) {
             DB::table('partners')->insert([
                 'uuid' => \Illuminate\Support\Str::uuid(),
                 'sales_id' => 2,
@@ -55,7 +55,7 @@ class PartnerSeeder extends Seeder
             ]);
         }
 
-        for ($i = 20; $i <= 30; $i++) {
+        for ($i = 21; $i <= 30; $i++) {
             DB::table('partners')->insert([
                 'uuid' => \Illuminate\Support\Str::uuid(),
                 'sales_id' => 2,
@@ -68,7 +68,7 @@ class PartnerSeeder extends Seeder
                 'address' => 'Address ' . $i,
                 'onboarding_date' => now(),
                 'live_date' => now(),
-                'payment_metode' => 'cazhbox',
+                'payment_metode' => 'payment link',
                 'period' => 'lembaga/bulan',
                 'status' => 'Proses',
                 'created_at' => now(),
@@ -76,7 +76,7 @@ class PartnerSeeder extends Seeder
             ]);
         }
 
-        for ($i = 30; $i <= 40; $i++) {
+        for ($i = 31; $i <= 40; $i++) {
             DB::table('partners')->insert([
                 'uuid' => \Illuminate\Support\Str::uuid(),
                 'sales_id' => 2,

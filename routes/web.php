@@ -1,8 +1,10 @@
 <?php
 
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\InvoiceGeneralController;
 use App\Http\Controllers\InvoiceGeneralTransactionController;
 use App\Http\Controllers\InvoiceSubscriptionController;
+use App\Http\Controllers\InvoiceSubscriptionTransactionController;
 use App\Http\Controllers\MOUController;
 use App\Http\Controllers\PartnerAccountSettingController;
 use App\Http\Controllers\PartnerBankController;
@@ -19,6 +21,7 @@ use App\Http\Controllers\SLAController;
 use App\Http\Controllers\SPHController;
 use App\Http\Controllers\STPDController;
 use App\Http\Controllers\UserController;
+use App\Models\InvoiceSubscriptionTransaction;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -111,9 +114,8 @@ Route::get('/tes', function () {
 
 
 Route::middleware('auth')->group(function () {
-    Route::get('/dashboard', function () {
-        return Inertia::render('Dashboard/Index');
-    })->name('dashboard');
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    Route::get('api/dashboard/{account_manager:id}', [DashboardController::class, 'getPartnerByUser'])->name('getByUser');
 
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
@@ -167,6 +169,7 @@ Route::middleware('auth')->group(function () {
     // Partner
     Route::get('/partners', [PartnerController::class, 'index'])->name('partners.view')->middleware(['can:lihat partner']);
     Route::post('/partners', [PartnerController::class, 'store'])->name('partners.store')->middleware(['can:tambah partner']);
+    Route::post('/partners/import', [PartnerController::class, 'import'])->name('partners.import')->middleware(['can:tambah partner']);
     Route::get('/partners/{partner:uuid}', [PartnerController::class, 'show'])->name('partners.show')->middleware(['can:edit partner']);
     Route::put('/partners/{partner:uuid}', [PartnerController::class, 'update'])->name('partners.update')->middleware(['can:edit partner']);
     Route::delete('/partners/{partner:uuid}', [PartnerController::class, 'destroy'])->name('partners.destroy')->middleware(['can:hapus partner']);
@@ -261,12 +264,19 @@ Route::middleware('auth')->group(function () {
     Route::get('/invoice_subscriptions', [InvoiceSubscriptionController::class, 'index'])->name('invoice_subscriptions.view')->middleware(['can:lihat produk']);
     Route::get('/invoice_subscriptions/create', [InvoiceSubscriptionController::class, 'create'])->name('invoice_subscriptions.create');
     Route::post('/invoice_subscriptions', [InvoiceSubscriptionController::class, 'store'])->name('invoice_subscriptions.store')->middleware(['can:tambah produk']);
-    Route::get('/invoice_subscriptions/zip', [InvoiceSubscriptionController::class, 'zipAll'])->name('invoice_subscriptions.zip')->middleware(['can:lihat produk']);
-    Route::get('/invoice_subscriptions/{invoice_subscriptions:uuid}', [InvoiceSubscriptionController::class, 'edit'])->name('invoice_subscriptions.edit')->middleware(['can:edit produk']);
-    Route::put('/invoice_subscriptions/{invoice_subscriptions:uuid}', [InvoiceSubscriptionController::class, 'update'])->name('invoice_subscriptions.update')->middleware(['can:edit produk']);
+    Route::post('/invoice_subscriptions/batch', [InvoiceSubscriptionController::class, 'storeBatch'])->name('invoice_subscriptions.store.batch')->middleware(['can:tambah produk']);
+    Route::post('/invoice_subscriptions/zip', [InvoiceSubscriptionController::class, 'zipAll'])->name('invoice_subscriptions.zip')->middleware(['can:lihat produk']);
+    Route::put('/invoice_subscriptions/{invoice_subscriptions:uuid}', [InvoiceSubscriptionController::class, 'update'])->name('invoice_subscriptions.update')->middleware(['can:hapus produk']);
     Route::delete('/invoice_subscriptions/{invoice_subscriptions:uuid}', [InvoiceSubscriptionController::class, 'destroy'])->name('invoice_subscriptions.destroy')->middleware(['can:hapus produk']);
-    Route::get('/api/invoice_subscriptions', [InvoiceSubscriptionController::class, 'apiGetInvoiceSubscriptionsWithBundle'])->name('api.invoice_subscriptions');
+    Route::get('/api/invoice_subscriptions/bundle', [InvoiceSubscriptionController::class, 'apiGetInvoiceSubscriptionsWithBundle'])->name('api.invoice_subscriptions.bundle');
+    Route::get('/api/invoice_subscriptions', [InvoiceSubscriptionController::class, 'apiGetInvoiceSubscriptions'])->name('api.invoice_subscriptions');
+    Route::get('/invoice_langganan/{uuid}', [InvoiceSubscriptionController::class, 'kontol']);
 
+    // Invoice Langganan Transaksi
+    Route::get('/invoice_subscriptions/transaction', [InvoiceSubscriptionTransactionController::class, 'index'])->name('invoice_subscriptions.transaction.view')->middleware(['can:lihat produk']);
+    Route::post('/invoice_subscriptions/transaction', [InvoiceSubscriptionTransactionController::class, 'store'])->name('invoice_subscriptions.transaction.store')->middleware(['can:tambah produk']);
+    Route::put('/invoice_subscriptions/transaction/{transaction:uuid}', [InvoiceSubscriptionTransactionController::class, 'update'])->name('invoice_subscriptions.transaction.update')->middleware(['can:edit produk']);
+    Route::delete('/invoice_subscriptions/transaction/{transaction:uuid}', [InvoiceSubscriptionTransactionController::class, 'destroy'])->name('invoice_subscriptions.transaction.destroy')->middleware(['can:edit produk']);
 });
 
 

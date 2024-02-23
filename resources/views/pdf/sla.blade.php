@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SERVICE LEVEL AGREEMENT</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-    <!-- @vite('resources/css/app.css') -->
+
 
     <style>
         @page {
@@ -71,7 +71,8 @@
                     <tr>
                         <td class="w-1/6">Alamat Lembaga</td>
                         <td style="width: 1%">:</td>
-                        <td class="w-7/12">{{$sla->partner_address}}
+                        <td class="w-7/12">{{json_decode($sla->partner_regency)->name}},
+                            {{json_decode($sla->partner_province)->name}}
 
                         </td>
                     </tr>
@@ -112,35 +113,40 @@
             <table class="w-full border border-collapse" border="1">
                 <thead class="text-left">
                     <th class="border p-2 text-center">No</th>
-                    <th class="border p-2 text-center">Tahapan</th>
-                    <th class="border p-2 text-center">Penanggungjawab</th>
-                    <th class="border p-2 text-center">Estimasi Waktu</th>
-                    <th class="border p-2 text-center">Tanggal</th>
-                    <th class="border p-2 text-center">Realisasi</th>
+                    <th class="border p-2 w-[30%] text-center" style="width:30%">Tahapan</th>
+                    <th class="border p-2 w-[15%] text-center" style="width:15%">Penanggungjawab</th>
+                    <th class="border p-2 w-[25%] text-center" style="width:20%">Estimasi Waktu</th>
+                    <th class="border p-2 w-[15%] text-center" style="width:15%">Tanggal</th>
+                    <th class="border p-2 w-[15%] text-center" style="width:15%">Realisasi</th>
                 </thead>
                 <tbody>
 
                     @foreach($activities as $activity)
                     <tr>
                         <td class="border text-center">{{$loop->index + 1}}</td>
-                        <td class="border p-1">{{$activity["activity"]}}</td>
-                        <td class="border p-1">{{ucwords($activity["cazh_pic"])}}</td>
-                        <td class="border p-1">{{$activity["duration"]}}</td>
-                        <td class="border p-1">
+                        <td class="border w-[30%] p-1" style="width:30%">{{$activity["activity"]}}</td>
+                        <td class="border w-[15%] text-center italic p-1" style="width:15%">
+                            {{ucwords($activity["cazh_pic"]['name'] ?? $activity["cazh_pic"])}}
+                        </td>
+
+                        <td class="border w-[25%] text-center p-1" style="width:20%">{{$activity["duration"]}}</td>
+                        <td class="border w-[15%] text-right p-1" style="width:15%">
                             {{date('j M Y', strtotime($activity["estimation_date"]))}}
                         </td>
-                        <td class="border p-1">{{$activity["realization_date"] ? date('j M Y',
+                        <td class="border w-[15%] text-right p-1" style="width:15%">{{$activity["realization_date"] ?
+                            date('j M Y',
                             strtotime($activity["realization_date"])) : ''}}</td>
+
                     </tr>
                     @endforeach
 
                 </tbody>
             </table>
+            <p class="text-xs" style="font-size: 8px">*) Sosialiasi dapat dilakukan mandiri oleh Lembaga Partner</p>
         </div>
 
 
-
-        <div class="flex  flex-row mt-5 justify-between">
+        <div class="flex flex-row mt-5 justify-between">
             <div class="w-[30%]" style="width: 30%;">
                 <p>Pihak Pertama</p>
                 <img src="{{ public_path($sla->signature_image) }}" alt="" class="min-h-20 w-full"
@@ -149,13 +155,24 @@
             </div>
             <div class="w-[30%]" style="width: 30%;">
                 <p>Pihak Kedua</p>
+                @if($sla->partner_pic_signature)
+                <img src='{{ public_path("storage/$sla->partner_pic_signature") }}' alt="" class="min-h-20 w-full"
+                    style="width:90%; height: 80px" />
+                @else
                 <div style="min-height: 80px"></div>
+                @endif
+
                 <p>{{$sla->partner_pic}}</p>
             </div>
             @if($sla->referral)
             <div class="w-[30%]" style="width: 30%;">
                 <p>Pihak Ketiga</p>
+                @if($sla->referral_signature)
+                <img src='{{ public_path("storage/$sla->referral_signature") }}' alt="" class="min-h-20 w-full"
+                    style="width:90%; height: 80px" />
+                @else
                 <div style="min-height: 80px"></div>
+                @endif
                 <p>{{$sla->referral_name}}</p>
             </div>
             @endif

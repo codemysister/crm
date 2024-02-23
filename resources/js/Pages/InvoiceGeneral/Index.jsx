@@ -1264,6 +1264,7 @@ export default function Index({ auth, invoiceGeneralProps, partnersProp }) {
                     </form>
                 </Dialog>
             </div>
+
             {/* Modal update transaksi */}
             <div className="card flex justify-content-center">
                 <Dialog

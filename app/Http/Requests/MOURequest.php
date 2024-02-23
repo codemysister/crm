@@ -25,10 +25,8 @@ class MOURequest extends FormRequest
             "code" => "required",
             "day" => "required",
             "date" => "required",
-            "partner_name" => "required",
-            "partner_pic" => "required",
-            "partner_pic_position" => "required",
-            "partner_address" => "required",
+            "partner" => "required",
+
             "url_subdomain" => "required",
             "price_card" => "required|integer",
             "price_lanyard" => "required|integer",
@@ -47,9 +45,7 @@ class MOURequest extends FormRequest
             "expired_date" => "required",
             "profit_sharing" => "required",
             "referral" => "required",
-            "signature_name" => "required",
-            "signature_position" => "required",
-            "signature_image" => "required",
+            "signature" => "required"
         ];
     }
 }

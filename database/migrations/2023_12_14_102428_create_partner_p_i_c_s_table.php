@@ -16,8 +16,8 @@ return new class extends Migration {
             $table->foreignId('partner_id')->constrained('partners', 'id')->onDelete('cascade');
             $table->string('name');
             $table->string('number');
-            $table->string('email');
-            $table->string('position');
+            $table->string('email')->nullable();
+            $table->string('position')->nullable();
             $table->timestamps();
         });
     }

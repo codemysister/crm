@@ -39,7 +39,10 @@ class MOUController extends Controller
             'pics' => function ($query) {
                 $query->latest();
             },
-            'subscription' => function ($query) {
+            'subscriptions' => function ($query) {
+                $query->latest();
+            },
+            'price_list' => function ($query) {
                 $query->latest();
             },
             'accounts' => function ($query) {
@@ -52,20 +55,81 @@ class MOUController extends Controller
         return Inertia::render('MOU/Create', compact('partnersProp', 'usersProp'));
     }
 
-    public function store(MOURequest $request)
+    public function generateCode()
+    {
+        $currentMonth = date('n');
+        $currentYear = date('Y');
+
+        function intToRoman($number)
+        {
+            $map = array('I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII');
+            return $map[$number - 1];
+        }
+
+        $romanMonth = intToRoman($currentMonth);
+        $latestData = Mou::latest()->first() ?? "#PKS/0000/$romanMonth/$currentYear";
+        $lastCode = $latestData ? explode('/', $latestData->code ?? $latestData)[1] : 0;
+        $newCode = str_pad((int) $lastCode + 1, 4, '0', STR_PAD_LEFT);
+        $newCode = "#PKS/$newCode/$romanMonth/$currentYear";
+        return $newCode;
+    }
+
+    public function generateMOUDocx($mou)
     {
 
-        $validated = $request->validated();
+        $phpWord = new \PhpOffice\PhpWord\TemplateProcessor('assets/template/mou.docx');
+        $phpWord->setValues([
+            'code' => $mou->code,
+            'day' => $mou->day,
+            'date' => Carbon::parse($mou->date)->locale('id')->isoFormat('DD MMMM YYYY'),
+            'pic' => $mou->partner_pic,
+            'partner' => strtoupper($mou->partner_name),
+            'position' => ucwords($mou->partner_pic_position),
+            'province' => json_decode($mou->partner_province)->name,
+            'regency' => json_decode($mou->partner_regency)->name,
+            'nomor_hp' => $mou->partner_phone_number,
+            'url_subdomain' => $mou->url_subdomain,
+            'price_card' => "Rp" . number_format($mou->price_card, 0, ',', '.'),
+            'price_lanyard' => "Rp" . number_format($mou->price_lanyard, 0, ',', '.'),
+            'price_subscription_system' => "Rp" . number_format($mou->price_subscription_system, 0, ',', '.'),
+            'period_subscription' => $mou->period_subscription,
+            'price_training_offline' => "Rp" . number_format($mou->price_training_offline, 0, ',', '.'),
+            'price_training_online' => "Rp" . number_format($mou->price_training_online, 0, ',', '.'),
+            'fee_purchase_cazhpoin' => "Rp" . number_format($mou->fee_purchase_cazhpoin, 0, ',', '.'),
+            'fee_bill_cazhpoin' => "Rp" . number_format($mou->fee_bill_cazhpoin, 0, ',', '.'),
+            'fee_topup_cazhpos' => "Rp" . number_format($mou->fee_topup_cazhpos, 0, ',', '.'),
+            'fee_withdraw_cazhpos' => "Rp" . number_format($mou->fee_withdraw_cazhpos, 0, ',', '.'),
+            'fee_bill_saldokartu' => "Rp" . number_format($mou->fee_bill_saldokartu, 0, ',', '.'),
+            'bank' => $mou->bank,
+            'account_bank_number' => $mou->account_bank_number,
+            'account_bank_name' => $mou->account_bank_name,
+            'profit_sharing' => $mou->profit_sharing ? "melakukan" : 'tidak melakukan',
+            'profit_sharing_detail' => $mou->profit_sharing_detail,
+            'expired_date' => Carbon::parse($mou->expired_date)->locale('id')->isoFormat('DD MMMM YYYY'),
+            'signature_name' => $mou->signature_name,
+        ]);
+
+        $phpWord->setImageValue('signature_image', array('path' => public_path($mou->signature_image)));
+        $fileName = $mou->uuid . '.docx';
+        $phpWord->saveAs(storage_path('app/public/mou/' . $fileName));
+        $mou->update(['mou_doc_word' => 'mou/' . $fileName]);
+
+    }
+
+    public function store(MOURequest $request)
+    {
+        $code = $this->generateCode();
         $mou = MOU::create([
             "uuid" => Str::uuid(),
-            "code" => $request->code,
+            "code" => $code,
             "day" => $request->day,
             "date" => Carbon::parse($request->date)->setTimezone('GMT+7')->format('Y-m-d H:i:s'),
-            "partner_id" => $request->partner_id,
-            "partner_name" => $request->partner_name,
-            "partner_pic" => $request->partner_pic,
-            "partner_pic_position" => $request->partner_pic_position,
-            "partner_address" => $request->partner_address,
+            "partner_id" => $request->partner['id'],
+            "partner_name" => $request->partner['name'],
+            "partner_pic" => $request->partner['pic'],
+            "partner_pic_position" => $request->partner['pic_position'],
+            "partner_province" => $request->partner['province'],
+            "partner_regency" => $request->partner['regency'],
             "url_subdomain" => $request->url_subdomain,
             "price_card" => $request->price_card,
             "price_lanyard" => $request->price_lanyard,
@@ -87,12 +151,13 @@ class MOUController extends Controller
             "referral" => $request->referral,
             "referral_name" => $request->referral_name,
             "created_by" => Auth::user()->id,
-            "signature_name" => $request->signature_name,
-            "signature_position" => $request->signature_position,
-            "signature_image" => $request->signature_image,
+            "signature_name" => $request->signature['name'],
+            "signature_position" => $request->signature['position'],
+            "signature_image" => $request->signature['image'],
             "mou_doc" => ""
         ]);
 
+        $this->generateMOUDocx($mou);
         GenerateMOUJob::dispatch($mou);
     }
 
@@ -116,6 +181,9 @@ class MOUController extends Controller
             'subscription' => function ($query) {
                 $query->latest();
             },
+            'price_list' => function ($query) {
+                $query->latest();
+            },
             'accounts' => function ($query) {
                 $query->latest();
             },
@@ -133,11 +201,12 @@ class MOUController extends Controller
         $mou->update([
             "day" => $request->day,
             "date" => Carbon::parse($request->date)->setTimezone('GMT+7')->format('Y-m-d H:i:s'),
-            "partner_id" => $request->partner_id,
-            "partner_name" => $request->partner_name,
-            "partner_pic" => $request->partner_pic,
-            "partner_pic_position" => $request->partner_pic_position,
-            "partner_address" => $request->partner_address,
+            "partner_id" => $request->partner['id'],
+            "partner_name" => $request->partner['name'],
+            "partner_pic" => $request->partner['pic'],
+            "partner_pic_position" => $request->partner['pic_position'],
+            "partner_province" => $request->partner['province'],
+            "partner_regency" => $request->partner['regency'],
             "url_subdomain" => $request->url_subdomain,
             "price_card" => $request->price_card,
             "price_lanyard" => $request->price_lanyard,
@@ -158,11 +227,12 @@ class MOUController extends Controller
             "profit_sharing_detail" => $request->profit_sharing_detail,
             "referral" => $request->referral,
             "referral_name" => $request->referral_name,
-            "signature_name" => $request->signature_name,
-            "signature_position" => $request->signature_position,
-            "signature_image" => $request->signature_image
+            "signature_name" => $request->signature['name'],
+            "signature_position" => $request->signature['position'],
+            "signature_image" => $request->signature['image'],
         ]);
 
+        $this->generateMOUDocx($mou);
         GenerateMOUJob::dispatch($mou);
     }
     public function apiGetMou()

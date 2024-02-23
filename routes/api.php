@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\ApiConvertRupiah;
 use App\Http\Controllers\ApiWilayahController;
+use App\Http\Controllers\InvoiceSubscriptionController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 

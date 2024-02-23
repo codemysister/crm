@@ -20,7 +20,8 @@ return new class extends Migration {
             $table->string('partner_name');
             $table->string('partner_pic');
             $table->string('partner_pic_position');
-            $table->string('partner_address');
+            $table->json('partner_province');
+            $table->json('partner_regency');
             $table->string('url_subdomain');
             $table->bigInteger('price_card');
             $table->bigInteger('price_lanyard');
@@ -45,6 +46,7 @@ return new class extends Migration {
             $table->string('signature_position');
             $table->string('signature_image');
             $table->string('mou_doc');
+            $table->string('mou_doc_word')->nullable()->default(null);
             $table->foreignId('created_by')->constrained('users', 'id')->onDelete('cascade');
             $table->timestamps();
         });

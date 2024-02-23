@@ -39,7 +39,7 @@ class Partner extends Authenticatable
         return $this->hasMany(PartnerAccountSetting::class, 'partner_id', 'id');
     }
 
-    public function subscription()
+    public function subscriptions()
     {
         return $this->hasMany(PartnerSubscription::class);
     }
@@ -57,5 +57,9 @@ class Partner extends Authenticatable
     public function invoice_generals()
     {
         return $this->hasMany(InvoiceGeneral::class);
+    }
+    public function invoice_subscriptions()
+    {
+        return $this->hasMany(InvoiceSubscription::class);
     }
 }

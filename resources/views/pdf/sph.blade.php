@@ -8,7 +8,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SURAT PENAWARAN HARGA</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-    <!-- @vite('resources/css/app.css') -->
+
 
     <style>
         @page {
@@ -33,16 +33,15 @@
 
 <body class="text-base">
 
-
     <div class="flex justify-between items-center">
         <table>
             <tr>
-                <td style="width:30%">
+                <td style="width:20%;">
                     <img src="{{ public_path('assets\img\cazh.png')}}" alt="Logo">
                 </td>
                 <td>
                     <div style="text-align:right">
-                        <div class="font-bold" style="font-size: 8px; line-height: 10px">PT. CAZH TEKNOLOGI INOVASI
+                        <div class="font-bold" style="font-size: 10px; line-height: 14px">PT. CAZH TEKNOLOGI INOVASI
                         </div>
                         <div class="" style="font-size: 8px; line-height: 10px">Bonavida Park D1, Jl. Raya Karanggintung
                         </div>
@@ -64,7 +63,9 @@
         <p class="text-sm">Kepada Yth.</p>
         <p class="text-sm"><b>{{$sph->partner_pic}}</b></p>
         <p class="text-sm"><b>{{$sph->partner_name}}</b></p>
-        <p class="text-sm">di {{$sph->partner_address}}</p>
+        <p class="text-sm">di {{json_decode($sph->partner_regency)->name}},
+            {{json_decode($sph->partner_province)->name}}
+        </p>
     </div>
 
     <div class="mt-6 text-left">
@@ -81,28 +82,28 @@
 
     <div class="w-full mt-6">
         <table class="w-full text-sm">
-            <thead style="background-color:#CFE2F3; padding: 5px 10px;">
+            <thead style="background-color:#CFE2F3; padding: 10px 10px;">
                 <tr>
-                    <th style="width: 10%;">No.</th>
-                    <th style="width: 30%;">Produk/Layanan</th>
-                    <th style="width: 40%;">Rincian</th>
+                    <th class="p-2" style="width: 10%;">No.</th>
+                    <th class="p-2" style="width: 40%;">Produk/Layanan</th>
+                    <th class="p-2" style="width: 20%;">Rincian</th>
                     <th>Jumlah</th>
                 </tr>
             </thead>
             <tbody>
                 @foreach($products as $product)
                 <tr>
-                    <td style=" width: 10%; text-align: center;">{{$loop->index + 1}}</td>
-                    <td style="width: 30%;">{{$product['name']}}</td>
-                    <td style="width: 40%;">{{$product['detail']}}</td>
-                    <td style="text-align: center;">{{$product['total']}}</td>
+                    <td class="p-1" style=" width: 10%; text-align: center;">{{$loop->index + 1}}</td>
+                    <td class="p-1" style="width: 40%;">{{$product['name']}}</td>
+                    <td class="p-1" style="width: 20%;">{{isset($product['detail']) ? $product['detail'] : null}}</td>
+                    <td class="p-1" style="text-align: center;">Rp{{number_format($product['total'], 0, ',','.')}}</td>
                 </tr>
                 @endforeach
             </tbody>
         </table>
     </div>
 
-    <div class="mt-6">
+    <div class="mt-10">
         <p class="text-sm">
             Untuk konfirmasi persetujuan silakan hubungi :
         </p>
@@ -121,10 +122,11 @@
     </div>
 
     <div class="flex flex-col justify-start mt-8 float-left">
-        <p class="text-sm">Purwokerto, {{date("d/m/Y")}}</p>
+        <p class="text-sm">Purwokerto, {{\Carbon\Carbon::parse(now())->locale('id')->isoFormat('D MMMM YYYY',
+            'Do MMMM YYYY') }}</p>
         <img class="h-20 w-[15%]" src="{{ public_path($sph->signature_image) }}" alt="Signature">
-        <div>{{ $sph->signature_name }}</div>
-        <div>{{ $sph->signature_position }}</div>
+        <div class="text-sm">{{ $sph->signature_name }}</div>
+        <div class="text-sm">{{ $sph->signature_position }}</div>
     </div>
 
 

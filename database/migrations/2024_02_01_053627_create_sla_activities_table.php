@@ -15,11 +15,12 @@ return new class extends Migration {
             $table->uuid('uuid');
             $table->foreignId('sla_id')->constrained('slas', 'id')->onDelete('cascade');
             $table->string('activity');
-            $table->string('cazh_pic');
+            $table->string('cazh_pic')->nullable()->default(null);
             $table->string('duration');
             $table->date('estimation_date');
-            $table->date('realization_date')->nullable();
-            $table->text('link_drive_proof')->nullable();
+            $table->date('realization_date')->nullable()->default(null);
+            $table->text('realization')->nullable()->default(null);
+            $table->text('information')->nullable()->default(null);
             $table->timestamps();
         });
     }

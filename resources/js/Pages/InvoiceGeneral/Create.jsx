@@ -784,7 +784,7 @@ const Create = ({ usersProp, partnersProp, salesProp, productsProp }) => {
                                     />
                                 </div>
 
-                                {data.payment_metode === "paymentlink" && (
+                                {data.payment_metode === "payment link" && (
                                     <div className="flex flex-col mt-3">
                                         <label htmlFor="partner_address">
                                             Link Xendit *

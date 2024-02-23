@@ -17,12 +17,12 @@ class DatabaseSeeder extends Seeder
         $this->call(RolePermissionSeeder::class);
         $this->call(UserSeeder::class);
         $this->call(ProductSeeder::class);
-        $this->call(PartnerSeeder::class);
-        $this->call(PartnerPicSeeder::class);
-        $this->call(PartnerBankSeeder::class);
-        $this->call(PartnerAccountSeeder::class);
-        $this->call(PartnerSubscriptionSeeder::class);
-        $this->call(PartnerPriceListSeeder::class);
-        $this->call(SignatureSeeder::class);
+        // $this->call(PartnerSeeder::class);
+        // $this->call(PartnerPicSeeder::class);
+        // $this->call(PartnerBankSeeder::class);
+        // $this->call(PartnerAccountSeeder::class);
+        // $this->call(PartnerSubscriptionSeeder::class);
+        // $this->call(PartnerPriceListSeeder::class);
+        // $this->call(SignatureSeeder::class);
     }
 }

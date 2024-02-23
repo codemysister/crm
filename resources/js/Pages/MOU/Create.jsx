@@ -24,6 +24,9 @@ const BASE_URL = import.meta.env.VITE_BASE_URL;
 const Create = ({ usersProp, partnersProp }) => {
     const [users, setUsers] = useState(usersProp);
     const [partners, setPartners] = useState(partnersProp);
+    const [provinces, setProvinces] = useState([]);
+    const [regencys, setRegencys] = useState([]);
+    const [codeProvince, setcodeProvince] = useState(null);
 
     const toast = useRef(null);
     const partnerScrollRef = useRef(null);
@@ -33,6 +36,8 @@ const Create = ({ usersProp, partnersProp }) => {
     const infoPriceLanyardRef = useRef(null);
     const animateDay = useRef(null);
     const animateDate = useRef(null);
+    const animatePartnerNameRef = useRef(null);
+    const animatePartnerNumberRef = useRef(null);
     const animatePartnerId = useRef(null);
     const animatePartnerName = useRef(null);
     const animatePartnerPIC = useRef(null);
@@ -59,6 +64,8 @@ const Create = ({ usersProp, partnersProp }) => {
     const animateReferral = useRef(null);
     const animateReferralName = useRef(null);
     const animateSignatureName = useRef(null);
+    const animatePartnerProvinceRef = useRef(null);
+    const animatePartnerRegencyRef = useRef(null);
 
     const {
         data,
@@ -76,11 +83,22 @@ const Create = ({ usersProp, partnersProp }) => {
         )}/CAZH-MOU/X/${new Date().getFullYear()}`,
         day: null,
         date: null,
-        partner_id: null,
-        partner_name: null,
-        partner_pic: null,
-        partner_pic_position: null,
-        partner_address: null,
+        partner: {
+            id: null,
+            name: null,
+            pic: null,
+            pic_position: null,
+            province: null,
+            regency: null,
+        },
+        partner: {
+            id: null,
+            name: null,
+            pic: null,
+            pic_position: null,
+            province: null,
+            regency: null,
+        },
         url_subdomain: null,
         price_card: null,
         price_lanyard: null,
@@ -97,15 +115,31 @@ const Create = ({ usersProp, partnersProp }) => {
         account_bank_number: null,
         account_bank_name: null,
         expired_date: null,
-        profit_sharing: null,
+        profit_sharing: false,
         profit_sharing_detail: null,
         referral: false,
         referral_name: null,
-        signature_name: null,
-        signature_position: null,
-        signature_image: null,
+        signature: {
+            name: null,
+            position: null,
+            image: null,
+        },
         mou_doc: "mou_path",
     });
+
+    useEffect(() => {
+        const fetchData = async () => {
+            await getProvince();
+        };
+
+        fetchData();
+    }, []);
+
+    useEffect(() => {
+        if (codeProvince) {
+            getRegencys(codeProvince);
+        }
+    }, [codeProvince]);
 
     const signatures = [
         {
@@ -120,6 +154,69 @@ const Create = ({ usersProp, partnersProp }) => {
         { name: "Lanyard Sablon", price: 12000 },
         { name: "Lanyard Printing", price: 20000 },
     ];
+
+    const getProvince = async () => {
+        const options = {
+            method: "GET",
+            url: `/api/wilayah/provinsi/`,
+            headers: {
+                "Content-Type": "application/json",
+            },
+        };
+
+        try {
+            const response = await axios.request(options);
+            const dataArray = Object.entries(response.data).map(
+                ([key, value]) => ({
+                    code: key,
+                    name: value
+                        .toLowerCase()
+                        .split(" ")
+                        .map(
+                            (word) =>
+                                word.charAt(0).toUpperCase() + word.slice(1)
+                        )
+                        .join(" "),
+                })
+            );
+            setProvinces((prev) => (prev = dataArray));
+        } catch (error) {
+            console.log(error);
+        }
+    };
+
+    const getRegencys = async (code) => {
+        let url = code
+            ? `/api/wilayah/kabupaten?provinsi=${code}`
+            : `/api/wilayah/kabupaten`;
+        const options = {
+            method: "GET",
+            url: url,
+            headers: {
+                "Content-Type": "application/json",
+            },
+        };
+
+        try {
+            const response = await axios.request(options);
+            const dataArray = Object.entries(response.data).map(
+                ([key, value]) => ({
+                    code: key,
+                    name: value
+                        .toLowerCase()
+                        .split(" ")
+                        .map(
+                            (word) =>
+                                word.charAt(0).toUpperCase() + word.slice(1)
+                        )
+                        .join(" "),
+                })
+            );
+            setRegencys((prev) => (prev = dataArray));
+        } catch (error) {
+            console.log(error);
+        }
+    };
 
     document.querySelector("body").classList.add("overflow-hidden");
 
@@ -225,12 +322,11 @@ const Create = ({ usersProp, partnersProp }) => {
         if (ref.current) {
             ref.current.classList.add("twinkle");
             ref.current.focus();
-            setTimeout(() => {
-                ref.current.scrollIntoView({
-                    behavior: "smooth",
-                    block: "center",
-                });
-            }, 200);
+
+            ref.current.scrollIntoView({
+                behavior: "smooth",
+                block: "center",
+            });
         }
         return null;
     };
@@ -247,6 +343,7 @@ const Create = ({ usersProp, partnersProp }) => {
         post("/mou", {
             onSuccess: () => {
                 showSuccess("Tambah");
+                window.location = BASE_URL + "/mou";
                 // reset("name", "category", "price", "unit", "description");
             },
 
@@ -262,7 +359,7 @@ const Create = ({ usersProp, partnersProp }) => {
             <Toast ref={toast} />
             <div className="h-screen max-h-screen overflow-y-hidden">
                 <div className="flex flex-col h-screen max-h-screen overflow-hidden md:flex-row z-40 relative gap-5">
-                    <div className="md:w-[40%] overflow-y-auto h-screen max-h-screen p-5">
+                    <div className="md:w-[35%] overflow-y-auto h-screen max-h-screen p-5">
                         <Card>
                             <div className="flex justify-between items-center mb-4">
                                 <h1 className="font-bold text-2xl">Mou</h1>
@@ -302,29 +399,16 @@ const Create = ({ usersProp, partnersProp }) => {
                                         Hari Kesepakatan *
                                     </label>
                                     <div className="card flex justify-content-center">
-                                        <Dropdown
+                                        <InputText
                                             value={data.day}
                                             onChange={(e) =>
-                                                // if(e.target.value === 'object')
-                                                setData("day", e.value)
+                                                setData("day", e.target.value)
                                             }
-                                            options={[
-                                                { name: "Senin" },
-                                                { name: "Selasa" },
-                                                { name: "Rabu" },
-                                                { name: "Kamis" },
-                                                { name: "Jum'at" },
-                                                { name: "Sabtu" },
-                                                { name: "Minggu" },
-                                            ]}
-                                            optionLabel="name"
-                                            optionValue="name"
-                                            placeholder="Pilih Hari"
-                                            filter
-                                            editable
-                                            valueTemplate={
-                                                selectedOptionTemplate
-                                            }
+                                            className={`dark:bg-gray-300 w-full ${
+                                                errors.day && "p-invalid"
+                                            }`}
+                                            id="day"
+                                            aria-describedby="day-help"
                                             onFocus={() => {
                                                 triggerInputFocus(animateDay);
                                             }}
@@ -333,10 +417,6 @@ const Create = ({ usersProp, partnersProp }) => {
                                                     animateDay
                                                 );
                                             }}
-                                            itemTemplate={optionTemplate}
-                                            className={`w-full md:w-14rem ${
-                                                errors.day && "p-invalid"
-                                            }`}
                                         />
                                     </div>
                                     {errors.day && (
@@ -391,169 +471,200 @@ const Create = ({ usersProp, partnersProp }) => {
                                 <div className="flex flex-col mt-3">
                                     <label htmlFor="lembaga">Lembaga *</label>
                                     <Dropdown
-                                        value={data.partner_name}
+                                        value={data.partner}
+                                        dataKey="id"
                                         onChange={(e) => {
-                                            console.log(e.target.value);
-                                            if (
-                                                typeof e.target.value ===
-                                                "object"
-                                            ) {
-                                                setData({
-                                                    ...data,
-                                                    partner_id:
-                                                        e.target.value.id,
-                                                    partner_name:
-                                                        e.target.value.name,
-                                                    partner_address:
-                                                        e.target.value.address,
-                                                    partner_pic:
-                                                        e.target.value.pics[0]
-                                                            .name,
-                                                    partner_pic_position:
+                                            setData((data) => ({
+                                                ...data,
+                                                partner: {
+                                                    ...data.partner,
+                                                    id: e.target.value.id,
+                                                    name: e.target.value.name,
+                                                    province:
+                                                        e.target.value.province,
+                                                    regency:
+                                                        e.target.value.regency,
+                                                    number: e.target.value
+                                                        .phone_number,
+                                                    pic: e.target.value.pics[0]
+                                                        .name,
+                                                    pic_position:
                                                         e.target.value.pics[0]
                                                             .position,
-                                                    url_subdomain:
-                                                        e.target.value
-                                                            .accounts[0]
-                                                            .subdomain,
-                                                    period_subscription:
-                                                        e.target.value
-                                                            .subscription[0]
-                                                            .period,
-                                                    price_card: JSON.parse(
-                                                        e.target.value
-                                                            .subscription[0]
-                                                            .price_card
-                                                    ).price,
-                                                    price_lanyard:
-                                                        e.target.value
-                                                            .subscription[0]
-                                                            .price_lanyard,
-                                                    price_subscription_system:
-                                                        e.target.value
-                                                            .subscription[0]
-                                                            .price_subscription_system,
-                                                    price_training_offline:
-                                                        e.target.value
-                                                            .subscription[0]
-                                                            .price_training_offline,
-                                                    price_training_online:
-                                                        e.target.value
-                                                            .subscription[0]
-                                                            .price_training_online,
-                                                    fee_purchase_cazhpoin:
-                                                        e.target.value
-                                                            .subscription[0]
-                                                            .fee_purchase_cazhpoin,
-                                                    fee_bill_cazhpoin:
-                                                        e.target.value
-                                                            .subscription[0]
-                                                            .fee_bill_cazhpoin,
-                                                    fee_topup_cazhpos:
-                                                        e.target.value
-                                                            .subscription[0]
-                                                            .fee_topup_cazhpos,
-                                                    fee_withdraw_cazhpos:
-                                                        e.target.value
-                                                            .subscription[0]
-                                                            .fee_withdraw_cazhpos,
-                                                    fee_bill_saldokartu:
-                                                        e.target.value
-                                                            .subscription[0]
-                                                            .fee_bill_saldokartu,
-                                                    bank: e.target.value
-                                                        .banks[0].bank,
-                                                    account_bank_name:
-                                                        e.target.value.banks[0]
-                                                            .account_bank_name,
-                                                    account_bank_number:
-                                                        e.target.value.banks[0]
-                                                            .account_bank_number,
-                                                });
-                                            } else {
-                                                setData({
-                                                    ...data,
-
-                                                    partner_name:
-                                                        e.target.value,
-                                                });
-                                            }
+                                                },
+                                                url_subdomain:
+                                                    e.target.value.accounts[0]
+                                                        .subdomain,
+                                                period_subscription:
+                                                    e.target.value.period,
+                                                price_card: JSON.parse(
+                                                    e.target.value.price_list
+                                                        .price_card
+                                                ).price,
+                                                price_lanyard:
+                                                    e.target.value.price_list
+                                                        .price_lanyard,
+                                                price_subscription_system:
+                                                    e.target.value.price_list
+                                                        .price_subscription_system,
+                                                price_training_offline:
+                                                    e.target.value.price_list
+                                                        .price_training_offline,
+                                                price_training_online:
+                                                    e.target.value.price_list
+                                                        .price_training_online,
+                                                fee_purchase_cazhpoin:
+                                                    e.target.value.price_list
+                                                        .fee_purchase_cazhpoin,
+                                                fee_bill_cazhpoin:
+                                                    e.target.value.price_list
+                                                        .fee_bill_cazhpoin,
+                                                fee_topup_cazhpos:
+                                                    e.target.value.price_list
+                                                        .fee_topup_cazhpos,
+                                                fee_withdraw_cazhpos:
+                                                    e.target.value.price_list
+                                                        .fee_withdraw_cazhpos,
+                                                fee_bill_saldokartu:
+                                                    e.target.value.price_list
+                                                        .fee_bill_saldokartu,
+                                                bank: e.target.value.banks[0]
+                                                    .bank,
+                                                account_bank_name:
+                                                    e.target.value.banks[0]
+                                                        .account_bank_name,
+                                                account_bank_number:
+                                                    e.target.value.banks[0]
+                                                        .account_bank_number,
+                                            }));
+                                            setcodeProvince(
+                                                (prev) =>
+                                                    (prev = JSON.parse(
+                                                        e.target.value.province
+                                                    ).code)
+                                            );
                                         }}
+                                        onShow={() => {
+                                            triggerInputFocus(
+                                                animatePartnerNameRef
+                                            );
+                                        }}
+                                        onHide={() => {
+                                            stopAnimateInputFocus(
+                                                animatePartnerNameRef
+                                            );
+                                        }}
+                                        showOnFocus
                                         options={partners}
                                         optionLabel="name"
                                         placeholder="Pilih Lembaga"
                                         filter
                                         valueTemplate={selectedOptionTemplate}
                                         itemTemplate={optionTemplate}
-                                        className={`w-full md:w-14rem ${
-                                            errors.partner_name && "p-invalid"
-                                        }`}
-                                        editable
-                                        onFocus={() => {
-                                            triggerInputFocus(
-                                                animatePartnerName
-                                            );
-                                        }}
-                                        onBlur={() => {
-                                            stopAnimateInputFocus(
-                                                animatePartnerName
-                                            );
-                                        }}
+                                        className="w-full md:w-14rem"
                                     />
-                                    {errors.partner_name && (
-                                        <Message
-                                            className="bg-transparent p-0 my-2 justify-start text-xs"
-                                            severity="error"
-                                            text={errors.partner_name}
-                                        />
-                                    )}
                                 </div>
-                                {console.log(data)}
+
                                 <div className="flex flex-col mt-3">
-                                    <label htmlFor="partner_address">
-                                        Lokasi *
-                                    </label>
-                                    <InputText
-                                        value={data.partner_address}
-                                        onChange={(e) =>
-                                            setData({
-                                                ...data,
-                                                partner_address: e.target.value,
-                                            })
+                                    <label htmlFor="province">Provinsi *</label>
+
+                                    <Dropdown
+                                        value={
+                                            data.partner.province
+                                                ? JSON.parse(
+                                                      data.partner.province
+                                                  )
+                                                : null
                                         }
-                                        className={`dark:bg-gray-300 ${
-                                            errors.partner_address &&
-                                            "p-invalid"
-                                        }`}
-                                        id="partner_address"
-                                        aria-describedby="partner_address-help"
+                                        onChange={(e) => {
+                                            setcodeProvince(
+                                                (prev) =>
+                                                    (prev = e.target.value.code)
+                                            );
+                                            setData("partner", {
+                                                ...data.partner,
+                                                province: JSON.stringify(
+                                                    e.target.value
+                                                ),
+                                            });
+                                        }}
+                                        dataKey="name"
+                                        options={provinces}
+                                        optionLabel="name"
+                                        placeholder="Pilih Provinsi"
+                                        filter
+                                        valueTemplate={selectedOptionTemplate}
+                                        itemTemplate={optionTemplate}
+                                        className="w-full md:w-14rem"
                                         onFocus={() => {
                                             triggerInputFocus(
-                                                animatePartnerAddress
+                                                animatePartnerProvinceRef
                                             );
                                         }}
-                                        onBlur={() => {
+                                        onShow={() => {
+                                            triggerInputFocus(
+                                                animatePartnerProvinceRef
+                                            );
+                                        }}
+                                        onHide={() => {
                                             stopAnimateInputFocus(
-                                                animatePartnerAddress
+                                                animatePartnerProvinceRef
                                             );
                                         }}
                                     />
-                                    {errors.partner_address && (
-                                        <Message
-                                            className="bg-transparent p-0 my-2 justify-start text-xs"
-                                            severity="error"
-                                            text={errors.partner_address}
-                                        />
-                                    )}
                                 </div>
+
+                                <div className="flex flex-col mt-3">
+                                    <label htmlFor="regency">Kabupaten *</label>
+                                    <Dropdown
+                                        value={
+                                            data.partner.regency
+                                                ? JSON.parse(
+                                                      data.partner.regency
+                                                  )
+                                                : null
+                                        }
+                                        onChange={(e) => {
+                                            setData("partner", {
+                                                ...data.partner,
+                                                regency: JSON.stringify(
+                                                    e.target.value
+                                                ),
+                                            });
+                                        }}
+                                        onFocus={() => {
+                                            triggerInputFocus(
+                                                animatePartnerRegencyRef
+                                            );
+                                        }}
+                                        onShow={() => {
+                                            triggerInputFocus(
+                                                animatePartnerRegencyRef
+                                            );
+                                        }}
+                                        onHide={() => {
+                                            stopAnimateInputFocus(
+                                                animatePartnerRegencyRef
+                                            );
+                                        }}
+                                        options={regencys}
+                                        optionLabel="name"
+                                        placeholder="Pilih Kabupaten"
+                                        filter
+                                        valueTemplate={selectedOptionTemplate}
+                                        itemTemplate={optionTemplate}
+                                        className="w-full md:w-14rem"
+                                    />
+                                </div>
+
                                 <div className="flex flex-col mt-3">
                                     <label htmlFor="partner_pic">PIC *</label>
                                     <InputText
-                                        value={data.partner_pic}
+                                        value={data.partner.pic}
                                         onChange={(e) =>
-                                            setData({
-                                                ...data,
-                                                partner_pic: e.target.value,
+                                            setData("partner", {
+                                                ...data.partner,
+                                                pic: e.target.value,
                                             })
                                         }
                                         className={`dark:bg-gray-300 ${
@@ -585,12 +696,11 @@ const Create = ({ usersProp, partnersProp }) => {
                                         Jabatan PIC *
                                     </label>
                                     <InputText
-                                        value={data.partner_pic_position}
+                                        value={data.partner.pic_position}
                                         onChange={(e) =>
-                                            setData({
-                                                ...data,
-                                                partner_pic_position:
-                                                    e.target.value,
+                                            setData("partner", {
+                                                ...data.partner,
+                                                pic_position: e.target.value,
                                             })
                                         }
                                         className={`dark:bg-gray-300 ${
@@ -675,6 +785,7 @@ const Create = ({ usersProp, partnersProp }) => {
                                         className={`${
                                             errors.price_card && "p-invalid"
                                         }`}
+                                        locale="id-ID"
                                     />
                                     {errors.price_card && (
                                         <Message
@@ -693,7 +804,9 @@ const Create = ({ usersProp, partnersProp }) => {
                                         onChange={(e) =>
                                             setData(
                                                 "price_lanyard",
-                                                Number(e.target.value)
+                                                Number(
+                                                    e.target.value
+                                                ).toLocaleString("id-ID")
                                             )
                                         }
                                         options={option_price_lanyard}
@@ -816,7 +929,9 @@ const Create = ({ usersProp, partnersProp }) => {
                                         onChange={(e) =>
                                             setData(
                                                 "price_training_offline",
-                                                Number(e.target.value)
+                                                Number(
+                                                    e.target.value
+                                                ).toLocaleString("id-ID")
                                             )
                                         }
                                         options={option_training_offline}
@@ -923,7 +1038,9 @@ const Create = ({ usersProp, partnersProp }) => {
                                         onChange={(e) =>
                                             setData(
                                                 "fee_purchase_cazhpoin",
-                                                Number(e.target.value)
+                                                Number(
+                                                    e.target.value
+                                                ).toLocaleString("id-ID")
                                             )
                                         }
                                         options={option_fee}
@@ -931,9 +1048,20 @@ const Create = ({ usersProp, partnersProp }) => {
                                         optionValue="name"
                                         placeholder="Pilih Tarif"
                                         editable
+                                        showOnFocus
                                         valueTemplate={selectedOptionTemplate}
                                         onFocus={() => {
                                             triggerInputFocus(
+                                                animateFeePurchaseCazhpoin
+                                            );
+                                        }}
+                                        onShow={() => {
+                                            triggerInputFocus(
+                                                animateFeePurchaseCazhpoin
+                                            );
+                                        }}
+                                        onHide={() => {
+                                            stopAnimateInputFocus(
                                                 animateFeePurchaseCazhpoin
                                             );
                                         }}
@@ -963,7 +1091,9 @@ const Create = ({ usersProp, partnersProp }) => {
                                         onChange={(e) =>
                                             setData(
                                                 "fee_bill_cazhpoin",
-                                                Number(e.target.value)
+                                                Number(
+                                                    e.target.value
+                                                ).toLocaleString("id-ID")
                                             )
                                         }
                                         options={option_fee}
@@ -971,6 +1101,7 @@ const Create = ({ usersProp, partnersProp }) => {
                                         optionValue="name"
                                         placeholder="Pilih Tarif"
                                         editable
+                                        showOnFocus
                                         valueTemplate={selectedOptionTemplate}
                                         onFocus={() => {
                                             triggerInputFocus(
@@ -1004,7 +1135,9 @@ const Create = ({ usersProp, partnersProp }) => {
                                         onChange={(e) =>
                                             setData(
                                                 "fee_topup_cazhpos",
-                                                Number(e.target.value)
+                                                Number(
+                                                    e.target.value
+                                                ).toLocaleString("id-ID")
                                             )
                                         }
                                         options={option_fee}
@@ -1012,6 +1145,7 @@ const Create = ({ usersProp, partnersProp }) => {
                                         optionValue="name"
                                         placeholder="Pilih Tarif"
                                         editable
+                                        showOnFocus
                                         valueTemplate={selectedOptionTemplate}
                                         onFocus={() => {
                                             triggerInputFocus(
@@ -1045,7 +1179,9 @@ const Create = ({ usersProp, partnersProp }) => {
                                         onChange={(e) =>
                                             setData(
                                                 "fee_withdraw_cazhpos",
-                                                Number(e.target.value)
+                                                Number(
+                                                    e.target.value
+                                                ).toLocaleString("id-ID")
                                             )
                                         }
                                         options={option_fee}
@@ -1053,6 +1189,7 @@ const Create = ({ usersProp, partnersProp }) => {
                                         optionValue="name"
                                         placeholder="Pilih Tarif"
                                         editable
+                                        showOnFocus
                                         valueTemplate={selectedOptionTemplate}
                                         onFocus={() => {
                                             triggerInputFocus(
@@ -1086,7 +1223,9 @@ const Create = ({ usersProp, partnersProp }) => {
                                         onChange={(e) =>
                                             setData(
                                                 "fee_bill_saldokartu",
-                                                Number(e.target.value)
+                                                Number(
+                                                    e.target.value
+                                                ).toLocaleString("id-ID")
                                             )
                                         }
                                         options={option_fee}
@@ -1094,6 +1233,7 @@ const Create = ({ usersProp, partnersProp }) => {
                                         optionValue="name"
                                         placeholder="Pilih Tarif"
                                         editable
+                                        showOnFocus
                                         valueTemplate={selectedOptionTemplate}
                                         onFocus={() => {
                                             triggerInputFocus(
@@ -1332,7 +1472,48 @@ const Create = ({ usersProp, partnersProp }) => {
                                     <label htmlFor="signature">
                                         Tanda Tangan *
                                     </label>
+
                                     <Dropdown
+                                        value={data.signature}
+                                        onChange={(e) => {
+                                            setData({
+                                                ...data,
+                                                signature: {
+                                                    name: e.target.value.name,
+                                                    position:
+                                                        e.target.value.position,
+                                                    image: e.target.value.image,
+                                                },
+                                            });
+                                        }}
+                                        dataKey="name"
+                                        options={signatures}
+                                        optionLabel="name"
+                                        placeholder="Pilih Tanda Tangan"
+                                        filter
+                                        valueTemplate={selectedOptionTemplate}
+                                        itemTemplate={optionSignatureTemplate}
+                                        className={`w-full md:w-14rem ${
+                                            errors.signature_name && "p-invalid"
+                                        }`}
+                                        onFocus={() => {
+                                            triggerInputFocus(
+                                                animateSignatureName
+                                            );
+                                        }}
+                                        onShow={() => {
+                                            triggerInputFocus(
+                                                animateSignatureName
+                                            );
+                                        }}
+                                        onHide={() => {
+                                            stopAnimateInputFocus(
+                                                animateSignatureName
+                                            );
+                                        }}
+                                        showOnFocus
+                                    />
+                                    {/* <Dropdown
                                         value={data.signature_name}
                                         onChange={(e) => {
                                             setData({
@@ -1345,6 +1526,7 @@ const Create = ({ usersProp, partnersProp }) => {
                                                     e.target.value.image,
                                             });
                                         }}
+                                        dataKey="name"
                                         options={signatures}
                                         optionLabel="name"
                                         placeholder="Pilih Tanda Tangan"
@@ -1354,18 +1536,17 @@ const Create = ({ usersProp, partnersProp }) => {
                                         className={`w-full md:w-14rem ${
                                             errors.signature_name && "p-invalid"
                                         }`}
-                                        editable
-                                        onFocus={() => {
+                                        onShow={(e) => {
                                             triggerInputFocus(
                                                 animateSignatureName
                                             );
                                         }}
-                                        onBlur={() => {
+                                        onHide={() => {
                                             stopAnimateInputFocus(
                                                 animateSignatureName
                                             );
                                         }}
-                                    />
+                                    /> */}
                                 </div>
 
                                 <div className="flex flex-col mt-3">
@@ -1438,7 +1619,7 @@ const Create = ({ usersProp, partnersProp }) => {
                         </Card>
                     </div>
 
-                    <div className="md:w-[60%] h-screen max-h-screen text-sm overflow-y-auto p-5">
+                    <div className="md:w-[65%] hidden md:block h-screen max-h-screen text-sm overflow-y-auto p-5">
                         <header>
                             <div className="flex justify-center leading-6 text-center flex-col">
                                 <h1 className="font-bold">
@@ -1448,7 +1629,7 @@ const Create = ({ usersProp, partnersProp }) => {
                                     KEMITRAAN PT CAZH TEKNOLOGI INOVASI
                                 </h1>
                                 <h1 className="font-bold">
-                                    DENGAN {data.partner_name ?? "{{partner}}"}
+                                    DENGAN {data.partner.name ?? "{{partner}}"}
                                 </h1>
                             </div>
                         </header>
@@ -1564,7 +1745,7 @@ const Create = ({ usersProp, partnersProp }) => {
                                                                 animatePartnerPIC
                                                             }
                                                         >
-                                                            {data.partner_pic ??
+                                                            {data.partner.pic ??
                                                                 "{nama_pic}"}
                                                         </b>
                                                     </td>
@@ -1580,7 +1761,8 @@ const Create = ({ usersProp, partnersProp }) => {
                                                                 animatePartnerPICPosition
                                                             }
                                                         >
-                                                            {data.partner_pic_position ??
+                                                            {data.partner
+                                                                .pic_position ??
                                                                 "{jabatan_pic}"}
                                                         </b>
                                                     </td>
@@ -1593,10 +1775,11 @@ const Create = ({ usersProp, partnersProp }) => {
                                                         :{" "}
                                                         <b
                                                             ref={
-                                                                animatePartnerName
+                                                                animatePartnerNameRef
                                                             }
                                                         >
-                                                            {data.partner_name ??
+                                                            {data.partner
+                                                                .name ??
                                                                 "{lembaga}"}
                                                         </b>
                                                     </td>
@@ -1607,13 +1790,36 @@ const Create = ({ usersProp, partnersProp }) => {
                                                     </td>
                                                     <td>
                                                         :{" "}
-                                                        <b
-                                                            ref={
-                                                                animatePartnerAddress
-                                                            }
-                                                        >
-                                                            {data.partner_address ??
-                                                                "{lokasi}"}
+                                                        <b>
+                                                            <span
+                                                                ref={
+                                                                    animatePartnerRegencyRef
+                                                                }
+                                                            >
+                                                                {data.partner
+                                                                    .regency
+                                                                    ? JSON.parse(
+                                                                          data
+                                                                              .partner
+                                                                              .regency
+                                                                      ).name
+                                                                    : "{{kabupaten}}"}
+                                                            </span>
+                                                            {", "}
+                                                            <span
+                                                                ref={
+                                                                    animatePartnerProvinceRef
+                                                                }
+                                                            >
+                                                                {data.partner
+                                                                    .province
+                                                                    ? JSON.parse(
+                                                                          data
+                                                                              .partner
+                                                                              .province
+                                                                      ).name
+                                                                    : "{{provinsi}}"}
+                                                            </span>
                                                         </b>
                                                     </td>
                                                 </tr>
@@ -3120,13 +3326,13 @@ const Create = ({ usersProp, partnersProp }) => {
                                 >
                                     <p>Pihak Pertama</p>
                                     <img
-                                        src={BASE_URL + data.signature_image}
+                                        src={BASE_URL + data.signature.image}
                                         alt=""
                                         className="min-h-20"
                                     />
                                     <p>
                                         <b>
-                                            {data.signature_name ??
+                                            {data.signature.name ??
                                                 "{{nama_pihak_pertama}}"}
                                         </b>
                                     </p>
@@ -3137,7 +3343,7 @@ const Create = ({ usersProp, partnersProp }) => {
                                     <div className="min-h-20"></div>
                                     <p>
                                         <b>
-                                            {data.partner_pic ??
+                                            {data.partner.pic ??
                                                 "{{nama_pihak_kedua}}"}
                                         </b>
                                     </p>

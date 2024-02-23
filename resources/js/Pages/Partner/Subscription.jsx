@@ -478,6 +478,7 @@ const Subscription = ({
                                         const total_bill =
                                             (e.value * dataSubscription.ppn) /
                                             100;
+                                        console.log(total_bill);
                                         setDataSubscription({
                                             ...dataSubscription,
                                             nominal: e.value,
@@ -485,7 +486,7 @@ const Subscription = ({
                                             total_bill:
                                                 dataSubscription.ppn === 0
                                                     ? e.value
-                                                    : total_bill,
+                                                    : e.value + total_bill,
                                         });
                                     }}
                                     locale="id-ID"
@@ -580,7 +581,10 @@ const Subscription = ({
                             body={(_, { rowIndex }) => rowIndex + 1}
                             className="dark:border-none pl-6"
                             headerClassName="dark:border-none pl-6 bg-transparent dark:bg-transparent dark:text-gray-300"
-                            style={{ width: "2rem" }}
+                            style={{
+                                width: "max-content",
+                                whiteSpace: "nowrap",
+                            }}
                         />
                         <Column
                             header="Partner"
@@ -599,7 +603,10 @@ const Subscription = ({
                             className="dark:border-none"
                             headerClassName="dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300"
                             align="left"
-                            style={{ minWidth: "6rem" }}
+                            style={{
+                                width: "max-content",
+                                whiteSpace: "nowrap",
+                            }}
                         ></Column>
 
                         <Column
@@ -613,7 +620,10 @@ const Subscription = ({
                             className="dark:border-none"
                             headerClassName="dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300"
                             align="left"
-                            style={{ minWidth: "6rem" }}
+                            style={{
+                                width: "max-content",
+                                whiteSpace: "nowrap",
+                            }}
                         ></Column>
 
                         <Column
@@ -624,7 +634,10 @@ const Subscription = ({
                             className="dark:border-none"
                             headerClassName="dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300"
                             align="left"
-                            style={{ minWidth: "6rem" }}
+                            style={{
+                                width: "max-content",
+                                whiteSpace: "nowrap",
+                            }}
                         ></Column>
 
                         <Column
@@ -640,7 +653,10 @@ const Subscription = ({
                             className="dark:border-none"
                             headerClassName="dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300"
                             align="left"
-                            style={{ minWidth: "8rem" }}
+                            style={{
+                                width: "max-content",
+                                whiteSpace: "nowrap",
+                            }}
                         ></Column>
 
                         <Column
@@ -654,13 +670,19 @@ const Subscription = ({
                             className="dark:border-none"
                             headerClassName="dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300"
                             align="left"
-                            style={{ minWidth: "8rem" }}
+                            style={{
+                                width: "max-content",
+                                whiteSpace: "nowrap",
+                            }}
                         ></Column>
 
                         <Column
                             header="Action"
                             body={actionBodyTemplateSubscriptipn}
-                            style={{ minWidth: "8rem" }}
+                            style={{
+                                width: "max-content",
+                                whiteSpace: "nowrap",
+                            }}
                             className="dark:border-none"
                             headerClassName="dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300"
                         ></Column>
