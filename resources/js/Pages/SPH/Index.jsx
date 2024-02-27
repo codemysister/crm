@@ -22,6 +22,7 @@ export default function Index({ auth, sphsDefault }) {
     const [preRenderLoad, setPreRenderLoad] = useState(true);
     const toast = useRef(null);
     const { roles, permissions } = auth.user;
+
     const [filters, setFilters] = useState({
         global: { value: null, matchMode: FilterMatchMode.CONTAINS },
     });
@@ -83,22 +84,28 @@ export default function Index({ auth, sphsDefault }) {
     const actionBodyTemplate = (rowData) => {
         return (
             <React.Fragment>
-                <Button
-                    icon="pi pi-pencil"
-                    rounded
-                    outlined
-                    className="mr-2"
-                    onClick={() => (window.location = "/sph/" + rowData.uuid)}
-                />
-                <Button
-                    icon="pi pi-trash"
-                    rounded
-                    outlined
-                    severity="danger"
-                    onClick={() => {
-                        handleDeleteProduct(rowData);
-                    }}
-                />
+                {permissions.includes("edit sph") && (
+                    <Button
+                        icon="pi pi-pencil"
+                        rounded
+                        outlined
+                        className="mr-2"
+                        onClick={() =>
+                            (window.location = "/sph/" + rowData.uuid)
+                        }
+                    />
+                )}
+                {permissions.includes("edit sph") && (
+                    <Button
+                        icon="pi pi-trash"
+                        rounded
+                        outlined
+                        severity="danger"
+                        onClick={() => {
+                            handleDeleteProduct(rowData);
+                        }}
+                    />
+                )}
             </React.Fragment>
         );
     };
@@ -212,16 +219,18 @@ export default function Index({ auth, sphsDefault }) {
             <ConfirmDialog />
 
             <HeaderModule title="Surat Penawaran Harga">
-                <Link
-                    href="/sph/create"
-                    className="bg-purple-600 block text-white py-2 px-3 font-semibold text-sm shadow-md rounded-lg mr-2"
-                >
-                    <i
-                        className="pi pi-plus"
-                        style={{ fontSize: "0.7rem", paddingRight: "5px" }}
-                    ></i>
-                    Tambah
-                </Link>
+                {permissions.includes("tambah sph") && (
+                    <Link
+                        href="/sph/create"
+                        className="bg-purple-600 block text-white py-2 px-3 font-semibold text-sm shadow-md rounded-lg mr-2"
+                    >
+                        <i
+                            className="pi pi-plus"
+                            style={{ fontSize: "0.7rem", paddingRight: "5px" }}
+                        ></i>
+                        Tambah
+                    </Link>
+                )}
             </HeaderModule>
 
             <div className="flex mx-auto flex-col justify-center mt-5 gap-5">
@@ -255,6 +264,10 @@ export default function Index({ auth, sphsDefault }) {
                         <Column
                             header="No"
                             body={(_, { rowIndex }) => rowIndex + 1}
+                            style={{
+                                width: "max-content",
+                                whiteSpace: "nowrap",
+                            }}
                             className="dark:border-none pl-6"
                             headerClassName="dark:border-none pl-6 bg-transparent dark:bg-transparent dark:text-gray-300"
                         />
@@ -265,6 +278,10 @@ export default function Index({ auth, sphsDefault }) {
                             headerClassName="dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300"
                             header="Nama"
                             align="left"
+                            style={{
+                                width: "max-content",
+                                whiteSpace: "nowrap",
+                            }}
                         ></Column>
                         <Column
                             field="partner_name"
@@ -284,7 +301,10 @@ export default function Index({ auth, sphsDefault }) {
                                 </button>
                             )}
                             align="left"
-                            style={{ minWidth: "8rem" }}
+                            style={{
+                                width: "max-content",
+                                whiteSpace: "nowrap",
+                            }}
                         ></Column>
                         <Column
                             field="code"
@@ -292,6 +312,10 @@ export default function Index({ auth, sphsDefault }) {
                             headerClassName="dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300"
                             header="Kode"
                             align="left"
+                            style={{
+                                width: "max-content",
+                                whiteSpace: "nowrap",
+                            }}
                         ></Column>
                         <Column
                             field="partner_pic"
@@ -299,7 +323,10 @@ export default function Index({ auth, sphsDefault }) {
                             headerClassName="dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300"
                             header="PIC"
                             align="left"
-                            style={{ minWidth: "6rem" }}
+                            style={{
+                                width: "max-content",
+                                whiteSpace: "nowrap",
+                            }}
                         ></Column>
                         <Column
                             field="partner_province"
@@ -311,7 +338,10 @@ export default function Index({ auth, sphsDefault }) {
                                 return JSON.parse(rowData.partner_province)
                                     .name;
                             }}
-                            style={{ minWidth: "8rem" }}
+                            style={{
+                                width: "max-content",
+                                whiteSpace: "nowrap",
+                            }}
                         ></Column>
                         <Column
                             field="partner_regency"
@@ -322,7 +352,10 @@ export default function Index({ auth, sphsDefault }) {
                             body={(rowData) => {
                                 return JSON.parse(rowData.partner_regency).name;
                             }}
-                            style={{ minWidth: "8rem" }}
+                            style={{
+                                width: "max-content",
+                                whiteSpace: "nowrap",
+                            }}
                         ></Column>
                         <Column
                             field="sales_name"
@@ -330,7 +363,10 @@ export default function Index({ auth, sphsDefault }) {
                             headerClassName="dark:border-none  bg-transparent dark:bg-transparent dark:text-gray-300"
                             align="left"
                             header="Sales"
-                            style={{ minWidth: "10rem" }}
+                            style={{
+                                width: "max-content",
+                                whiteSpace: "nowrap",
+                            }}
                         ></Column>
                         <Column
                             field="sales_wa"
@@ -338,7 +374,10 @@ export default function Index({ auth, sphsDefault }) {
                             headerClassName="dark:border-none  bg-transparent dark:bg-transparent dark:text-gray-300"
                             align="left"
                             header="WA Sales"
-                            style={{ minWidth: "8rem" }}
+                            style={{
+                                width: "max-content",
+                                whiteSpace: "nowrap",
+                            }}
                         ></Column>
                         <Column
                             field="sales_email"
@@ -346,7 +385,10 @@ export default function Index({ auth, sphsDefault }) {
                             headerClassName="dark:border-none  bg-transparent dark:bg-transparent dark:text-gray-300"
                             align="left"
                             header="Email Sales"
-                            style={{ minWidth: "8rem" }}
+                            style={{
+                                width: "max-content",
+                                whiteSpace: "nowrap",
+                            }}
                         ></Column>
                         <Column
                             body={(rowData) => {
@@ -366,7 +408,7 @@ export default function Index({ auth, sphsDefault }) {
                                             href={
                                                 BASE_URL + "/" + rowData.sph_doc
                                             }
-                                            download={`Surat_Tugas_Perjalanan_Dinas_${rowData.partner_name}`}
+                                            download={`${rowData.code}_${rowData.partner_name}`}
                                             class="font-bold  w-full h-full text-center rounded-full "
                                         >
                                             <i
@@ -385,6 +427,10 @@ export default function Index({ auth, sphsDefault }) {
                             headerClassName="dark:border-none  bg-transparent dark:bg-transparent dark:text-gray-300"
                             align="left"
                             header="Dokumen"
+                            style={{
+                                width: "max-content",
+                                whiteSpace: "nowrap",
+                            }}
                         ></Column>
                         <Column
                             field="created_by"
@@ -395,12 +441,19 @@ export default function Index({ auth, sphsDefault }) {
                             headerClassName="dark:border-none  bg-transparent dark:bg-transparent dark:text-gray-300"
                             align="left"
                             header="Dibuat Oleh"
-                            style={{ minWidth: "10rem" }}
+                            style={{
+                                width: "max-content",
+                                whiteSpace: "nowrap",
+                            }}
                         ></Column>
+
                         <Column
                             header="Action"
                             body={actionBodyTemplate}
-                            style={{ minWidth: "12rem" }}
+                            style={{
+                                width: "max-content",
+                                whiteSpace: "nowrap",
+                            }}
                             className="dark:border-none"
                             headerClassName="dark:border-none  bg-transparent dark:bg-transparent dark:text-gray-300"
                         ></Column>

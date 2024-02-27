@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Jobs\GenerateSPHJob;
 use App\Models\Partner;
 use App\Models\Product;
+use App\Models\Signature;
 use App\Models\SPH;
 use App\Models\SPHProduct;
 use App\Models\User;
@@ -19,7 +20,8 @@ class SPHController extends Controller
 {
     public function index()
     {
-        return Inertia::render('SPH/Index');
+        $signaturesProp = Signature::all();
+        return Inertia::render('SPH/Index', compact('signaturesProp'));
     }
 
     public function create()
@@ -40,7 +42,8 @@ class SPHController extends Controller
         )->get();
         $productsProp = Product::all();
         $salesProp = User::role('account executive')->get();
-        return Inertia::render('SPH/Create', compact('partnersProp', 'usersProp', 'productsProp', 'salesProp'));
+        $signaturesProp = Signature::all();
+        return Inertia::render('SPH/Create', compact('partnersProp', 'usersProp', 'productsProp', 'salesProp', 'signaturesProp'));
     }
 
     function updateProducts($sph, $oldData, $newData)

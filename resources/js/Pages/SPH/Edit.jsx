@@ -13,6 +13,7 @@ import React from "react";
 import { Toast } from "primereact/toast";
 import { Badge } from "primereact/badge";
 import { useEffect } from "react";
+import { InputNumber } from "primereact/inputnumber";
 
 const BASE_URL = import.meta.env.VITE_BASE_URL;
 
@@ -577,6 +578,7 @@ const Edit = ({ usersProp, partnersProp, salesProp, productsProp, sph }) => {
                                                 wa: e.target.value,
                                             });
                                         }}
+                                        keyfilter="int"
                                         className="dark:bg-gray-300"
                                         id="sales-whatsapp"
                                         aria-describedby="sales-whatsapp-help"
@@ -686,10 +688,12 @@ const Edit = ({ usersProp, partnersProp, salesProp, productsProp, sph }) => {
                                 label="Tambah produk dari stock"
                                 icon="pi pi-external-link"
                                 onClick={() => setDialogProductVisible(true)}
+                                className="text-xs md:text-base"
                             />
                             <Button
                                 label="Tambah Inputan Produk"
                                 icon="pi pi-plus"
+                                className="text-xs md:text-base"
                                 onClick={() => {
                                     let inputNew = {
                                         name: "",
@@ -713,7 +717,7 @@ const Edit = ({ usersProp, partnersProp, salesProp, productsProp, sph }) => {
                             const no = index + 1;
                             return (
                                 <div
-                                    className="flex gap-5 mt-2 items-center justify-center"
+                                    className="flex gap-5 mt-2 items-center"
                                     key={product + index}
                                 >
                                     <div>
@@ -744,19 +748,19 @@ const Edit = ({ usersProp, partnersProp, salesProp, productsProp, sph }) => {
                                             <label htmlFor="partner_address">
                                                 Harga *
                                             </label>
-                                            <InputText
+                                            <InputNumber
                                                 value={product.price}
                                                 onChange={(e) =>
                                                     handleInputChange(
                                                         index,
                                                         "price",
-                                                        e.target.value
+                                                        e.value
                                                     )
                                                 }
                                                 className="dark:bg-gray-300"
                                                 id="partner_address"
                                                 aria-describedby="partner_address-help"
-                                                keyfilter="int"
+                                                locale="id"
                                             />
                                         </div>
                                     </div>
@@ -766,19 +770,19 @@ const Edit = ({ usersProp, partnersProp, salesProp, productsProp, sph }) => {
                                             <label htmlFor="partner_address">
                                                 Kuantitas *
                                             </label>
-                                            <InputText
+                                            <InputNumber
                                                 value={product.qty}
                                                 onChange={(e) =>
                                                     handleInputChange(
                                                         index,
                                                         "qty",
-                                                        e.target.value
+                                                        e.value
                                                     )
                                                 }
                                                 className="dark:bg-gray-300"
                                                 id="partner_address"
                                                 aria-describedby="partner_address-help"
-                                                keyfilter="int"
+                                                locale="id"
                                             />
                                         </div>
                                     </div>
@@ -809,11 +813,13 @@ const Edit = ({ usersProp, partnersProp, salesProp, productsProp, sph }) => {
                                             <label htmlFor="partner_address">
                                                 Jumlah *
                                             </label>
-                                            <InputText
+                                            <InputNumber
                                                 value={product.total}
                                                 className="dark:bg-gray-300"
                                                 id="partner_address"
                                                 aria-describedby="partner_address-help"
+                                                disabled
+                                                locale="id"
                                             />
                                         </div>
                                     </div>
@@ -886,6 +892,7 @@ const Edit = ({ usersProp, partnersProp, salesProp, productsProp, sph }) => {
                                     headerStyle={{ width: "3rem" }}
                                 ></Column>
                                 <Column field="name" header="Name"></Column>
+                                <Column field="description" header="Deskripsi"></Column>
                                 <Column
                                     field="category"
                                     header="Kategori"
@@ -912,9 +919,14 @@ const Edit = ({ usersProp, partnersProp, salesProp, productsProp, sph }) => {
                                     <p>
                                         Bonavida Park D1, Jl. Raya Karanggintung
                                     </p>
-                                    <p>Kec. Sumbang, Kab. Banyumas,</p>
-                                    <p>Jawa Tengah 53183</p>
-                                    <p>hello@cazh.id</p>
+                                    <p>
+                                        Kec. Sumbang, Kab. Banyumas,Jawa Tengah
+                                        53183
+                                    </p>
+
+                                    <p>
+                                        hello@cards.co.id | https://cards.co.id
+                                    </p>
                                 </div>
                             </div>
                         </header>
@@ -923,7 +935,7 @@ const Edit = ({ usersProp, partnersProp, salesProp, productsProp, sph }) => {
                             <h1 className="font-bold underline mx-auto">
                                 SURAT PENAWARAN HARGA
                             </h1>
-                            <p className="">Nomor : {data.code}</p>
+                            <p className="">Nomor : <b>{data.code}</b></p>
                         </div>
 
                         <div className="mt-5">
@@ -975,9 +987,9 @@ const Edit = ({ usersProp, partnersProp, salesProp, productsProp, sph }) => {
                             <table className="w-full">
                                 <thead className="bg-blue-100 text-left">
                                     <th className="pl-2">No</th>
-                                    <th>Produk/Layanan</th>
-                                    <th>Rincian</th>
-                                    <th>Jumlah</th>
+                                    <th className="py-2">Produk/Layanan</th>
+                                    <th className="py-2">Rincian</th>
+                                    <th className="py-2 text-center">Jumlah</th>
                                 </thead>
                                 <tbody>
                                     {data.products?.length == 0 && (
@@ -993,7 +1005,7 @@ const Edit = ({ usersProp, partnersProp, salesProp, productsProp, sph }) => {
                                                 <td className="pl-2">{++i}</td>
                                                 <td>{data.name}</td>
                                                 <td>{data.detail}</td>
-                                                <td>{data.total}</td>
+                                                <td className="text-right px-4">Rp{data.total ? data.total.toLocaleString('id') : 0}</td>
                                             </tr>
                                         );
                                     })}
@@ -1033,10 +1045,13 @@ const Edit = ({ usersProp, partnersProp, salesProp, productsProp, sph }) => {
                             className="flex flex-col mt-5 justify-start w-[30%]"
                             ref={animateSignatureNameRef}
                         >
-                            <p>Purwokerto, {new Date().getFullYear()}</p>
-                            <img src={BASE_URL + data.signature.image} alt="" />
+                            <p>Purwokerto, {new Date().toLocaleDateString("id-ID", {
+                                    day: "numeric",
+                                    month: "long",
+                                    year: "numeric",
+                                })}</p>
+                            <img src={BASE_URL +'/storage/'+ data.signature.image} alt="" />
                             <p>{data.signature.name}</p>
-                            <p>{data.signature.position}</p>
                         </div>
                     </div>
                 </div>

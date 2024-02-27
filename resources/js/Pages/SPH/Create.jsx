@@ -16,10 +16,17 @@ import { InputNumber } from "primereact/inputnumber";
 
 const BASE_URL = import.meta.env.VITE_BASE_URL;
 
-const Create = ({ usersProp, partnersProp, salesProp, productsProp }) => {
+const Create = ({
+    usersProp,
+    partnersProp,
+    salesProp,
+    productsProp,
+    signaturesProp,
+}) => {
     const [users, setUsers] = useState(usersProp);
     const [partners, setPartners] = useState(partnersProp);
     const [sales, setSales] = useState(salesProp);
+    const [signatures, setSignatures] = useState(signaturesProp);
     const [products, setProducts] = useState(productsProp);
     const [dialogVisible, setDialogVisible] = useState(false);
     const [dialogProductVisible, setDialogProductVisible] = useState(false);
@@ -153,13 +160,13 @@ const Create = ({ usersProp, partnersProp, salesProp, productsProp }) => {
             console.log(error);
         }
     };
-    const signatures = [
-        {
-            name: "Muh Arif Mahfudin",
-            position: "CEO",
-            image: "/assets/img/signatures/ttd.png",
-        },
-    ];
+    // const signatures = [
+    //     {
+    //         name: "Muh Arif Mahfudin",
+    //         position: "CEO",
+    //         image: "/assets/img/signatures/ttd.png",
+    //     },
+    // ];
     const [filters, setFilters] = useState({
         global: { value: null, matchMode: FilterMatchMode.CONTAINS },
     });
@@ -244,7 +251,7 @@ const Create = ({ usersProp, partnersProp, salesProp, productsProp }) => {
             <div className="flex flex-wrap p-2 align-items-center gap-3">
                 <img
                     className="w-3rem shadow-2 flex-shrink-0 border-round"
-                    src={item.image}
+                    src={"/storage/" + item.image}
                     alt={item.name}
                 />
                 <div className="flex-1 flex flex-col gap-2 xl:mr-8">
@@ -472,6 +479,7 @@ const Create = ({ usersProp, partnersProp, salesProp, productsProp }) => {
                                 <div className="flex flex-col mt-3">
                                     <label htmlFor="regency">Kabupaten *</label>
                                     <Dropdown
+                                        dataKey="name"
                                         value={
                                             data.partner.regency
                                                 ? JSON.parse(
@@ -490,6 +498,21 @@ const Create = ({ usersProp, partnersProp, salesProp, productsProp }) => {
                                                     e.target.value
                                                 ),
                                             });
+                                        }}
+                                        onFocus={() => {
+                                            triggerInputFocus(
+                                                animatePartnerRegencyRef
+                                            );
+                                        }}
+                                        onShow={() => {
+                                            triggerInputFocus(
+                                                animatePartnerRegencyRef
+                                            );
+                                        }}
+                                        onBlur={() => {
+                                            stopAnimateInputFocus(
+                                                animatePartnerRegencyRef
+                                            );
                                         }}
                                         options={regencys}
                                         optionLabel="name"
@@ -510,24 +533,19 @@ const Create = ({ usersProp, partnersProp, salesProp, productsProp }) => {
                                                 pic: e.target.value,
                                             })
                                         }
-                                        className="dark:bg-gray-300"
-                                        id="partner_pic"
-                                        aria-describedby="partner_pic-help"
                                         onFocus={() => {
                                             triggerInputFocus(
-                                                animatePartnerRegencyRef
-                                            );
-                                        }}
-                                        onShow={() => {
-                                            triggerInputFocus(
-                                                animatePartnerRegencyRef
+                                                animatePartnerPicRef
                                             );
                                         }}
                                         onBlur={() => {
                                             stopAnimateInputFocus(
-                                                animatePartnerRegencyRef
+                                                animatePartnerPicRef
                                             );
                                         }}
+                                        className="dark:bg-gray-300"
+                                        id="partner_pic"
+                                        aria-describedby="partner_pic-help"
                                     />
                                 </div>
                                 <div className="flex flex-col mt-3">
@@ -579,6 +597,7 @@ const Create = ({ usersProp, partnersProp, salesProp, productsProp }) => {
                                                 wa: e.target.value,
                                             });
                                         }}
+                                        keyfilter="int"
                                         className="dark:bg-gray-300"
                                         id="sales-whatsapp"
                                         aria-describedby="sales-whatsapp-help"
@@ -688,10 +707,12 @@ const Create = ({ usersProp, partnersProp, salesProp, productsProp }) => {
                                 label="Tambah produk dari stock"
                                 icon="pi pi-external-link"
                                 onClick={() => setDialogProductVisible(true)}
+                                className="text-xs md:text-base"
                             />
                             <Button
                                 label="Tambah Inputan Produk"
                                 icon="pi pi-plus"
+                                className="text-xs md:text-base"
                                 onClick={() => {
                                     let inputNew = {
                                         name: "",
@@ -774,7 +795,7 @@ const Create = ({ usersProp, partnersProp, salesProp, productsProp }) => {
                                                     handleInputChange(
                                                         index,
                                                         "qty",
-                                                        e.target.value
+                                                        e.value
                                                     )
                                                 }
                                                 className="dark:bg-gray-300"
@@ -818,6 +839,7 @@ const Create = ({ usersProp, partnersProp, salesProp, productsProp }) => {
                                                 id="partner_address"
                                                 aria-describedby="partner_address-help"
                                                 locale="id-ID"
+                                                disabled
                                             />
                                         </div>
                                     </div>
@@ -889,7 +911,8 @@ const Create = ({ usersProp, partnersProp, salesProp, productsProp }) => {
                                     selectionMode="multiple"
                                     headerStyle={{ width: "3rem" }}
                                 ></Column>
-                                <Column field="name" header="Name"></Column>
+                                <Column field="name" header="Nama"></Column>
+                                <Column field="description" header="Deskripsi"></Column>
                                 <Column
                                     field="category"
                                     header="Kategori"
@@ -916,9 +939,14 @@ const Create = ({ usersProp, partnersProp, salesProp, productsProp }) => {
                                     <p>
                                         Bonavida Park D1, Jl. Raya Karanggintung
                                     </p>
-                                    <p>Kec. Sumbang, Kab. Banyumas,</p>
-                                    <p>Jawa Tengah 53183</p>
-                                    <p>hello@cazh.id</p>
+                                    <p>
+                                        Kec. Sumbang, Kab. Banyumas,Jawa Tengah
+                                        53183
+                                    </p>
+
+                                    <p>
+                                        hello@cards.co.id | https://cards.co.id
+                                    </p>
                                 </div>
                             </div>
                         </header>
@@ -927,7 +955,7 @@ const Create = ({ usersProp, partnersProp, salesProp, productsProp }) => {
                             <h1 className="font-bold underline mx-auto">
                                 SURAT PENAWARAN HARGA
                             </h1>
-                            <p className="">Nomor : {data.code}</p>
+                            <p className="">Nomor : <b>{data.code}</b></p>
                         </div>
 
                         <div className="mt-5" ref={partnerScrollRef}>
@@ -979,9 +1007,9 @@ const Create = ({ usersProp, partnersProp, salesProp, productsProp }) => {
                             <table className="w-full">
                                 <thead className="bg-blue-100 text-left">
                                     <th className="pl-2">No</th>
-                                    <th>Produk/Layanan</th>
-                                    <th>Rincian</th>
-                                    <th>Jumlah</th>
+                                    <th className="py-2">Produk/Layanan</th>
+                                    <th className="py-2">Rincian</th>
+                                    <th className="py-2 text-center">Jumlah</th>
                                 </thead>
                                 <tbody>
                                     {data.products?.length == 0 && (
@@ -997,7 +1025,7 @@ const Create = ({ usersProp, partnersProp, salesProp, productsProp }) => {
                                                 <td className="pl-2">{++i}</td>
                                                 <td>{data.name}</td>
                                                 <td>{data.detail}</td>
-                                                <td>{data.total}</td>
+                                                <td className="text-right px-4">Rp{data.total ? data.total.toLocaleString('id') : 0}</td>
                                             </tr>
                                         );
                                     })}
@@ -1037,8 +1065,22 @@ const Create = ({ usersProp, partnersProp, salesProp, productsProp }) => {
                             className="flex flex-col mt-5 justify-start w-[30%]"
                             ref={animateSignatureNameRef}
                         >
-                            <p>Purwokerto, {new Date().getFullYear()}</p>
-                            <img src={BASE_URL + data.signature.image} alt="" />
+                            <p>
+                                Purwokerto,{" "}
+                                {new Date().toLocaleDateString("id-ID", {
+                                    day: "numeric",
+                                    month: "long",
+                                    year: "numeric",
+                                })}
+                            </p>
+                            <img
+                                src={
+                                    BASE_URL +
+                                    "/storage/" +
+                                    data.signature.image
+                                }
+                                alt=""
+                            />
                             <p>{data.signature.name}</p>
                             <p>{data.signature.position}</p>
                         </div>
