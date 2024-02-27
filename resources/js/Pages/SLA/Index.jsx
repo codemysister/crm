@@ -263,26 +263,38 @@ export default function Index({ auth }) {
                     <Column
                         header="No"
                         body={(_, { rowIndex }) => rowIndex + 1}
-                        style={{ width: "1rem" }}
+                        style={{
+                            width: "max-content",
+                            whiteSpace: "nowrap",
+                        }}
                         className="dark:border-none"
                         headerClassName="dark:border-none bg-gray-50 dark:bg-transparent dark:text-gray-300"
                     />
                     <Column
                         field="activity"
                         header="Tahapan"
-                        style={{ minWidth: "10rem", maxWidth: "16rem" }}
+                        style={{
+                            width: "max-content",
+                            whiteSpace: "nowrap",
+                        }}
                         headerClassName="dark:border-none bg-gray-50 dark:bg-transparent dark:text-gray-300"
                     ></Column>
                     <Column
                         field="cazh_pic"
                         header="Penanggungjawab"
-                        style={{ minWidth: "8rem" }}
+                        style={{
+                            width: "max-content",
+                            whiteSpace: "nowrap",
+                        }}
                         headerClassName="dark:border-none bg-gray-50 dark:bg-transparent dark:text-gray-300"
                     ></Column>
                     <Column
                         field="duration"
                         header="Estimasi Waktu"
-                        style={{ minWidth: "8rem", maxWidth: "14rem" }}
+                        style={{
+                            width: "max-content",
+                            whiteSpace: "nowrap",
+                        }}
                         headerClassName="dark:border-none bg-gray-50 dark:bg-transparent dark:text-gray-300"
                     ></Column>
                     <Column
@@ -293,7 +305,10 @@ export default function Index({ auth }) {
                                 rowData.estimation_date
                             ).toLocaleDateString("id");
                         }}
-                        style={{ minWidth: "8rem" }}
+                        style={{
+                            width: "max-content",
+                            whiteSpace: "nowrap",
+                        }}
                         headerClassName="dark:border-none bg-gray-50 dark:bg-transparent dark:text-gray-300"
                     ></Column>
                     <Column
@@ -306,7 +321,10 @@ export default function Index({ auth }) {
                                   ).toLocaleDateString("id")
                                 : "belum diisi";
                         }}
-                        style={{ minWidth: "8rem" }}
+                        style={{
+                            width: "max-content",
+                            whiteSpace: "nowrap",
+                        }}
                         headerClassName="dark:border-none bg-gray-50 dark:bg-transparent dark:text-gray-300"
                     ></Column>
                     <Column
@@ -328,7 +346,10 @@ export default function Index({ auth }) {
                                 "belum diisi"
                             );
                         }}
-                        style={{ width: "7rem" }}
+                        style={{
+                            width: "8rem",
+                            // whiteSpace: "nowrap",
+                        }}
                         headerClassName="dark:border-none bg-gray-50 dark:bg-transparent dark:text-gray-300"
                     ></Column>
                     <Column
@@ -357,7 +378,10 @@ export default function Index({ auth }) {
                                 "belum diisi"
                             );
                         }}
-                        style={{ minWidth: "8rem" }}
+                        style={{
+                            width: "max-content",
+                            whiteSpace: "nowrap",
+                        }}
                         headerClassName="dark:border-none bg-gray-50 dark:bg-transparent dark:text-gray-300"
                     ></Column>
                     <Column
@@ -508,13 +532,19 @@ export default function Index({ auth }) {
                     >
                         <Column
                             expander={allowExpansion}
-                            style={{ width: "1rem" }}
+                            style={{
+                                width: "max-content",
+                                whiteSpace: "nowrap",
+                            }}
                         />
 
                         <Column
                             header="No"
                             body={(_, { rowIndex }) => rowIndex + 1}
-                            style={{ width: "5%" }}
+                            style={{
+                                width: "max-content",
+                                whiteSpace: "nowrap",
+                            }}
                             className="dark:border-none pl-6"
                             headerClassName="dark:border-none pl-6 bg-transparent dark:bg-transparent dark:text-gray-300"
                         />
@@ -525,7 +555,10 @@ export default function Index({ auth }) {
                             headerClassName="dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300"
                             header="Nama"
                             align="left"
-                            style={{ width: "10%" }}
+                            style={{
+                                width: "max-content",
+                                whiteSpace: "nowrap",
+                            }}
                         ></Column>
                         <Column
                             field="code"
@@ -533,7 +566,10 @@ export default function Index({ auth }) {
                             headerClassName="dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300"
                             header="Kode"
                             align="left"
-                            style={{ minWidth: "8rem" }}
+                            style={{
+                                width: "max-content",
+                                whiteSpace: "nowrap",
+                            }}
                         ></Column>
                         <Column
                             field="partner_name"
@@ -553,7 +589,10 @@ export default function Index({ auth }) {
                                 </button>
                             )}
                             align="left"
-                            style={{ minWidth: "8rem" }}
+                            style={{
+                                width: "max-content",
+                                whiteSpace: "nowrap",
+                            }}
                         ></Column>
                         <Column
                             field="partner_province"
@@ -565,7 +604,10 @@ export default function Index({ auth }) {
                                 return JSON.parse(rowData.partner_province)
                                     .name;
                             }}
-                            style={{ minWidth: "8rem" }}
+                            style={{
+                                width: "max-content",
+                                whiteSpace: "nowrap",
+                            }}
                         ></Column>
                         <Column
                             field="partner_regency"
@@ -576,7 +618,10 @@ export default function Index({ auth }) {
                             body={(rowData) => {
                                 return JSON.parse(rowData.partner_regency).name;
                             }}
-                            style={{ minWidth: "8rem" }}
+                            style={{
+                                width: "max-content",
+                                whiteSpace: "nowrap",
+                            }}
                         ></Column>
                         <Column
                             field="partner_phone_number"
@@ -584,7 +629,10 @@ export default function Index({ auth }) {
                             headerClassName="dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300"
                             header="Nomor Telepon Lembaga"
                             align="left"
-                            style={{ minWidth: "14rem" }}
+                            style={{
+                                width: "max-content",
+                                whiteSpace: "nowrap",
+                            }}
                         ></Column>
                         <Column
                             field="partner_pic"
@@ -592,7 +640,10 @@ export default function Index({ auth }) {
                             headerClassName="dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300"
                             header="PIC Lembaga"
                             align="left"
-                            style={{ minWidth: "8rem" }}
+                            style={{
+                                width: "max-content",
+                                whiteSpace: "nowrap",
+                            }}
                         ></Column>
                         <Column
                             field="partner_pic_email"
@@ -600,7 +651,10 @@ export default function Index({ auth }) {
                             headerClassName="dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300"
                             header="Email PIC"
                             align="left"
-                            style={{ minWidth: "8rem" }}
+                            style={{
+                                width: "max-content",
+                                whiteSpace: "nowrap",
+                            }}
                         ></Column>
                         <Column
                             field="partner_pic_number"
@@ -608,7 +662,10 @@ export default function Index({ auth }) {
                             headerClassName="dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300"
                             header="Nomor Telepon PIC"
                             align="left"
-                            style={{ minWidth: "12rem" }}
+                            style={{
+                                width: "max-content",
+                                whiteSpace: "nowrap",
+                            }}
                         ></Column>
                         <Column
                             body={(rowData) => {
@@ -647,12 +704,18 @@ export default function Index({ auth }) {
                             headerClassName="dark:border-none  bg-transparent dark:bg-transparent dark:text-gray-300"
                             align="left"
                             header="Dokumen"
-                            style={{ minWidth: "2rem" }}
+                            style={{
+                                width: "max-content",
+                                whiteSpace: "nowrap",
+                            }}
                         ></Column>
                         <Column
                             header="Action"
                             body={actionBodyTemplate}
-                            style={{ minWidth: "12rem" }}
+                            style={{
+                                width: "max-content",
+                                whiteSpace: "nowrap",
+                            }}
                             className="dark:border-none"
                             headerClassName="dark:border-none  bg-transparent dark:bg-transparent dark:text-gray-300"
                         ></Column>

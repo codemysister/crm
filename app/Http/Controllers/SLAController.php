@@ -65,10 +65,10 @@ class SLAController extends Controller
         }
 
         $romanMonth = intToRoman($currentMonth);
-        $latestData = SLA::latest()->first() ?? "#SLA/000/$romanMonth/$currentYear";
+        $latestData = SLA::latest()->first() ?? "SLA/000/$romanMonth/$currentYear";
         $lastCode = $latestData ? explode('/', $latestData->code ?? $latestData)[1] : 0;
         $newCode = str_pad((int) $lastCode + 1, 3, '0', STR_PAD_LEFT);
-        $newCode = "#SLA/$newCode/$romanMonth/$currentYear";
+        $newCode = "SLA/$newCode/$romanMonth/$currentYear";
         return $newCode;
     }
 
