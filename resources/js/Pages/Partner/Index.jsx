@@ -744,7 +744,7 @@ export default function Index({ auth, partner }) {
         post("/partners/import", {
             onSuccess: () => {
                 showSuccess("Tambah");
-                setModalPartnersIsVisible((prev) => false);
+                setModalImportPartnerIsVisible((prev) => false);
                 getPartners();
                 reset();
 
@@ -2464,6 +2464,7 @@ export default function Index({ auth, partner }) {
                                             Kabupaten *
                                         </label>
                                         <Dropdown
+                                            dataKey="name"
                                             value={
                                                 data.partner.regency
                                                     ? JSON.parse(

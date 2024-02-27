@@ -20,6 +20,7 @@ return new class extends Migration {
             $table->string('partner_name');
             $table->string('partner_pic');
             $table->string('partner_pic_position');
+            $table->string('partner_pic_signature')->nullable()->default(null);
             $table->json('partner_province');
             $table->json('partner_regency');
             $table->string('url_subdomain');
@@ -43,6 +44,7 @@ return new class extends Migration {
             $table->boolean('referral');
             $table->string('referral_name')->nullable();
             $table->string('signature_name');
+            $table->string('referral_signature')->nullable()->default(null);
             $table->string('signature_position');
             $table->string('signature_image');
             $table->string('mou_doc');

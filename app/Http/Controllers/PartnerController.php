@@ -54,6 +54,7 @@ class PartnerController extends Controller
     {
 
         $imported = Excel::import(new PartnerImport, request()->file('partner.excell'));
+        // Excel::queueImport(new PartnerImport, request()->file('partner.excell'));
 
     }
 
@@ -235,7 +236,7 @@ class PartnerController extends Controller
             },
             'price_list'
 
-        ])->latest()->get();
+        ])->get();
         $salesDefault = User::role('account executive')->get();
         $accountManagerDefault = User::role('account manager')->get();
 

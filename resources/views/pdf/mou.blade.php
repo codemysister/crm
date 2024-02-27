@@ -112,7 +112,7 @@
                             <table style="width: 100%;">
                                 <tr>
                                     <td style="width: 20%;">Nama</td>
-                                    <td>: <b>{{$mou["partner_pic"]}}</b></td>
+                                    <td class="uppercase">: <b>{{$mou["partner_pic"]}}</b></td>
                                 </tr>
                                 <tr>
                                     <td style="width: 20%;">Jabatan</td>
@@ -120,7 +120,7 @@
                                 </tr>
                                 <tr>
                                     <td style="width: 20%;">Lembaga</td>
-                                    <td>: <b>{{$mou["partner_name"]}}</b></td>
+                                    <td class="uppercase">: <b>{{$mou["partner_name"]}}</b></td>
                                 </tr>
                                 <tr>
                                     <td style="width: 20%;">Lokasi</td>
@@ -184,7 +184,7 @@
                                                     b.
                                                 </td>
                                                 <td>
-                                                    Aplikasi <i>Mobile</i> Kartu Digital bernama “CARDS Kartu Digital”
+                                                    Aplikasi <i>Mobile</i> Kartu Digital bernama <b>“CARDS Kartu Digital”</b>
                                                     yang
                                                     dapat diunduh untuk pengguna sistem operasi Android maupun iOS.
                                                 </td>
@@ -194,7 +194,7 @@
                                                     c.
                                                 </td>
                                                 <td>
-                                                    Aplikasi <i>Mobile</i> Kasir Digital bernama “CAZH POS” dan/atau
+                                                    Aplikasi <i>Mobile</i> Kasir Digital bernama <b>“CAZH POS”</b> dan/atau
                                                     “CAZH POS
                                                     Lite” yang dapat diunduh untuk pengguna sistem operasi Android.
                                                 </td>
@@ -306,46 +306,46 @@
                                                     <p style="margin-bottom: 5px">
                                                         Harga produk kartu
                                                     </p>
-                                                    <table style="width: 100%; border: 1px solid #d1d5db;">
+                                                    <table style="width: 100%; border: 1px solid #000000;">
                                                         <thead
                                                             style="font-weight: bold; background-color: #efefef !important;">
                                                             <th
-                                                                style="width: 5%; border: 1px solid #d1d5db; padding: 5px">
+                                                                style="width: 5%; border: 1px solid #000000; padding: 5px">
                                                                 No
                                                             </th>
                                                             <th
-                                                                style="width: 50%; border: 1px solid #d1d5db; padding: 5px">
+                                                                style="width: 50%; border: 1px solid #000000; padding: 5px">
                                                                 Produk
                                                             </th>
-                                                            <th style="border: 1px solid #d1d5db; padding: 5px">
+                                                            <th style="border: 1px solid #000000; padding: 5px">
                                                                 Harga
                                                             </th>
                                                         </thead>
                                                         <tbody>
                                                             <tr>
                                                                 <td
-                                                                    style="text-align: center; border: 1px solid #d1d5db; padding: 5px">
+                                                                    style="text-align: center; border: 1px solid #000000; padding: 5px">
                                                                     1
                                                                 </td>
                                                                 <td
-                                                                    style="width: 50%; border: 1px solid #d1d5db; padding: 5px">
+                                                                    style="width: 50%; border: 1px solid #000000; padding: 5px">
                                                                     Kartu Tercetak
                                                                 </td>
-                                                                <td style="border: 1px solid #d1d5db; padding: 5px">
+                                                                <td style="border: 1px solid #000000; padding: 5px">
                                                                     Rp{{number_format($mou->price_card, 0, ',',
                                                                     '.')}}/kartu
                                                                 </td>
                                                             </tr>
                                                             <tr>
                                                                 <td
-                                                                    style="text-align: center; border: 1px solid #d1d5db; padding: 5px">
+                                                                    style="text-align: center; border: 1px solid #000000; padding: 5px">
                                                                     2
                                                                 </td>
                                                                 <td
-                                                                    style="width: 50%; border: 1px solid #d1d5db; padding: 5px">
+                                                                    style="width: 50%; border: 1px solid #000000; padding: 5px">
                                                                     Lanyard (Tali gantungan kartu)
                                                                 </td>
-                                                                <td style="border: 1px solid #d1d5db; padding: 5px">
+                                                                <td style="border: 1px solid #000000; padding: 5px">
                                                                     Rp{{number_format($mou->price_lanyard, 0, ',',
                                                                     '.')}}/lanyard
                                                                 </td>
@@ -365,28 +365,28 @@
                                                     <table style="width: 100%;">
                                                         <thead style="font-weight: bold; background-color: #efefef">
                                                             <th
-                                                                style="width: 5%; border: 1px solid #d1d5db; padding: 5px">
+                                                                style="width: 5%; border: 1px solid #000000; padding: 5px">
                                                                 No
                                                             </th>
                                                             <th
-                                                                style="width: 50%; border: 1px solid #d1d5db; padding: 5px">
+                                                                style="width: 50%; border: 1px solid #000000; padding: 5px">
                                                                 Layanan
                                                             </th>
-                                                            <th style="border: 1px solid #d1d5db; padding: 5px">
+                                                            <th style="border: 1px solid #000000; padding: 5px">
                                                                 Harga
                                                             </th>
                                                         </thead>
                                                         <tbody>
                                                             <tr>
                                                                 <td
-                                                                    style="text-align: center; border: 1px solid #d1d5db; padding: 5px">
+                                                                    style="text-align: center; border: 1px solid #000000; padding: 5px">
                                                                     1
                                                                 </td>
                                                                 <td
-                                                                    style="width: 50%; border: 1px solid #d1d5db; padding: 5px">
+                                                                    style="width: 50%; border: 1px solid #000000; padding: 5px">
                                                                     Langganan sistem
                                                                 </td>
-                                                                <td style="border: 1px solid #d1d5db; padding: 5px">
+                                                                <td style="border: 1px solid #000000; padding: 5px">
                                                                     Rp{{number_format($mou->price_subscription_system,
                                                                     0,
                                                                     ',', '.')}} per-{{$mou->period_subscription}}
@@ -410,31 +410,31 @@
                                                         dari ketiga sesi tersebut, Pihak Kedua akan dikenakan biaya
                                                         layanan untuk setiap pertemuan.
                                                     </p>
-                                                    <table style="width: 100%; border: 1px solid #d1d5db;">
+                                                    <table style="width: 100%; border: 1px solid #000000;">
                                                         <thead style="font-weight: bold; background-color: #efefef">
                                                             <th
-                                                                style="width: 5%; border: 1px solid #d1d5db; padding: 5px">
+                                                                style="width: 5%; border: 1px solid #000000; padding: 5px">
                                                                 No
                                                             </th>
                                                             <th
-                                                                style="width: 50%; border: 1px solid #d1d5db; padding: 5px">
+                                                                style="width: 50%; border: 1px solid #000000; padding: 5px">
                                                                 Layanan
                                                             </th>
-                                                            <th style="border: 1px solid #d1d5db; padding: 5px">
+                                                            <th style="border: 1px solid #000000; padding: 5px">
                                                                 Harga
                                                             </th>
                                                         </thead>
                                                         <tbody>
                                                             <tr>
                                                                 <td
-                                                                    style="text-align: center; border: 1px solid #d1d5db; padding: 5px">
+                                                                    style="text-align: center; border: 1px solid #000000; padding: 5px">
                                                                     1
                                                                 </td>
                                                                 <td
-                                                                    style="width: 50%; border: 1px solid #d1d5db; padding: 5px">
+                                                                    style="width: 50%; border: 1px solid #000000; padding: 5px">
                                                                     Training dan/atau sosialisasi di lokasi
                                                                 </td>
-                                                                <td style="border: 1px solid #d1d5db; padding: 5px">
+                                                                <td style="border: 1px solid #000000; padding: 5px">
                                                                     Rp{{number_format($mou->price_training_offline, 0,
                                                                     ',',
                                                                     '.')}} sekali bayar
@@ -442,14 +442,14 @@
                                                             </tr>
                                                             <tr>
                                                                 <td
-                                                                    style="text-align: center; border: 1px solid #d1d5db; padding: 5px">
+                                                                    style="text-align: center; border: 1px solid #000000; padding: 5px">
                                                                     2
                                                                 </td>
                                                                 <td
-                                                                    style="width: 50%; border: 1px solid #d1d5db; padding: 5px">
+                                                                    style="width: 50%; border: 1px solid #000000; padding: 5px">
                                                                     Training dan/atau sosialisasi secara daring.
                                                                 </td>
-                                                                <td style="border: 1px solid #d1d5db; padding: 5px">
+                                                                <td style="border: 1px solid #000000; padding: 5px">
                                                                     Rp{{number_format($mou->price_training_online, 0,
                                                                     ',',
                                                                     '.')}}
@@ -532,35 +532,35 @@
                                                     <p style="margin-bottom: 5px">
                                                         Aplikasi Kartu Digital
                                                     </p>
-                                                    <table style="width: 100%; border: 1px solid #d1d5db;">
+                                                    <table style="width: 100%; border: 1px solid #000000;">
                                                         <thead style="font-weight: bold; background-color: #efefef">
                                                             <th
-                                                                style="width: 5%; border: 1px solid #d1d5db; padding: 5px">
+                                                                style="width: 5%; border: 1px solid #000000; padding: 5px">
                                                                 No
                                                             </th>
                                                             <th
-                                                                style="width: 35%; border: 1px solid #d1d5db; padding: 5px">
+                                                                style="width: 35%; border: 1px solid #000000; padding: 5px">
                                                                 Produk
                                                             </th>
                                                             <th
-                                                                style="width: 35%; border: 1px solid #d1d5db; padding: 5px">
+                                                                style="width: 35%; border: 1px solid #000000; padding: 5px">
                                                                 Metode Pembayaran
                                                             </th>
-                                                            <th style="border: 1px solid #d1d5db; padding: 5px">
+                                                            <th style="border: 1px solid #000000; padding: 5px">
                                                                 Harga
                                                             </th>
                                                         </thead>
                                                         <tbody>
                                                             <tr>
                                                                 <td
-                                                                    style="text-align: center; vertical-align: top; border: 1px solid #d1d5db; padding: 5px">
+                                                                    style="text-align: center; vertical-align: top; border: 1px solid #000000; padding: 5px">
                                                                     1
                                                                 </td>
                                                                 <td
-                                                                    style="width: 35%; vertical-align: top; border: 1px solid #d1d5db; padding: 5px">
+                                                                    style="width: 35%; vertical-align: top; border: 1px solid #000000; padding: 5px">
                                                                     Beli CazhPOIN nominal 10.000-249.999
                                                                 </td>
-                                                                <td style="border: 1px solid #d1d5db; padding: 5px">
+                                                                <td style="border: 1px solid #000000; padding: 5px">
                                                                     <ul
                                                                         style="list-style-type: disc; list-style-position: inside;">
                                                                         <li>
@@ -574,7 +574,7 @@
                                                                         </li>
                                                                     </ul>
                                                                 </td>
-                                                                <td style="border: 1px solid #d1d5db; padding: 5px">
+                                                                <td style="border: 1px solid #000000; padding: 5px">
                                                                     <ul>
                                                                         <li>
                                                                             Rp5.000
@@ -590,14 +590,14 @@
                                                             </tr>
                                                             <tr>
                                                                 <td
-                                                                    style="text-align: center; vertical-align: top; border: 1px solid #d1d5db; padding: 5px">
+                                                                    style="text-align: center; vertical-align: top; border: 1px solid #000000; padding: 5px">
                                                                     2
                                                                 </td>
                                                                 <td
-                                                                    style="width: 35%; vertical-align: top; border: 1px solid #d1d5db; padding: 5px">
+                                                                    style="width: 35%; vertical-align: top; border: 1px solid #000000; padding: 5px">
                                                                     Beli CazhPOIN nominal 250.000 dan/atau lebih
                                                                 </td>
-                                                                <td style="border: 1px solid #d1d5db; padding: 5px">
+                                                                <td style="border: 1px solid #000000; padding: 5px">
                                                                     <ul
                                                                         style="list-style-type: disc; list-style-position: inside;">
                                                                         <li>
@@ -611,7 +611,7 @@
                                                                         </li>
                                                                     </ul>
                                                                 </td>
-                                                                <td style="border: 1px solid #d1d5db; padding: 5px">
+                                                                <td style="border: 1px solid #000000; padding: 5px">
                                                                     <ul>
                                                                         <li>
                                                                             Gratis
@@ -627,14 +627,14 @@
                                                             </tr>
                                                             <tr>
                                                                 <td
-                                                                    style="text-align: center; vertical-align: top; border: 1px solid #d1d5db; padding: 5px">
+                                                                    style="text-align: center; vertical-align: top; border: 1px solid #000000; padding: 5px">
                                                                     3
                                                                 </td>
                                                                 <td
-                                                                    style="width: 35%; vertical-align: top; border: 1px solid #d1d5db; padding: 5px">
+                                                                    style="width: 35%; vertical-align: top; border: 1px solid #000000; padding: 5px">
                                                                     Isi Kartu
                                                                 </td>
-                                                                <td style="border: 1px solid #d1d5db; padding: 5px">
+                                                                <td style="border: 1px solid #000000; padding: 5px">
                                                                     <ul
                                                                         style="list-style-type: disc; list-style-position: inside;">
                                                                         <li>
@@ -654,7 +654,7 @@
                                                                         </li>
                                                                     </ul>
                                                                 </td>
-                                                                <td style="border: 1px solid #d1d5db; padding: 5px">
+                                                                <td style="border: 1px solid #000000; padding: 5px">
                                                                     <ul>
                                                                         <li>
                                                                             Rp7.500
@@ -678,14 +678,14 @@
                                                             </tr>
                                                             <tr>
                                                                 <td
-                                                                    style="text-align: center; vertical-align: top; border: 1px solid #d1d5db; padding: 5px">
+                                                                    style="text-align: center; vertical-align: top; border: 1px solid #000000; padding: 5px">
                                                                     4
                                                                 </td>
                                                                 <td
-                                                                    style="width: 35%; vertical-align: top; border: 1px solid #d1d5db; padding: 5px">
+                                                                    style="width: 35%; vertical-align: top; border: 1px solid #000000; padding: 5px">
                                                                     Pembayaran Tagihan
                                                                 </td>
-                                                                <td style="border: 1px solid #d1d5db; padding: 5px">
+                                                                <td style="border: 1px solid #000000; padding: 5px">
                                                                     <ul
                                                                         style="list-style-type: disc; list-style-position: inside;">
                                                                         <li>
@@ -702,7 +702,7 @@
                                                                         </li>
                                                                     </ul>
                                                                 </td>
-                                                                <td style="border: 1px solid #d1d5db; padding: 5px">
+                                                                <td style="border: 1px solid #000000; padding: 5px">
                                                                     <ul>
                                                                         <li>
                                                                             Rp7.500
@@ -733,45 +733,45 @@
                                                     <p style="margin-bottom: 5px">
                                                         Aplikasi Kasir Digital
                                                     </p>
-                                                    <table style="width: 100%; border: 1px solid #d1d5db;">
+                                                    <table style="width: 100%; border: 1px solid #000000;">
                                                         <thead style="font-weight: bold; background-color: #efefef">
                                                             <th
-                                                                style="width: 5%; border: 1px solid #d1d5db; padding: 5px">
+                                                                style="width: 5%; border: 1px solid #000000; padding: 5px">
                                                                 No
                                                             </th>
                                                             <th
-                                                                style="width: 50%; border: 1px solid #d1d5db; padding: 5px">
+                                                                style="width: 60%; border: 1px solid #000000; padding: 5px">
                                                                 Transaksi
                                                             </th>
-                                                            <th style="border: 1px solid #d1d5db; padding: 5px">
+                                                            <th style="border: 1px solid #000000; padding: 5px">
                                                                 Harga per-transaksi
                                                             </th>
                                                         </thead>
                                                         <tbody>
                                                             <tr>
                                                                 <td
-                                                                    style="text-align: center; border: 1px solid #d1d5db; padding: 5px">
+                                                                    style="text-align: center; border: 1px solid #000000; padding: 5px">
                                                                     1
                                                                 </td>
                                                                 <td
-                                                                    style="width: 50%; border: 1px solid #d1d5db; padding: 5px">
+                                                                    style="width: 50%; border: 1px solid #000000; padding: 5px">
                                                                     Top-up kartu
                                                                 </td>
-                                                                <td style="border: 1px solid #d1d5db; padding: 5px">
+                                                                <td style="border: 1px solid #000000; padding: 5px">
                                                                     Rp{{number_format($mou->fee_topup_cazhpos, 0, ',',
                                                                     '.')}}
                                                                 </td>
                                                             </tr>
                                                             <tr>
                                                                 <td
-                                                                    style="text-align: center; border: 1px solid #d1d5db; padding: 5px">
+                                                                    style="text-align: center; border: 1px solid #000000; padding: 5px">
                                                                     2
                                                                 </td>
                                                                 <td
-                                                                    style="width: 50%; border: 1px solid #d1d5db; padding: 5px">
+                                                                    style="width: 50%; border: 1px solid #000000; padding: 5px">
                                                                     Withdraw kartu
                                                                 </td>
-                                                                <td style="border: 1px solid #d1d5db; padding: 5px">
+                                                                <td style="border: 1px solid #000000; padding: 5px">
                                                                     Rp{{number_format($mou->fee_withdraw_cazhpos, 0,
                                                                     ',',
                                                                     '.')}}
@@ -779,27 +779,27 @@
                                                             </tr>
                                                             <tr>
                                                                 <td
-                                                                    style="text-align: center; border: 1px solid #d1d5db; padding: 5px">
+                                                                    style="text-align: center; border: 1px solid #000000; padding: 5px">
                                                                     3
                                                                 </td>
                                                                 <td
-                                                                    style="width: 50%; border: 1px solid #d1d5db; padding: 5px">
+                                                                    style="width: 50%; border: 1px solid #000000; padding: 5px">
                                                                     Transaksi pembelian produk
                                                                 </td>
-                                                                <td style="border: 1px solid #d1d5db; padding: 5px">
+                                                                <td style="border: 1px solid #000000; padding: 5px">
                                                                     Rp0
                                                                 </td>
                                                             </tr>
                                                             <tr>
                                                                 <td
-                                                                    style="text-align: center; border: 1px solid #d1d5db; padding: 5px">
+                                                                    style="text-align: center; border: 1px solid #000000; padding: 5px">
                                                                     4
                                                                 </td>
                                                                 <td
-                                                                    style="width: 50%; border: 1px solid #d1d5db; padding: 5px">
+                                                                    style="width: 50%; border: 1px solid #000000; padding: 5px">
                                                                     Penarikan CazhBox dari Aplikasi Kasir
                                                                 </td>
-                                                                <td style="border: 1px solid #d1d5db; padding: 5px">
+                                                                <td style="border: 1px solid #000000; padding: 5px">
                                                                     Rp7.500/transaksi
                                                                 </td>
                                                             </tr>
@@ -816,37 +816,37 @@
                                                     <p style="margin-bottom: 5px">
                                                         Aplikasi Web Dashboard Sistem Manajemen Lembaga
                                                     </p>
-                                                    <table style="width: 100%; border: 1px solid #d1d5db;">
+                                                    <table style="width: 100%; border: 1px solid #000000;">
                                                         <thead style="background-color: #efefef; font-weight: bold;">
                                                             <th
-                                                                style="width: 5%; border: 1px solid #d1d5db; padding: 5px">
+                                                                style="width: 5%; border: 1px solid #000000; padding: 5px">
                                                                 No
                                                             </th>
                                                             <th
-                                                                style="width: 30%; border: 1px solid #d1d5db; padding: 5px">
+                                                                style="width: 30%; border: 1px solid #000000; padding: 5px">
                                                                 Transaksi
                                                             </th>
                                                             <th
-                                                                style="width: 30%; border: 1px solid #d1d5db; padding: 5px">
+                                                                style="width: 30%; border: 1px solid #000000; padding: 5px">
                                                                 Jenis Transaksi
                                                             </th>
                                                             <th
-                                                                style="width: 30%; border: 1px solid #d1d5db; padding: 5px">
+                                                                style="width: 30%; border: 1px solid #000000; padding: 5px">
                                                                 Harga per-transaksi
                                                             </th>
                                                         </thead>
                                                         <tbody>
                                                             <tr>
                                                                 <td
-                                                                    style="text-align: center; vertical-align: top; border: 1px solid #d1d5db; padding: 5px">
+                                                                    style="text-align: center; vertical-align: top; border: 1px solid #000000; padding: 5px">
                                                                     1
                                                                 </td>
                                                                 <td
-                                                                    style="width: 30%; vertical-align: top; border: 1px solid #d1d5db; padding: 5px">
+                                                                    style="width: 30%; vertical-align: top; border: 1px solid #000000; padding: 5px">
                                                                     Top-up saldo kartu
                                                                 </td>
                                                                 <td
-                                                                    style="width: 30%; border: 1px solid #d1d5db; padding: 5px">
+                                                                    style="width: 30%; border: 1px solid #000000; padding: 5px">
                                                                     <ul
                                                                         style="list-style-type: disc; list-style-position: inside;">
                                                                         <li>
@@ -855,7 +855,7 @@
                                                                     </ul>
                                                                 </td>
                                                                 <td
-                                                                    style="width: 30%; border: 1px solid #d1d5db; padding: 5px">
+                                                                    style="width: 30%; border: 1px solid #000000; padding: 5px">
                                                                     <ul>
                                                                         <li>
                                                                             Rp1.000
@@ -865,15 +865,15 @@
                                                             </tr>
                                                             <tr>
                                                                 <td
-                                                                    style="text-align: center; vertical-align: top; border: 1px solid #d1d5db; padding: 5px">
+                                                                    style="text-align: center; vertical-align: top; border: 1px solid #000000; padding: 5px">
                                                                     2
                                                                 </td>
                                                                 <td
-                                                                    style="width: 30%; vertical-align: top; border: 1px solid #d1d5db; padding: 5px">
+                                                                    style="width: 30%; vertical-align: top; border: 1px solid #000000; padding: 5px">
                                                                     Pembayaran tagihan
                                                                 </td>
                                                                 <td
-                                                                    style="width: 30%; border: 1px solid #d1d5db; padding: 5px">
+                                                                    style="width: 30%; border: 1px solid #000000; padding: 5px">
                                                                     <ul
                                                                         style="list-style-type: disc; list-style-position: inside;">
                                                                         <li>
@@ -889,7 +889,7 @@
                                                                     </ul>
                                                                 </td>
                                                                 <td
-                                                                    style="width: 30%; border: 1px solid #d1d5db; padding: 5px; vertical-align: top">
+                                                                    style="width: 30%; border: 1px solid #000000; padding: 5px; vertical-align: top">
                                                                     <ul>
                                                                         <li>
                                                                             Rp0
@@ -907,16 +907,16 @@
                                                             </tr>
                                                             <tr>
                                                                 <td
-                                                                    style="text-align: center; vertical-align: top; border: 1px solid #d1d5db; padding: 5px">
+                                                                    style="text-align: center; vertical-align: top; border: 1px solid #000000; padding: 5px">
                                                                     3
                                                                 </td>
-                                                                <td style="width: 30%; vertical-align: top; border: 1px solid #d1d5db; padding: 5px"
+                                                                <td style="width: 30%; vertical-align: top; border: 1px solid #000000; padding: 5px"
                                                                     colspan=2>
                                                                     Penarikan CazhBox dari Dashboard
                                                                 </td>
 
                                                                 <td
-                                                                    style="width: 30%; border: 1px solid #d1d5db; padding: 5px">
+                                                                    style="width: 30%; border: 1px solid #000000; padding: 5px">
                                                                     Rp7.500/transaksi
                                                                 </td>
                                                             </tr>
@@ -1122,7 +1122,12 @@
                 </div>
                 <div class="w-[30%]">
                     <p>Pihak Kedua</p>
+                    @if($mou->partner_pic_signature)
+                    <img src='{{ public_path("storage/$mou->partner_pic_signature") }}' alt="" class="min-h-20 w-full"
+                        style="width:90%; height: 80px" />
+                    @else
                     <div style="min-height: 80px"></div>
+                    @endif
                     <p><b>{{$mou->partner_pic}}</b></p>
                 </div>
             </div>
@@ -1131,7 +1136,12 @@
             <div class="px-8 flex flex-row mt-5 justify-center">
                 <div class="w-[30%]">
                     <p>Pihak Ketiga</p>
+                    @if($mou->referral_signature)
+                    <img src='{{ public_path("storage/$mou->referral_signature") }}' alt="" class="min-h-20 w-full"
+                        style="width:90%; height: 80px" />
+                    @else
                     <div style="min-height: 80px"></div>
+                    @endif
                     <p>
                         <b>
                             {{$mou->referral_name}}
