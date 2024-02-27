@@ -4,31 +4,38 @@ import { useState } from "react";
 import { Button } from "primereact/button";
 import { DataTable } from "primereact/datatable";
 import { Dialog } from "primereact/dialog";
-import { Head, useForm } from "@inertiajs/react";
+import { Head, Link, useForm } from "@inertiajs/react";
 import { Calendar } from "primereact/calendar";
+import { useRef } from "react";
 import { FilterMatchMode } from "primereact/api";
 import { Dropdown } from "primereact/dropdown";
 import React from "react";
-import { useRef } from "react";
 import { Toast } from "primereact/toast";
 import { Column } from "primereact/column";
+import { useEffect } from "react";
+
 const BASE_URL = import.meta.env.VITE_BASE_URL;
 
-const Edit = ({ usersDefault, partnersDefault, stpd }) => {
+const Edit = ({ stpd, usersDefault, partnersDefault, signaturesProp }) => {
     const [users, setUsers] = useState(usersDefault);
     const [partners, setPartners] = useState(partnersDefault);
+    const [signatures, setSignatures] = useState(signaturesProp);
     const [dialogVisible, setDialogVisible] = useState(false);
     const [rowClick, setRowClick] = useState(true);
-    const cetakBtn = React.useRef();
-    const linkDocSTPD = React.useRef();
     const toast = useRef(null);
-    const signatures = [
-        {
-            name: "Muh Arif Mahfudin",
-            position: "CEO",
-            signature: "/assets/img/signatures/ttd.png",
-        },
-    ];
+    const [provinces, setProvinces] = useState([]);
+    const [regencys, setRegencys] = useState([]);
+    const [codeProvince, setcodeProvince] = useState(null);
+
+    const animatePartnerNameRef = useRef(null);
+    const animateDepartureDateRef = useRef(null);
+    const animateReturnDateRef = useRef(null);
+    const animateTransportationRef = useRef(null);
+    const animateAccomodationRef = useRef(null);
+    const animatePartnerProvinceRef = useRef(null);
+    const animatePartnerRegencyRef = useRef(null);
+
+   
     const [filters, setFilters] = useState({
         global: { value: null, matchMode: FilterMatchMode.CONTAINS },
     });
@@ -42,6 +49,20 @@ const Edit = ({ usersDefault, partnersDefault, stpd }) => {
 
         setFilters(_filters);
         setGlobalFilterValue(value);
+    };
+
+    const triggerInputFocus = (ref) => {
+        if (ref.current) {
+            ref.current.classList.add("twinkle");
+            ref.current.focus();
+        }
+        return null;
+    };
+
+    const stopAnimateInputFocus = (ref) => {
+        ref.current.classList.remove("twinkle");
+
+        return null;
     };
 
     document.querySelector("body").classList.add("overflow-hidden");
@@ -59,15 +80,100 @@ const Edit = ({ usersDefault, partnersDefault, stpd }) => {
         uuid: stpd.uuid,
         code: stpd.code,
         employees: stpd.employees,
-        institution: stpd.institution,
-        location: stpd.location,
-        departure_date: new Date(stpd.departure_date),
-        return_date: new Date(stpd.return_date),
+        partner: {
+            name: stpd.partner_name,
+            province: stpd.partner_province,
+            regency: stpd.partner_regency
+        },
+        departure_date: stpd.departure_date,
+        return_date: stpd.return_date,
         transportation: stpd.transportation,
         accommodation: stpd.accommodation,
-        signature: JSON.parse(stpd.signature),
-        stpd_doc: stpd.stpd_doc,
+        signature: {
+            name: stpd.signature_name,
+            image: stpd.signature_image,
+            position: stpd.signature_position
+        },
+        stpd_doc: "",
     });
+
+    useEffect(() => {
+        const fetchData = async () => {
+            await getProvince();
+            await getRegencys();
+        };
+
+        fetchData();
+    }, []);
+
+    useEffect(() => {
+        if (codeProvince) {
+            getRegencys(codeProvince);
+        }
+    }, [codeProvince]);
+
+    const getProvince = async () => {
+        const options = {
+            method: "GET",
+            url: `/api/wilayah/provinsi/`,
+            headers: {
+                "Content-Type": "application/json",
+            },
+        };
+
+        try {
+            const response = await axios.request(options);
+            const dataArray = Object.entries(response.data).map(
+                ([key, value]) => ({
+                    code: key,
+                    name: value
+                        .toLowerCase()
+                        .split(" ")
+                        .map(
+                            (word) =>
+                                word.charAt(0).toUpperCase() + word.slice(1)
+                        )
+                        .join(" "),
+                })
+            );
+            setProvinces((prev) => (prev = dataArray));
+        } catch (error) {
+            console.log(error);
+        }
+    };
+
+    const getRegencys = async (code) => {
+        let url = code
+            ? `/api/wilayah/kabupaten?provinsi=${code}`
+            : `/api/wilayah/kabupaten`;
+        const options = {
+            method: "GET",
+            url: url,
+            headers: {
+                "Content-Type": "application/json",
+            },
+        };
+
+        try {
+            const response = await axios.request(options);
+            const dataArray = Object.entries(response.data).map(
+                ([key, value]) => ({
+                    code: key,
+                    name: value
+                        .toLowerCase()
+                        .split(" ")
+                        .map(
+                            (word) =>
+                                word.charAt(0).toUpperCase() + word.slice(1)
+                        )
+                        .join(" "),
+                })
+            );
+            setRegencys((prev) => (prev = dataArray));
+        } catch (error) {
+            console.log(error);
+        }
+    };
 
     const dialogFooterTemplate = () => {
         return (
@@ -83,6 +189,7 @@ const Edit = ({ usersDefault, partnersDefault, stpd }) => {
         if (!tanggal) {
             return "N/A";
         }
+        tanggal = new Date(tanggal);
         let tanggalAngka = tanggal.getDate();
         let bulanAngka = tanggal.getMonth() + 1;
         let tahunAngka = tanggal.getFullYear();
@@ -108,20 +215,12 @@ const Edit = ({ usersDefault, partnersDefault, stpd }) => {
         return <span>{props.placeholder}</span>;
     };
 
-    const optionTemplate = (option) => {
-        return (
-            <div className="flex align-items-center">
-                <div>{option.name}</div>
-            </div>
-        );
-    };
-
     const optionSignatureTemplate = (item) => {
         return (
             <div className="flex flex-wrap p-2 align-items-center gap-3">
                 <img
                     className="w-3rem shadow-2 flex-shrink-0 border-round"
-                    src={item.signature}
+                    src={"/storage/" + item.image}
                     alt={item.name}
                 />
                 <div className="flex-1 flex flex-col gap-2 xl:mr-8">
@@ -134,6 +233,16 @@ const Edit = ({ usersDefault, partnersDefault, stpd }) => {
             </div>
         );
     };
+
+    const optionTemplate = (option) => {
+        return (
+            <div className="flex align-items-center">
+                <div>{option.name}</div>
+            </div>
+        );
+    };
+
+   
 
     const header = (
         <div className="flex flex-row justify-left gap-2 align-items-center items-end">
@@ -173,15 +282,15 @@ const Edit = ({ usersDefault, partnersDefault, stpd }) => {
     const handleSubmitForm = (e) => {
         e.preventDefault();
 
-        put("/stpd/" + data.uuid, {
+        put("/stpd/"+data.uuid, {
             onSuccess: () => {
-                showSuccess("Update");
+                showSuccess("Tambah");
                 window.location = BASE_URL + "/stpd";
                 // reset("name", "category", "price", "unit", "description");
             },
 
             onError: () => {
-                showError("Update");
+                showError("Tambah");
             },
         });
     };
@@ -192,8 +301,29 @@ const Edit = ({ usersDefault, partnersDefault, stpd }) => {
             <Toast ref={toast} />
             <div className="h-screen max-h-screen overflow-y-hidden">
                 <div className="flex flex-col h-screen max-h-screen overflow-hidden md:flex-row z-40 relative gap-5">
-                    <div className="md:w-[40%] overflow-y-auto h-screen max-h-screen p-5">
-                        <Card title="Surat Keterangan Perjalanan Dinas">
+                    <div className="md:w-[35%] overflow-y-auto h-screen max-h-screen p-5">
+                        <Card>
+                        <div className="flex justify-between items-center mb-4">
+                                <h1 className="font-bold text-xl">
+                                Surat Keterangan Perjalanan Dinas
+                                </h1>
+                                <Link href="/stpd">
+                                    <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                        stroke-width="1.5"
+                                        stroke="currentColor"
+                                        class="w-6 h-6"
+                                    >
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            d="M8.25 9V5.25A2.25 2.25 0 0 1 10.5 3h6a2.25 2.25 0 0 1 2.25 2.25v13.5A2.25 2.25 0 0 1 16.5 21h-6a2.25 2.25 0 0 1-2.25-2.25V15m-3 0-3-3m0 0 3-3m-3 3H15"
+                                        />
+                                    </svg>
+                                </Link>
+                            </div>
                             <div className="flex flex-col">
                                 <Button
                                     label="Tambah karyawan"
@@ -213,17 +343,42 @@ const Edit = ({ usersDefault, partnersDefault, stpd }) => {
                                         hidden
                                     />
                                 </div>
+
                                 <div className="flex flex-col mt-3">
                                     <label htmlFor="lembaga">Lembaga *</label>
                                     <Dropdown
-                                        value={data.institution}
+                                        value={data.partner}
+                                        dataKey="name"
                                         onChange={(e) => {
-                                            setData({
-                                                ...data,
-                                                institution: e.target.value,
-                                                location:
-                                                    e.target.value.address,
+                                            setData("partner", {
+                                                ...data.partner,
+                                                id: e.target.value.id,
+                                                name: e.target.value.name,
+                                                province:
+                                                    e.target.value.province,
+                                                regency: e.target.value.regency,
                                             });
+                                            setcodeProvince(
+                                                (prev) =>
+                                                    (prev = JSON.parse(
+                                                        e.target.value.province
+                                                    ).code)
+                                            );
+                                        }}
+                                        onFocus={() => {
+                                            triggerInputFocus(
+                                                animatePartnerNameRef
+                                            );
+                                        }}
+                                        onShow={() => {
+                                            triggerInputFocus(
+                                                animatePartnerNameRef
+                                            );
+                                        }}
+                                        onBlur={() => {
+                                            stopAnimateInputFocus(
+                                                animatePartnerNameRef
+                                            );
                                         }}
                                         options={partners}
                                         optionLabel="name"
@@ -232,19 +387,100 @@ const Edit = ({ usersDefault, partnersDefault, stpd }) => {
                                         valueTemplate={selectedOptionTemplate}
                                         itemTemplate={optionTemplate}
                                         className="w-full md:w-14rem"
-                                        editable
                                     />
                                 </div>
+
                                 <div className="flex flex-col mt-3">
-                                    <label htmlFor="location">Lokasi *</label>
-                                    <InputText
-                                        value={data.location}
-                                        onChange={(e) =>
-                                            setData("location", e.target.value)
+                                    <label htmlFor="province">Provinsi *</label>
+
+                                    <Dropdown
+                                        value={
+                                            data.partner.province
+                                                ? JSON.parse(
+                                                      data.partner.province
+                                                  )
+                                                : null
                                         }
-                                        className="dark:bg-gray-300"
-                                        id="location"
-                                        aria-describedby="location-help"
+                                        onChange={(e) => {
+                                            setcodeProvince(
+                                                (prev) =>
+                                                    (prev = e.target.value.code)
+                                            );
+                                            setData("partner", {
+                                                ...data.partner,
+                                                province: JSON.stringify(
+                                                    e.target.value
+                                                ),
+                                            });
+                                        }}
+                                        dataKey="name"
+                                        options={provinces}
+                                        optionLabel="name"
+                                        placeholder="Pilih Provinsi"
+                                        filter
+                                        valueTemplate={selectedOptionTemplate}
+                                        itemTemplate={optionTemplate}
+                                        className="w-full md:w-14rem"
+                                        onFocus={() => {
+                                            triggerInputFocus(
+                                                animatePartnerProvinceRef
+                                            );
+                                        }}
+                                        onShow={() => {
+                                            triggerInputFocus(
+                                                animatePartnerProvinceRef
+                                            );
+                                        }}
+                                        onBlur={() => {
+                                            stopAnimateInputFocus(
+                                                animatePartnerProvinceRef
+                                            );
+                                        }}
+                                    />
+                                </div>
+
+                                <div className="flex flex-col mt-3">
+                                    <label htmlFor="regency">Kabupaten *</label>
+                                    <Dropdown
+                                        dataKey="name"
+                                        value={
+                                            data.partner.regency
+                                                ? JSON.parse(
+                                                      data.partner.regency
+                                                  )
+                                                : null
+                                        }
+                                        onChange={(e) => {
+                                           
+                                            setData("partner", {
+                                                ...data.partner,
+                                                regency: JSON.stringify(
+                                                    e.target.value
+                                                ),
+                                            });
+                                        }}
+                                        onFocus={() => {
+                                            triggerInputFocus(
+                                                animatePartnerRegencyRef
+                                            );
+                                        }}
+                                        onShow={() => {
+                                            triggerInputFocus(
+                                                animatePartnerRegencyRef
+                                            );
+                                        }}
+                                        onBlur={() => {
+                                            stopAnimateInputFocus(
+                                                animatePartnerRegencyRef
+                                            );
+                                        }}
+                                        options={regencys}
+                                        optionLabel="name"
+                                        placeholder="Pilih Kabupaten"
+                                        filter
+                                        valueTemplate={selectedOptionTemplate}
+                                        itemTemplate={optionTemplate}
+                                        className="w-full md:w-14rem"
                                     />
                                 </div>
                                 <div className="flex flex-col mt-3">
@@ -264,15 +500,28 @@ const Edit = ({ usersDefault, partnersDefault, stpd }) => {
                                             )
                                                 .toISOString()
                                                 .split("T")[0];
-                                            console.log(formattedDate);
-                                            console.log(e.target.value);
                                             setData(
                                                 "departure_date",
                                                 e.target.value
                                             );
                                         }}
+                                        onFocus={() => {
+                                            triggerInputFocus(
+                                                animateDepartureDateRef
+                                            );
+                                        }}
+                                        onShow={() => {
+                                            triggerInputFocus(
+                                                animateDepartureDateRef
+                                            );
+                                        }}
+                                        onHide={() => {
+                                            stopAnimateInputFocus(
+                                                animateDepartureDateRef
+                                            );
+                                        }}
                                         showIcon
-                                        dateFormat="yy-mm-dd"
+                                        dateFormat="dd/mm/yy"
                                     />
                                 </div>
                                 <div className="flex flex-col mt-3">
@@ -297,8 +546,23 @@ const Edit = ({ usersDefault, partnersDefault, stpd }) => {
                                                 e.target.value
                                             );
                                         }}
+                                        onFocus={() => {
+                                            triggerInputFocus(
+                                                animateReturnDateRef
+                                            );
+                                        }}
+                                        onShow={() => {
+                                            triggerInputFocus(
+                                                animateReturnDateRef
+                                            );
+                                        }}
+                                        onHide={() => {
+                                            stopAnimateInputFocus(
+                                                animateReturnDateRef
+                                            );
+                                        }}
                                         showIcon
-                                        dateFormat="yy-mm-dd"
+                                        dateFormat="dd/mm/yy"
                                     />
                                 </div>
                                 <div className="flex flex-col mt-3">
@@ -313,6 +577,17 @@ const Edit = ({ usersDefault, partnersDefault, stpd }) => {
                                                 e.target.value
                                             )
                                         }
+                                        onFocus={() => {
+                                            triggerInputFocus(
+                                                animateTransportationRef
+                                            );
+                                        }}
+                                       
+                                        onBlur={() => {
+                                            stopAnimateInputFocus(
+                                                animateTransportationRef
+                                            );
+                                        }}
                                         className="dark:bg-gray-300"
                                         id="transportation"
                                         aria-describedby="transportation-help"
@@ -330,6 +605,17 @@ const Edit = ({ usersDefault, partnersDefault, stpd }) => {
                                                 e.target.value
                                             )
                                         }
+                                        onFocus={() => {
+                                            triggerInputFocus(
+                                                animateAccomodationRef
+                                            );
+                                        }}
+                                        
+                                        onBlur={() => {
+                                            stopAnimateInputFocus(
+                                                animateAccomodationRef
+                                            );
+                                        }}
                                         className="dark:bg-gray-300"
                                         id="accommodation"
                                         aria-describedby="accommodation-help"
@@ -339,18 +625,21 @@ const Edit = ({ usersDefault, partnersDefault, stpd }) => {
                                     <label htmlFor="signature">
                                         Tanda Tangan *
                                     </label>
-
                                     <Dropdown
-                                        value={data.signature.name}
+                                        dataKey="name"
+                                        value={data.signature}
                                         onChange={(e) => {
                                             setData({
                                                 ...data,
-                                                signature: e.target.value,
+                                                signature: {
+                                                    name: e.target.value.name,
+                                                    image: e.target.value.image,
+                                                    position: e.target.value.position,
+                                                },
                                             });
                                         }}
                                         options={signatures}
                                         optionLabel="name"
-                                        optionValue="name"
                                         placeholder="Pilih Tanda Tangan"
                                         filter
                                         valueTemplate={selectedOptionTemplate}
@@ -360,6 +649,7 @@ const Edit = ({ usersDefault, partnersDefault, stpd }) => {
                                 </div>
 
                                 <div className="flex-flex-col mt-3">
+                                    
                                     <form onSubmit={handleSubmitForm}>
                                         <Button className="mx-auto justify-center block">
                                             Submit
@@ -369,6 +659,7 @@ const Edit = ({ usersDefault, partnersDefault, stpd }) => {
                             </div>
                         </Card>
                     </div>
+                 
 
                     <Dialog
                         header="Karyawan"
@@ -391,10 +682,10 @@ const Edit = ({ usersDefault, partnersDefault, stpd }) => {
                             tableStyle={{ minWidth: "50rem" }}
                             selectionMode={rowClick ? null : "checkbox"}
                             selection={data.employees}
-                            onSelectionChange={(e) =>
-                                setData("employees", e.value)
-                            }
-                            dataKey="user_id"
+                            onSelectionChange={(e) => {
+                                setData("employees", e.value);
+                            }}
+                            dataKey="name"
                         >
                             <Column
                                 selectionMode="multiple"
@@ -403,38 +694,40 @@ const Edit = ({ usersDefault, partnersDefault, stpd }) => {
                             <Column field="name" header="Name"></Column>
                             <Column
                                 filter
+                                body={(rowData) => {
+                                    return <span>{rowData.position}</span>;
+                                }}
                                 header="Jabatan"
-                                body={(rowData) => rowData.position}
+                                field="position"
                             ></Column>
                         </DataTable>
                     </Dialog>
 
-                    <div className="md:w-[60%] h-screen max-h-screen overflow-y-auto p-5">
-                        <header>
+                    <div className="md:w-[65%] h-screen text-sm max-h-screen overflow-y-auto p-5">
+                    <header>
                             <div className="flex justify-between items-center">
-                                <div className="w-full">
-                                    <h2 className="font-bold text-sm">
-                                        PT CAZH TEKNOLOGI INOVASI
-                                    </h2>
-                                    <p className="text-xs ">
-                                        Bonavida Park D1, Jl. Raya Karanggintung
-                                    </p>
-                                    <p className="text-xs">
-                                        Kec. Sumbang, Kab. Banyumas,
-                                    </p>
-                                    <p className="text-xs">Jawa Tengah 53183</p>
-                                    <p className="text-xs">hello@cazh.id</p>
-                                </div>
                                 <div className="w-full">
                                     <img
                                         src="/assets/img/cazh.png"
                                         alt=""
-                                        className="scale-[0.6]"
-                                        // style={{ scale: 0.8 }}
+                                        className="float-left w-1/3 h-1/3"
                                     />
-                                    {/* <button className="z-50" onClick={tes}>
-                                    tes
-                                </button> */}
+                                </div>
+                                <div className="w-full text-right text-xs">
+                                    <h2 className="font-bold">
+                                        PT CAZH TEKNOLOGI INOVASI
+                                    </h2>
+                                    <p>
+                                        Bonavida Park D1, Jl. Raya Karanggintung
+                                    </p>
+                                    <p>
+                                        Kec. Sumbang, Kab. Banyumas,Jawa Tengah
+                                        53183
+                                    </p>
+
+                                    <p>
+                                        hello@cards.co.id | https://cards.co.id
+                                    </p>
                                 </div>
                             </div>
                         </header>
@@ -443,15 +736,15 @@ const Edit = ({ usersDefault, partnersDefault, stpd }) => {
                             <h1 className="font-bold underline mx-auto">
                                 SURAT TUGAS PERJALANAN DINAS
                             </h1>
-                            <p className="">Nomor : 001/CAZHSPJ/X/2023</p>
+                            <p className="">Nomor : {data.code}</p>
                         </div>
 
                         <div className="w-full mt-5">
                             <table className="w-full">
                                 <thead className="bg-blue-100 text-left">
-                                    <th>No</th>
-                                    <th>Nama Karyawan</th>
-                                    <th>Jabatan</th>
+                                    <th className="px-2 py-1">No</th>
+                                    <th className="px-2 py-1">Nama Karyawan</th>
+                                    <th className="px-2 py-1">Jabatan</th>
                                 </thead>
                                 <tbody>
                                     {data.employees?.length == 0 && (
@@ -464,9 +757,9 @@ const Edit = ({ usersDefault, partnersDefault, stpd }) => {
                                     {data.employees?.map((data, i) => {
                                         return (
                                             <tr key={data.name + i}>
-                                                <td>{++i}</td>
-                                                <td>{data.name}</td>
-                                                <td>{data.position}</td>
+                                                <td className="px-2 py-1">{++i}</td>
+                                                <td className="px-2 py-1">{data.name}</td>
+                                                <td className="px-2 py-1">{data.position}</td>
                                             </tr>
                                         );
                                     })}
@@ -483,76 +776,84 @@ const Edit = ({ usersDefault, partnersDefault, stpd }) => {
                             <table className="w-full">
                                 <tbody>
                                     <tr>
-                                        <td className="text-gray-700 text-base font-bold w-1/6">
+                                        <td className="text-gray-700 w-1/6">
                                             Lembaga Tujuan
                                         </td>
-                                        <td className="text-gray-700 text-base w-[2%]">
+                                        <td className="text-gray-700 w-[1%]">
                                             :
                                         </td>
-                                        <td className="text-gray-700 text-base w-7/12">
-                                            {typeof data.institution ===
-                                            "object"
-                                                ? data.institution.name
-                                                : data.institution}
+                                        <td className="text-gray-700 font-bold w-7/12">
+                                            {data.partner.name ?? "{{Lembaga}}"}
                                         </td>
                                     </tr>
                                     <tr>
-                                        <td className="text-gray-700 text-base font-bold w-1/6">
+                                        <td className="text-gray-700 w-1/6">
                                             Lokasi
                                         </td>
-                                        <td className="text-gray-700 text-base w-[2%]">
+                                        <td className="text-gray-700 w-[1%]">
                                             :
                                         </td>
-                                        <td className="text-gray-700 text-base w-7/12">
-                                            {data.location}
+                                        <td className="text-gray-700 font-bold w-7/12">
+                                        <span ref={animatePartnerRegencyRef}>
+                                    {data.partner.regency
+                                        ? JSON.parse(data.partner.regency).name
+                                        : "{{Kab/Kota}}"}
+                                </span>
+                                {", "}
+                                <span ref={animatePartnerProvinceRef}>
+                                    {data.partner.province
+                                        ? JSON.parse(data.partner.province).name
+                                        : "{{Provinsi}}"}
+                                </span>
                                         </td>
                                     </tr>
+                                    <br />
                                     <tr>
-                                        <td className="text-gray-700 text-base font-bold w-1/6">
+                                        <td className="text-gray-700 w-1/6">
                                             Berangkat
                                         </td>
-                                        <td className="text-gray-700 text-base w-[2%]">
+                                        <td className="text-gray-700 w-[1%]">
                                             :
                                         </td>
-                                        <td className="text-gray-700 text-base w-7/12">
+                                        <td ref={animateDepartureDateRef} className="text-gray-700 font-bold w-7/12">
                                             {ubahFormatTanggal(
                                                 data.departure_date
                                             )}
                                         </td>
                                     </tr>
                                     <tr>
-                                        <td className="text-gray-700 text-base font-bold w-1/6">
+                                        <td className="text-gray-700 w-1/6">
                                             Kembali
                                         </td>
-                                        <td className="text-gray-700 text-base w-[2%]">
+                                        <td className="text-gray-700 w-[1%]">
                                             :
                                         </td>
-                                        <td className="text-gray-700 text-base w-7/12">
+                                        <td ref={animateReturnDateRef} className="text-gray-700 font-bold w-7/12">
                                             {ubahFormatTanggal(
                                                 data.return_date
                                             )}
                                         </td>
                                     </tr>
                                     <tr>
-                                        <td className="text-gray-700 text-base font-bold w-1/6">
+                                        <td className="text-gray-700 w-1/6">
                                             Kendaraan
                                         </td>
-                                        <td className="text-gray-700 text-base w-[2%]">
+                                        <td className="text-gray-700 w-[1%]">
                                             :
                                         </td>
-                                        <td className="text-gray-700 text-base w-7/12">
-                                            {data.transportation}
+                                        <td ref={animateTransportationRef} className="text-gray-700 font-bold w-7/12">
+                                            {data.transportation ?? "{{Kendaraan}}"}
                                         </td>
                                     </tr>
                                     <tr>
-                                        <td className="text-gray-700 text-base font-bold w-1/6">
+                                        <td className="text-gray-700 w-1/6">
                                             Akomodasi
                                         </td>
-                                        <td className="text-gray-700 text-base w-[2%]">
+                                        <td className="text-gray-700 w-[1%]">
                                             :
                                         </td>
-                                        <td className="text-gray-700 text-base w-7/12">
-                                            {data.accommodation}
+                                        <td ref={animateAccomodationRef} className="text-gray-700 font-bold w-7/12">
+                                            {data.accommodation ?? "{{Akomodasi}}"}
                                         </td>
                                     </tr>
                                 </tbody>
@@ -577,7 +878,7 @@ const Edit = ({ usersDefault, partnersDefault, stpd }) => {
                         <div className="flex flex-col mt-5 justify-start w-[30%]">
                             <p>Purwokerto, {new Date().getFullYear()}</p>
                             <img
-                                src={BASE_URL + data.signature.signature}
+                                src={BASE_URL +'/storage/'+ data.signature.image}
                                 alt=""
                             />
                             <p>{data.signature.name}</p>
@@ -587,7 +888,178 @@ const Edit = ({ usersDefault, partnersDefault, stpd }) => {
                 </div>
 
                 <div className="bg-white h-screen z-10 w-full absolute top-0 left-0"></div>
+
+                {/* <div
+                    className="z-0"
+                    style={{
+                        width: "100%",
+                        position: "absolute",
+                        top: 0,
+                        left: 0,
+                    }}
+                    id="content"
+                >
+                    <header>
+                        <div className="flex justify-between items-center">
+                            <div className="w-full">
+                                <h2 className="font-bold text-sm">
+                                    PT CAZH TEKNOLOGI INOVASI
+                                </h2>
+                                <p className="text-xs ">
+                                    Bonavida Park D1, Jl. Raya Karanggintung
+                                </p>
+                                <p className="text-xs">
+                                    Kec. Sumbang, Kab. Banyumas,
+                                </p>
+                                <p className="text-xs">Jawa Tengah 53183</p>
+                                <p className="text-xs">hello@cazh.id</p>
+                            </div>
+                            <div className="w-full">
+                                <img
+                                    src="/assets/img/cazh.png"
+                                    alt=""
+                                    className="scale-[0.6]"
+                                 
+                                />
+                               
+                            </div>
+                        </div>
+                    </header>
+
+                    <div className="text-center mt-5">
+                        <h1 className="font-bold underline mx-auto">
+                            SURAT TUGAS PERJALANAN DINAS
+                        </h1>
+                        <p className="mt-10">
+                            Untuk melaksanakan tugas melakukan perjalanan dinas
+                            dengan ketentuan sebagai berikut:
+                        </p>
+                        <p className="">Nomor : 001/CAZHSPJ/X/2023</p>
+                    </div>
+
+                    <div className="w-full mt-5">
+                        <table className="w-full">
+                            <thead className="bg-blue-100 text-left">
+                                <th>No</th>
+                                <th>Nama Karyawan</th>
+                                <th>Jabatan</th>
+                            </thead>
+                            <tbody>
+                                {selectedUsers?.length == 0 && (
+                                    <tr className="text-center">
+                                        <td colSpan={3}>
+                                            Karyawan belum ditambah
+                                        </td>
+                                    </tr>
+                                )}
+                                {selectedUsers?.map((data, i) => {
+                                    return (
+                                        <tr>
+                                            <td>{++i}</td>
+                                            <td>{data.name}</td>
+                                            <td>{data.roles[0].name}</td>
+                                        </tr>
+                                    );
+                                })}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <p className="mt-10">
+                        Untuk melaksanakan tugas melakukan perjalanan dinas
+                        dengan ketentuan sebagai berikut:
+                    </p>
+
+                    <div className="w-full mt-5">
+                        <table class="w-full">
+                            <tr>
+                                <td class="text-gray-700 text-base font-bold w-1/6">
+                                    Lembaga Tujuan
+                                </td>
+                                <td class="text-gray-700 text-base w-[2%]">
+                                    :
+                                </td>
+                                <td class="text-gray-700 text-base w-7/12">
+                                    {data.institution}
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="text-gray-700 text-base font-bold w-1/6">
+                                    Lokasi
+                                </td>
+                                <td class="text-gray-700 text-base w-[2%]">
+                                    :
+                                </td>
+                                <td class="text-gray-700 text-base w-7/12">
+                                    {data.location}
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="text-gray-700 text-base font-bold w-1/6">
+                                    Berangkat
+                                </td>
+                                <td class="text-gray-700 text-base w-[2%]">
+                                    :
+                                </td>
+                                <td class="text-gray-700 text-base w-7/12">
+                                    {ubahFormatTanggal(data.departure_date)}
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="text-gray-700 text-base font-bold w-1/6">
+                                    Kembali
+                                </td>
+                                <td class="text-gray-700 text-base w-[2%]">
+                                    :
+                                </td>
+                                <td class="text-gray-700 text-base w-7/12">
+                                    {ubahFormatTanggal(data.return_date)}
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="text-gray-700 text-base font-bold w-1/6">
+                                    Kendaraan
+                                </td>
+                                <td class="text-gray-700 text-base w-[2%]">
+                                    :
+                                </td>
+                                <td class="text-gray-700 text-base w-7/12">
+                                    {data.transportation}
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="text-gray-700 text-base font-bold w-1/6">
+                                    Akomodasi
+                                </td>
+                                <td class="text-gray-700 text-base w-[2%]">
+                                    :
+                                </td>
+                                <td class="text-gray-700 text-base w-7/12">
+                                    {data.accommodation}
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+
+                    <div className="w-full mt-5 text-justify">
+                        Semua biaya dalam perjalanan dinas, konsumsi, serta
+                        akomodasi dalam rangka perjalanan dinas ini akan menjadi
+                        tanggung jawab PT Cazh Teknologi Inovasi sesuai
+                        peraturan perjalanan dinas yang berlaku.
+                    </div>
+
+                    <div className="w-full mt-5 text-justify">
+                        Demikian surat ini dibuat agar dapat dilaksanakan dengan
+                        baik dan penuh tanggung jawab. Kepada semua pihak yang
+                        terlibat dimohon kerja sama yang baik agar perjalanan
+                        dinas ini dapat terlaksana dengan lancar.
+                    </div>
+                </div> */}
             </div>
+
+            {/* <PDFViewer width="1000" height="600" className="">
+                 <Invoice invoice={invoice} />
+             </PDFViewer> */}
         </>
     );
 };

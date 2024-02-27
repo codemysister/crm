@@ -11,6 +11,7 @@ import { ConfirmDialog, confirmDialog } from "primereact/confirmdialog";
 import { Skeleton } from "primereact/skeleton";
 import { Link } from "@inertiajs/react";
 import { FilterMatchMode } from "primereact/api";
+import { ProgressSpinner } from "primereact/progressspinner";
 
 const BASE_URL = import.meta.env.VITE_BASE_URL;
 
@@ -82,22 +83,28 @@ export default function Index({ auth, spdsDefault }) {
     const actionBodyTemplate = (rowData) => {
         return (
             <React.Fragment>
-                <Button
-                    icon="pi pi-pencil"
-                    rounded
-                    outlined
-                    className="mr-2"
-                    onClick={() => (window.location = "/stpd/" + rowData.uuid)}
-                />
-                <Button
-                    icon="pi pi-trash"
-                    rounded
-                    outlined
-                    severity="danger"
-                    onClick={() => {
-                        handleDeleteProduct(rowData);
-                    }}
-                />
+                {permissions.includes("edit stpd") && (
+                    <Button
+                        icon="pi pi-pencil"
+                        rounded
+                        outlined
+                        className="mr-2"
+                        onClick={() =>
+                            (window.location = "/stpd/" + rowData.uuid)
+                        }
+                    />
+                )}
+                {permissions.includes("hapus stpd") && (
+                    <Button
+                        icon="pi pi-trash"
+                        rounded
+                        outlined
+                        severity="danger"
+                        onClick={() => {
+                            handleDeleteProduct(rowData);
+                        }}
+                    />
+                )}
             </React.Fragment>
         );
     };
@@ -204,16 +211,18 @@ export default function Index({ auth, spdsDefault }) {
             <ConfirmDialog />
 
             <HeaderModule title="Surat Perjalanan Dinas">
-                <Link
-                    href="/stpd/create"
-                    className="bg-purple-600 block text-white py-2 px-3 font-semibold text-sm shadow-md rounded-lg mr-2"
-                >
-                    <i
-                        className="pi pi-plus"
-                        style={{ fontSize: "0.7rem", paddingRight: "5px" }}
-                    ></i>
-                    Tambah
-                </Link>
+                {permissions.includes("tambah stpd") && (
+                    <Link
+                        href="/stpd/create"
+                        className="bg-purple-600 block text-white py-2 px-3 font-semibold text-sm shadow-md rounded-lg mr-2"
+                    >
+                        <i
+                            className="pi pi-plus"
+                            style={{ fontSize: "0.7rem", paddingRight: "5px" }}
+                        ></i>
+                        Tambah
+                    </Link>
+                )}
             </HeaderModule>
 
             <div className="flex mx-auto flex-col justify-center mt-5 gap-5">
@@ -250,15 +259,21 @@ export default function Index({ auth, spdsDefault }) {
                             headerClassName="dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300"
                             header="Nama"
                             align="left"
-                            style={{ width: "20%" }}
+                            style={{
+                                width: "max-content",
+                                whiteSpace: "nowrap",
+                            }}
                         ></Column>
                         <Column
-                            field="institution"
+                            field="partner_name"
                             className="dark:border-none"
                             headerClassName="dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300"
                             header="Lembaga"
                             align="left"
-                            style={{ width: "20%" }}
+                            style={{
+                                width: "max-content",
+                                whiteSpace: "nowrap",
+                            }}
                         ></Column>
                         <Column
                             field="code"
@@ -266,15 +281,39 @@ export default function Index({ auth, spdsDefault }) {
                             headerClassName="dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300"
                             header="Kode"
                             align="left"
-                            style={{ width: "20%" }}
+                            style={{
+                                width: "max-content",
+                                whiteSpace: "nowrap",
+                            }}
                         ></Column>
                         <Column
-                            field="location"
+                            field="partner_province"
                             className="dark:border-none"
-                            headerClassName="dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300"
-                            header="Alamat"
+                            headerClassName="dark:border-none  bg-transparent dark:bg-transparent dark:text-gray-300"
                             align="left"
-                            style={{ width: "20%" }}
+                            header="Provinsi"
+                            body={(rowData) => {
+                                return JSON.parse(rowData.partner_province)
+                                    .name;
+                            }}
+                            style={{
+                                width: "max-content",
+                                whiteSpace: "nowrap",
+                            }}
+                        ></Column>
+                        <Column
+                            field="partner_regency"
+                            className="dark:border-none"
+                            headerClassName="dark:border-none  bg-transparent dark:bg-transparent dark:text-gray-300"
+                            align="left"
+                            header="Kabupaten"
+                            body={(rowData) => {
+                                return JSON.parse(rowData.partner_regency).name;
+                            }}
+                            style={{
+                                width: "max-content",
+                                whiteSpace: "nowrap",
+                            }}
                         ></Column>
                         <Column
                             body={(rowData) => {
@@ -286,7 +325,10 @@ export default function Index({ auth, spdsDefault }) {
                             headerClassName="dark:border-none  bg-transparent dark:bg-transparent dark:text-gray-300"
                             align="left"
                             header="Tanggal Berangkat"
-                            style={{ width: "10%" }}
+                            style={{
+                                width: "max-content",
+                                whiteSpace: "nowrap",
+                            }}
                         ></Column>
                         <Column
                             body={(rowData) => {
@@ -298,7 +340,10 @@ export default function Index({ auth, spdsDefault }) {
                             headerClassName="dark:border-none  bg-transparent dark:bg-transparent dark:text-gray-300"
                             align="left"
                             header="Tanggal Kembali"
-                            style={{ width: "10%" }}
+                            style={{
+                                width: "max-content",
+                                whiteSpace: "nowrap",
+                            }}
                         ></Column>
                         <Column
                             field="accommodation"
@@ -306,31 +351,75 @@ export default function Index({ auth, spdsDefault }) {
                             headerClassName="dark:border-none  bg-transparent dark:bg-transparent dark:text-gray-300"
                             align="left"
                             header="Akomodasi"
-                            style={{ width: "20%" }}
+                            style={{
+                                width: "max-content",
+                                whiteSpace: "nowrap",
+                            }}
                         ></Column>
                         <Column
                             body={(rowData) => {
-                                return (
-                                    <a
-                                        href={BASE_URL + "/" + rowData.stpd_doc}
-                                        download={`Surat_Tugas_Perjalanan_Dinas_${rowData.institution}`}
-                                        class="p-button font-bold text-center rounded-full block pi pi-file-pdf"
-                                    ></a>
+                                return rowData.stpd == "" ? (
+                                    <ProgressSpinner
+                                        style={{
+                                            width: "30px",
+                                            height: "30px",
+                                        }}
+                                        strokeWidth="8"
+                                        fill="var(--surface-ground)"
+                                        animationDuration=".5s"
+                                    />
+                                ) : (
+                                    <div className="flex w-full h-full items-center justify-center">
+                                        <a
+                                            href={
+                                                BASE_URL +
+                                                "/" +
+                                                rowData.stpd_doc
+                                            }
+                                            download={`${rowData.code}_${rowData.partner_name}`}
+                                            class="font-bold  w-full h-full text-center rounded-full "
+                                        >
+                                            <i
+                                                className="pi pi-file-pdf"
+                                                style={{
+                                                    width: "100%",
+                                                    height: "100%",
+                                                    fontSize: "1.5rem",
+                                                }}
+                                            ></i>
+                                        </a>
+                                    </div>
                                 );
+                                // return (
+                                //     <a
+                                //         href={BASE_URL + "/" + rowData.stpd_doc}
+                                //         download={`Surat_Tugas_Perjalanan_Dinas_${rowData.institution}`}
+                                //         class="p-button font-bold text-center rounded-full block pi pi-file-pdf"
+                                //     ></a>
+                                // );
                             }}
                             className="dark:border-none"
                             headerClassName="dark:border-none  bg-transparent dark:bg-transparent dark:text-gray-300"
                             align="left"
                             header="Dokumen"
-                            style={{ width: "5%" }}
+                            style={{
+                                width: "max-content",
+                                whiteSpace: "nowrap",
+                            }}
                         ></Column>
-                        <Column
-                            header="Action"
-                            body={actionBodyTemplate}
-                            style={{ minWidth: "12rem" }}
-                            className="dark:border-none"
-                            headerClassName="dark:border-none  bg-transparent dark:bg-transparent dark:text-gray-300"
-                        ></Column>
+                        {permissions.includes("hapus stpd") &&
+                            permissions.includes("edit stpd") && (
+                                <Column
+                                    header="Action"
+                                    body={actionBodyTemplate}
+                                    style={{
+                                        width: "max-content",
+                                        whiteSpace: "nowrap",
+                                    }}
+                                    className="dark:border-none"
+                                    headerClassName="dark:border-none  bg-transparent dark:bg-transparent dark:text-gray-300"
+                                ></Column>
+                            )}
                     </DataTable>
                 </div>
             </div>

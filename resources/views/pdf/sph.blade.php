@@ -56,7 +56,7 @@
 
     <div class="flex flex-col justify-center mt-10 text-center">
         <div class="font-bold underline text-sm">SURAT PENAWARAN HARGA</div>
-        <div class="text-sm">Nomor : {{$sph->code}}</div>
+        <div class="text-sm">Nomor : <b>{{$sph->code}}</b></div>
     </div>
 
     <div class="flex flex-col justify-start mt-6 text-left">
@@ -96,7 +96,7 @@
                     <td class="p-1" style=" width: 10%; text-align: center;">{{$loop->index + 1}}</td>
                     <td class="p-1" style="width: 40%;">{{$product['name']}}</td>
                     <td class="p-1" style="width: 20%;">{{isset($product['detail']) ? $product['detail'] : null}}</td>
-                    <td class="p-1" style="text-align: center;">Rp{{number_format($product['total'], 0, ',','.')}}</td>
+                    <td class="p-1" style="text-align: right;">Rp{{number_format($product['total'], 0, ',','.')}}</td>
                 </tr>
                 @endforeach
             </tbody>
@@ -124,9 +124,8 @@
     <div class="flex flex-col justify-start mt-8 float-left">
         <p class="text-sm">Purwokerto, {{\Carbon\Carbon::parse(now())->locale('id')->isoFormat('D MMMM YYYY',
             'Do MMMM YYYY') }}</p>
-        <img class="h-20 w-[15%]" src="{{ public_path($sph->signature_image) }}" alt="Signature">
+        <img class="h-20 w-[15%]" src="{{ public_path("/storage/$sph->signature_image") }}" alt="Signature">
         <div class="text-sm">{{ $sph->signature_name }}</div>
-        <div class="text-sm">{{ $sph->signature_position }}</div>
     </div>
 
 

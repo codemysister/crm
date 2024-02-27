@@ -14,13 +14,16 @@ return new class extends Migration {
             $table->id();
             $table->uuid();
             $table->string('code');
-            $table->string('institution');
-            $table->string('location');
+            $table->string('partner_name');
+            $table->json('partner_province');
+            $table->json('partner_regency');
             $table->date('departure_date');
             $table->date('return_date');
             $table->string('transportation');
             $table->string('accommodation');
-            $table->json('signature'); // {name:'', position: '', signature:'path'}
+            $table->string('signature_name');
+            $table->string('signature_image');
+            $table->string('signature_position');
             $table->string('stpd_doc');
             $table->timestamps();
         });

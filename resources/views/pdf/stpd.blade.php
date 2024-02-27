@@ -30,20 +30,23 @@
     </style>
 </head>
 
-<body class="font-sen text-base">
+<body class="text-sm">
 
-    <div class="flex justify-between items-center bg-red-500">
+<div class="flex justify-between items-center">
         <table>
             <tr>
-                <td style="width:30%">
+                <td style="width:20%;">
                     <img src="{{ public_path('assets\img\cazh.png')}}" alt="Logo">
                 </td>
                 <td>
                     <div style="text-align:right">
-                        <div class="font-bold text-xs">PT. CAZH TEKNOLOGI INOVASI</div>
-                        <div class="text-xs">Bonavida Park D1, Jl. Raya Karanggintung</div>
-                        <div class="text-xs">Kec. Sumbang, Kab. Banyumas, Jawa Tengah 53183</div>
-                        <div class="text-xs">hello@cazh.id | https://cazh.id</div>
+                        <div class="font-bold" style="font-size: 10px; line-height: 14px">PT. CAZH TEKNOLOGI INOVASI
+                        </div>
+                        <div class="" style="font-size: 8px; line-height: 10px">Bonavida Park D1, Jl. Raya Karanggintung
+                        </div>
+                        <div class="" style="font-size: 8px; line-height: 10px">Kec. Sumbang, Kab. Banyumas, Jawa Tengah
+                            53183</div>
+                        <div class="" style="font-size: 8px; line-height: 10px">hello@cazh.id | https://cazh.id</div>
                     </div>
                 </td>
             </tr>
@@ -52,7 +55,7 @@
 
     <div class="flex flex-col justify-center mt-8 text-center">
         <div class="font-bold underline text-sm">SURAT KETERANGAN PERJALANAN DINAS</div>
-        <div class="text-sm">Nomor : {{stpd->code}}</div>
+        <div class="text-sm">Nomor : {{$stpd->code}}</div>
     </div>
 
     <div class="mt-4">
@@ -63,18 +66,18 @@
         <table class="w-full">
             <thead style="background-color:#CFE2F3;">
                 <tr>
-                    <th style="text-align:left; padding-left: 20px; width:5%;">No.</th>
-                    <th style="text-align:left; padding-left: 20px;">Karyawan</th>
-                    <th style="text-align:left; padding-left: 20px;">Jabatan</th>
+                    <th style="text-align:left; width:5%;" class="p-2 pl-2">No.</th>
+                    <th style="text-align:left;" class="p-2">Karyawan</th>
+                    <th style="text-align:left;" class="p-2">Jabatan</th>
                 </tr>
             </thead>
             <tbody>
                 @foreach($employees as $employee)
 
                 <tr>
-                    <td style="text-align:left; padding-left: 20px; width:5%;">{{ $loop->index + 1 }}</td>
-                    <td style="text-align:left; padding-left: 20px;">{{ $employee['name'] }}</td>
-                    <td style="text-align:left; padding-left: 20px;">{{ ucwords($employee['position']) }}</td>
+                    <td style="text-align:left; width:5%;" class="p-2 pl-2">{{ $loop->index + 1 }}</td>
+                    <td style="text-align:left;" class="p-2">{{ $employee['name'] }}</td>
+                    <td style="text-align:left;" class="p-2">{{ ucwords($employee['position']) }}</td>
                 </tr>
                 @endforeach
             </tbody>
@@ -85,19 +88,23 @@
         <div>Untuk melaksanakan tugas melakukan perjalanan dinas dengan ketentuan sebagai berikut:</div>
     </div>
 
+   
+
     <div class="mt-4">
         <div class="flex w-full">
             <table style="width:100%">
                 <tr>
                     <td style="width:20%;">Lembaga Tujuan</td>
                     <td style="width:1%">:</td>
-                    <td style="font-weight:bold">{{$stpd->institution}}</td>
+                    <td style="font-weight:bold">{{$stpd->partner_name}}</td>
                 </tr>
                 <tr>
                     <td style="width:20%;">Lokasi</td>
                     <td style="width:1%">:</td>
-                    <td style="font-weight:bold">{{$stpd->location}}</td>
+                    <td style="font-weight:bold">{{json_decode($stpd->partner_regency)->name}},
+            {{json_decode($stpd->partner_province)->name}}</td>
                 </tr>
+                <br />
                 <tr>
                     <td style="width:20%;">Berangkat</td>
                     <td style="width:1%">:</td>
@@ -139,19 +146,16 @@
         </div>
 
 
-        @php
-        $decodedSignature = json_decode($stpd->signature, true);
-        @endphp
 
         <div class="flex flex-col justify-start mt-8 float-left">
             <div>Purwokerto, {{date("d/m/Y")}}</div>
-            <img class="h-20 w-[15%]" src="{{ public_path($decodedSignature['signature']) }}" alt="Signature">
-            <div>{{ $decodedSignature['name'] }}</div>
-            <div>{{ $decodedSignature['position'] }}</div>
+            <img class="h-20 w-[15%]" src='{{ public_path("/storage/$stpd->signature_image") }}' alt="Signature">
+            <div>{{ $stpd->signature_name }}</div>
+            <div>{{ $stpd->signature_position }}</div>
         </div>
 
-        <div class="flex justify-end mt-28 float-right">
-            <div class="w-2/5 text-left self-end">
+        <div class="flex justify-end mt-20">
+            <div class="self-start text-left">
                 <div>.........................., ..........................</div>
                 <div>Mengetahui*,</div>
                 <div style="margin-top: 50px;">(....................................................)</div>
