@@ -21,6 +21,10 @@ import { Calendar } from "primereact/calendar";
 import { Dropdown } from "primereact/dropdown";
 import { Message } from "primereact/message";
 import axios from "axios";
+import { FilePond, registerPlugin } from "react-filepond";
+import FilePondPluginFileValidateSize from "filepond-plugin-file-validate-size";
+import "filepond/dist/filepond.min.css";
+registerPlugin(FilePondPluginFileValidateSize);
 
 const BASE_URL = import.meta.env.VITE_BASE_URL;
 
@@ -37,7 +41,7 @@ export default function InvoiceSubscription({
     const [isLoadingData, setIsLoadingData] = useState(false);
     const [selectedInvoices, setSelectedInvoices] = useState([]);
     const [rowClick, setRowClick] = useState(true);
-   
+
     const [modalTransactionIsVisible, setModalTransactionIsVisible] =
         useState(false);
     const [modalEditTransactionIsVisible, setModalEditTransactionIsVisible] =
@@ -103,7 +107,7 @@ export default function InvoiceSubscription({
         errors: errorsTransaction,
     } = useForm({
         id: "",
-        invoice_subcription: null,
+        invoice_subscription: null,
         partner: {
             id: null,
             name: null,
@@ -117,6 +121,7 @@ export default function InvoiceSubscription({
         money: null,
         payment_for: null,
         metode: null,
+        rest_bill: null,
     });
 
     useEffect(() => {
@@ -316,7 +321,6 @@ export default function InvoiceSubscription({
 
         fetchData();
     }, []);
-    
 
     const convertRupiah = async (nominal) => {
         const options = {
@@ -375,17 +379,16 @@ export default function InvoiceSubscription({
         });
     };
 
-    const showError = (type, message) => {
+    const showError = (message) => {
         toast.current.show({
             severity: "error",
             summary: "Error",
-            detail: message ?? `${type} data gagal`,
+            detail: message,
             life: 3000,
         });
     };
 
     const handleEditTransaction = (transaction) => {
-       
         setDataTransaction({
             ...dataTransaction,
             uuid: transaction.uuid,
@@ -404,7 +407,6 @@ export default function InvoiceSubscription({
                 image: transaction.signature_image,
             },
         });
-        
     };
 
     const handleDeleteInvoiceSubscription = (invoice_subscription) => {
@@ -433,18 +435,55 @@ export default function InvoiceSubscription({
             icon: "pi pi-info-circle",
             acceptClassName: "p-button-danger",
             accept: async () => {
-                destroy(
-                    "invoice_subscriptions/transaction/" + invoice_subscription.uuid,
-                    {
-                        onSuccess: () => {
+                axios
+                    .delete(
+                        "invoice_subscriptions/transaction/" +
+                            invoice_subscription.uuid,
+
+                        {
+                            headers: {
+                                "X-CSRF-TOKEN": document.head.querySelector(
+                                    'meta[name="csrf-token"]'
+                                ).content,
+                            },
+                        }
+                    )
+                    .then((response) => {
+                        // setDataTransaction("rest_bill", response.data.rest_of_bill);
+                        if (response.data.error) {
+                            showError(response.data.error);
+                        } else {
+                            showSuccess("Tambah");
+                            setModalTransactionIsVisible((prev) => false);
+
                             getInvoiceSubscriptions();
-                            showSuccess("Hapus");
-                        },
-                        onError: () => {
-                            showError("Hapus");
-                        },
-                    }
-                );
+                            resetTransaction(
+                                "nominal",
+                                "date",
+                                "money",
+                                "payment_for",
+                                "metode",
+                                "signature"
+                            );
+                            setDataTransaction((prev) => ({
+                                ...prev,
+                                rest_bill: response.data.rest_of_bill,
+                            }));
+                        }
+                    });
+                // destroy(
+                //     "invoice_subscriptions/transaction/" +
+                //         invoice_subscription.uuid,
+                //     {
+                //         onSuccess: () => {
+                //             getInvoiceSubscriptions();
+                //             showSuccess("Hapus");
+                //         },
+                //         onError: () => {
+                //             showError("Hapus");
+                //         },
+                //     }
+                // );
             },
         });
     };
@@ -656,6 +695,15 @@ export default function InvoiceSubscription({
     };
 
     const onRowExpand = (event) => {
+        resetTransaction(
+            "nominal",
+            "date",
+            "money",
+            "payment_for",
+            "metode",
+            "signature"
+        );
+
         setDataTransaction((prev) => ({
             ...prev,
             invoice_subscription: event.data.uuid,
@@ -807,55 +855,129 @@ export default function InvoiceSubscription({
         );
     };
 
-    
-
     const handleSubmitForm = (e, type) => {
         e.preventDefault();
-
+        console.log(dataTransaction);
         if (type === "tambah") {
-            postTransaction("/invoice_subscriptions/transaction", {
-                onSuccess: () => {
-                    showSuccess("Tambah");
-                    setModalTransactionIsVisible((prev) => false);
+            // postTransaction("/invoice_subscriptions/transaction", {
+            //     onSuccess: () => {
+            //         showSuccess("Tambah");
+            //         setModalTransactionIsVisible((prev) => false);
 
-                    getInvoiceSubscriptions();
-                    resetTransaction("nominal");
-                },
-                onError: (errors) => {
-                    showError("Tambah", errors.error);
-                },
-            });
+            //         getInvoiceSubscriptions();
+            //         resetTransaction("nominal");
+            //     },
+            //     onError: (errors) => {
+            //         showError("Tambah", errors.error);
+            //     },
+            // });
+            axios
+                .post(
+                    "/invoice_subscriptions/transaction",
+                    {
+                        dataTransaction,
+                    },
+                    {
+                        headers: {
+                            "X-CSRF-TOKEN": document.head.querySelector(
+                                'meta[name="csrf-token"]'
+                            ).content,
+                        },
+                    }
+                )
+                .then((response) => {
+                    // setDataTransaction("rest_bill", response.data.rest_of_bill);
+                    if (response.data.error) {
+                        showError(response.data.error);
+                    } else {
+                        showSuccess("Tambah");
+                        setModalTransactionIsVisible((prev) => false);
+
+                        getInvoiceSubscriptions();
+                        resetTransaction(
+                            "nominal",
+                            "date",
+                            "money",
+                            "payment_for",
+                            "metode",
+                            "signature"
+                        );
+                        setDataTransaction((prev) => ({
+                            ...prev,
+                            rest_bill: response.data.rest_of_bill,
+                        }));
+                    }
+                });
         } else {
-            
-            putTransaction("/invoice_subscriptions/transaction/" + dataTransaction.uuid, {
-                onSuccess: (data) => {
-                    
-                    showSuccess("Update");
-                    setModalEditTransactionIsVisible((prev) => false);
-                    getInvoiceSubscriptions();
-                    reset(
-                        "date",
-                        "metode",
-                        "money",
-                        "nominal",
-                        "payment_for",
-                        "signature"
-                    );
-                    // console.log(data.props.rest_of_bill);
-                    // const rest_bill = data.props.rest_of_bill;
-                    // setDataTransaction((prev)=>({
-                    //     ...prev,
-                    //     rest_bill: rest_bill
-                    // }))
-                },
-                onError: () => {
-                    showError("Update");
-                },
-            });
+            axios
+                .put(
+                    "/invoice_subscriptions/transaction/" +
+                        dataTransaction.uuid,
+                    {
+                        dataTransaction,
+                    },
+                    {
+                        headers: {
+                            "X-CSRF-TOKEN": document.head.querySelector(
+                                'meta[name="csrf-token"]'
+                            ).content,
+                        },
+                    }
+                )
+                .then((response) => {
+                    // setDataTransaction("rest_bill", response.data.rest_of_bill);
+                    if (response.data.error) {
+                        showError(response.data.error);
+                    } else {
+                        showSuccess("Update");
+                        setModalEditTransactionIsVisible(
+                            (prev) => (prev = false)
+                        );
+
+                        getInvoiceSubscriptions();
+                        resetTransaction(
+                            "nominal",
+                            "date",
+                            "money",
+                            "payment_for",
+                            "metode",
+                            "signature"
+                        );
+                        setDataTransaction((prev) => ({
+                            ...prev,
+                            rest_bill: response.data.rest_of_bill,
+                        }));
+                    }
+                });
+            // putTransaction(
+            //     "/invoice_subscriptions/transaction/" + dataTransaction.uuid,
+            //     {
+            //         onSuccess: (data) => {
+            //             showSuccess("Update");
+            //             setModalEditTransactionIsVisible((prev) => false);
+            //             getInvoiceSubscriptions();
+            //             reset(
+            //                 "date",
+            //                 "metode",
+            //                 "money",
+            //                 "nominal",
+            //                 "payment_for",
+            //                 "signature"
+            //             );
+            //             // console.log(data.props.rest_of_bill);
+            //             // const rest_bill = data.props.rest_of_bill;
+            //             // setDataTransaction((prev)=>({
+            //             //     ...prev,
+            //             //     rest_bill: rest_bill
+            //             // }))
+            //         },
+            //         onError: () => {
+            //             showError("Update");
+            //         },
+            //     }
+            // );
         }
     };
-
-    // console.log(dataTransaction);
 
     const clear = () => {
         toast.current.clear();
@@ -920,7 +1042,7 @@ export default function InvoiceSubscription({
     const handleSubmitFormMassal = (e, type) => {
         e.preventDefault();
 
-        showDocumentLoading();
+        // showDocumentLoading();
         setModalBundleIsVisible((prev) => false);
         if (type === "tambah") {
             post("/invoice_subscriptions/batch", {
@@ -1025,11 +1147,13 @@ export default function InvoiceSubscription({
                         globalFilterMatchMode="contains"
                         rowExpansionTemplate={rowExpansionTemplate}
                         onRowExpand={onRowExpand}
-                        
                     >
                         <Column
                             expander={allowExpansion}
-                            style={{ width: "1rem" }}
+                            style={{
+                                width: "max-content",
+                                whiteSpace: "nowrap",
+                            }}
                         />
 
                         <Column
@@ -1040,7 +1164,10 @@ export default function InvoiceSubscription({
                         <Column
                             header="No"
                             body={(_, { rowIndex }) => rowIndex + 1}
-                            style={{ width: "5%" }}
+                            style={{
+                                width: "max-content",
+                                whiteSpace: "nowrap",
+                            }}
                             className="dark:border-none pl-6"
                             headerClassName="dark:border-none pl-6 bg-transparent dark:bg-transparent dark:text-gray-300"
                         />
@@ -1082,7 +1209,10 @@ export default function InvoiceSubscription({
                             className="dark:border-none"
                             headerClassName="dark:border-none  bg-transparent dark:bg-transparent dark:text-gray-300"
                             align="left"
-                            style={{ minWidth: "8rem" }}
+                            style={{
+                                width: "max-content",
+                                whiteSpace: "nowrap",
+                            }}
                         ></Column>
                         <Column
                             field="partner_name"
@@ -1102,7 +1232,10 @@ export default function InvoiceSubscription({
                                 </button>
                             )}
                             align="left"
-                            style={{ minWidth: "8rem" }}
+                            style={{
+                                width: "max-content",
+                                whiteSpace: "nowrap",
+                            }}
                         ></Column>
 
                         <Column
@@ -1152,7 +1285,10 @@ export default function InvoiceSubscription({
                             body={(rowData) => {
                                 return rowData.invoice_age + " hari";
                             }}
-                            style={{ minWidth: "8rem" }}
+                            style={{
+                                width: "max-content",
+                                whiteSpace: "nowrap",
+                            }}
                         ></Column>
 
                         <Column
@@ -1178,7 +1314,10 @@ export default function InvoiceSubscription({
                                     />
                                 );
                             }}
-                            style={{ minWidth: "8rem" }}
+                            style={{
+                                width: "max-content",
+                                whiteSpace: "nowrap",
+                            }}
                         ></Column>
 
                         <Column
@@ -1221,12 +1360,18 @@ export default function InvoiceSubscription({
                             headerClassName="dark:border-none  bg-transparent dark:bg-transparent dark:text-gray-300"
                             align="left"
                             header="Dokumen"
-                            style={{ minWidth: "2rem" }}
+                            style={{
+                                width: "max-content",
+                                whiteSpace: "nowrap",
+                            }}
                         ></Column>
                         <Column
                             header="Action"
                             body={actionBodyTemplate}
-                            style={{ minWidth: "12rem" }}
+                            style={{
+                                width: "max-content",
+                                whiteSpace: "nowrap",
+                            }}
                             className="dark:border-none"
                             headerClassName="dark:border-none  bg-transparent dark:bg-transparent dark:text-gray-300"
                         ></Column>
@@ -1247,20 +1392,29 @@ export default function InvoiceSubscription({
                     <Column
                         header="No"
                         body={(_, { rowIndex }) => rowIndex + 1}
-                        style={{ width: "1rem" }}
+                        style={{
+                            width: "max-content",
+                            whiteSpace: "nowrap",
+                        }}
                         className="dark:border-none"
                         headerClassName="dark:border-none bg-gray-50 dark:bg-transparent dark:text-gray-300"
                     />
                     <Column
                         field="bill"
                         header="Tagihan"
-                        style={{ minWidth: "10rem" }}
+                        style={{
+                            width: "max-content",
+                            whiteSpace: "nowrap",
+                        }}
                         headerClassName="dark:border-none bg-gray-50 dark:bg-transparent dark:text-gray-300"
                     ></Column>
                     <Column
                         field="nominal"
                         header="Nominal"
-                        style={{ minWidth: "8rem" }}
+                        style={{
+                            width: "max-content",
+                            whiteSpace: "nowrap",
+                        }}
                         body={(rowData) => {
                             return rowData.nominal.toLocaleString("id-ID");
                         }}
@@ -1270,7 +1424,10 @@ export default function InvoiceSubscription({
                     <Column
                         field="ppn"
                         header="Pajak (%)"
-                        style={{ minWidth: "8rem" }}
+                        style={{
+                            width: "max-content",
+                            whiteSpace: "nowrap",
+                        }}
                         body={(rowData) => {
                             return rowData.ppn;
                         }}
@@ -1279,7 +1436,10 @@ export default function InvoiceSubscription({
                     <Column
                         field="Pajak"
                         header="Pajak"
-                        style={{ minWidth: "8rem" }}
+                        style={{
+                            width: "max-content",
+                            whiteSpace: "nowrap",
+                        }}
                         body={(rowData) => {
                             return rowData.total_ppn.toLocaleString("id-ID");
                         }}
@@ -1289,7 +1449,10 @@ export default function InvoiceSubscription({
                     <Column
                         field="total_bill"
                         header="Jumlah"
-                        style={{ minWidth: "8rem" }}
+                        style={{
+                            width: "max-content",
+                            whiteSpace: "nowrap",
+                        }}
                         body={(rowData) => {
                             return rowData.total_bill.toLocaleString("id-ID");
                         }}
@@ -1309,6 +1472,44 @@ export default function InvoiceSubscription({
                 <form onSubmit={(e) => handleSubmitFormMassal(e, "tambah")}>
                     <div className="flex flex-col justify-around gap-4 mt-4">
                         <div className="flex flex-col">
+                            <label htmlFor="name">Excel</label>
+
+                            <div className="App">
+                                <FilePond
+                                    onaddfile={(error, fileItems) => {
+                                        setData("excel", fileItems.file);
+                                    }}
+                                    maxFileSize="2mb"
+                                    labelMaxFileSizeExceeded="File terlalu besar"
+                                    name="files"
+                                    labelIdle='Drag & Drop your files or <span class="filepond--label-action">Browse</span>'
+                                />
+                            </div>
+                        </div>
+                        <div className="flex flex-col mt-3">
+                            <label htmlFor="signature">Tanda Tangan *</label>
+                            <Dropdown
+                                value={data.signature}
+                                onChange={(e) => {
+                                    setData("signature", {
+                                        ...data.signature,
+                                        name: e.target.value.name,
+                                        image: e.target.value.image,
+                                    });
+                                }}
+                                dataKey="name"
+                                options={signatures}
+                                optionLabel="name"
+                                placeholder="Pilih Tanda Tangan"
+                                filter
+                                valueTemplate={selectedOptionTemplate}
+                                itemTemplate={optionSignatureTemplate}
+                                panelClassName="max-w-[300px]"
+                                className="w-full md:w-14rem"
+                            />
+                        </div>
+
+                        {/* <div className="flex flex-col">
                             <label htmlFor="estimation_date">Tanggal *</label>
                             <Calendar
                                 value={data.date ? new Date(data.date) : null}
@@ -1396,7 +1597,7 @@ export default function InvoiceSubscription({
                                 panelClassName="max-w-[300px]"
                                 className="w-full md:w-14rem"
                             />
-                        </div>
+                        </div> */}
                     </div>
                     <div className="flex justify-center mt-5">
                         <Button
@@ -1723,7 +1924,6 @@ export default function InvoiceSubscription({
                     </form>
                 </Dialog>
             </div>
-
         </DashboardLayout>
     );
 }

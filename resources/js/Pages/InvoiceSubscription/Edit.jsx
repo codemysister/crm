@@ -316,60 +316,6 @@ const Edit = ({
                                         value={data.partner}
                                         dataKey="id"
                                         onChange={(e) => {
-                                            let oldBills = data.bills.filter(
-                                                (data) => {
-                                                    return !("id" in data);
-                                                }
-                                            );
-
-                                            let newBills =
-                                                e.target.value.subscriptions.map(
-                                                    (bill) => {
-                                                        if (
-                                                            bill.bill
-                                                                .toLowerCase()
-                                                                .includes(
-                                                                    "langganan bulan"
-                                                                )
-                                                        ) {
-                                                            let date =
-                                                                new Date();
-                                                            const monthIndex =
-                                                                date.getMonth();
-                                                            const monthNames = [
-                                                                "Januari",
-                                                                "Februari",
-                                                                "Maret",
-                                                                "April",
-                                                                "Mei",
-                                                                "Juni",
-                                                                "Juli",
-                                                                "Agustus",
-                                                                "September",
-                                                                "Oktober",
-                                                                "November",
-                                                                "Desember",
-                                                            ];
-                                                            const monthName =
-                                                                monthNames[
-                                                                    monthIndex
-                                                                ];
-
-                                                            const year =
-                                                                date.getFullYear();
-                                                            return {
-                                                                ...bill,
-                                                                bill:
-                                                                    bill.bill +
-                                                                    " " +
-                                                                    monthName +
-                                                                    " " +
-                                                                    year,
-                                                            };
-                                                        }
-                                                        return { ...bill };
-                                                    }
-                                                );
                                             setData((data) => ({
                                                 ...data,
                                                 partner: {
@@ -381,10 +327,6 @@ const Edit = ({
                                                     regency:
                                                         e.target.value.regency,
                                                 },
-                                                bills: [
-                                                    ...newBills,
-                                                    ...oldBills,
-                                                ],
                                             }));
                                         }}
                                         onFocus={() => {
@@ -1067,9 +1009,9 @@ const Edit = ({
                                             <span ref={animatePaidOffRef}>
                                                 Rp
                                                 {data.paid_off
-                                                    ? data.paid_off.toLocaleString(
-                                                          "id"
-                                                      )
+                                                    ? Number(
+                                                          data.paid_off
+                                                      ).toLocaleString("id")
                                                     : 0}
                                             </span>
                                         </td>
