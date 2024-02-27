@@ -23,9 +23,15 @@ import { Message } from "primereact/message";
 
 const BASE_URL = import.meta.env.VITE_BASE_URL;
 
-export default function Index({ auth, invoiceGeneralProps, partnersProp }) {
+export default function Index({
+    auth,
+    invoiceGeneralProps,
+    partnersProp,
+    signaturesProp,
+}) {
     const [invoiceGenerals, setInvoiceGenerals] = useState(invoiceGeneralProps);
     const [partners, setPartners] = useState(partnersProp);
+    const [signatures, setSignatures] = useState(signaturesProp);
     const [invoiceProducts, setInvoiceProducts] = useState([]);
     const [isLoadingData, setIsLoadingData] = useState(false);
     const [modalTransactionIsVisible, setModalTransactionIsVisible] =
@@ -44,13 +50,13 @@ export default function Index({ auth, invoiceGeneralProps, partnersProp }) {
         global: { value: null, matchMode: FilterMatchMode.CONTAINS },
     });
 
-    const signatures = [
-        {
-            name: "Muh Arif Mahfudin",
-            position: "CEO",
-            image: "/assets/img/signatures/ttd.png",
-        },
-    ];
+    // const signatures = [
+    //     {
+    //         name: "Muh Arif Mahfudin",
+    //         position: "CEO",
+    //         image: "/assets/img/signatures/ttd.png",
+    //     },
+    // ];
 
     const [globalFilterValue, setGlobalFilterValue] = useState("");
     const onGlobalFilterChange = (e) => {
@@ -339,17 +345,18 @@ export default function Index({ auth, invoiceGeneralProps, partnersProp }) {
         });
     };
 
-    const showError = (type, message) => {
+    const showError = (message) => {
         toast.current.show({
             severity: "error",
             summary: "Error",
-            detail: message ?? `${type} data gagal`,
+            detail: message,
             life: 3000,
         });
     };
 
     const handleEditTransaction = (transaction) => {
         setData({
+            ...data,
             uuid: transaction.uuid,
             invoice_general_id: transaction.invoice_general_id,
             partner: {
@@ -394,18 +401,52 @@ export default function Index({ auth, invoiceGeneralProps, partnersProp }) {
             icon: "pi pi-info-circle",
             acceptClassName: "p-button-danger",
             accept: async () => {
-                destroy(
-                    "invoice_generals/transaction/" + invoice_general.uuid,
-                    {
-                        onSuccess: () => {
+                axios
+                    .delete(
+                        "invoice_generals/transaction/" + invoice_general.uuid,
+
+                        {
+                            headers: {
+                                "X-CSRF-TOKEN": document.head.querySelector(
+                                    'meta[name="csrf-token"]'
+                                ).content,
+                            },
+                        }
+                    )
+                    .then((response) => {
+                        // setDataTransaction("rest_bill", response.data.rest_of_bill);
+                        if (response.data.error) {
+                            showError(response.data.error);
+                        } else {
+                            showSuccess("Tambah");
+                            setModalTransactionIsVisible((prev) => false);
                             getInvoiceGenerals();
-                            showSuccess("Hapus");
-                        },
-                        onError: () => {
-                            showError("Hapus");
-                        },
-                    }
-                );
+                            reset(
+                                "nominal",
+                                "date",
+                                "money",
+                                "payment_for",
+                                "metode",
+                                "signature"
+                            );
+                            setData((prev) => ({
+                                ...prev,
+                                rest_bill: response.data.rest_of_bill,
+                            }));
+                        }
+                    });
+                // destroy(
+                //     "invoice_generals/transaction/" + invoice_general.uuid,
+                //     {
+                //         onSuccess: () => {
+                //             getInvoiceGenerals();
+                //             showSuccess("Hapus");
+                //         },
+                //         onError: () => {
+                //             showError("Hapus");
+                //         },
+                //     }
+                // );
             },
         });
     };
@@ -459,7 +500,7 @@ export default function Index({ auth, invoiceGeneralProps, partnersProp }) {
             <div className="flex flex-wrap p-2 align-items-center gap-3">
                 <img
                     className="w-3rem shadow-2 flex-shrink-0 border-round"
-                    src={item.image}
+                    src={"/storage/" + item.image}
                     alt={item.name}
                 />
                 <div className="flex-1 flex flex-col gap-2 xl:mr-8">
@@ -566,7 +607,7 @@ export default function Index({ auth, invoiceGeneralProps, partnersProp }) {
 
     const headerTransaction = (
         <div className="flex flex-row gap-2 bg-gray-50 p-2 rounded-lg align-items-center items-center justify-between justify-content-between">
-            <div className="w-[15%]">
+            <div className="w-[30%]">
                 <Button
                     label="Input Pembayaran"
                     className="bg-purple-600 w-full text-xs shadow-md rounded-lg mr-2"
@@ -574,11 +615,11 @@ export default function Index({ auth, invoiceGeneralProps, partnersProp }) {
                     onClick={() => {
                         setModalTransactionIsVisible((prev) => (prev = true));
                         reset(
-                            "name",
-                            "category",
-                            "price",
-                            "unit",
-                            "description"
+                            "nominal",
+                            "date",
+                            "money",
+                            "payment_for",
+                            "signature"
                         );
                     }}
                     aria-controls="popup_menu_right"
@@ -607,7 +648,7 @@ export default function Index({ auth, invoiceGeneralProps, partnersProp }) {
 
     const rowExpansionTemplate = (data) => {
         return (
-            <div className="md:px-14 py-5">
+            <div className="md:px-14">
                 <div className="flex">
                     <DataTable
                         headerClassName="bg-red-500"
@@ -619,14 +660,20 @@ export default function Index({ auth, invoiceGeneralProps, partnersProp }) {
                         <Column
                             header="No"
                             body={(_, { rowIndex }) => rowIndex + 1}
-                            style={{ width: "1rem" }}
                             className="dark:border-none"
                             headerClassName="dark:border-none bg-gray-50 dark:bg-transparent dark:text-gray-300"
+                            style={{
+                                width: "max-content",
+                                whiteSpace: "nowrap",
+                            }}
                         />
                         <Column
                             field="date"
                             header="Tanggal"
-                            style={{ minWidth: "10rem" }}
+                            style={{
+                                width: "max-content",
+                                whiteSpace: "nowrap",
+                            }}
                             body={(rowData) => {
                                 return new Date(
                                     rowData.date
@@ -637,7 +684,10 @@ export default function Index({ auth, invoiceGeneralProps, partnersProp }) {
                         <Column
                             field="nominal"
                             header="Nominal"
-                            style={{ minWidth: "8rem" }}
+                            style={{
+                                width: "max-content",
+                                whiteSpace: "nowrap",
+                            }}
                             body={(rowData) => {
                                 return rowData.nominal.toLocaleString("id-ID");
                             }}
@@ -646,19 +696,28 @@ export default function Index({ auth, invoiceGeneralProps, partnersProp }) {
                         <Column
                             field="money"
                             header="Uang Terbilang"
-                            style={{ minWidth: "10rem" }}
+                            style={{
+                                width: "max-content",
+                                whiteSpace: "nowrap",
+                            }}
                             headerClassName="dark:border-none bg-gray-50 dark:bg-transparent dark:text-gray-300"
                         ></Column>
                         <Column
                             field="metode"
                             header="Metode"
-                            style={{ minWidth: "8rem" }}
+                            style={{
+                                width: "max-content",
+                                whiteSpace: "nowrap",
+                            }}
                             headerClassName="dark:border-none bg-gray-50 dark:bg-transparent dark:text-gray-300"
                         ></Column>
                         <Column
                             field="created_by"
                             header="Diinput Oleh"
-                            style={{ minWidth: "8rem" }}
+                            style={{
+                                width: "max-content",
+                                whiteSpace: "nowrap",
+                            }}
                             body={(rowData) => {
                                 return rowData.user.name;
                             }}
@@ -703,12 +762,18 @@ export default function Index({ auth, invoiceGeneralProps, partnersProp }) {
                             headerClassName="dark:border-none bg-gray-50 dark:bg-transparent dark:text-gray-300"
                             align="left"
                             header="Dokumen"
-                            style={{ minWidth: "2rem" }}
+                            style={{
+                                width: "max-content",
+                                whiteSpace: "nowrap",
+                            }}
                         ></Column>
                         <Column
                             header="Action"
                             body={actionTransactionBodyTemplate}
-                            style={{ minWidth: "12rem" }}
+                            style={{
+                                width: "max-content",
+                                whiteSpace: "nowrap",
+                            }}
                             className="dark:border-none"
                             headerClassName="dark:border-none bg-gray-50 dark:bg-transparent dark:text-gray-300"
                         ></Column>
@@ -722,44 +787,117 @@ export default function Index({ auth, invoiceGeneralProps, partnersProp }) {
         e.preventDefault();
 
         if (type === "tambah") {
-            post("/invoice_generals/transaction", {
-                onSuccess: () => {
-                    showSuccess("Tambah");
-                    setModalTransactionIsVisible((prev) => false);
+            axios
+                .post(
+                    "/invoice_generals/transaction",
+                    {
+                        ...data,
+                    },
+                    {
+                        headers: {
+                            "X-CSRF-TOKEN": document.head.querySelector(
+                                'meta[name="csrf-token"]'
+                            ).content,
+                        },
+                    }
+                )
+                .then((response) => {
+                    // setDataTransaction("rest_bill", response.data.rest_of_bill);
+                    if (response.data.error) {
+                        showError(response.data.error);
+                    } else {
+                        showSuccess("Tambah");
+                        setModalTransactionIsVisible((prev) => false);
+                        getInvoiceGenerals();
+                        reset(
+                            "nominal",
+                            "date",
+                            "money",
+                            "payment_for",
+                            "metode",
+                            "signature"
+                        );
+                        setData((prev) => ({
+                            ...prev,
+                            rest_bill: response.data.rest_of_bill,
+                        }));
+                    }
+                });
+            // post("/invoice_generals/transaction", {
+            //     onSuccess: () => {
+            //         showSuccess("Tambah");
+            //         setModalTransactionIsVisible((prev) => false);
 
-                    getInvoiceGenerals();
-                    reset(
-                        "date",
-                        "metode",
-                        "money",
-                        "nominal",
-                        "payment_for",
-                        "signature"
-                    );
-                },
-                onError: (errors) => {
-                    showError("Tambah", errors.error);
-                },
-            });
+            //         getInvoiceGenerals();
+            //         reset(
+            //             "date",
+            //             "metode",
+            //             "money",
+            //             "nominal",
+            //             "payment_for",
+            //             "signature"
+            //         );
+            //     },
+            //     onError: (errors) => {
+            //         showError("Tambah", errors.error);
+            //     },
+            // });
         } else {
-            put("/invoice_generals/transaction/" + data.uuid, {
-                onSuccess: () => {
-                    showSuccess("Update");
-                    setModalEditTransactionIsVisible((prev) => false);
-                    getInvoiceGenerals();
-                    reset(
-                        "date",
-                        "metode",
-                        "money",
-                        "nominal",
-                        "payment_for",
-                        "signature"
-                    );
-                },
-                onError: () => {
-                    showError("Update");
-                },
-            });
+            axios
+                .put(
+                    "/invoice_generals/transaction/" + data.uuid,
+                    {
+                        ...data,
+                    },
+                    {
+                        headers: {
+                            "X-CSRF-TOKEN": document.head.querySelector(
+                                'meta[name="csrf-token"]'
+                            ).content,
+                        },
+                    }
+                )
+                .then((response) => {
+                    console.log(response.data.error);
+                    if (response.data.error) {
+                        showError(response.data.error);
+                    } else {
+                        showSuccess("Tambah");
+                        setModalEditTransactionIsVisible((prev) => false);
+
+                        getInvoiceGenerals();
+                        reset(
+                            "nominal",
+                            "date",
+                            "money",
+                            "payment_for",
+                            "metode",
+                            "signature"
+                        );
+                        setData((prev) => ({
+                            ...prev,
+                            rest_bill: response.data.rest_of_bill,
+                        }));
+                    }
+                });
+            // put("/invoice_generals/transaction/" + data.uuid, {
+            //     onSuccess: () => {
+            //         showSuccess("Update");
+            //         setModalEditTransactionIsVisible((prev) => false);
+            //         getInvoiceGenerals();
+            //         reset(
+            //             "date",
+            //             "metode",
+            //             "money",
+            //             "nominal",
+            //             "payment_for",
+            //             "signature"
+            //         );
+            //     },
+            //     onError: () => {
+            //         showError("Update");
+            //     },
+            // });
         }
     };
 
@@ -769,16 +907,18 @@ export default function Index({ auth, invoiceGeneralProps, partnersProp }) {
             <ConfirmDialog />
 
             <HeaderModule title="Invoice Umum">
-                <Link
-                    href="/invoice_generals/create"
-                    className="bg-purple-600 block text-white py-2 px-3 font-semibold text-sm shadow-md rounded-lg mr-2"
-                >
-                    <i
-                        className="pi pi-plus"
-                        style={{ fontSize: "0.7rem", paddingRight: "5px" }}
-                    ></i>
-                    Tambah
-                </Link>
+                {permissions.includes("tambah invoice umum") && (
+                    <Link
+                        href="/invoice_generals/create"
+                        className="bg-purple-600 block text-white py-2 px-3 font-semibold text-sm shadow-md rounded-lg mr-2"
+                    >
+                        <i
+                            className="pi pi-plus"
+                            style={{ fontSize: "0.7rem", paddingRight: "5px" }}
+                        ></i>
+                        Tambah
+                    </Link>
+                )}
             </HeaderModule>
 
             <div className="flex mx-auto flex-col justify-center mt-5 gap-5">
@@ -810,13 +950,19 @@ export default function Index({ auth, invoiceGeneralProps, partnersProp }) {
                     >
                         <Column
                             expander={allowExpansion}
-                            style={{ width: "1rem" }}
+                            style={{
+                                width: "max-content",
+                                whiteSpace: "nowrap",
+                            }}
                         />
 
                         <Column
                             header="No"
                             body={(_, { rowIndex }) => rowIndex + 1}
-                            style={{ width: "5%" }}
+                            style={{
+                                width: "max-content",
+                                whiteSpace: "nowrap",
+                            }}
                             className="dark:border-none pl-6"
                             headerClassName="dark:border-none pl-6 bg-transparent dark:bg-transparent dark:text-gray-300"
                         />
@@ -827,7 +973,10 @@ export default function Index({ auth, invoiceGeneralProps, partnersProp }) {
                             headerClassName="dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300"
                             header="Nama"
                             align="left"
-                            style={{ width: "10%" }}
+                            style={{
+                                width: "max-content",
+                                whiteSpace: "nowrap",
+                            }}
                         ></Column>
                         {/* <Column
                             field="code"
@@ -865,7 +1014,10 @@ export default function Index({ auth, invoiceGeneralProps, partnersProp }) {
                             className="dark:border-none"
                             headerClassName="dark:border-none  bg-transparent dark:bg-transparent dark:text-gray-300"
                             align="left"
-                            style={{ minWidth: "8rem" }}
+                            style={{
+                                width: "max-content",
+                                whiteSpace: "nowrap",
+                            }}
                         ></Column>
                         <Column
                             field="partner_name"
@@ -885,12 +1037,18 @@ export default function Index({ auth, invoiceGeneralProps, partnersProp }) {
                                 </button>
                             )}
                             align="left"
-                            style={{ minWidth: "8rem" }}
+                            style={{
+                                width: "max-content",
+                                whiteSpace: "nowrap",
+                            }}
                         ></Column>
                         {visibleColumns.map((col) => (
                             <Column
                                 key={col.field}
-                                style={{ minWidth: col.width }}
+                                style={{
+                                    width: "max-content",
+                                    whiteSpace: "nowrap",
+                                }}
                                 field={col.field}
                                 header={col.header}
                                 body={(rowData) => {
@@ -915,48 +1073,6 @@ export default function Index({ auth, invoiceGeneralProps, partnersProp }) {
                             />
                         ))}
 
-                        {/* <Column
-                            field="date"
-                            className="dark:border-none"
-                            headerClassName="dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300"
-                            header="Tanggal"
-                            body={(rowData) => {
-                                return new Date(
-                                    rowData.date
-                                ).toLocaleDateString("id");
-                            }}
-                            align="left"
-                            style={{ minWidth: "5rem" }}
-                        ></Column>
-                        <Column
-                            field="due_date"
-                            className="dark:border-none"
-                            headerClassName="dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300"
-                            header="Jatuh Tempo"
-                            body={(rowData) => {
-                                return new Date(
-                                    rowData.due_date
-                                ).toLocaleDateString("id");
-                            }}
-                            align="left"
-                            style={{ minWidth: "8rem" }}
-                        ></Column>
-                        <Column
-                            field="bill_date"
-                            className="dark:border-none"
-                            headerClassName="dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300"
-                            header="Tanggal Terbayar"
-                            body={(rowData) => {
-                                return rowData.bill_date
-                                    ? new Date(
-                                          rowData.bill_date
-                                      ).toLocaleDateString("id")
-                                    : "belum terbayar";
-                            }}
-                            align="left"
-                            style={{ minWidth: "10rem" }}
-                        ></Column> */}
-
                         <Column
                             field="invoice_age"
                             className="dark:border-none"
@@ -966,7 +1082,10 @@ export default function Index({ auth, invoiceGeneralProps, partnersProp }) {
                             body={(rowData) => {
                                 return rowData.invoice_age + " hari";
                             }}
-                            style={{ minWidth: "8rem" }}
+                            style={{
+                                width: "max-content",
+                                whiteSpace: "nowrap",
+                            }}
                         ></Column>
 
                         <Column
@@ -993,7 +1112,10 @@ export default function Index({ auth, invoiceGeneralProps, partnersProp }) {
                                     />
                                 );
                             }}
-                            style={{ minWidth: "5rem" }}
+                            style={{
+                                width: "max-content",
+                                whiteSpace: "nowrap",
+                            }}
                         ></Column>
 
                         <Column
@@ -1035,12 +1157,19 @@ export default function Index({ auth, invoiceGeneralProps, partnersProp }) {
                             headerClassName="dark:border-none  bg-transparent dark:bg-transparent dark:text-gray-300"
                             align="left"
                             header="Dokumen"
-                            style={{ minWidth: "2rem" }}
+                            style={{
+                                width: "max-content",
+                                whiteSpace: "nowrap",
+                            }}
                         ></Column>
+
                         <Column
                             header="Action"
                             body={actionBodyTemplate}
-                            style={{ minWidth: "12rem" }}
+                            style={{
+                                width: "max-content",
+                                whiteSpace: "nowrap",
+                            }}
                             className="dark:border-none"
                             headerClassName="dark:border-none  bg-transparent dark:bg-transparent dark:text-gray-300"
                         ></Column>
@@ -1061,20 +1190,29 @@ export default function Index({ auth, invoiceGeneralProps, partnersProp }) {
                     <Column
                         header="No"
                         body={(_, { rowIndex }) => rowIndex + 1}
-                        style={{ width: "1rem" }}
+                        style={{
+                            width: "max-content",
+                            whiteSpace: "nowrap",
+                        }}
                         className="dark:border-none"
                         headerClassName="dark:border-none bg-gray-50 dark:bg-transparent dark:text-gray-300"
                     />
                     <Column
                         field="name"
                         header="Produk"
-                        style={{ minWidth: "10rem" }}
+                        style={{
+                            width: "max-content",
+                            whiteSpace: "nowrap",
+                        }}
                         headerClassName="dark:border-none bg-gray-50 dark:bg-transparent dark:text-gray-300"
                     ></Column>
                     <Column
                         field="price"
                         header="Harga"
-                        style={{ minWidth: "8rem" }}
+                        style={{
+                            width: "max-content",
+                            whiteSpace: "nowrap",
+                        }}
                         body={(rowData) => {
                             return rowData.price.toLocaleString("id-ID");
                         }}
@@ -1083,13 +1221,19 @@ export default function Index({ auth, invoiceGeneralProps, partnersProp }) {
                     <Column
                         field="quantity"
                         header="Kuantitas"
-                        style={{ minWidth: "8rem" }}
+                        style={{
+                            width: "max-content",
+                            whiteSpace: "nowrap",
+                        }}
                         headerClassName="dark:border-none bg-gray-50 dark:bg-transparent dark:text-gray-300"
                     ></Column>
                     <Column
                         field="total"
                         header="Total Harga"
-                        style={{ minWidth: "8rem" }}
+                        style={{
+                            width: "max-content",
+                            whiteSpace: "nowrap",
+                        }}
                         body={(rowData) => {
                             return rowData.total.toLocaleString("id-ID");
                         }}
@@ -1098,7 +1242,10 @@ export default function Index({ auth, invoiceGeneralProps, partnersProp }) {
                     <Column
                         field="ppn"
                         header="PPN (%)"
-                        style={{ minWidth: "8rem" }}
+                        style={{
+                            width: "max-content",
+                            whiteSpace: "nowrap",
+                        }}
                         body={(rowData) => {
                             return rowData.ppn + "%";
                         }}
@@ -1107,7 +1254,10 @@ export default function Index({ auth, invoiceGeneralProps, partnersProp }) {
                     <Column
                         field="total_ppn"
                         header="PPN"
-                        style={{ minWidth: "8rem" }}
+                        style={{
+                            width: "max-content",
+                            whiteSpace: "nowrap",
+                        }}
                         body={(rowData) => {
                             return rowData.total_ppn.toLocaleString("id-ID");
                         }}
@@ -1182,6 +1332,7 @@ export default function Index({ auth, invoiceGeneralProps, partnersProp }) {
                                 onValueChange={(e) => {
                                     convertRupiah(e.value);
                                 }}
+                                on
                                 defaultValue={0}
                                 className="dark:bg-gray-300"
                                 id="nominal"
@@ -1276,6 +1427,17 @@ export default function Index({ auth, invoiceGeneralProps, partnersProp }) {
                     onHide={() => setModalEditTransactionIsVisible(false)}
                 >
                     <form onSubmit={(e) => handleSubmitForm(e, "update")}>
+                        <div className="flex flex-col mt-3">
+                            <div className="flex bg-purple-600 text-white text-xs p-3 rounded-lg justify-between w-full h-full">
+                                <p>Sisa tagihan</p>
+                                <p className="font-semibold">
+                                    Rp{" "}
+                                    {data.rest_bill
+                                        ? data.rest_bill.toLocaleString("id-ID")
+                                        : 0}
+                                </p>
+                            </div>
+                        </div>
                         <div className="flex flex-col mt-3">
                             <label htmlFor="date">Tanggal *</label>
                             <Calendar

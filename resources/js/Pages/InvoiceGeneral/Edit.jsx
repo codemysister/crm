@@ -344,11 +344,11 @@ const Edit = ({ usersProp, partnersProp, productsProp, invoiceGeneral }) => {
         });
     };
 
-    const showError = (type) => {
+    const showError = (message) => {
         toast.current.show({
             severity: "error",
             summary: "Error",
-            detail: `${type} data gagal`,
+            detail: message,
             life: 3000,
         });
     };
@@ -391,14 +391,14 @@ const Edit = ({ usersProp, partnersProp, productsProp, invoiceGeneral }) => {
         e.preventDefault();
 
         put("/invoice_generals/" + data.uuid, {
-            onSuccess: () => {
+            onSuccess: (data) => {
                 showSuccess("Tambah");
                 window.location = BASE_URL + "/invoice_generals";
                 // reset("name", "category", "price", "unit", "description");
             },
 
-            onError: () => {
-                showError("Tambah");
+            onError: (data) => {
+                showError(data.error);
             },
         });
     };
@@ -707,7 +707,7 @@ const Edit = ({ usersProp, partnersProp, productsProp, invoiceGeneral }) => {
                                     </label>
                                     <InputNumber
                                         value={data.paid_off}
-                                        onValueChange={(e) => {
+                                        onChange={(e) => {
                                             setData((data) => ({
                                                 ...data,
                                                 paid_off: e.value,
@@ -993,29 +993,6 @@ const Edit = ({ usersProp, partnersProp, productsProp, invoiceGeneral }) => {
                                     <div className="flex">
                                         <div className="flex flex-col">
                                             <label htmlFor="partner_address">
-                                                Jumlah Harga *
-                                            </label>
-                                            <InputNumber
-                                                value={product.total}
-                                                onChange={(e) => {
-                                                    handleInputChange(
-                                                        index,
-                                                        "total",
-                                                        e.value
-                                                    );
-                                                }}
-                                                defaultValue={0}
-                                                className="dark:bg-gray-300"
-                                                id="partner_address"
-                                                aria-describedby="partner_address-help"
-                                                locale="id-ID"
-                                            />
-                                        </div>
-                                    </div>
-
-                                    <div className="flex">
-                                        <div className="flex flex-col">
-                                            <label htmlFor="partner_address">
                                                 Pajak (%) *
                                             </label>
                                             <InputNumber
@@ -1035,6 +1012,31 @@ const Edit = ({ usersProp, partnersProp, productsProp, invoiceGeneral }) => {
                                             />
                                         </div>
                                     </div>
+
+                                    <div className="flex">
+                                        <div className="flex flex-col">
+                                            <label htmlFor="partner_address">
+                                                Jumlah Harga *
+                                            </label>
+                                            <InputNumber
+                                                value={product.total}
+                                                onChange={(e) => {
+                                                    handleInputChange(
+                                                        index,
+                                                        "total",
+                                                        e.value
+                                                    );
+                                                }}
+                                                defaultValue={0}
+                                                className="dark:bg-gray-300"
+                                                id="partner_address"
+                                                aria-describedby="partner_address-help"
+                                                locale="id-ID"
+                                                disabled
+                                            />
+                                        </div>
+                                    </div>
+
                                     <div className="flex">
                                         <div className="flex flex-col">
                                             <label htmlFor="partner_address">
@@ -1053,6 +1055,7 @@ const Edit = ({ usersProp, partnersProp, productsProp, invoiceGeneral }) => {
                                                 id="partner_address"
                                                 aria-describedby="partner_address-help"
                                                 locale="id-ID"
+                                                disabled
                                             />
                                         </div>
                                     </div>
@@ -1313,9 +1316,11 @@ const Edit = ({ usersProp, partnersProp, productsProp, invoiceGeneral }) => {
                                         <div className="w-full">
                                             <p className="text-right w-full">
                                                 Rp
-                                                {data.paid_off.toLocaleString(
-                                                    "id-ID"
-                                                ) ?? 0}
+                                                {data.paid_off
+                                                    ? data.paid_off.toLocaleString(
+                                                          "id-ID"
+                                                      )
+                                                    : 0}
                                             </p>
                                             <hr className="h-[2px] bg-gray-500" />
                                         </div>
@@ -1347,7 +1352,7 @@ const Edit = ({ usersProp, partnersProp, productsProp, invoiceGeneral }) => {
 
                         <div
                             ref={animatePaymentMetodeRef}
-                            className="flex w-full mt-16 justify-between items-center"
+                            className="flex w-full mt-5 justify-between items-center"
                         >
                             <div className="w-[50%] leading-6">
                                 {data.payment_metode === "payment link" && (

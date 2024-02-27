@@ -360,7 +360,12 @@ const Create = ({ usersProp, partnersProp, salesProp, productsProp }) => {
 
         updatedProducts[index][field] = value;
 
-        if (field == "price" || field == "quantity" || field == "ppn") {
+        if (
+            field == "price" ||
+            field == "quantity" ||
+            field == "ppn" ||
+            field == "total"
+        ) {
             let totalUpdated =
                 updatedProducts[index]["price"] *
                 updatedProducts[index]["quantity"];
@@ -537,6 +542,7 @@ const Create = ({ usersProp, partnersProp, salesProp, productsProp }) => {
                                     <label htmlFor="province">Provinsi *</label>
 
                                     <Dropdown
+                                        dataKey="name"
                                         value={
                                             data.partner.province
                                                 ? JSON.parse(
@@ -556,7 +562,6 @@ const Create = ({ usersProp, partnersProp, salesProp, productsProp }) => {
                                                 ),
                                             });
                                         }}
-                                        dataKey="name"
                                         options={provinces}
                                         optionLabel="name"
                                         placeholder="Pilih Provinsi"
@@ -585,6 +590,7 @@ const Create = ({ usersProp, partnersProp, salesProp, productsProp }) => {
                                 <div className="flex flex-col mt-3">
                                     <label htmlFor="regency">Kabupaten *</label>
                                     <Dropdown
+                                        dataKey="name"
                                         value={
                                             data.partner.regency
                                                 ? JSON.parse(
@@ -708,7 +714,7 @@ const Create = ({ usersProp, partnersProp, salesProp, productsProp }) => {
                                     </label>
                                     <InputNumber
                                         value={data.paid_off}
-                                        onValueChange={(e) => {
+                                        onChange={(e) => {
                                             setData((data) => ({
                                                 ...data,
                                                 paid_off: e.value,
@@ -990,7 +996,6 @@ const Create = ({ usersProp, partnersProp, salesProp, productsProp }) => {
                                             />
                                         </div>
                                     </div>
-
                                     <div className="flex">
                                         <div className="flex flex-col">
                                             <label htmlFor="partner_address">
@@ -1010,10 +1015,10 @@ const Create = ({ usersProp, partnersProp, salesProp, productsProp }) => {
                                                 id="partner_address"
                                                 aria-describedby="partner_address-help"
                                                 locale="id-ID"
+                                                disabled
                                             />
                                         </div>
                                     </div>
-
                                     <div className="flex">
                                         <div className="flex flex-col">
                                             <label htmlFor="partner_address">
@@ -1054,6 +1059,7 @@ const Create = ({ usersProp, partnersProp, salesProp, productsProp }) => {
                                                 id="partner_address"
                                                 aria-describedby="partner_address-help"
                                                 locale="id-ID"
+                                                disabled
                                             />
                                         </div>
                                     </div>
@@ -1314,9 +1320,11 @@ const Create = ({ usersProp, partnersProp, salesProp, productsProp }) => {
                                         <div className="w-full">
                                             <p className="text-right w-full">
                                                 Rp
-                                                {data.paid_off.toLocaleString(
-                                                    "id-ID"
-                                                ) ?? 0}
+                                                {data.paid_off
+                                                    ? data.paid_off.toLocaleString(
+                                                          "id-ID"
+                                                      )
+                                                    : 0}
                                             </p>
                                             <hr className="h-[2px] bg-gray-500" />
                                         </div>

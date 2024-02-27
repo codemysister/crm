@@ -53,10 +53,7 @@ class InvoiceGeneralTransactionController extends Controller
 
 
         if ($rest_of_bill < $request->nominal) {
-            // return response()->json(['error' => 'Pembayaran melebihi sisa tagihan']);
-            return redirect()->back()->withErrors([
-                'error' => 'Pembayaran melebihi sisa tagihan'
-            ]);
+            return response()->json(['error' => 'Pembayaran melebihi sisa tagihan']);
         }
         $rest_of_bill = $rest_of_bill - $request->nominal;
         $status = "belum terbayar";
@@ -87,6 +84,8 @@ class InvoiceGeneralTransactionController extends Controller
         $invoice_general->update(['rest_of_bill' => $rest_of_bill, 'status' => $status, 'bill_date' => Carbon::now()->format('Y-m-d H:i:s')]);
 
         GenerateReceiptJob::dispatch($transaction);
+        return response()->json(['rest_of_bill' => $rest_of_bill]);
+
     }
     public function update(InvoiceGeneralTransactionRequest $request, $uuid)
     {
@@ -123,7 +122,7 @@ class InvoiceGeneralTransactionController extends Controller
 
             if ($rest_of_bill < 0) {
                 DB::rollBack();
-                return response()->json(['error' => 'Pembayaran melebihi sisa tagihan'], 422);
+                return response()->json(['error' => 'Pembayaran melebihi sisa tagihan']);
             }
 
             DB::commit();
@@ -141,14 +140,19 @@ class InvoiceGeneralTransactionController extends Controller
             $status = "lunas";
         }
 
+
         $invoice_general->update(['rest_of_bill' => $rest_of_bill, 'status' => $status, 'bill_date' => Carbon::parse($invoice_general->transactions->first()->date)->setTimezone('GMT+7')->format('Y-m-d H:i:s')]);
 
         GenerateReceiptJob::dispatch($transaction);
+
+        return response()->json(['rest_of_bill' => $rest_of_bill]);
+
     }
 
     public function destroy($uuid)
     {
         $transaction = InvoiceGeneralTransaction::where('uuid', '=', $uuid)->first();
+
         Storage::disk('public')->delete($transaction->receipt_doc);
         $transaction->delete();
         $invoice_general_id = $transaction->invoice_general_id;
@@ -160,12 +164,14 @@ class InvoiceGeneralTransactionController extends Controller
         $rest_of_bill = $this->calculateRestOfBill($invoice_general);
         $status = "belum terbayar";
 
+
         if ($rest_of_bill !== 0 && count($invoice_general->transactions) > 0) {
             $status = "sebagian";
         } else {
             $status = "lunas";
         }
 
-        $invoice_general->update(['rest_of_bill' => $rest_of_bill, 'status' => $status, 'bill_date' => count($invoice_general->transactions) > 0 ? Carbon::parse($invoice_general->transactions->first()->date)->setTimezone('GMT+7')->format('Y-m-d H:i:s') : null]);
+        $invoice_general->update(['rest_of_bill' => $rest_of_bill, 'status' => $status, 'bill_date' => count($invoice_general->transactions) > 0 ? Carbon::parse($invoice_general->transactions()->latest()->first()->date)->setTimezone('GMT+7')->format('Y-m-d H:i:s') : null]);
+        return response()->json(['rest_of_bill' => $rest_of_bill]);
     }
 }
