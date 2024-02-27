@@ -82,6 +82,12 @@ const Index = ({ statisticGeneral, accountManagers }) => {
                 data[0].totalCancel,
                 data[0].totalCLBK,
             ],
+            totalPartner: data[0].totalPartner,
+            totalAktif: data[0].totalAktif,
+            totalCLBK: data[0].totalCLBK,
+            totalCancel: data[0].totalCancel,
+            totalProses: data[0].totalProses,
+            totalNonaktif: data[0].totalNonaktif,
             partnersByProvince: data[0].partnersByProvince,
             partners: data[0].partners,
         }));
@@ -158,7 +164,7 @@ const Index = ({ statisticGeneral, accountManagers }) => {
             datalabels: {
                 color: "white",
                 font: {
-                    size: "15px",
+                    size: "12px",
                 },
                 formatter: (value) => {
                     return value.toFixed(1) + "%";
@@ -180,7 +186,7 @@ const Index = ({ statisticGeneral, accountManagers }) => {
                     filter
                     valueTemplate={selectedOptionTemplate}
                     itemTemplate={optionTemplate}
-                    className="w-[30%] flex justify-center focus: rounded-none border-t-0 border-r-0 border-l-0 border-b-[1px] border-b-slate-200"
+                    className="w-[30%] flex justify-center dark:bg-gray-800 dark:text-gray-400 dark:border-b-slate-600 focus: rounded-none border-t-0 border-r-0 border-l-0 border-b-[1px] border-b-slate-200"
                 />
             </HeaderModule>
             <div className="flex mx-auto flex-col justify-center gap-5 mt-5">
@@ -200,7 +206,9 @@ const Index = ({ statisticGeneral, accountManagers }) => {
                                 Total Partner
                             </p>
                             <p className="text-lg font-semibold text-gray-700 dark:text-gray-200">
-                                {statisticGeneral.totalPartner}
+                                {selectedAM
+                                    ? statiscticAM.totalPartner
+                                    : statisticGeneral.totalPartner}
                             </p>
                         </div>
                     </div>
@@ -227,7 +235,9 @@ const Index = ({ statisticGeneral, accountManagers }) => {
                                 Total Proses
                             </p>
                             <p className="text-lg font-semibold text-gray-700 dark:text-gray-200">
-                                {statisticGeneral.totalProses}
+                                {selectedAM
+                                    ? statiscticAM.totalProses
+                                    : statisticGeneral.totalProses}
                             </p>
                         </div>
                     </div>
@@ -254,7 +264,9 @@ const Index = ({ statisticGeneral, accountManagers }) => {
                                 Total Aktif
                             </p>
                             <p className="text-lg font-semibold text-gray-700 dark:text-gray-200">
-                                {statisticGeneral.totalAktif}
+                                {selectedAM
+                                    ? statiscticAM.totalAktif
+                                    : statisticGeneral.totalAktif}
                             </p>
                         </div>
                     </div>
@@ -281,7 +293,9 @@ const Index = ({ statisticGeneral, accountManagers }) => {
                                 Total Non Aktif
                             </p>
                             <p className="text-lg font-semibold text-gray-700 dark:text-gray-200">
-                                {statisticGeneral.totalNonaktif}
+                                {selectedAM
+                                    ? statiscticAM.totalNonaktif
+                                    : statisticGeneral.totalNonaktif}
                             </p>
                         </div>
                     </div>
@@ -307,7 +321,9 @@ const Index = ({ statisticGeneral, accountManagers }) => {
                                 Total Cancel
                             </p>
                             <p className="text-lg font-semibold text-gray-700 dark:text-gray-200">
-                                {statisticGeneral.totalCancel}
+                                {selectedAM
+                                    ? statiscticAM.totalCancel
+                                    : statisticGeneral.totalCancel}
                             </p>
                         </div>
                     </div>
@@ -329,21 +345,24 @@ const Index = ({ statisticGeneral, accountManagers }) => {
                                 />
                             </svg>
                         </div>
+
                         <div>
                             <p className="mb-2 text-sm font-medium text-gray-600 dark:text-gray-400">
                                 Total CLBK
                             </p>
                             <p className="text-lg font-semibold text-gray-700 dark:text-gray-200">
-                                {statisticGeneral.totalCLBK}
+                                {selectedAM
+                                    ? statiscticAM.totalCLBK
+                                    : statisticGeneral.totalCLBK}
                             </p>
                         </div>
                     </div>
                 </div>
 
-                <div className="card flex flex-col -mt-6 w-full md:w-[80%] md:flex-row mx-auto justify-between gap-5 md:gap-7">
-                    <div className="flex flex-col text-center justify-center md:w-[50%] border bg-white p-10  shadow-md rounded-lg">
+                <div className="card flex flex-col -mt-6 w-full md:max-h-[320px] md:flex-row mx-auto justify-between gap-5">
+                    <div className="flex flex-col text-center md:w-[25%] justify-center border bg-white dark:bg-gray-800 dark:border-none dark:text-gray-400 p-3  shadow-md rounded-lg">
                         <h1 className="mb-2 font-semibold">
-                            Presentase Status Partner By AM
+                            Presentase Status Partner AM
                         </h1>
                         <Doughnut
                             data={{
@@ -371,7 +390,7 @@ const Index = ({ statisticGeneral, accountManagers }) => {
                             options={options}
                         />
                     </div>
-                    <div className="w-full flex flex-col text-center justify-center md:w-[50%] border bg-white p-10 shadow-md rounded-lg">
+                    <div className=" flex flex-col text-center md:w-[25%] justify-center border bg-white dark:bg-gray-800 dark:border-none dark:text-gray-400 p-3 shadow-md rounded-lg">
                         <h1 className="mb-2 font-semibold">
                             Presentase Status Partner
                         </h1>
@@ -417,9 +436,187 @@ const Index = ({ statisticGeneral, accountManagers }) => {
                             options={options}
                         />
                     </div>
+                    <div className="flex md:w-[45%] text-center justify-center border dark:border-none bg-white dark:bg-gray-800 shadow-md rounded-lg">
+                        <Bar
+                            className="w-full bg-white dark:bg-gray-800 h-full p-5 rounded-lg shadow-md "
+                            data={{
+                                labels:
+                                    statiscticAM.partnersByProvince?.length > 0
+                                        ? statiscticAM.partnersByProvince.map(
+                                              (province) =>
+                                                  province.province_name
+                                          )
+                                        : statisticGeneral.partnersByProvince.map(
+                                              (province) =>
+                                                  province.province_name
+                                          ),
+                                datasets: [
+                                    {
+                                        label:
+                                            statiscticAM.partnersByProvince
+                                                ?.length > 0
+                                                ? "Jumlah Partner Tiap Provinsi By AM"
+                                                : "Jumlah Partner Tiap Provinsi",
+                                        data:
+                                            statiscticAM.partnersByProvince
+                                                ?.length > 0
+                                                ? statiscticAM.partnersByProvince.map(
+                                                      (province) =>
+                                                          province.total
+                                                  )
+                                                : statisticGeneral.partnersByProvince.map(
+                                                      (province) =>
+                                                          province.total
+                                                  ),
+                                        backgroundColor: backgroundColors,
+                                    },
+                                ],
+                            }}
+                            options={{
+                                width: "100%",
+                                height: "100%",
+                                maintainAspectRatio: false, // Menambahkan opsi ini
+                                responsive: true, // Menambahkan opsi ini untuk responsif
+                                scales: {
+                                    x: {
+                                        beginAtZero: true,
+                                    },
+                                    y: {
+                                        beginAtZero: true,
+                                    },
+                                },
+                            }}
+                        />
+                    </div>
                 </div>
 
-                <div className="card flex mx-auto w-full md:mih-h-[420px] md:h-[420px] md:w-[80%] justify-center">
+                {/* <div
+                    className="card grid grid-cols-2"
+                    style={{ gridTemplateColumns: "40% 60%" }}
+                >
+                    <div>
+                        <div className="flex flex-col max-h-[300px] text-center justify-center border bg-white p-10  shadow-md rounded-lg">
+                            <h1 className="mb-2 font-semibold">
+                                Presentase Status Partner By AM
+                            </h1>
+                            <Doughnut
+                                data={{
+                                    labels: [
+                                        "Proses",
+                                        "Aktif",
+                                        "Non Aktif",
+                                        "Cancel",
+                                        "CLBK",
+                                    ],
+                                    datasets: [
+                                        {
+                                            label: "Presentase",
+                                            data: statiscticAM.data,
+                                            backgroundColor: [
+                                                "orange",
+                                                "green",
+                                                "gray",
+                                                "purple",
+                                                "blue",
+                                            ],
+                                        },
+                                    ],
+                                }}
+                                options={options}
+                            />
+                        </div>
+                        <div className=" flex flex-col max-h-[300px] text-center justify-center border bg-white p-10 shadow-md rounded-lg">
+                            <h1 className="mb-2 font-semibold">
+                                Presentase Status Partner
+                            </h1>
+                            <Doughnut
+                                data={{
+                                    labels: [
+                                        "Proses",
+                                        "Aktif",
+                                        "Non Aktif",
+                                        "Cancel",
+                                        "CLBK",
+                                    ],
+                                    datasets: [
+                                        {
+                                            label: "Persentase",
+                                            data: [
+                                                (statisticGeneral.totalProses /
+                                                    statisticGeneral.totalPartner) *
+                                                    100,
+                                                (statisticGeneral.totalAktif /
+                                                    statisticGeneral.totalPartner) *
+                                                    100,
+                                                (statisticGeneral.totalNonaktif /
+                                                    statisticGeneral.totalPartner) *
+                                                    100,
+                                                (statisticGeneral.totalCLBK /
+                                                    statisticGeneral.totalPartner) *
+                                                    100,
+                                                (statisticGeneral.totalCancel /
+                                                    statisticGeneral.totalPartner) *
+                                                    100,
+                                            ],
+                                            backgroundColor: [
+                                                "orange",
+                                                "green",
+                                                "gray",
+                                                "purple",
+                                                "blue",
+                                            ],
+                                        },
+                                    ],
+                                }}
+                                options={options}
+                            />
+                        </div>
+                    </div>
+                    <div className="flex text-center justify-center border bg-white p-10 shadow-md rounded-lg">
+                        <Bar
+                            className="w-full p-10 bg-white h-full rounded-lg shadow-md "
+                            data={{
+                                labels:
+                                    statiscticAM.partnersByProvince?.length > 0
+                                        ? statiscticAM.partnersByProvince.map(
+                                              (province) =>
+                                                  province.province_name
+                                          )
+                                        : statisticGeneral.partnersByProvince.map(
+                                              (province) =>
+                                                  province.province_name
+                                          ),
+                                datasets: [
+                                    {
+                                        label:
+                                            statiscticAM.partnersByProvince
+                                                ?.length > 0
+                                                ? "Jumlah Partner Tiap Provinsi By AM"
+                                                : "Jumlah Partner Tiap Provinsi",
+                                        data:
+                                            statiscticAM.partnersByProvince
+                                                ?.length > 0
+                                                ? statiscticAM.partnersByProvince.map(
+                                                      (province) =>
+                                                          province.total
+                                                  )
+                                                : statisticGeneral.partnersByProvince.map(
+                                                      (province) =>
+                                                          province.total
+                                                  ),
+                                        backgroundColor: backgroundColors,
+                                    },
+                                ],
+                            }}
+                            options={{
+                                width: "100%",
+                                height: "100%",
+                            }}
+                        />
+                    </div>
+                </div>
+
+                <div className="card flex mx-auto w-full md:mih-h-[420px] md:h-[420px] justify-center">
                     <Bar
                         className="w-full p-10 bg-white h-full rounded-lg shadow-md "
                         data={{
@@ -454,19 +651,30 @@ const Index = ({ statisticGeneral, accountManagers }) => {
                         options={{
                             width: "100%",
                             height: "100%",
+                            maintainAspectRatio: false,
+                            responsive: true,
+                            scales: {
+                                x: {
+                                    beginAtZero: true,
+                                },
+                                y: {
+                                    beginAtZero: true,
+                                },
+                            },
                         }}
                     />
-                </div>
+                </div> */}
 
                 <div className="card p-fluid w-full h-full flex justify-center rounded-lg">
                     <DataTable
                         loading={isLoadingData}
-                        className="w-full h-auto rounded-lg dark:glass border-none text-center shadow-md"
+                        className="w-full h-auto rounded-lg dark:bg-gray-800 dark:text-gray-400 border-none text-center shadow-md"
                         pt={{
                             bodyRow:
                                 "dark:bg-transparent bg-transparent dark:text-gray-300",
                             table: "dark:bg-transparent bg-white dark:text-gray-300",
                             header: "",
+                            emptyMessage: "dark:bg-gray-800 dark:text-gray-400",
                         }}
                         paginator
                         rows={5}
@@ -596,7 +804,9 @@ const Index = ({ statisticGeneral, accountManagers }) => {
                             headerClassName="dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300"
                             header="Kecamatan"
                             body={(rowData) => {
-                                return JSON.parse(rowData.subdistrict).name;
+                                return rowData.subdistrict
+                                    ? JSON.parse(rowData.subdistrict).name
+                                    : "belum diisi";
                             }}
                             align="left"
                             style={{
