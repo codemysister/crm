@@ -261,22 +261,28 @@ export default function Index({ auth }) {
     const actionBodyTemplate = (rowData) => {
         return (
             <React.Fragment>
-                <Button
-                    icon="pi pi-pencil"
-                    rounded
-                    outlined
-                    className="mr-2"
-                    onClick={() => (window.location = "/mou/" + rowData.uuid)}
-                />
-                <Button
-                    icon="pi pi-trash"
-                    rounded
-                    outlined
-                    severity="danger"
-                    onClick={() => {
-                        handleDeleteProduct(rowData);
-                    }}
-                />
+                {permissions.includes("edit mou") && (
+                    <Button
+                        icon="pi pi-pencil"
+                        rounded
+                        outlined
+                        className="mr-2"
+                        onClick={() =>
+                            (window.location = "/mou/" + rowData.uuid)
+                        }
+                    />
+                )}
+                {permissions.includes("hapus mou") && (
+                    <Button
+                        icon="pi pi-trash"
+                        rounded
+                        outlined
+                        severity="danger"
+                        onClick={() => {
+                            handleDeleteProduct(rowData);
+                        }}
+                    />
+                )}
             </React.Fragment>
         );
     };
@@ -425,16 +431,18 @@ export default function Index({ auth }) {
             <ConfirmDialog />
 
             <HeaderModule title="Mou">
-                <Link
-                    href="/mou/create"
-                    className="bg-purple-600 block text-white py-2 px-3 font-semibold text-sm shadow-md rounded-lg mr-2"
-                >
-                    <i
-                        className="pi pi-plus"
-                        style={{ fontSize: "0.7rem", paddingRight: "5px" }}
-                    ></i>
-                    Tambah
-                </Link>
+                {permissions.includes("tambah mou") && (
+                    <Link
+                        href="/mou/create"
+                        className="bg-purple-600 block text-white py-2 px-3 font-semibold text-sm shadow-md rounded-lg mr-2"
+                    >
+                        <i
+                            className="pi pi-plus"
+                            style={{ fontSize: "0.7rem", paddingRight: "5px" }}
+                        ></i>
+                        Tambah
+                    </Link>
+                )}
             </HeaderModule>
 
             <div className="flex mx-auto flex-col justify-center mt-5 gap-5">
@@ -471,6 +479,10 @@ export default function Index({ auth }) {
                             header="No"
                             body={(_, { rowIndex }) => rowIndex + 1}
                             className="dark:border-none pl-6"
+                            style={{
+                                width: "max-content",
+                                whiteSpace: "nowrap",
+                            }}
                             headerClassName="dark:border-none pl-6 bg-transparent dark:bg-transparent dark:text-gray-300"
                         />
 
@@ -492,13 +504,19 @@ export default function Index({ auth }) {
                                 </button>
                             )}
                             align="left"
-                            style={{ minWidth: "8rem" }}
+                            style={{
+                                width: "max-content",
+                                whiteSpace: "nowrap",
+                            }}
                         ></Column>
 
                         {visibleColumns.map((col) => (
                             <Column
                                 key={col.field}
-                                style={{ minWidth: col.width }}
+                                style={{
+                                    width: "max-content",
+                                    whiteSpace: "nowrap",
+                                }}
                                 field={col.field}
                                 header={col.header}
                                 body={(rowData) => {
@@ -622,11 +640,19 @@ export default function Index({ auth }) {
                             headerClassName="dark:border-none  bg-transparent dark:bg-transparent dark:text-gray-300"
                             align="left"
                             header="Dokumen"
+                            style={{
+                                width: "max-content",
+                                whiteSpace: "nowrap",
+                            }}
                         ></Column>
+
                         <Column
                             header="Action"
                             body={actionBodyTemplate}
-                            style={{ minWidth: "12rem" }}
+                            style={{
+                                width: "max-content",
+                                whiteSpace: "nowrap",
+                            }}
                             className="dark:border-none"
                             headerClassName="dark:border-none  bg-transparent dark:bg-transparent dark:text-gray-300"
                         ></Column>

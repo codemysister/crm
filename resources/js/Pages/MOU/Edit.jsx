@@ -19,14 +19,22 @@ import "./Create.css";
 import { InputNumber } from "primereact/inputnumber";
 import { OverlayPanel } from "primereact/overlaypanel";
 import { Message } from "primereact/message";
+import { FilePond, registerPlugin } from "react-filepond";
+import FilePondPluginFileValidateSize from "filepond-plugin-file-validate-size";
+import "filepond/dist/filepond.min.css";
+registerPlugin(FilePondPluginFileValidateSize);
+
 const BASE_URL = import.meta.env.VITE_BASE_URL;
 
-const Edit = ({ usersProp, partnersProp, mou }) => {
+const Edit = ({ usersProp, partnersProp, mou, signaturesProp }) => {
     const [users, setUsers] = useState(usersProp);
     const [partners, setPartners] = useState(partnersProp);
     const [provinces, setProvinces] = useState([]);
     const [regencys, setRegencys] = useState([]);
     const [codeProvince, setcodeProvince] = useState(null);
+    const [isSignatureBlob, setIsSignatureBlob] = useState(false);
+    const [signatures, setSignatures] = useState(signaturesProp);
+
 
     const toast = useRef(null);
     const partnerScrollRef = useRef(null);
@@ -67,6 +75,8 @@ const Edit = ({ usersProp, partnersProp, mou }) => {
     const animatePartnerProvinceRef = useRef(null);
     const animatePartnerRegencyRef = useRef(null);
 
+    
+
     const {
         data,
         setData,
@@ -89,7 +99,7 @@ const Edit = ({ usersProp, partnersProp, mou }) => {
             province: mou.partner_province,
             regency: mou.partner_regency,
         },
-
+        pic_signature: mou.partner_pic_signature,
         url_subdomain: mou.url_subdomain,
         price_card: mou.price_card,
         price_lanyard: mou.price_lanyard,
@@ -106,10 +116,11 @@ const Edit = ({ usersProp, partnersProp, mou }) => {
         account_bank_number: mou.account_bank_number,
         account_bank_name: mou.account_bank_name,
         expired_date: mou.expired_date,
-        profit_sharing: mou.profit_sharing,
+        profit_sharing: Boolean(mou.profit_sharing),
         profit_sharing_detail: mou.profit_sharing_detail,
-        referral: mou.referral,
+        referral: Boolean(mou.referral),
         referral_name: mou.referral_name,
+        referral_signature: mou.referral_signature,
         signature: {
             name: mou.signature_name,
             position: mou.signature_position,
@@ -117,6 +128,12 @@ const Edit = ({ usersProp, partnersProp, mou }) => {
         },
         mou_doc: mou.mou_doc,
     });
+
+    useEffect(() => {
+        if(typeof data.pic_signature == 'object'){
+            setIsSignatureBlob(true);
+        }
+    },[data.pic_signature, data.referral_signature])
 
     useEffect(() => {
         setcodeProvince(
@@ -135,19 +152,46 @@ const Edit = ({ usersProp, partnersProp, mou }) => {
         }
     }, [codeProvince]);
 
-    const signatures = [
-        {
-            name: "Muh Arif Mahfudin",
-            position: "CEO",
-            image: "/assets/img/signatures/ttd.png",
-        },
-    ];
+    // const signatures = [
+    //     {
+    //         name: "Muh Arif Mahfudin",
+    //         position: "CEO",
+    //         image: "/assets/img/signatures/ttd.png",
+    //     },
+    // ];
 
     const option_price_lanyard = [
         { name: "Lanyard Polos", price: 10000 },
         { name: "Lanyard Sablon", price: 12000 },
         { name: "Lanyard Printing", price: 20000 },
     ];
+
+    const selectedOptionFeeTemplate = (option, props) => {
+        if (option) {
+            return (
+                <div className="flex align-items-center">
+                    <div>{option.price}</div>
+                </div>
+            );
+        }
+
+        return <span>{props.placeholder}</span>;
+    };
+
+    const optionFeeTemplate = (option) => {
+        return (
+            <div className="flex align-items-center">
+                <div>{option.price}</div>
+            </div>
+        );
+    };
+
+    const option_fee_price = [
+        { name: "1", price: 1000 },
+        { name: "2", price: 2000 },
+        { name: "3", price: 2500 },
+    ];
+
 
     const getProvince = async () => {
         const options = {
@@ -334,7 +378,7 @@ const Edit = ({ usersProp, partnersProp, mou }) => {
     const handleSubmitForm = (e) => {
         e.preventDefault();
 
-        put("/mou/" + data.uuid, {
+        post("/mou/" + data.uuid, {
             onSuccess: () => {
                 showSuccess("Tambah");
                 window.location = BASE_URL + "/mou";
@@ -388,7 +432,7 @@ const Edit = ({ usersProp, partnersProp, mou }) => {
                                     />
                                 </div>
 
-                                <div className="flex flex-col mt-3">
+                                {/* <div className="flex flex-col mt-3">
                                     <label htmlFor="date">
                                         Hari Kesepakatan *
                                     </label>
@@ -420,7 +464,7 @@ const Edit = ({ usersProp, partnersProp, mou }) => {
                                             text={errors.day}
                                         />
                                     )}
-                                </div>
+                                </div> */}
                                 <div className="flex flex-col mt-3">
                                     <label htmlFor="date">
                                         Tanggal Kesepakatan *
@@ -434,12 +478,17 @@ const Edit = ({ usersProp, partnersProp, mou }) => {
                                         }
                                         style={{ height: "35px" }}
                                         onChange={(e) => {
-                                            const formattedDate = new Date(
-                                                e.target.value
-                                            )
-                                                .toISOString()
-                                                .split("T")[0];
-                                            setData("date", e.target.value);
+                                            const dayIndex = e.target.value.getDay();
+
+                                            const daysOfWeek = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
+
+                                            const dayName = daysOfWeek[dayIndex];
+
+                                            setData({
+                                                ...data,
+                                                date: e.target.value,
+                                                day: dayName
+                                            });
                                         }}
                                         onFocus={() => {
                                             triggerInputFocus(animateDate);
@@ -448,7 +497,7 @@ const Edit = ({ usersProp, partnersProp, mou }) => {
                                             stopAnimateInputFocus(animateDate);
                                         }}
                                         showIcon
-                                        dateFormat="yy-mm-dd"
+                                        dateFormat="dd/mm/yy"
                                         className={`w-full md:w-14rem ${
                                             errors.date && "p-invalid"
                                         }`}
@@ -464,6 +513,7 @@ const Edit = ({ usersProp, partnersProp, mou }) => {
 
                                 <div className="flex flex-col mt-3">
                                     <label htmlFor="lembaga">Lembaga *</label>
+                                    
                                     <Dropdown
                                         value={data.partner}
                                         dataKey="id"
@@ -484,52 +534,80 @@ const Edit = ({ usersProp, partnersProp, mou }) => {
                                                         .name,
                                                     pic_position:
                                                         e.target.value.pics[0]
-                                                            .position,
+                                                            .position ?? data.partner.pic_position,
                                                 },
                                                 url_subdomain:
                                                     e.target.value.accounts[0]
                                                         .subdomain,
                                                 period_subscription:
                                                     e.target.value.period,
-                                                price_card: JSON.parse(
-                                                    e.target.value.price_list
-                                                        .price_card
-                                                ).price,
-                                                price_lanyard:
-                                                    e.target.value.price_list
-                                                        .price_lanyard,
-                                                price_subscription_system:
-                                                    e.target.value.price_list
-                                                        .price_subscription_system,
-                                                price_training_offline:
-                                                    e.target.value.price_list
-                                                        .price_training_offline,
-                                                price_training_online:
-                                                    e.target.value.price_list
-                                                        .price_training_online,
-                                                fee_purchase_cazhpoin:
-                                                    e.target.value.price_list
-                                                        .fee_purchase_cazhpoin,
-                                                fee_bill_cazhpoin:
-                                                    e.target.value.price_list
-                                                        .fee_bill_cazhpoin,
-                                                fee_topup_cazhpos:
-                                                    e.target.value.price_list
-                                                        .fee_topup_cazhpos,
-                                                fee_withdraw_cazhpos:
-                                                    e.target.value.price_list
-                                                        .fee_withdraw_cazhpos,
-                                                fee_bill_saldokartu:
-                                                    e.target.value.price_list
-                                                        .fee_bill_saldokartu,
+                                                price_card: e.target.value
+                                                    .price_list
+                                                    ? JSON.parse(
+                                                          e.target.value
+                                                              .price_list
+                                                              .price_card
+                                                      ).price
+                                                    : null,
+                                                price_lanyard: e.target.value
+                                                    .price_list
+                                                    ? e.target.value.price_list
+                                                          .price_lanyard
+                                                    : null,
+                                                price_subscription_system: e
+                                                    .target.value.price_list
+                                                    ? e.target.value.price_list
+                                                          .price_subscription_system
+                                                    : null,
+                                                price_training_offline: e.target
+                                                    .value.price_list
+                                                    ? e.target.value.price_list
+                                                          .price_training_offline
+                                                    : null,
+                                                price_training_online: e.target
+                                                    .value.price_list
+                                                    ? e.target.value.price_list
+                                                          .price_training_online
+                                                    : null,
+                                                fee_purchase_cazhpoin: e.target
+                                                    .value.price_list
+                                                    ? e.target.value.price_list
+                                                          .fee_purchase_cazhpoin
+                                                    : null,
+                                                fee_bill_cazhpoin: e.target
+                                                    .value.price_list
+                                                    ? e.target.value.price_list
+                                                          .fee_bill_cazhpoin
+                                                    : null,
+                                                fee_topup_cazhpos: e.target
+                                                    .value.price_list
+                                                    ? e.target.value.price_list
+                                                          .fee_topup_cazhpos
+                                                    : null,
+                                                fee_withdraw_cazhpos: e.target
+                                                    .value.price_list
+                                                    ? e.target.value.price_list
+                                                          .fee_withdraw_cazhpos
+                                                    : null,
+                                                fee_bill_saldokartu: e.target
+                                                    .value.price_list
+                                                    ? e.target.value.price_list
+                                                          .fee_bill_saldokartu
+                                                    : null,
                                                 bank: e.target.value.banks[0]
-                                                    .bank,
-                                                account_bank_name:
-                                                    e.target.value.banks[0]
-                                                        .account_bank_name,
-                                                account_bank_number:
-                                                    e.target.value.banks[0]
-                                                        .account_bank_number,
+                                                    ? e.target.value.banks[0]
+                                                          .bank
+                                                    : null,
+                                                account_bank_name: e.target
+                                                    .value.banks[0]
+                                                    ? e.target.value.banks[0]
+                                                          .account_bank_name
+                                                    : null,
+                                                account_bank_number: e.target
+                                                    .value.banks[0]
+                                                    ? e.target.value.banks[0]
+                                                          .account_bank_number
+                                                    : null,
                                             }));
                                             setcodeProvince(
                                                 (prev) =>
@@ -611,6 +689,7 @@ const Edit = ({ usersProp, partnersProp, mou }) => {
                                 <div className="flex flex-col mt-3">
                                     <label htmlFor="regency">Kabupaten *</label>
                                     <Dropdown
+                                    dataKey="name"
                                         value={
                                             data.partner.regency
                                                 ? JSON.parse(
@@ -641,7 +720,6 @@ const Edit = ({ usersProp, partnersProp, mou }) => {
                                                 animatePartnerRegencyRef
                                             );
                                         }}
-                                        dataKey="name"
                                         options={regencys}
                                         optionLabel="name"
                                         placeholder="Pilih Kabupaten"
@@ -799,9 +877,7 @@ const Edit = ({ usersProp, partnersProp, mou }) => {
                                         onChange={(e) =>
                                             setData(
                                                 "price_lanyard",
-                                                Number(
-                                                    e.target.value
-                                                ).toLocaleString("id-ID")
+                                                Number(e.target.value)
                                             )
                                         }
                                         options={option_price_lanyard}
@@ -924,9 +1000,7 @@ const Edit = ({ usersProp, partnersProp, mou }) => {
                                         onChange={(e) =>
                                             setData(
                                                 "price_training_offline",
-                                                Number(
-                                                    e.target.value
-                                                ).toLocaleString("id-ID")
+                                                Number(e.target.value)
                                             )
                                         }
                                         options={option_training_offline}
@@ -1029,34 +1103,24 @@ const Edit = ({ usersProp, partnersProp, mou }) => {
                                     </label>
 
                                     <Dropdown
+                                        dataKey="name"
                                         value={data.fee_purchase_cazhpoin}
                                         onChange={(e) =>
                                             setData(
                                                 "fee_purchase_cazhpoin",
-                                                Number(
-                                                    e.target.value
-                                                ).toLocaleString("id-ID")
+                                                Number(e.target.value)
                                             )
                                         }
-                                        options={option_fee}
-                                        optionLabel="name"
-                                        optionValue="name"
+                                        options={option_fee_price}
+                                        optionLabel="price"
+                                        optionValue="price"
                                         placeholder="Pilih Tarif"
                                         editable
-                                        showOnFocus
-                                        valueTemplate={selectedOptionTemplate}
+                                        valueTemplate={
+                                            selectedOptionFeeTemplate
+                                        }
                                         onFocus={() => {
                                             triggerInputFocus(
-                                                animateFeePurchaseCazhpoin
-                                            );
-                                        }}
-                                        onShow={() => {
-                                            triggerInputFocus(
-                                                animateFeePurchaseCazhpoin
-                                            );
-                                        }}
-                                        onHide={() => {
-                                            stopAnimateInputFocus(
                                                 animateFeePurchaseCazhpoin
                                             );
                                         }}
@@ -1065,7 +1129,7 @@ const Edit = ({ usersProp, partnersProp, mou }) => {
                                                 animateFeePurchaseCazhpoin
                                             );
                                         }}
-                                        itemTemplate={optionTemplate}
+                                        itemTemplate={optionFeeTemplate}
                                         className="w-full md:w-14rem"
                                     />
                                     {errors.fee_purchase_cazhpoin && (
@@ -1082,22 +1146,23 @@ const Edit = ({ usersProp, partnersProp, mou }) => {
                                     </label>
 
                                     <Dropdown
+                                        dataKey="name"
                                         value={data.fee_bill_cazhpoin}
                                         onChange={(e) =>
                                             setData(
                                                 "fee_bill_cazhpoin",
-                                                Number(
-                                                    e.target.value
-                                                ).toLocaleString("id-ID")
+                                                Number(e.target.value)
                                             )
                                         }
-                                        options={option_fee}
-                                        optionLabel="name"
-                                        optionValue="name"
+                                        options={option_fee_price}
+                                        optionLabel="price"
+                                        optionValue="price"
                                         placeholder="Pilih Tarif"
                                         editable
                                         showOnFocus
-                                        valueTemplate={selectedOptionTemplate}
+                                        valueTemplate={
+                                            selectedOptionFeeTemplate
+                                        }
                                         onFocus={() => {
                                             triggerInputFocus(
                                                 animateFeeBillCazhpoin
@@ -1108,7 +1173,7 @@ const Edit = ({ usersProp, partnersProp, mou }) => {
                                                 animateFeeBillCazhpoin
                                             );
                                         }}
-                                        itemTemplate={optionTemplate}
+                                        itemTemplate={optionFeeTemplate}
                                         className="w-full md:w-14rem"
                                     />
 
@@ -1126,22 +1191,23 @@ const Edit = ({ usersProp, partnersProp, mou }) => {
                                     </label>
 
                                     <Dropdown
+                                        dataKey="name"
                                         value={data.fee_topup_cazhpos}
                                         onChange={(e) =>
                                             setData(
                                                 "fee_topup_cazhpos",
-                                                Number(
-                                                    e.target.value
-                                                ).toLocaleString("id-ID")
+                                                Number(e.target.value)
                                             )
                                         }
-                                        options={option_fee}
-                                        optionLabel="name"
-                                        optionValue="name"
+                                        options={option_fee_price}
+                                        optionLabel="price"
+                                        optionValue="price"
                                         placeholder="Pilih Tarif"
                                         editable
                                         showOnFocus
-                                        valueTemplate={selectedOptionTemplate}
+                                        valueTemplate={
+                                            selectedOptionFeeTemplate
+                                        }
                                         onFocus={() => {
                                             triggerInputFocus(
                                                 animateFeeTopupCazhpos
@@ -1152,7 +1218,7 @@ const Edit = ({ usersProp, partnersProp, mou }) => {
                                                 animateFeeTopupCazhpos
                                             );
                                         }}
-                                        itemTemplate={optionTemplate}
+                                        itemTemplate={optionFeeTemplate}
                                         className="w-full md:w-14rem"
                                     />
 
@@ -1170,22 +1236,23 @@ const Edit = ({ usersProp, partnersProp, mou }) => {
                                     </label>
 
                                     <Dropdown
+                                        dataKey="name"
                                         value={data.fee_withdraw_cazhpos}
                                         onChange={(e) =>
                                             setData(
                                                 "fee_withdraw_cazhpos",
-                                                Number(
-                                                    e.target.value
-                                                ).toLocaleString("id-ID")
+                                                Number(e.target.value)
                                             )
                                         }
-                                        options={option_fee}
-                                        optionLabel="name"
-                                        optionValue="name"
+                                        options={option_fee_price}
+                                        optionLabel="price"
+                                        optionValue="price"
                                         placeholder="Pilih Tarif"
                                         editable
                                         showOnFocus
-                                        valueTemplate={selectedOptionTemplate}
+                                        valueTemplate={
+                                            selectedOptionFeeTemplate
+                                        }
                                         onFocus={() => {
                                             triggerInputFocus(
                                                 animateFeeWithdrawCazhpos
@@ -1196,7 +1263,7 @@ const Edit = ({ usersProp, partnersProp, mou }) => {
                                                 animateFeeWithdrawCazhpos
                                             );
                                         }}
-                                        itemTemplate={optionTemplate}
+                                        itemTemplate={optionFeeTemplate}
                                         className="w-full md:w-14rem"
                                     />
 
@@ -1214,22 +1281,23 @@ const Edit = ({ usersProp, partnersProp, mou }) => {
                                     </label>
 
                                     <Dropdown
+                                        dataKey="name"
                                         value={data.fee_bill_saldokartu}
                                         onChange={(e) =>
                                             setData(
                                                 "fee_bill_saldokartu",
-                                                Number(
-                                                    e.target.value
-                                                ).toLocaleString("id-ID")
+                                                Number(e.target.value)
                                             )
                                         }
-                                        options={option_fee}
-                                        optionLabel="name"
-                                        optionValue="name"
+                                        options={option_fee_price}
+                                        optionLabel="price"
+                                        optionValue="price"
                                         placeholder="Pilih Tarif"
                                         editable
                                         showOnFocus
-                                        valueTemplate={selectedOptionTemplate}
+                                        valueTemplate={
+                                            selectedOptionFeeTemplate
+                                        }
                                         onFocus={() => {
                                             triggerInputFocus(
                                                 animateFeeBillSaldokartu
@@ -1240,7 +1308,7 @@ const Edit = ({ usersProp, partnersProp, mou }) => {
                                                 animateFeeBillSaldokartu
                                             );
                                         }}
-                                        itemTemplate={optionTemplate}
+                                        itemTemplate={optionFeeTemplate}
                                         className="w-full md:w-14rem"
                                     />
 
@@ -1252,6 +1320,7 @@ const Edit = ({ usersProp, partnersProp, mou }) => {
                                         />
                                     )}
                                 </div>
+
                                 <div className="flex flex-col mt-3">
                                     <label htmlFor="bank">Bank*</label>
                                     <Dropdown
@@ -1397,7 +1466,7 @@ const Edit = ({ usersProp, partnersProp, mou }) => {
                                             );
                                         }}
                                         showIcon
-                                        dateFormat="yy-mm-dd"
+                                        dateFormat="dd/mm/yy"
                                         className={`${
                                             errors.expired_date && "p-invalid"
                                         }`}
@@ -1545,6 +1614,133 @@ const Edit = ({ usersProp, partnersProp, mou }) => {
                                 </div>
 
                                 <div className="flex flex-col mt-3">
+                                    <label htmlFor="signature">
+                                        Tanda Tangan PIC
+                                    </label>
+
+                                    {/* <div className="App">
+                                        {data.pic_signature !== null &&
+                                        typeof data.pic_signature ==
+                                            "string" ? (
+                                            <>
+                                                <FilePond
+                                                    files={
+                                                        "/storage/" +
+                                                        data.pic_signature
+                                                    }
+                                                    onaddfile={(
+                                                        error,
+                                                        fileItems
+                                                    ) => {
+                                                        if (!error) {
+                                                            setData(
+                                                                "pic_signature",
+                                                                fileItems.file
+                                                            );
+                                                        }
+                                                    }}
+                                                    onremovefile={() => {
+                                                        setData(
+                                                            "pic_signature",
+                                                            null
+                                                        );
+                                                    }}
+                                                    maxFileSize="2mb"
+                                                    labelMaxFileSizeExceeded="File terlalu besar"
+                                                    labelIdle='Drag & Drop your files or <span class="filepond--label-action">Browse</span>'
+                                                />
+                                            </>
+                                        ) : (
+                                            <>
+                                                <FilePond
+                                                    onaddfile={(
+                                                        error,
+                                                        fileItems
+                                                    ) => {
+                                                        if (!error) {
+                                                            setData(
+                                                                "pic_signature",
+                                                                fileItems.file
+                                                            );
+                                                        }
+                                                    }}
+                                                    onremovefile={() => {
+                                                        setData(
+                                                            "pic_signature",
+                                                            null
+                                                        );
+                                                    }}
+                                                    maxFileSize="2mb"
+                                                    labelMaxFileSizeExceeded="File terlalu besar"
+                                                    labelIdle='Drag & Drop your files or <span class="filepond--label-action">Browse</span>'
+                                                />
+                                            </>
+                                        )}
+                                    </div> */}
+
+                                    <div className="App">
+                                                {data.pic_signature !==
+                                                    null &&
+                                                typeof data.pic_signature ==
+                                                    "string" ? (
+                                                    <>
+                                                        <FilePond
+                                                            files={
+                                                                "/storage/" +
+                                                                data.pic_signature
+                                                            }
+                                                            onaddfile={(
+                                                                error,
+                                                                fileItems
+                                                            ) => {
+                                                                if (!error) {
+                                                                    setData(
+                                                                        "pic_signature",
+                                                                        fileItems.file
+                                                                    );
+                                                                }
+                                                            }}
+                                                            onremovefile={() => {
+                                                                setData(
+                                                                    "pic_signature",
+                                                                    null
+                                                                );
+                                                            }}
+                                                            maxFileSize="2mb"
+                                                            labelMaxFileSizeExceeded="File terlalu besar"
+                                                            labelIdle='Drag & Drop your files or <span class="filepond--label-action">Browse</span>'
+                                                        />
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        <FilePond
+                                                            onaddfile={(
+                                                                error,
+                                                                fileItems
+                                                            ) => {
+                                                                if (!error) {
+                                                                    setData(
+                                                                        "pic_signature",
+                                                                        fileItems.file
+                                                                    );
+                                                                }
+                                                            }}
+                                                            onremovefile={() => {
+                                                                setData(
+                                                                    "pic_signature",
+                                                                    null
+                                                                );
+                                                            }}
+                                                            maxFileSize="2mb"
+                                                            labelMaxFileSizeExceeded="File terlalu besar"
+                                                            labelIdle='Drag & Drop your files or <span class="filepond--label-action">Browse</span>'
+                                                        />
+                                                    </>
+                                                )}
+                                            </div>
+                                </div>
+
+                                <div className="flex flex-col mt-3">
                                     <label htmlFor="referral">Referral</label>
                                     <div className="flex items-center gap-2 my-2">
                                         <Checkbox
@@ -1569,7 +1765,10 @@ const Edit = ({ usersProp, partnersProp, mou }) => {
                                     </div>
                                 </div>
 
+                                {console.log(data)}
+
                                 {data.referral && (
+                                    <>
                                     <div className="flex flex-col mt-3">
                                         <label htmlFor="referral_name">
                                             Atas Nama
@@ -1601,11 +1800,72 @@ const Edit = ({ usersProp, partnersProp, mou }) => {
                                             }}
                                         />
                                     </div>
+                                    <div className="App">
+                                                {data.referral_signature !==
+                                                    null &&
+                                                typeof data.referral_signature ==
+                                                    "string" ? (
+                                                    <>
+                                                        <FilePond
+                                                            files={
+                                                                "/storage/" +
+                                                                data.referral_signature
+                                                            }
+                                                            onaddfile={(
+                                                                error,
+                                                                fileItems
+                                                            ) => {
+                                                                if (!error) {
+                                                                    setData(
+                                                                        "referral_signature",
+                                                                        fileItems.file
+                                                                    );
+                                                                }
+                                                            }}
+                                                            onremovefile={() => {
+                                                                setData(
+                                                                    "referral_signature",
+                                                                    null
+                                                                );
+                                                            }}
+                                                            maxFileSize="2mb"
+                                                            labelMaxFileSizeExceeded="File terlalu besar"
+                                                            labelIdle='Drag & Drop your files or <span class="filepond--label-action">Browse</span>'
+                                                        />
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        <FilePond
+                                                            onaddfile={(
+                                                                error,
+                                                                fileItems
+                                                            ) => {
+                                                                if (!error) {
+                                                                    setData(
+                                                                        "referral_signature",
+                                                                        fileItems.file
+                                                                    );
+                                                                }
+                                                            }}
+                                                            onremovefile={() => {
+                                                                setData(
+                                                                    "referral_signature",
+                                                                    null
+                                                                );
+                                                            }}
+                                                            maxFileSize="2mb"
+                                                            labelMaxFileSizeExceeded="File terlalu besar"
+                                                            labelIdle='Drag & Drop your files or <span class="filepond--label-action">Browse</span>'
+                                                        />
+                                                    </>
+                                                )}
+                                            </div>
+                                    </>
                                 )}
 
                                 <div className="flex-flex-col mt-3">
                                     <form onSubmit={handleSubmitForm}>
-                                        <Button className="mx-auto justify-center block">
+                                        <Button className="mx-auto justify-center block" disabled={!isSignatureBlob}>
                                             Submit
                                         </Button>
                                     </form>
@@ -3335,7 +3595,21 @@ const Edit = ({ usersProp, partnersProp, mou }) => {
                                 </div>
                                 <div className="w-[30%]">
                                     <p>Pihak Kedua</p>
+                                    {data.pic_signature && isSignatureBlob ? (
+                                    <img
+                                        src={
+                                            typeof data.pic_signature ===
+                                            "string"
+                                                ? data.pic_signature
+                                                : URL.createObjectURL(
+                                                      data.pic_signature
+                                                  )
+                                        }
+                                        className="min-h-20 max-h-20"
+                                    />
+                                ) : (
                                     <div className="min-h-20"></div>
+                                )}
                                     <p>
                                         <b>
                                             {data.partner.pic ??
@@ -3351,7 +3625,21 @@ const Edit = ({ usersProp, partnersProp, mou }) => {
                                 {data.referral && (
                                     <div className="w-[30%]">
                                         <p>Pihak Ketiga</p>
+                                        {data.referral_signature ? (
+                                        <img
+                                            src={
+                                                typeof data.referral_signature ===
+                                                "string"
+                                                    ? data.referral_signature
+                                                    : URL.createObjectURL(
+                                                          data.referral_signature
+                                                      )
+                                            }
+                                            className="min-h-20 max-h-20"
+                                        />
+                                    ) : (
                                         <div className="min-h-20"></div>
+                                    )}
                                         <p>
                                             <b>
                                                 {data.referral_name ??

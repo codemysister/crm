@@ -7,11 +7,13 @@ use App\Jobs\GenerateMOUJob;
 use App\Models\MOU;
 use App\Models\Partner;
 use App\Models\Product;
+use App\Models\Signature;
 use App\Models\User;
 use Carbon\Carbon;
 use DateTime;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
 
@@ -52,7 +54,8 @@ class MOUController extends Controller
                 $query->latest();
             },
         ])->get();
-        return Inertia::render('MOU/Create', compact('partnersProp', 'usersProp'));
+        $signaturesProp = Signature::all();
+        return Inertia::render('MOU/Create', compact('partnersProp', 'usersProp', 'signaturesProp'));
     }
 
     public function generateCode()
@@ -67,10 +70,10 @@ class MOUController extends Controller
         }
 
         $romanMonth = intToRoman($currentMonth);
-        $latestData = Mou::latest()->first() ?? "#PKS/0000/$romanMonth/$currentYear";
+        $latestData = Mou::latest()->first() ?? "PKS/0000/$romanMonth/$currentYear";
         $lastCode = $latestData ? explode('/', $latestData->code ?? $latestData)[1] : 0;
         $newCode = str_pad((int) $lastCode + 1, 4, '0', STR_PAD_LEFT);
-        $newCode = "#PKS/$newCode/$romanMonth/$currentYear";
+        $newCode = "PKS/$newCode/$romanMonth/$currentYear";
         return $newCode;
     }
 
@@ -107,9 +110,17 @@ class MOUController extends Controller
             'profit_sharing_detail' => $mou->profit_sharing_detail,
             'expired_date' => Carbon::parse($mou->expired_date)->locale('id')->isoFormat('DD MMMM YYYY'),
             'signature_name' => $mou->signature_name,
+            'referral' => $mou->referral ? 'Pihak Ketiga' : '',
+            'referral_name' => $mou->referral_name ?? ""
         ]);
 
-        $phpWord->setImageValue('signature_image', array('path' => public_path($mou->signature_image)));
+        $phpWord->setImageValue('signature_image', array('path' => public_path("/storage/$mou->signature_image")));
+        if($mou->partner_pic_signature){
+            $phpWord->setImageValue('pic_signature', array('path' => public_path("/storage/$mou->partner_pic_signature")));
+        }
+        if($mou->referral){
+            $phpWord->setImageValue('referral_signature', array('path' => public_path("/storage/$mou->referral_signature")));
+        }
         $fileName = $mou->uuid . '.docx';
         $phpWord->saveAs(storage_path('app/public/mou/' . $fileName));
         $mou->update(['mou_doc_word' => 'mou/' . $fileName]);
@@ -118,6 +129,21 @@ class MOUController extends Controller
 
     public function store(MOURequest $request)
     {
+        $pathSignaturePic = null;
+        if ($request->hasFile('partner.pic_signature')) {
+            $file = $request->file('partner.pic_signature');
+            $filename = time() . '_' . rand() . '_' . $request->partner['id'] . '.' . $file->getClientOriginalExtension();
+            $pathSignaturePic = 'images/tanda_tangan/' . $filename;
+            Storage::putFileAs('public/images/tanda_tangan', $file, $filename);
+        }
+        $pathSignatureReferral = null;
+        if ($request->hasFile('referral_signature')) {
+            $file = $request->file('referral_signature');
+            $filename = time() . '_' . rand() . '_' . $request->partner['id'] . '.' . $file->getClientOriginalExtension();
+            $pathSignatureReferral = 'images/tanda_tangan/' . $filename;
+            Storage::putFileAs('public/images/tanda_tangan', $file, $filename);
+        }
+        
         $code = $this->generateCode();
         $mou = MOU::create([
             "uuid" => Str::uuid(),
@@ -128,6 +154,7 @@ class MOUController extends Controller
             "partner_name" => $request->partner['name'],
             "partner_pic" => $request->partner['pic'],
             "partner_pic_position" => $request->partner['pic_position'],
+            "partner_pic_signature" => $pathSignaturePic,
             "partner_province" => $request->partner['province'],
             "partner_regency" => $request->partner['regency'],
             "url_subdomain" => $request->url_subdomain,
@@ -150,6 +177,7 @@ class MOUController extends Controller
             "profit_sharing_detail" => $request->profit_sharing_detail,
             "referral" => $request->referral,
             "referral_name" => $request->referral_name,
+            "referral_signature" => $pathSignatureReferral,
             "created_by" => Auth::user()->id,
             "signature_name" => $request->signature['name'],
             "signature_position" => $request->signature['position'],
@@ -178,7 +206,7 @@ class MOUController extends Controller
             'pics' => function ($query) {
                 $query->latest();
             },
-            'subscription' => function ($query) {
+            'subscriptions' => function ($query) {
                 $query->latest();
             },
             'price_list' => function ($query) {
@@ -192,12 +220,65 @@ class MOUController extends Controller
             },
         ])->get();
         $mou = MOU::where('uuid', '=', $uuid)->first();
-        return Inertia::render('MOU/Edit', compact('mou', 'usersProp', 'partnersProp'));
+        $signaturesProp = Signature::all();
+        return Inertia::render('MOU/Edit', compact('mou', 'usersProp', 'partnersProp', 'signaturesProp'));
     }
 
     public function update(MOURequest $request, $uuid)
     {
         $mou = MOU::where('uuid', '=', $uuid)->first();
+
+        $pathSignaturePic = null;
+        if ($request->hasFile('pic_signature')) {
+            $file = $request->file('pic_signature');
+            if ($file->getClientOriginalName() == 'blob') {
+                $pathSignaturePic = $mou->partner_pic_signature;
+            } else {
+                if ($mou->partner_pic_signature) {
+                    Storage::delete('public/' . $mou->partner_pic_signature);
+                    $filename = time() . '_' . rand() . '_' . $request->partner['id'] . '.' . $file->getClientOriginalExtension();
+                    $pathSignaturePic = "images/tanda_tangan/" . $filename;
+                    Storage::putFileAs('public/images/tanda_tangan', $file, $filename);
+                } else {
+                    $filename = time() . '_' . rand() . '_' . $request->partner['id'] . '.' . $file->getClientOriginalExtension();
+                    $pathSignaturePic = "images/tanda_tangan/" . $filename;
+                    Storage::putFileAs('public/images/tanda_tangan', $file, $filename);
+
+                }
+            }
+        } else {
+            if ($mou->partner_pic_signature) {
+                Storage::delete('public/' . $mou->partner_pic_signature);
+                $pathSignaturePic = null;
+            }
+        }
+
+        $pathSignatureReferral = null;
+
+        if ($request->hasFile('referral_signature')) {
+            $file = $request->file('referral_signature');
+            if ($file->getClientOriginalName() == 'blob') {
+                $pathSignatureReferral = $mou->referral_signature;
+            } else {
+                if ($mou->referral_signature) {
+                    Storage::delete('public/' . $mou->referral_signature);
+                    $filename = time() . '_' . rand() . '_' . $request->partner['id'] . '.' . $file->getClientOriginalExtension();
+                    $pathSignatureReferral = "images/tanda_tangan/" . $filename;
+                    Storage::putFileAs('public/images/tanda_tangan', $file, $filename);
+                } else {
+                    $filename = time() . '_' . rand() . '_' . $request->partner['id'] . '.' . $file->getClientOriginalExtension();
+                    $pathSignatureReferral = "images/tanda_tangan/" . $filename;
+                    Storage::putFileAs('public/images/tanda_tangan', $file, $filename);
+                }
+            }
+        } else {
+            if ($mou->referral_signature) {
+                Storage::delete('public/' . $mou->referral_signature);
+                $pathSignatureReferral = null;
+            }
+        }
+
+        
         $mou->update([
             "day" => $request->day,
             "date" => Carbon::parse($request->date)->setTimezone('GMT+7')->format('Y-m-d H:i:s'),
@@ -207,6 +288,7 @@ class MOUController extends Controller
             "partner_pic_position" => $request->partner['pic_position'],
             "partner_province" => $request->partner['province'],
             "partner_regency" => $request->partner['regency'],
+            "partner_pic_signature" => $pathSignaturePic,
             "url_subdomain" => $request->url_subdomain,
             "price_card" => $request->price_card,
             "price_lanyard" => $request->price_lanyard,
@@ -227,6 +309,7 @@ class MOUController extends Controller
             "profit_sharing_detail" => $request->profit_sharing_detail,
             "referral" => $request->referral,
             "referral_name" => $request->referral_name,
+            "referral_signature" => $pathSignatureReferral,
             "signature_name" => $request->signature['name'],
             "signature_position" => $request->signature['position'],
             "signature_image" => $request->signature['image'],
