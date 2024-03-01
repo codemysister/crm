@@ -23,7 +23,7 @@ class UserSeeder extends Seeder
             "password" => bcrypt("admin123")
         ]);
 
-        $super_admin->assignRole("super admin");
+        $super_admin->assignRole("Super Admin");
 
         // AE
         for ($i = 1; $i <= 5; $i++) {
@@ -34,7 +34,7 @@ class UserSeeder extends Seeder
                 "password" => bcrypt("ae123")
             ]);
 
-            $sales->assignRole("account executive");
+            $sales->assignRole("Account Executive");
         }
 
         // Account Manager
@@ -46,7 +46,7 @@ class UserSeeder extends Seeder
                 "password" => bcrypt("am123")
             ]);
 
-            $am->assignRole("account manager");
+            $am->assignRole("Account Manager");
         }
 
         // Account Representative
@@ -58,7 +58,7 @@ class UserSeeder extends Seeder
                 "password" => bcrypt("ar123")
             ]);
 
-            $am->assignRole("account representative");
+            $am->assignRole("Account Representative");
         }
 
 
@@ -70,7 +70,7 @@ class UserSeeder extends Seeder
             "password" => bcrypt("admin123")
         ]);
 
-        $admin->assignRole("general admin");
+        $admin->assignRole("General Admin");
 
         // DPD
         $designer = User::create([
@@ -79,6 +79,6 @@ class UserSeeder extends Seeder
             "number" => "085178612434",
             "password" => bcrypt("designer123")
         ]);
-        $designer->assignRole("graphics designer");
+        $designer->assignRole("Graphics Designer");
     }
 }

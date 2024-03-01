@@ -11,8 +11,8 @@ import {
 
 import logo from "./cazh.png";
 import ttd from "./ttd.png";
-import Sen from "./Sen-Regular.ttf";
-import SenBold from "./Sen-Bold.ttf";
+// import Sen from "./Sen-Regular.ttf";
+// import SenBold from "./Sen-Bold.ttf";
 // Font.register({
 //     family: "Sen",
 //     fonts: [{ src: Sen }, { src: SenBold, fontWeight: "bold" }],
@@ -24,6 +24,7 @@ Font.register({
         { src: Sen }, // font-style: normal, font-weight: normal
         { src: SenBold, fontWeight: "600", fontStyle: "bold" },
     ],
+    format: "truetype",
 });
 const borderColor = "#90e5fc";
 const styles = StyleSheet.create({

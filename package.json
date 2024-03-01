@@ -30,6 +30,7 @@
         "primereact": "^10.5.1",
         "puppeteer": "^21.9.0",
         "react-chartjs-2": "^5.2.0",
-        "react-filepond": "^7.1.2"
+        "react-filepond": "^7.1.2",
+        "@react-pdf/renderer": "^3.0.0"
     }
 }
