@@ -30,6 +30,7 @@ return new class extends Migration {
             $table->string('period_subscription');
             $table->bigInteger('price_training_offline');
             $table->bigInteger('price_training_online');
+            $table->string('fee_qris');
             $table->integer('fee_purchase_cazhpoin');
             $table->integer('fee_bill_cazhpoin');
             $table->integer('fee_topup_cazhpos');

@@ -35,22 +35,14 @@ const Edit = ({ usersProp, partnersProp, mou, signaturesProp }) => {
     const [isSignatureBlob, setIsSignatureBlob] = useState(false);
     const [signatures, setSignatures] = useState(signaturesProp);
 
-
     const toast = useRef(null);
-    const partnerScrollRef = useRef(null);
-    const info = useRef(null);
-    const infoPriceTrainingRef = useRef(null);
+    const infoPriceTrainingOfflineRef = useRef(null);
     const infoPriceTrainingOnlineRef = useRef(null);
-    const infoPriceLanyardRef = useRef(null);
     const animateDay = useRef(null);
     const animateDate = useRef(null);
     const animatePartnerNameRef = useRef(null);
-    const animatePartnerNumberRef = useRef(null);
-    const animatePartnerId = useRef(null);
-    const animatePartnerName = useRef(null);
     const animatePartnerPIC = useRef(null);
     const animatePartnerPICPosition = useRef(null);
-    const animatePartnerAddress = useRef(null);
     const animateUrlSubdomain = useRef(null);
     const animatePriceCard = useRef(null);
     const animatePriceLanyard = useRef(null);
@@ -70,12 +62,9 @@ const Edit = ({ usersProp, partnersProp, mou, signaturesProp }) => {
     const animateProfitSharing = useRef(null);
     const animateProfitSharingDetail = useRef(null);
     const animateReferral = useRef(null);
-    const animateReferralName = useRef(null);
     const animateSignatureName = useRef(null);
     const animatePartnerProvinceRef = useRef(null);
     const animatePartnerRegencyRef = useRef(null);
-
-    
 
     const {
         data,
@@ -130,10 +119,10 @@ const Edit = ({ usersProp, partnersProp, mou, signaturesProp }) => {
     });
 
     useEffect(() => {
-        if(typeof data.pic_signature == 'object'){
+        if (typeof data.pic_signature == "object") {
             setIsSignatureBlob(true);
         }
-    },[data.pic_signature, data.referral_signature])
+    }, [data.pic_signature, data.referral_signature]);
 
     useEffect(() => {
         setcodeProvince(
@@ -152,13 +141,14 @@ const Edit = ({ usersProp, partnersProp, mou, signaturesProp }) => {
         }
     }, [codeProvince]);
 
-    // const signatures = [
-    //     {
-    //         name: "Muh Arif Mahfudin",
-    //         position: "CEO",
-    //         image: "/assets/img/signatures/ttd.png",
-    //     },
-    // ];
+    const option_price_training_offline = [
+        { name: "Jawa", price: 15000000 },
+        { name: "Kalimantan", price: 25000000 },
+        { name: "Sulawesi", price: 27000000 },
+        { name: "Sumatra", price: 23000000 },
+        { name: "Bali", price: 26000000 },
+        { name: "Jabodetabek", price: 15000000 },
+    ];
 
     const option_price_lanyard = [
         { name: "Lanyard Polos", price: 10000 },
@@ -185,13 +175,6 @@ const Edit = ({ usersProp, partnersProp, mou, signaturesProp }) => {
             </div>
         );
     };
-
-    const option_fee_price = [
-        { name: "1", price: 1000 },
-        { name: "2", price: 2000 },
-        { name: "3", price: 2500 },
-    ];
-
 
     const getProvince = async () => {
         const options = {
@@ -419,7 +402,7 @@ const Edit = ({ usersProp, partnersProp, mou, signaturesProp }) => {
                                 </Link>
                             </div>
                             <div className="flex flex-col">
-                                <div className="flex flex-col mt-3">
+                            <div className="flex flex-col mt-3">
                                     <InputText
                                         value={data.code}
                                         onChange={(e) =>
@@ -431,40 +414,6 @@ const Edit = ({ usersProp, partnersProp, mou, signaturesProp }) => {
                                         hidden
                                     />
                                 </div>
-
-                                {/* <div className="flex flex-col mt-3">
-                                    <label htmlFor="date">
-                                        Hari Kesepakatan *
-                                    </label>
-                                    <div className="card flex justify-content-center">
-                                        <InputText
-                                            value={data.day}
-                                            onChange={(e) =>
-                                                setData("day", e.target.value)
-                                            }
-                                            className={`dark:bg-gray-300 w-full ${
-                                                errors.day && "p-invalid"
-                                            }`}
-                                            id="day"
-                                            aria-describedby="day-help"
-                                            onFocus={() => {
-                                                triggerInputFocus(animateDay);
-                                            }}
-                                            onBlur={() => {
-                                                stopAnimateInputFocus(
-                                                    animateDay
-                                                );
-                                            }}
-                                        />
-                                    </div>
-                                    {errors.day && (
-                                        <Message
-                                            className="bg-transparent p-0 my-2 justify-start text-xs"
-                                            severity="error"
-                                            text={errors.day}
-                                        />
-                                    )}
-                                </div> */}
                                 <div className="flex flex-col mt-3">
                                     <label htmlFor="date">
                                         Tanggal Kesepakatan *
@@ -478,16 +427,26 @@ const Edit = ({ usersProp, partnersProp, mou, signaturesProp }) => {
                                         }
                                         style={{ height: "35px" }}
                                         onChange={(e) => {
-                                            const dayIndex = e.target.value.getDay();
+                                            const dayIndex =
+                                                e.target.value.getDay();
 
-                                            const daysOfWeek = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
+                                            const daysOfWeek = [
+                                                "Minggu",
+                                                "Senin",
+                                                "Selasa",
+                                                "Rabu",
+                                                "Kamis",
+                                                "Jumat",
+                                                "Sabtu",
+                                            ];
 
-                                            const dayName = daysOfWeek[dayIndex];
+                                            const dayName =
+                                                daysOfWeek[dayIndex];
 
                                             setData({
                                                 ...data,
                                                 date: e.target.value,
-                                                day: dayName
+                                                day: dayName,
                                             });
                                         }}
                                         onFocus={() => {
@@ -510,226 +469,6 @@ const Edit = ({ usersProp, partnersProp, mou, signaturesProp }) => {
                                         />
                                     )}
                                 </div>
-
-                                <div className="flex flex-col mt-3">
-                                    <label htmlFor="lembaga">Lembaga *</label>
-                                    
-                                    <Dropdown
-                                        value={data.partner}
-                                        dataKey="id"
-                                        onChange={(e) => {
-                                            setData((data) => ({
-                                                ...data,
-                                                partner: {
-                                                    ...data.partner,
-                                                    id: e.target.value.id,
-                                                    name: e.target.value.name,
-                                                    province:
-                                                        e.target.value.province,
-                                                    regency:
-                                                        e.target.value.regency,
-                                                    number: e.target.value
-                                                        .phone_number,
-                                                    pic: e.target.value.pics[0]
-                                                        .name,
-                                                    pic_position:
-                                                        e.target.value.pics[0]
-                                                            .position ?? data.partner.pic_position,
-                                                },
-                                                url_subdomain:
-                                                    e.target.value.accounts[0]
-                                                        .subdomain,
-                                                period_subscription:
-                                                    e.target.value.period,
-                                                price_card: e.target.value
-                                                    .price_list
-                                                    ? JSON.parse(
-                                                          e.target.value
-                                                              .price_list
-                                                              .price_card
-                                                      ).price
-                                                    : null,
-                                                price_lanyard: e.target.value
-                                                    .price_list
-                                                    ? e.target.value.price_list
-                                                          .price_lanyard
-                                                    : null,
-                                                price_subscription_system: e
-                                                    .target.value.price_list
-                                                    ? e.target.value.price_list
-                                                          .price_subscription_system
-                                                    : null,
-                                                price_training_offline: e.target
-                                                    .value.price_list
-                                                    ? e.target.value.price_list
-                                                          .price_training_offline
-                                                    : null,
-                                                price_training_online: e.target
-                                                    .value.price_list
-                                                    ? e.target.value.price_list
-                                                          .price_training_online
-                                                    : null,
-                                                fee_purchase_cazhpoin: e.target
-                                                    .value.price_list
-                                                    ? e.target.value.price_list
-                                                          .fee_purchase_cazhpoin
-                                                    : null,
-                                                fee_bill_cazhpoin: e.target
-                                                    .value.price_list
-                                                    ? e.target.value.price_list
-                                                          .fee_bill_cazhpoin
-                                                    : null,
-                                                fee_topup_cazhpos: e.target
-                                                    .value.price_list
-                                                    ? e.target.value.price_list
-                                                          .fee_topup_cazhpos
-                                                    : null,
-                                                fee_withdraw_cazhpos: e.target
-                                                    .value.price_list
-                                                    ? e.target.value.price_list
-                                                          .fee_withdraw_cazhpos
-                                                    : null,
-                                                fee_bill_saldokartu: e.target
-                                                    .value.price_list
-                                                    ? e.target.value.price_list
-                                                          .fee_bill_saldokartu
-                                                    : null,
-                                                bank: e.target.value.banks[0]
-                                                    ? e.target.value.banks[0]
-                                                          .bank
-                                                    : null,
-                                                account_bank_name: e.target
-                                                    .value.banks[0]
-                                                    ? e.target.value.banks[0]
-                                                          .account_bank_name
-                                                    : null,
-                                                account_bank_number: e.target
-                                                    .value.banks[0]
-                                                    ? e.target.value.banks[0]
-                                                          .account_bank_number
-                                                    : null,
-                                            }));
-                                            setcodeProvince(
-                                                (prev) =>
-                                                    (prev = JSON.parse(
-                                                        e.target.value.province
-                                                    ).code)
-                                            );
-                                        }}
-                                        onShow={() => {
-                                            triggerInputFocus(
-                                                animatePartnerNameRef
-                                            );
-                                        }}
-                                        onHide={() => {
-                                            stopAnimateInputFocus(
-                                                animatePartnerNameRef
-                                            );
-                                        }}
-                                        showOnFocus
-                                        options={partners}
-                                        optionLabel="name"
-                                        placeholder="Pilih Lembaga"
-                                        filter
-                                        valueTemplate={selectedOptionTemplate}
-                                        itemTemplate={optionTemplate}
-                                        className="w-full md:w-14rem"
-                                    />
-                                </div>
-
-                                <div className="flex flex-col mt-3">
-                                    <label htmlFor="province">Provinsi *</label>
-
-                                    <Dropdown
-                                        value={
-                                            data.partner.province
-                                                ? JSON.parse(
-                                                      data.partner.province
-                                                  )
-                                                : null
-                                        }
-                                        onChange={(e) => {
-                                            setcodeProvince(
-                                                (prev) =>
-                                                    (prev = e.target.value.code)
-                                            );
-                                            setData("partner", {
-                                                ...data.partner,
-                                                province: JSON.stringify(
-                                                    e.target.value
-                                                ),
-                                            });
-                                        }}
-                                        dataKey="name"
-                                        options={provinces}
-                                        optionLabel="name"
-                                        placeholder="Pilih Provinsi"
-                                        filter
-                                        valueTemplate={selectedOptionTemplate}
-                                        itemTemplate={optionTemplate}
-                                        className="w-full md:w-14rem"
-                                        onFocus={() => {
-                                            triggerInputFocus(
-                                                animatePartnerProvinceRef
-                                            );
-                                        }}
-                                        onShow={() => {
-                                            triggerInputFocus(
-                                                animatePartnerProvinceRef
-                                            );
-                                        }}
-                                        onHide={() => {
-                                            stopAnimateInputFocus(
-                                                animatePartnerProvinceRef
-                                            );
-                                        }}
-                                    />
-                                </div>
-
-                                <div className="flex flex-col mt-3">
-                                    <label htmlFor="regency">Kabupaten *</label>
-                                    <Dropdown
-                                    dataKey="name"
-                                        value={
-                                            data.partner.regency
-                                                ? JSON.parse(
-                                                      data.partner.regency
-                                                  )
-                                                : null
-                                        }
-                                        onChange={(e) => {
-                                            setData("partner", {
-                                                ...data.partner,
-                                                regency: JSON.stringify(
-                                                    e.target.value
-                                                ),
-                                            });
-                                        }}
-                                        onFocus={() => {
-                                            triggerInputFocus(
-                                                animatePartnerRegencyRef
-                                            );
-                                        }}
-                                        onShow={() => {
-                                            triggerInputFocus(
-                                                animatePartnerRegencyRef
-                                            );
-                                        }}
-                                        onHide={() => {
-                                            stopAnimateInputFocus(
-                                                animatePartnerRegencyRef
-                                            );
-                                        }}
-                                        options={regencys}
-                                        optionLabel="name"
-                                        placeholder="Pilih Kabupaten"
-                                        filter
-                                        valueTemplate={selectedOptionTemplate}
-                                        itemTemplate={optionTemplate}
-                                        className="w-full md:w-14rem"
-                                    />
-                                </div>
-
                                 <div className="flex flex-col mt-3">
                                     <label htmlFor="partner_pic">PIC *</label>
                                     <InputText
@@ -800,6 +539,257 @@ const Edit = ({ usersProp, partnersProp, mou, signaturesProp }) => {
                                             text={errors.partner_pic_position}
                                         />
                                     )}
+                                </div>                            
+                                <div className="flex flex-col mt-3">
+                                    <label htmlFor="lembaga">Lembaga *</label>
+                                    <div className="p-inputgroup flex-1">
+                                        <InputText
+                                            value={data.partner.name}
+                                            placeholder="Lembaga"
+                                            onChange={(e) => {
+                                                setData((prev) => ({
+                                                    ...prev,
+                                                    partner: {
+                                                        ...prev.partner,
+                                                        name: e.target.value,
+                                                    },
+                                                }));
+                                            }}
+                                            onFocus={() => {
+                                                triggerInputFocus(
+                                                    animatePartnerNameRef
+                                                );
+                                            }}
+                                            onBlur={() => {
+                                                stopAnimateInputFocus(
+                                                    animatePartnerNameRef
+                                                );
+                                            }}
+                                            className="w-[90%]"
+                                        />
+                                        <Dropdown
+                                            value={data.partner}
+                                            dataKey="name"
+                                            onChange={(e) => {
+                                                setData((data) => ({
+                                                    ...data,
+                                                    partner: {
+                                                        ...data.partner,
+                                                        id: e.target.value.id,
+                                                        name: e.target.value
+                                                            .name,
+                                                        province:
+                                                            e.target.value
+                                                                .province,
+                                                        regency:
+                                                            e.target.value
+                                                                .regency,
+                                                        number: e.target.value
+                                                            .phone_number,
+                                                        pic: e.target.value
+                                                            .pics[0].name,
+                                                        pic_position:
+                                                            e.target.value
+                                                                .pics[0]
+                                                                .position,
+                                                    },
+                                                    url_subdomain:
+                                                        e.target.value
+                                                            .accounts[0]
+                                                            .subdomain,
+                                                    period_subscription:
+                                                        e.target.value.period,
+                                                    price_card: e.target.value
+                                                        .price_list
+                                                        ? JSON.parse(
+                                                              e.target.value
+                                                                  .price_list
+                                                                  .price_card
+                                                          ).price
+                                                        : null,
+                                                    price_lanyard: e.target
+                                                        .value.price_list
+                                                        ? e.target.value
+                                                              .price_list
+                                                              .price_lanyard
+                                                        : null,
+                                                    price_subscription_system: e
+                                                        .target.value.price_list
+                                                        ? e.target.value
+                                                              .price_list
+                                                              .price_subscription_system
+                                                        : null,
+                                                    price_training_offline: e
+                                                        .target.value.price_list
+                                                        ? e.target.value
+                                                              .price_list
+                                                              .price_training_offline
+                                                        : null,
+                                                    price_training_online: e
+                                                        .target.value.price_list
+                                                        ? e.target.value
+                                                              .price_list
+                                                              .price_training_online
+                                                        : null,
+                                                    fee_purchase_cazhpoin: e
+                                                        .target.value.price_list
+                                                        ? e.target.value
+                                                              .price_list
+                                                              .fee_purchase_cazhpoin
+                                                        : null,
+                                                    fee_bill_cazhpoin: e.target
+                                                        .value.price_list
+                                                        ? e.target.value
+                                                              .price_list
+                                                              .fee_bill_cazhpoin
+                                                        : null,
+                                                    fee_topup_cazhpos: e.target
+                                                        .value.price_list
+                                                        ? e.target.value
+                                                              .price_list
+                                                              .fee_topup_cazhpos
+                                                        : null,
+                                                    fee_withdraw_cazhpos: e
+                                                        .target.value.price_list
+                                                        ? e.target.value
+                                                              .price_list
+                                                              .fee_withdraw_cazhpos
+                                                        : null,
+                                                    fee_bill_saldokartu: e
+                                                        .target.value.price_list
+                                                        ? e.target.value
+                                                              .price_list
+                                                              .fee_bill_saldokartu
+                                                        : null,
+                                                    bank: e.target.value
+                                                        .banks[0]
+                                                        ? e.target.value
+                                                              .banks[0].bank
+                                                        : null,
+                                                    account_bank_name: e.target
+                                                        .value.banks[0]
+                                                        ? e.target.value
+                                                              .banks[0]
+                                                              .account_bank_name
+                                                        : null,
+                                                    account_bank_number: e
+                                                        .target.value.banks[0]
+                                                        ? e.target.value
+                                                              .banks[0]
+                                                              .account_bank_number
+                                                        : null,
+                                                }));
+                                                setcodeProvince(
+                                                    (prev) =>
+                                                        (prev = JSON.parse(
+                                                            e.target.value
+                                                                .province
+                                                        ).code)
+                                                );
+                                            }}
+                                            options={partners}
+                                            filter
+                                            placeholder={false}
+                                            showClear={false}
+                                            optionLabel="name"
+                                            valueTemplate={
+                                                selectedOptionTemplate
+                                            }
+                                            itemTemplate={optionTemplate}
+                                            className="w-[10%] dropdown-group border-l-0"
+                                        />
+                                    </div>
+                                </div>
+                                <div className="flex flex-col mt-3">
+                                    <label htmlFor="province">Provinsi *</label>
+
+                                    <Dropdown
+                                        value={
+                                            data.partner.province
+                                                ? JSON.parse(
+                                                      data.partner.province
+                                                  )
+                                                : null
+                                        }
+                                        onChange={(e) => {
+                                            setcodeProvince(
+                                                (prev) =>
+                                                    (prev = e.target.value.code)
+                                            );
+                                            setData("partner", {
+                                                ...data.partner,
+                                                province: JSON.stringify(
+                                                    e.target.value
+                                                ),
+                                            });
+                                        }}
+                                        dataKey="name"
+                                        options={provinces}
+                                        optionLabel="name"
+                                        placeholder="Pilih Provinsi"
+                                        filter
+                                        valueTemplate={selectedOptionTemplate}
+                                        itemTemplate={optionTemplate}
+                                        className="w-full md:w-14rem"
+                                        onFocus={() => {
+                                            triggerInputFocus(
+                                                animatePartnerProvinceRef
+                                            );
+                                        }}
+                                        onShow={() => {
+                                            triggerInputFocus(
+                                                animatePartnerProvinceRef
+                                            );
+                                        }}
+                                        onHide={() => {
+                                            stopAnimateInputFocus(
+                                                animatePartnerProvinceRef
+                                            );
+                                        }}
+                                    />
+                                </div>
+                                <div className="flex flex-col mt-3">
+                                    <label htmlFor="regency">Kabupaten *</label>
+                                    <Dropdown
+                                        dataKey="name"
+                                        value={
+                                            data.partner.regency
+                                                ? JSON.parse(
+                                                      data.partner.regency
+                                                  )
+                                                : null
+                                        }
+                                        onChange={(e) => {
+                                            setData("partner", {
+                                                ...data.partner,
+                                                regency: JSON.stringify(
+                                                    e.target.value
+                                                ),
+                                            });
+                                        }}
+                                        onFocus={() => {
+                                            triggerInputFocus(
+                                                animatePartnerRegencyRef
+                                            );
+                                        }}
+                                        onShow={() => {
+                                            triggerInputFocus(
+                                                animatePartnerRegencyRef
+                                            );
+                                        }}
+                                        onHide={() => {
+                                            stopAnimateInputFocus(
+                                                animatePartnerRegencyRef
+                                            );
+                                        }}
+                                        options={regencys}
+                                        optionLabel="name"
+                                        placeholder="Pilih Kabupaten"
+                                        filter
+                                        valueTemplate={selectedOptionTemplate}
+                                        itemTemplate={optionTemplate}
+                                        className="w-full md:w-14rem"
+                                    />
                                 </div>
                                 <div className="flex flex-col mt-3">
                                     <label htmlFor="url_subdomain">
@@ -872,35 +862,64 @@ const Edit = ({ usersProp, partnersProp, mou, signaturesProp }) => {
                                     <label htmlFor="price_lanyard">
                                         Harga Lanyard *
                                     </label>
-                                    <Dropdown
-                                        value={data.price_lanyard}
-                                        onChange={(e) =>
-                                            setData(
-                                                "price_lanyard",
-                                                Number(e.target.value)
-                                            )
-                                        }
-                                        options={option_price_lanyard}
-                                        optionLabel="price"
-                                        optionValue="price"
-                                        placeholder="Pilih Tarif"
-                                        editable
-                                        valueTemplate={
-                                            selectedOptionTrainingTemplate
-                                        }
-                                        itemTemplate={optionTrainingTemplate}
-                                        onFocus={() => {
-                                            triggerInputFocus(
-                                                animatePriceLanyard
-                                            );
-                                        }}
-                                        onBlur={() => {
-                                            stopAnimateInputFocus(
-                                                animatePriceLanyard
-                                            );
-                                        }}
-                                        className="w-full md:w-14rem"
-                                    />
+
+                                    <div className="p-inputgroup flex-1">
+                                        <InputNumber
+                                            locale="id-ID"
+                                            value={data.price_lanyard}
+                                            onChange={(e) =>
+                                                setData(
+                                                    "price_lanyard",
+                                                    e.value
+                                                )
+                                            }
+                                            onFocus={() => {
+                                                triggerInputFocus(
+                                                    animatePriceLanyard
+                                                );
+                                            }}
+                                            onBlur={() => {
+                                                stopAnimateInputFocus(
+                                                    animatePriceLanyard
+                                                );
+                                            }}
+                                            className={`${
+                                                errors.price_lanyard &&
+                                                "p-invalid"
+                                            } w-[90%]`}
+                                        />
+                                        <Dropdown
+                                            value={data.price_lanyard}
+                                            onChange={(e) =>
+                                                setData(
+                                                    "price_lanyard",
+                                                    Number(e.target.value)
+                                                )
+                                            }
+                                            options={option_price_lanyard}
+                                            optionLabel="price"
+                                            optionValue="price"
+                                            placeholder="Pilih Tarif"
+                                            editable
+                                            valueTemplate={
+                                                selectedOptionTrainingTemplate
+                                            }
+                                            itemTemplate={
+                                                optionTrainingTemplate
+                                            }
+                                            onFocus={() => {
+                                                triggerInputFocus(
+                                                    animatePriceLanyard
+                                                );
+                                            }}
+                                            onBlur={() => {
+                                                stopAnimateInputFocus(
+                                                    animatePriceLanyard
+                                                );
+                                            }}
+                                            className="w-[10%] border-l-0 dropdown-group"
+                                        />
+                                    </div>
                                     {errors.price_lanyard && (
                                         <Message
                                             className="bg-transparent p-0 my-2 justify-start text-xs"
@@ -952,36 +971,65 @@ const Edit = ({ usersProp, partnersProp, mou, signaturesProp }) => {
                                     <label htmlFor="period_subscription">
                                         Langganan Per-*
                                     </label>
-                                    <Dropdown
-                                        value={data.period_subscription}
-                                        onChange={(e) => {
-                                            setData(
-                                                "period_subscription",
-                                                e.target.value
-                                            );
-                                        }}
-                                        options={option_period_subscription}
-                                        optionLabel="name"
-                                        optionValue="name"
-                                        placeholder="Langganan Per-"
-                                        filter
-                                        valueTemplate={selectedOptionTemplate}
-                                        itemTemplate={optionTemplate}
-                                        className={`w-full md:w-14rem ${
-                                            errors.period_subscription &&
-                                            "p-invalid"
-                                        }`}
-                                        onFocus={() => {
-                                            triggerInputFocus(
-                                                animatePeriodSubscription
-                                            );
-                                        }}
-                                        onBlur={() => {
-                                            stopAnimateInputFocus(
-                                                animatePeriodSubscription
-                                            );
-                                        }}
-                                    />
+                                    <div className="p-inputgroup flex-1">
+                                        <InputText
+                                            value={data.period_subscription}
+                                            onChange={(e) =>
+                                                setData({
+                                                    ...data,
+                                                    period_subscription:
+                                                        e.target.value,
+                                                })
+                                            }
+                                            className={`dark:bg-gray-300 ${
+                                                errors.period_subscription &&
+                                                "p-invalid "
+                                            } w-[90%]`}
+                                            id="period_subscription"
+                                            aria-describedby="period_subscription-help"
+                                            onFocus={() => {
+                                                triggerInputFocus(
+                                                    animatePeriodSubscription
+                                                );
+                                            }}
+                                            onBlur={() => {
+                                                stopAnimateInputFocus(
+                                                    animatePeriodSubscription
+                                                );
+                                            }}
+                                        />
+
+                                        <Dropdown
+                                            value={data.period_subscription}
+                                            onChange={(e) => {
+                                                setData(
+                                                    "period_subscription",
+                                                    e.target.value
+                                                );
+                                            }}
+                                            options={option_period_subscription}
+                                            optionLabel="name"
+                                            optionValue="name"
+                                            valueTemplate={
+                                                selectedOptionTemplate
+                                            }
+                                            itemTemplate={optionTemplate}
+                                            className={`${
+                                                errors.period_subscription &&
+                                                "p-invalid"
+                                            } dropdown-group border-l-0 w-[10%]`}
+                                            onFocus={() => {
+                                                triggerInputFocus(
+                                                    animatePeriodSubscription
+                                                );
+                                            }}
+                                            onBlur={() => {
+                                                stopAnimateInputFocus(
+                                                    animatePeriodSubscription
+                                                );
+                                            }}
+                                        />
+                                    </div>
                                     {errors.period_subscription && (
                                         <Message
                                             className="bg-transparent p-0 my-2 justify-start text-xs"
@@ -992,38 +1040,67 @@ const Edit = ({ usersProp, partnersProp, mou, signaturesProp }) => {
                                 </div>
                                 <div className="flex flex-col mt-3">
                                     <label htmlFor="period_subscription">
-                                        Training Lokasi*
+                                        Harga Training Lokasi*
                                     </label>
 
-                                    <Dropdown
-                                        value={data.price_training_offline}
-                                        onChange={(e) =>
-                                            setData(
-                                                "price_training_offline",
-                                                Number(e.target.value)
-                                            )
-                                        }
-                                        options={option_training_offline}
-                                        optionLabel="price"
-                                        optionValue="price"
-                                        placeholder="Pilih Tarif"
-                                        editable
-                                        valueTemplate={
-                                            selectedOptionTrainingTemplate
-                                        }
-                                        itemTemplate={optionTrainingTemplate}
-                                        onFocus={() => {
-                                            triggerInputFocus(
-                                                animatePriceTrainingOffline
-                                            );
-                                        }}
-                                        onBlur={() => {
-                                            stopAnimateInputFocus(
-                                                animatePriceTrainingOffline
-                                            );
-                                        }}
-                                        className="w-full md:w-14rem"
-                                    />
+                                    <div className="p-inputgroup flex-1 h-full">
+                                        <InputNumber
+                                            value={data.price_training_offline}
+                                            onChange={(e) =>
+                                                setData(
+                                                    "price_training_offline",
+                                                    e.value
+                                                )
+                                            }
+                                            onFocus={() => {
+                                                triggerInputFocus(
+                                                    animatePriceTrainingOffline
+                                                );
+                                            }}
+                                            onBlur={() => {
+                                                stopAnimateInputFocus(
+                                                    animatePriceTrainingOffline
+                                                );
+                                            }}
+                                            className={`h-full w-[90%]`}
+                                            locale="id-ID"
+                                        />
+
+                                        <Dropdown
+                                            value={data.price_training_offline}
+                                            onChange={(e) => {
+                                                setData(
+                                                    "price_training_offline",
+                                                    Number(e.target.value)
+                                                );
+                                            }}
+                                            options={
+                                                option_price_training_offline
+                                            }
+                                            optionLabel="name"
+                                            optionValue="price"
+                                            className={`${
+                                                errors.period_subscription &&
+                                                "p-invalid"
+                                            } dropdown-group border-l-0 w-[10%]`}
+                                            onFocus={() => {
+                                                triggerInputFocus(
+                                                    animatePriceTrainingOffline
+                                                );
+                                            }}
+                                            onBlur={() => {
+                                                stopAnimateInputFocus(
+                                                    animatePriceTrainingOffline
+                                                );
+                                            }}
+                                            valueTemplate={
+                                                selectedOptionTrainingTemplate
+                                            }
+                                            itemTemplate={
+                                                optionTrainingTemplate
+                                            }
+                                        />
+                                    </div>
                                     {errors.price_training_offline && (
                                         <Message
                                             className="bg-transparent p-0 my-2 justify-start text-xs"
@@ -1034,7 +1111,7 @@ const Edit = ({ usersProp, partnersProp, mou, signaturesProp }) => {
                                 </div>
                                 <div className="flex flex-col mt-3">
                                     <label htmlFor="price_training_online">
-                                        Training Online*
+                                        Harga Training Online*
                                     </label>
                                     <div className="p-inputgroup flex-1 h-full">
                                         <InputNumber
@@ -1099,25 +1176,52 @@ const Edit = ({ usersProp, partnersProp, mou, signaturesProp }) => {
                                 </div>
                                 <div className="flex flex-col mt-3">
                                     <label htmlFor="fee_purchase_cazhpoin">
-                                        Fee isi kartu via CazhPOIN*
+                                        Tarif QRIS*
                                     </label>
 
-                                    <Dropdown
-                                        dataKey="name"
+                                    <InputText
+                                        value={data.fee_qris}
+                                        onChange={(e) =>
+                                            setData({
+                                                ...data,
+                                                fee_qris: e.target.value,
+                                            })
+                                        }
+                                        className={`dark:bg-gray-300 ${
+                                            errors.fee_qris && "p-invalid "
+                                        } w-full`}
+                                        id="fee_qris"
+                                        aria-describedby="fee_qris-help"
+                                        onFocus={() => {
+                                            triggerInputFocus(animateFeeQRIS);
+                                        }}
+                                        onBlur={() => {
+                                            stopAnimateInputFocus(
+                                                animateFeeQRIS
+                                            );
+                                        }}
+                                    />
+                                    {errors.fee_qris && (
+                                        <Message
+                                            className="bg-transparent p-0 my-2 justify-start text-xs"
+                                            severity="error"
+                                            text={errors.fee_qris}
+                                        />
+                                    )}
+                                </div>
+                                <div className="flex flex-col mt-3">
+                                    <label htmlFor="fee_purchase_cazhpoin">
+                                        Tarif isi kartu via CazhPOIN*
+                                    </label>
+
+                                    <InputNumber
+                                        locale="id-ID"
                                         value={data.fee_purchase_cazhpoin}
                                         onChange={(e) =>
                                             setData(
                                                 "fee_purchase_cazhpoin",
-                                                Number(e.target.value)
+                                                e.value
                                             )
-                                        }
-                                        options={option_fee_price}
-                                        optionLabel="price"
-                                        optionValue="price"
-                                        placeholder="Pilih Tarif"
-                                        editable
-                                        valueTemplate={
-                                            selectedOptionFeeTemplate
                                         }
                                         onFocus={() => {
                                             triggerInputFocus(
@@ -1129,8 +1233,10 @@ const Edit = ({ usersProp, partnersProp, mou, signaturesProp }) => {
                                                 animateFeePurchaseCazhpoin
                                             );
                                         }}
-                                        itemTemplate={optionFeeTemplate}
-                                        className="w-full md:w-14rem"
+                                        className={`${
+                                            errors.fee_purchase_cazhpoin &&
+                                            "p-invalid"
+                                        }`}
                                     />
                                     {errors.fee_purchase_cazhpoin && (
                                         <Message
@@ -1142,26 +1248,17 @@ const Edit = ({ usersProp, partnersProp, mou, signaturesProp }) => {
                                 </div>
                                 <div className="flex flex-col mt-3">
                                     <label htmlFor="fee_bill_cazhpoin">
-                                        Fee bayar tagihan via CazhPOIN*
+                                        Tarif bayar tagihan via CazhPOIN*
                                     </label>
 
-                                    <Dropdown
-                                        dataKey="name"
+                                    <InputNumber
+                                        locale="id-ID"
                                         value={data.fee_bill_cazhpoin}
                                         onChange={(e) =>
                                             setData(
                                                 "fee_bill_cazhpoin",
-                                                Number(e.target.value)
+                                                e.value
                                             )
-                                        }
-                                        options={option_fee_price}
-                                        optionLabel="price"
-                                        optionValue="price"
-                                        placeholder="Pilih Tarif"
-                                        editable
-                                        showOnFocus
-                                        valueTemplate={
-                                            selectedOptionFeeTemplate
                                         }
                                         onFocus={() => {
                                             triggerInputFocus(
@@ -1173,8 +1270,10 @@ const Edit = ({ usersProp, partnersProp, mou, signaturesProp }) => {
                                                 animateFeeBillCazhpoin
                                             );
                                         }}
-                                        itemTemplate={optionFeeTemplate}
-                                        className="w-full md:w-14rem"
+                                        className={`${
+                                            errors.fee_bill_cazhpoin &&
+                                            "p-invalid"
+                                        }`}
                                     />
 
                                     {errors.fee_bill_cazhpoin && (
@@ -1187,26 +1286,17 @@ const Edit = ({ usersProp, partnersProp, mou, signaturesProp }) => {
                                 </div>
                                 <div className="flex flex-col mt-3">
                                     <label htmlFor="fee_topup_cazhpos">
-                                        Fee topup kartu via CazhPOIN*
+                                        Tarif topup kartu via CazhPOIN*
                                     </label>
 
-                                    <Dropdown
-                                        dataKey="name"
+                                    <InputNumber
+                                        locale="id-ID"
                                         value={data.fee_topup_cazhpos}
                                         onChange={(e) =>
                                             setData(
                                                 "fee_topup_cazhpos",
-                                                Number(e.target.value)
+                                                e.value
                                             )
-                                        }
-                                        options={option_fee_price}
-                                        optionLabel="price"
-                                        optionValue="price"
-                                        placeholder="Pilih Tarif"
-                                        editable
-                                        showOnFocus
-                                        valueTemplate={
-                                            selectedOptionFeeTemplate
                                         }
                                         onFocus={() => {
                                             triggerInputFocus(
@@ -1218,8 +1308,10 @@ const Edit = ({ usersProp, partnersProp, mou, signaturesProp }) => {
                                                 animateFeeTopupCazhpos
                                             );
                                         }}
-                                        itemTemplate={optionFeeTemplate}
-                                        className="w-full md:w-14rem"
+                                        className={`${
+                                            errors.fee_topup_cazhpos &&
+                                            "p-invalid"
+                                        }`}
                                     />
 
                                     {errors.fee_topup_cazhpos && (
@@ -1232,26 +1324,18 @@ const Edit = ({ usersProp, partnersProp, mou, signaturesProp }) => {
                                 </div>
                                 <div className="flex flex-col mt-3">
                                     <label htmlFor="fee_withdraw_cazhpos">
-                                        Fee penarikan saldo kartu via CazhPOIN*
+                                        Tarif penarikan saldo kartu via
+                                        CazhPOIN*
                                     </label>
 
-                                    <Dropdown
-                                        dataKey="name"
+                                    <InputNumber
+                                        locale="id-ID"
                                         value={data.fee_withdraw_cazhpos}
                                         onChange={(e) =>
                                             setData(
                                                 "fee_withdraw_cazhpos",
-                                                Number(e.target.value)
+                                                e.value
                                             )
-                                        }
-                                        options={option_fee_price}
-                                        optionLabel="price"
-                                        optionValue="price"
-                                        placeholder="Pilih Tarif"
-                                        editable
-                                        showOnFocus
-                                        valueTemplate={
-                                            selectedOptionFeeTemplate
                                         }
                                         onFocus={() => {
                                             triggerInputFocus(
@@ -1263,8 +1347,10 @@ const Edit = ({ usersProp, partnersProp, mou, signaturesProp }) => {
                                                 animateFeeWithdrawCazhpos
                                             );
                                         }}
-                                        itemTemplate={optionFeeTemplate}
-                                        className="w-full md:w-14rem"
+                                        className={`${
+                                            errors.fee_withdraw_cazhpos &&
+                                            "p-invalid"
+                                        }`}
                                     />
 
                                     {errors.fee_withdraw_cazhpos && (
@@ -1277,26 +1363,17 @@ const Edit = ({ usersProp, partnersProp, mou, signaturesProp }) => {
                                 </div>
                                 <div className="flex flex-col mt-3">
                                     <label htmlFor="fee_bill_saldokartu">
-                                        Fee bayar tagihan via Saldo Kartu*
+                                        Tarif bayar tagihan via Saldo Kartu*
                                     </label>
 
-                                    <Dropdown
-                                        dataKey="name"
+                                    <InputNumber
+                                        locale="id-ID"
                                         value={data.fee_bill_saldokartu}
                                         onChange={(e) =>
                                             setData(
                                                 "fee_bill_saldokartu",
-                                                Number(e.target.value)
+                                                e.value
                                             )
-                                        }
-                                        options={option_fee_price}
-                                        optionLabel="price"
-                                        optionValue="price"
-                                        placeholder="Pilih Tarif"
-                                        editable
-                                        showOnFocus
-                                        valueTemplate={
-                                            selectedOptionFeeTemplate
                                         }
                                         onFocus={() => {
                                             triggerInputFocus(
@@ -1308,8 +1385,10 @@ const Edit = ({ usersProp, partnersProp, mou, signaturesProp }) => {
                                                 animateFeeBillSaldokartu
                                             );
                                         }}
-                                        itemTemplate={optionFeeTemplate}
-                                        className="w-full md:w-14rem"
+                                        className={`${
+                                            errors.fee_bill_saldokartu &&
+                                            "p-invalid"
+                                        }`}
                                     />
 
                                     {errors.fee_bill_saldokartu && (
@@ -1618,6 +1697,7 @@ const Edit = ({ usersProp, partnersProp, mou, signaturesProp }) => {
                                         Tanda Tangan PIC
                                     </label>
 
+                        
                                     {/* <div className="App">
                                         {data.pic_signature !== null &&
                                         typeof data.pic_signature ==
@@ -1678,66 +1758,68 @@ const Edit = ({ usersProp, partnersProp, mou, signaturesProp }) => {
                                         )}
                                     </div> */}
 
-                                    <div className="App">
-                                                {data.pic_signature !==
-                                                    null &&
-                                                typeof data.pic_signature ==
-                                                    "string" ? (
-                                                    <>
-                                                        <FilePond
-                                                            files={
-                                                                "/storage/" +
-                                                                data.pic_signature
+<div className="App mt-3">
+                                        <label htmlFor="referral_name">
+                                                Tanda Tangan Pihak Ketiga
+                                            </label>
+                                            {data.pic_signature !== null &&
+                                            typeof data.pic_signature ==
+                                                "string" ? (
+                                                <>
+                                                    <FilePond
+                                                        files={
+                                                            "/storage/" +
+                                                            data.pic_signature
+                                                        }
+                                                        onaddfile={(
+                                                            error,
+                                                            fileItems
+                                                        ) => {
+                                                            if (!error) {
+                                                                setData(
+                                                                    "pic_signature",
+                                                                    fileItems.file
+                                                                );
                                                             }
-                                                            onaddfile={(
-                                                                error,
-                                                                fileItems
-                                                            ) => {
-                                                                if (!error) {
-                                                                    setData(
-                                                                        "pic_signature",
-                                                                        fileItems.file
-                                                                    );
-                                                                }
-                                                            }}
-                                                            onremovefile={() => {
+                                                        }}
+                                                        onremovefile={() => {
+                                                            setData(
+                                                                "pic_signature",
+                                                                null
+                                                            );
+                                                        }}
+                                                        maxFileSize="2mb"
+                                                        labelMaxFileSizeExceeded="File terlalu besar"
+                                                        labelIdle='Drag & Drop your files or <span class="filepond--label-action">Browse</span>'
+                                                    />
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <FilePond
+                                                        onaddfile={(
+                                                            error,
+                                                            fileItems
+                                                        ) => {
+                                                            if (!error) {
                                                                 setData(
                                                                     "pic_signature",
-                                                                    null
+                                                                    fileItems.file
                                                                 );
-                                                            }}
-                                                            maxFileSize="2mb"
-                                                            labelMaxFileSizeExceeded="File terlalu besar"
-                                                            labelIdle='Drag & Drop your files or <span class="filepond--label-action">Browse</span>'
-                                                        />
-                                                    </>
-                                                ) : (
-                                                    <>
-                                                        <FilePond
-                                                            onaddfile={(
-                                                                error,
-                                                                fileItems
-                                                            ) => {
-                                                                if (!error) {
-                                                                    setData(
-                                                                        "pic_signature",
-                                                                        fileItems.file
-                                                                    );
-                                                                }
-                                                            }}
-                                                            onremovefile={() => {
-                                                                setData(
-                                                                    "pic_signature",
-                                                                    null
-                                                                );
-                                                            }}
-                                                            maxFileSize="2mb"
-                                                            labelMaxFileSizeExceeded="File terlalu besar"
-                                                            labelIdle='Drag & Drop your files or <span class="filepond--label-action">Browse</span>'
-                                                        />
-                                                    </>
-                                                )}
-                                            </div>
+                                                            }
+                                                        }}
+                                                        onremovefile={() => {
+                                                            setData(
+                                                                "pic_signature",
+                                                                null
+                                                            );
+                                                        }}
+                                                        maxFileSize="2mb"
+                                                        labelMaxFileSizeExceeded="File terlalu besar"
+                                                        labelIdle='Drag & Drop your files or <span class="filepond--label-action">Browse</span>'
+                                                    />
+                                                </>
+                                            )}
+                                        </div>
                                 </div>
 
                                 <div className="flex flex-col mt-3">
@@ -1765,107 +1847,112 @@ const Edit = ({ usersProp, partnersProp, mou, signaturesProp }) => {
                                     </div>
                                 </div>
 
-                                {console.log(data)}
+                               
 
                                 {data.referral && (
                                     <>
-                                    <div className="flex flex-col mt-3">
-                                        <label htmlFor="referral_name">
-                                            Atas Nama
-                                        </label>
+                                        <div className="flex flex-col mt-3">
+                                            <label htmlFor="referral_name">
+                                                Atas Nama
+                                            </label>
 
-                                        <InputText
-                                            value={data.referral_name}
-                                            onChange={(e) =>
-                                                setData(
-                                                    "referral_name",
-                                                    e.target.value
-                                                )
-                                            }
-                                            className={`dark:bg-gray-300 ${
-                                                errors.referral_name &&
-                                                "p-invalid"
-                                            }`}
-                                            id="referral_name"
-                                            aria-describedby="referral_name-help"
-                                            onFocus={() => {
-                                                triggerInputFocus(
-                                                    animateReferral
-                                                );
-                                            }}
-                                            onBlur={() => {
-                                                stopAnimateInputFocus(
-                                                    animateReferral
-                                                );
-                                            }}
-                                        />
-                                    </div>
-                                    <div className="App">
-                                                {data.referral_signature !==
-                                                    null &&
-                                                typeof data.referral_signature ==
-                                                    "string" ? (
-                                                    <>
-                                                        <FilePond
-                                                            files={
-                                                                "/storage/" +
-                                                                data.referral_signature
+                                            <InputText
+                                                value={data.referral_name}
+                                                onChange={(e) =>
+                                                    setData(
+                                                        "referral_name",
+                                                        e.target.value
+                                                    )
+                                                }
+                                                className={`dark:bg-gray-300 ${
+                                                    errors.referral_name &&
+                                                    "p-invalid"
+                                                }`}
+                                                id="referral_name"
+                                                aria-describedby="referral_name-help"
+                                                onFocus={() => {
+                                                    triggerInputFocus(
+                                                        animateReferral
+                                                    );
+                                                }}
+                                                onBlur={() => {
+                                                    stopAnimateInputFocus(
+                                                        animateReferral
+                                                    );
+                                                }}
+                                            />
+                                        </div>
+                                        <div className="App mt-3">
+                                        <label htmlFor="referral_name">
+                                                Tanda Tangan Pihak Ketiga
+                                            </label>
+                                            {data.referral_signature !== null &&
+                                            typeof data.referral_signature ==
+                                                "string" ? (
+                                                <>
+                                                    <FilePond
+                                                        files={
+                                                            "/storage/" +
+                                                            data.referral_signature
+                                                        }
+                                                        onaddfile={(
+                                                            error,
+                                                            fileItems
+                                                        ) => {
+                                                            if (!error) {
+                                                                setData(
+                                                                    "referral_signature",
+                                                                    fileItems.file
+                                                                );
                                                             }
-                                                            onaddfile={(
-                                                                error,
-                                                                fileItems
-                                                            ) => {
-                                                                if (!error) {
-                                                                    setData(
-                                                                        "referral_signature",
-                                                                        fileItems.file
-                                                                    );
-                                                                }
-                                                            }}
-                                                            onremovefile={() => {
+                                                        }}
+                                                        onremovefile={() => {
+                                                            setData(
+                                                                "referral_signature",
+                                                                null
+                                                            );
+                                                        }}
+                                                        maxFileSize="2mb"
+                                                        labelMaxFileSizeExceeded="File terlalu besar"
+                                                        labelIdle='Drag & Drop your files or <span class="filepond--label-action">Browse</span>'
+                                                    />
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <FilePond
+                                                        onaddfile={(
+                                                            error,
+                                                            fileItems
+                                                        ) => {
+                                                            if (!error) {
                                                                 setData(
                                                                     "referral_signature",
-                                                                    null
+                                                                    fileItems.file
                                                                 );
-                                                            }}
-                                                            maxFileSize="2mb"
-                                                            labelMaxFileSizeExceeded="File terlalu besar"
-                                                            labelIdle='Drag & Drop your files or <span class="filepond--label-action">Browse</span>'
-                                                        />
-                                                    </>
-                                                ) : (
-                                                    <>
-                                                        <FilePond
-                                                            onaddfile={(
-                                                                error,
-                                                                fileItems
-                                                            ) => {
-                                                                if (!error) {
-                                                                    setData(
-                                                                        "referral_signature",
-                                                                        fileItems.file
-                                                                    );
-                                                                }
-                                                            }}
-                                                            onremovefile={() => {
-                                                                setData(
-                                                                    "referral_signature",
-                                                                    null
-                                                                );
-                                                            }}
-                                                            maxFileSize="2mb"
-                                                            labelMaxFileSizeExceeded="File terlalu besar"
-                                                            labelIdle='Drag & Drop your files or <span class="filepond--label-action">Browse</span>'
-                                                        />
-                                                    </>
-                                                )}
-                                            </div>
+                                                            }
+                                                        }}
+                                                        onremovefile={() => {
+                                                            setData(
+                                                                "referral_signature",
+                                                                null
+                                                            );
+                                                        }}
+                                                        maxFileSize="2mb"
+                                                        labelMaxFileSizeExceeded="File terlalu besar"
+                                                        labelIdle='Drag & Drop your files or <span class="filepond--label-action">Browse</span>'
+                                                    />
+                                                </>
+                                            )}
+                                        </div>
                                     </>
                                 )}
 
                                 <div className="flex-flex-col mt-3">
                                     <form onSubmit={handleSubmitForm}>
-                                        <Button className="mx-auto justify-center block" disabled={!isSignatureBlob}>
+                                        <Button
+                                            className="mx-auto justify-center block"
+                                            // disabled={!isSignatureBlob}
+                                        >
                                             Submit
                                         </Button>
                                     </form>
@@ -3581,7 +3668,7 @@ const Edit = ({ usersProp, partnersProp, mou, signaturesProp }) => {
                                 >
                                     <p>Pihak Pertama</p>
                                     <img
-                                        src={BASE_URL + data.signature.image}
+                                        src={BASE_URL +"/storage/"+ data.signature.image}
                                         alt=""
                                         className="min-h-20"
                                     />
@@ -3596,20 +3683,20 @@ const Edit = ({ usersProp, partnersProp, mou, signaturesProp }) => {
                                 <div className="w-[30%]">
                                     <p>Pihak Kedua</p>
                                     {data.pic_signature && isSignatureBlob ? (
-                                    <img
-                                        src={
-                                            typeof data.pic_signature ===
-                                            "string"
-                                                ? data.pic_signature
-                                                : URL.createObjectURL(
-                                                      data.pic_signature
-                                                  )
-                                        }
-                                        className="min-h-20 max-h-20"
-                                    />
-                                ) : (
-                                    <div className="min-h-20"></div>
-                                )}
+                                        <img
+                                            src={
+                                                typeof data.pic_signature ===
+                                                "string"
+                                                    ? data.pic_signature
+                                                    : URL.createObjectURL(
+                                                          data.pic_signature
+                                                      )
+                                            }
+                                            className="min-h-20 max-h-20"
+                                        />
+                                    ) : (
+                                        <div className="min-h-20"></div>
+                                    )}
                                     <p>
                                         <b>
                                             {data.partner.pic ??
@@ -3626,20 +3713,20 @@ const Edit = ({ usersProp, partnersProp, mou, signaturesProp }) => {
                                     <div className="w-[30%]">
                                         <p>Pihak Ketiga</p>
                                         {data.referral_signature ? (
-                                        <img
-                                            src={
-                                                typeof data.referral_signature ===
-                                                "string"
-                                                    ? data.referral_signature
-                                                    : URL.createObjectURL(
-                                                          data.referral_signature
-                                                      )
-                                            }
-                                            className="min-h-20 max-h-20"
-                                        />
-                                    ) : (
-                                        <div className="min-h-20"></div>
-                                    )}
+                                            <img
+                                                src={
+                                                    typeof data.referral_signature ===
+                                                    "string"
+                                                        ? data.referral_signature
+                                                        : URL.createObjectURL(
+                                                              data.referral_signature
+                                                          )
+                                                }
+                                                className="min-h-20 max-h-20"
+                                            />
+                                        ) : (
+                                            <div className="min-h-20"></div>
+                                        )}
                                         <p>
                                             <b>
                                                 {data.referral_name ??

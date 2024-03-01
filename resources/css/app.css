@@ -68,6 +68,11 @@
     .dark .shadow-custome{
       box-shadow: 0px 2px 3px rgba(0, 0, 0, 0.267);
     }
+
+    .dark .p-datatable-emptymessage{
+      background-color: #1F2937;
+      color: #9CA3AF;
+    }
     
     /* End Datatable */
 
@@ -173,8 +178,24 @@
       font-size: 0.9rem;
     }
 
+    .dark .p-dropdown .p-dropdown-label.p-placeholder{
+      color: #9CA3AF;
+    }
+
     span.p-dropdown-label.p-inputtext{
       margin-top: -6px;
+    }
+
+    .dropdown-group .p-dropdown-label-empty{
+      display: none;
+    }
+
+    .dropdown-group .p-dropdown-trigger{
+      width: 100%;
+    }
+
+    .dropdown-group .p-dropdown-label{
+      display: none;
     }
 
     /* End Dropdown */
@@ -228,7 +249,7 @@
     
     .twinkle {
       color: rgb(0, 0, 0); /* Warna awal */
-      animation: twinkleAnimation 0.5s infinite alternate;
+      animation: twinkleAnimation 0.8s infinite alternate;
     }
     
     @keyframes twinkleAnimation {

@@ -29,7 +29,8 @@ class SLAController extends Controller
     {
         $slas = SLA::with(['activities', 'partner', 'user'])->get();
         $roles = DB::table('roles')->distinct()->get("name");
-        return response()->json(["sla" => $slas, "roles" => $roles]);
+        $users = User::all();
+        return response()->json(["sla" => $slas, "roles" => $roles, "users" => $users]);
     }
 
     public function create()
@@ -48,9 +49,9 @@ class SLAController extends Controller
         $partnersProp = Partner::with(
             'pics'
         )->get();
-        $rolesProp = DB::table('roles')->distinct()->get("name");
+        // $rolesProp = DB::table('roles')->distinct()->get("name");
 
-        return Inertia::render('SLA/Create', compact('partnersProp', 'usersProp', 'rolesProp'));
+        return Inertia::render('SLA/Create', compact('partnersProp', 'usersProp'));
     }
 
     public function generateCode()
@@ -197,9 +198,7 @@ class SLAController extends Controller
 
         $sla = SLA::where('uuid', '=', $uuid)->with('activities')->first();
 
-        $rolesProp = DB::table('roles')->distinct()->get("name");
-
-        return Inertia::render('SLA/Edit', compact('partnersProp', 'usersProp', 'rolesProp', 'sla'));
+        return Inertia::render('SLA/Edit', compact('partnersProp', 'usersProp', 'sla'));
     }
 
     public function update(SLARequest $request, $uuid)

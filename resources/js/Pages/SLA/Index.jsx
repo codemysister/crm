@@ -27,6 +27,7 @@ const BASE_URL = import.meta.env.VITE_BASE_URL;
 export default function Index({ auth }) {
     const [slas, setSlas] = useState("");
     const [positions, setPositions] = useState("");
+    const [users, setUsers] = useState("");
     const [isLoadingData, setIsLoadingData] = useState(false);
     const dummyArray = Array.from({ length: 5 }, (v, i) => i);
     const [preRenderLoad, setPreRenderLoad] = useState(true);
@@ -82,7 +83,7 @@ export default function Index({ auth }) {
 
         setSlas((prev) => data.sla);
         setPositions((prev) => data.roles);
-
+        setUsers((prev) => data.users);
         setIsLoadingData(false);
     };
 
@@ -753,7 +754,7 @@ export default function Index({ auth }) {
                                         onChange={(e) => {
                                             setData("cazh_pic", e.target.value);
                                         }}
-                                        options={positions}
+                                        options={users}
                                         optionLabel="name"
                                         optionValue="name"
                                         placeholder="Pilih Penanggungjawab"

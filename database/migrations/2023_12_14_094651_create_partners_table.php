@@ -13,21 +13,21 @@ return new class extends Migration {
         Schema::create('partners', function (Blueprint $table) {
             $table->id();
             $table->uuid('uuid');
-            $table->foreignId('sales_id')->constrained('users', 'id')->onDelete('cascade');
+            $table->foreignId('sales_id')->nullable()->constrained('users', 'id')->onDelete('cascade');
             $table->foreignId('account_manager_id')->nullable()->constrained('users', 'id')->onDelete('cascade');
             $table->string('name');
             $table->string('logo')->nullable();
-            $table->string('phone_number');
+            $table->string('phone_number')->nullable();
             $table->json('province');
             $table->json('regency');
             $table->json('subdistrict')->nullable();
             $table->string('address')->nullable();
-            $table->date('onboarding_date');
+            $table->date('onboarding_date')->nullable();
             $table->date('live_date')->nullable()->default(null);
             $table->integer('onboarding_age')->nullable();
             $table->integer('live_age')->nullable();
             $table->date('monitoring_date_after_3_month_live')->nullable();
-            $table->string('period');
+            $table->string('period')->nullable();
             $table->string('payment_metode')->default('payment link');
             $table->enum('status', ['Proses', 'Aktif', 'Non Aktif', 'Cancel', 'CLBK']);
             $table->timestamps();

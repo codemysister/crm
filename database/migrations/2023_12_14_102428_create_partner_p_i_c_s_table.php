@@ -15,7 +15,7 @@ return new class extends Migration {
             $table->uuid('uuid');
             $table->foreignId('partner_id')->constrained('partners', 'id')->onDelete('cascade');
             $table->string('name');
-            $table->string('number');
+            $table->string('number')->nullable();
             $table->string('email')->nullable();
             $table->string('position')->nullable();
             $table->timestamps();

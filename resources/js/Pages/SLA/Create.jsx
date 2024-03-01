@@ -21,9 +21,8 @@ registerPlugin(FilePondPluginFileValidateSize);
 
 const BASE_URL = import.meta.env.VITE_BASE_URL;
 
-const Create = ({ usersProp, partnersProp, rolesProp, productsProp }) => {
-    const [users, setUsers] = useState(usersProp);
-    const [roles, setRoles] = useState(rolesProp);
+const Create = ({ usersProp, partnersProp, productsProp }) => {
+    const [users, setUsers] = useState([...usersProp, {name: 'Account Executive'}, {name: 'Account Manager', name: 'Graphics Designer'}, {name: 'Account Manager'}]);
     const [partners, setPartners] = useState(partnersProp);
     const [dialogVisible, setDialogVisible] = useState(false);
     const [selectedProducts, setSelectedProducts] = useState([]);
@@ -1152,7 +1151,7 @@ const Create = ({ usersProp, partnersProp, rolesProp, productsProp }) => {
                                                         e.target.value
                                                     );
                                                 }}
-                                                options={roles}
+                                                options={users}
                                                 optionLabel="name"
                                                 placeholder="Pilih Penanggungjawab"
                                                 filter

@@ -30,6 +30,8 @@ import FilePondPluginFileValidateSize from "filepond-plugin-file-validate-size";
 import "filepond/dist/filepond.min.css";
 registerPlugin(FilePondPluginFileValidateSize);
 
+const BASE_URL = import.meta.env.VITE_BASE_URL;
+
 export default function Index({ auth, partner }) {
     const [partners, setPartners] = useState("");
     const [detailPartner, setDetailPartner] = useState(partner);
@@ -59,6 +61,7 @@ export default function Index({ auth, partner }) {
     const stepPriceListRef = useRef(null);
     const scrollForm = useRef(null);
     const infoPriceTrainingOnlineRef = useRef(null);
+    const infoPriceTrainingOfflineRef = useRef(null);
     const { roles, permissions } = auth.user;
     const [activeIndex, setActiveIndex] = useState(0);
     const dummyArray = Array.from({ length: 5 }, (v, i) => i);
@@ -963,7 +966,6 @@ export default function Index({ auth, partner }) {
                                                 />
                                             </div>
 
-                                            {console.log(data.partner.province)}
                                             <div className="flex flex-col">
                                                 <label htmlFor="province">
                                                     Provinsi *
@@ -1309,6 +1311,7 @@ export default function Index({ auth, partner }) {
                                                     itemTemplate={
                                                         optionTemplate
                                                     }
+                                                    editable
                                                     className={`w-full md:w-14rem 
                                         `}
                                                 />
@@ -1364,6 +1367,7 @@ export default function Index({ auth, partner }) {
                                                         })
                                                     }
                                                     options={status}
+                                                    editable
                                                     optionLabel="name"
                                                     optionValue="name"
                                                     placeholder="Pilih Status"
@@ -1500,6 +1504,7 @@ export default function Index({ auth, partner }) {
                                                                 e.target.value,
                                                         })
                                                     }
+                                                    keyfilter="int"
                                                     className="dark:bg-gray-300"
                                                     id="account_bank_number"
                                                     aria-describedby="account_bank_number-help"
@@ -1838,7 +1843,7 @@ export default function Index({ auth, partner }) {
 
                                                 <div className="flex justify-between gap-1 w-full items-center">
                                                     <div className="w-full flex gap-2 h-full">
-                                                        <Dropdown
+                                                        {/* <Dropdown
                                                             value={
                                                                 data.price_list
                                                                     .price_lanyard
@@ -1871,6 +1876,33 @@ export default function Index({ auth, partner }) {
                                                                 optionTrainingTemplate
                                                             }
                                                             className="w-full md:w-14rem"
+                                                        /> */}
+                                                        <InputNumber
+                                                            placeholder="tarif"
+                                                            value={
+                                                                data.price_list
+                                                                    .price_lanyard
+                                                            }
+                                                            onValueChange={(
+                                                                e
+                                                            ) =>
+                                                                setData(
+                                                                    "price_list",
+                                                                    {
+                                                                        ...data.price_list,
+                                                                        price_lanyard:
+                                                                            Number(
+                                                                                e
+                                                                                    .target
+                                                                                    .value
+                                                                            ),
+                                                                    }
+                                                                )
+                                                            }
+                                                            className="dark:bg-gray-300 w-full"
+                                                            id="lanyard"
+                                                            aria-describedby="lanyard-help"
+                                                            locale="id-ID"
                                                         />
                                                     </div>
                                                 </div>
@@ -1919,40 +1951,75 @@ export default function Index({ auth, partner }) {
 
                                                 <div className="flex justify-between gap-1 w-full items-center">
                                                     <div className="w-full flex gap-2 h-full">
-                                                        <Dropdown
-                                                            value={
-                                                                data.price_list
-                                                                    .price_training_offline
-                                                            }
-                                                            onChange={(e) =>
-                                                                setData(
-                                                                    "price_list",
-                                                                    {
-                                                                        ...data.price_list,
-                                                                        price_training_offline:
-                                                                            Number(
-                                                                                e
-                                                                                    .target
-                                                                                    .value
-                                                                            ),
-                                                                    }
-                                                                )
-                                                            }
-                                                            options={
-                                                                option_training_offline
-                                                            }
-                                                            optionLabel="price"
-                                                            optionValue="price"
-                                                            placeholder="Pilih Tarif"
-                                                            editable
-                                                            valueTemplate={
-                                                                selectedOptionTrainingTemplate
-                                                            }
-                                                            itemTemplate={
-                                                                optionTrainingTemplate
-                                                            }
-                                                            className="w-full md:w-14rem"
-                                                        />
+                                                        <div className="p-inputgroup flex-1 h-full">
+                                                            <InputNumber
+                                                                value={
+                                                                    data
+                                                                        .price_list
+                                                                        .price_training_offline
+                                                                }
+                                                                onChange={(e) =>
+                                                                    setData(
+                                                                        "price_list",
+                                                                        {
+                                                                            ...data.price_list,
+                                                                            price_training_offline:
+                                                                                e.value,
+                                                                        }
+                                                                    )
+                                                                }
+                                                                className={`h-full`}
+                                                                locale="id-ID"
+                                                            />
+
+                                                            <Button
+                                                                type="button"
+                                                                className="h-[35px]"
+                                                                icon="pi pi-info-circle"
+                                                                onClick={(e) =>
+                                                                    infoPriceTrainingOfflineRef.current.toggle(
+                                                                        e
+                                                                    )
+                                                                }
+                                                            />
+                                                            <OverlayPanel
+                                                                className="shadow-md"
+                                                                ref={
+                                                                    infoPriceTrainingOfflineRef
+                                                                }
+                                                            >
+                                                                <ul className="list-disc list-inside">
+                                                                    <li>
+                                                                        Jawa -
+                                                                        15.000.000
+                                                                    </li>
+                                                                    <li>
+                                                                        Kalimatan
+                                                                        -
+                                                                        25.000.000
+                                                                    </li>
+                                                                    <li>
+                                                                        Sulawesi
+                                                                        -
+                                                                        27.000.000
+                                                                    </li>
+                                                                    <li>
+                                                                        Sumatra
+                                                                        -
+                                                                        23.000.000
+                                                                    </li>
+                                                                    <li>
+                                                                        Bali -
+                                                                        26.000.000
+                                                                    </li>
+                                                                    <li>
+                                                                        Jabodetabek
+                                                                        -
+                                                                        15.000.000
+                                                                    </li>
+                                                                </ul>
+                                                            </OverlayPanel>
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>
@@ -2040,7 +2107,7 @@ export default function Index({ auth, partner }) {
 
                                                 <div className="flex justify-between gap-1 w-full items-center">
                                                     <div className="w-full flex gap-2 h-full">
-                                                        <Dropdown
+                                                        {/* <Dropdown
                                                             dataKey="name"
                                                             value={
                                                                 data.price_list
@@ -2074,6 +2141,33 @@ export default function Index({ auth, partner }) {
                                                                 optionFeeTemplate
                                                             }
                                                             className="w-full md:w-14rem"
+                                                        /> */}
+                                                        <InputNumber
+                                                            placeholder="tarif"
+                                                            value={
+                                                                data.price_list
+                                                                    .fee_purchase_cazhpoin
+                                                            }
+                                                            onValueChange={(
+                                                                e
+                                                            ) =>
+                                                                setData(
+                                                                    "price_list",
+                                                                    {
+                                                                        ...data.price_list,
+                                                                        fee_purchase_cazhpoin:
+                                                                            Number(
+                                                                                e
+                                                                                    .target
+                                                                                    .value
+                                                                            ),
+                                                                    }
+                                                                )
+                                                            }
+                                                            className="dark:bg-gray-300 w-full"
+                                                            id="lanyard"
+                                                            aria-describedby="lanyard-help"
+                                                            locale="id-ID"
                                                         />
                                                     </div>
                                                 </div>
@@ -2087,7 +2181,7 @@ export default function Index({ auth, partner }) {
 
                                                 <div className="flex justify-between gap-1 w-full items-center">
                                                     <div className="w-full flex gap-2 h-full">
-                                                        <Dropdown
+                                                        {/* <Dropdown
                                                             value={
                                                                 data.price_list
                                                                     .fee_bill_cazhpoin
@@ -2120,6 +2214,33 @@ export default function Index({ auth, partner }) {
                                                                 optionFeeTemplate
                                                             }
                                                             className="w-full md:w-14rem"
+                                                        /> */}
+                                                        <InputNumber
+                                                            placeholder="tarif"
+                                                            value={
+                                                                data.price_list
+                                                                    .fee_bill_cazhpoin
+                                                            }
+                                                            onValueChange={(
+                                                                e
+                                                            ) =>
+                                                                setData(
+                                                                    "price_list",
+                                                                    {
+                                                                        ...data.price_list,
+                                                                        fee_bill_cazhpoin:
+                                                                            Number(
+                                                                                e
+                                                                                    .target
+                                                                                    .value
+                                                                            ),
+                                                                    }
+                                                                )
+                                                            }
+                                                            className="dark:bg-gray-300 w-full"
+                                                            id="lanyard"
+                                                            aria-describedby="lanyard-help"
+                                                            locale="id-ID"
                                                         />
                                                     </div>
                                                 </div>
@@ -2133,7 +2254,7 @@ export default function Index({ auth, partner }) {
 
                                                 <div className="flex justify-between gap-1 w-full items-center">
                                                     <div className="w-full flex gap-2 h-full">
-                                                        <Dropdown
+                                                        {/* <Dropdown
                                                             value={
                                                                 data.price_list
                                                                     .fee_topup_cazhpos
@@ -2166,6 +2287,33 @@ export default function Index({ auth, partner }) {
                                                                 optionFeeTemplate
                                                             }
                                                             className="w-full md:w-14rem"
+                                                        /> */}
+                                                        <InputNumber
+                                                            placeholder="tarif"
+                                                            value={
+                                                                data.price_list
+                                                                    .fee_topup_cazhpos
+                                                            }
+                                                            onValueChange={(
+                                                                e
+                                                            ) =>
+                                                                setData(
+                                                                    "price_list",
+                                                                    {
+                                                                        ...data.price_list,
+                                                                        fee_topup_cazhpos:
+                                                                            Number(
+                                                                                e
+                                                                                    .target
+                                                                                    .value
+                                                                            ),
+                                                                    }
+                                                                )
+                                                            }
+                                                            className="dark:bg-gray-300 w-full"
+                                                            id="lanyard"
+                                                            aria-describedby="lanyard-help"
+                                                            locale="id-ID"
                                                         />
                                                     </div>
                                                 </div>
@@ -2179,7 +2327,7 @@ export default function Index({ auth, partner }) {
 
                                                 <div className="flex justify-between gap-1 w-full items-center">
                                                     <div className="w-full flex gap-2 h-full">
-                                                        <Dropdown
+                                                        {/* <Dropdown
                                                             value={
                                                                 data.price_list
                                                                     .fee_withdraw_cazhpos
@@ -2212,6 +2360,33 @@ export default function Index({ auth, partner }) {
                                                                 optionFeeTemplate
                                                             }
                                                             className="w-full md:w-14rem"
+                                                        /> */}
+                                                        <InputNumber
+                                                            placeholder="tarif"
+                                                            value={
+                                                                data.price_list
+                                                                    .fee_withdraw_cazhpos
+                                                            }
+                                                            onValueChange={(
+                                                                e
+                                                            ) =>
+                                                                setData(
+                                                                    "price_list",
+                                                                    {
+                                                                        ...data.price_list,
+                                                                        fee_withdraw_cazhpos:
+                                                                            Number(
+                                                                                e
+                                                                                    .target
+                                                                                    .value
+                                                                            ),
+                                                                    }
+                                                                )
+                                                            }
+                                                            className="dark:bg-gray-300 w-full"
+                                                            id="lanyard"
+                                                            aria-describedby="lanyard-help"
+                                                            locale="id-ID"
                                                         />
                                                     </div>
                                                 </div>
@@ -2224,7 +2399,7 @@ export default function Index({ auth, partner }) {
 
                                                 <div className="flex justify-between gap-1 w-full items-center">
                                                     <div className="w-full flex gap-2 h-full">
-                                                        <Dropdown
+                                                        {/* <Dropdown
                                                             value={
                                                                 data.price_list
                                                                     .fee_bill_saldokartu
@@ -2257,6 +2432,33 @@ export default function Index({ auth, partner }) {
                                                                 optionFeeTemplate
                                                             }
                                                             className="w-full md:w-14rem"
+                                                        /> */}
+                                                        <InputNumber
+                                                            placeholder="tarif"
+                                                            value={
+                                                                data.price_list
+                                                                    .fee_bill_saldokartu
+                                                            }
+                                                            onValueChange={(
+                                                                e
+                                                            ) =>
+                                                                setData(
+                                                                    "price_list",
+                                                                    {
+                                                                        ...data.price_list,
+                                                                        fee_bill_saldokartu:
+                                                                            Number(
+                                                                                e
+                                                                                    .target
+                                                                                    .value
+                                                                            ),
+                                                                    }
+                                                                )
+                                                            }
+                                                            className="dark:bg-gray-300 w-full"
+                                                            id="lanyard"
+                                                            aria-describedby="lanyard-help"
+                                                            locale="id-ID"
                                                         />
                                                     </div>
                                                 </div>
@@ -2294,7 +2496,25 @@ export default function Index({ auth, partner }) {
                                 }
                                 className="my-4"
                             >
-                                <div className="flex flex-col">
+                                <div className="flex flex-col mt-3">
+                            <div className="flex bg-green-600 text-white text-xs p-3 rounded-lg justify-between w-full h-full">
+                                <p>Template</p>
+                                <p className="font-semibold">
+                                <a
+                                            href={
+                                                BASE_URL +
+                                                "/assets/template/excel/sample.xlsx"
+                                                
+                                            }
+                                            download="sample.xlsx"
+                                            class="font-bold underline w-full h-full text-center rounded-full "
+                                        >
+                                            sample.xlsx
+                                        </a>
+                                </p>
+                            </div>
+                        </div>
+                                <div className="flex flex-col mt-3">
                                     <label htmlFor="name">Excell</label>
 
                                     <div className="App">
@@ -2849,6 +3069,11 @@ export default function Index({ auth, partner }) {
                                 ></Column>
                                 <Column
                                     field="phone_number"
+                                    body={(rowData) => {
+                                        return rowData.phone_number
+                                            ? rowData.phone_number
+                                            : "belum diisi";
+                                    }}
                                     className="dark:border-none"
                                     headerClassName="dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300"
                                     header="No. Telepon"
@@ -2860,7 +3085,11 @@ export default function Index({ auth, partner }) {
                                 ></Column>
                                 <Column
                                     header="Sales"
-                                    body={(rowData) => rowData.sales.name}
+                                    body={(rowData) => {
+                                        return rowData.sales
+                                            ? rowData.sales.name
+                                            : "belum diisi";
+                                    }}
                                     className="dark:border-none"
                                     headerClassName="dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300"
                                     align="left"
@@ -2932,11 +3161,13 @@ export default function Index({ auth, partner }) {
                                 ></Column>
                                 <Column
                                     header="Tanggal onboarding"
-                                    body={(rowData) =>
-                                        new Date(
-                                            rowData.onboarding_date
-                                        ).toLocaleDateString("id")
-                                    }
+                                    body={(rowData) => {
+                                        return rowData.onboarding_date
+                                            ? new Date(
+                                                  rowData.onboarding_date
+                                              ).toLocaleDateString("id")
+                                            : "belum diisi";
+                                    }}
                                     className="dark:border-none"
                                     headerClassName="dark:border-none  bg-transparent dark:bg-transparent dark:text-gray-300"
                                     align="left"

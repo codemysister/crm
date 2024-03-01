@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Jobs\GenerateSPHJob;
 use App\Models\Partner;
+use App\Models\PartnerPIC;
 use App\Models\Product;
 use App\Models\Signature;
 use App\Models\SPH;
@@ -117,11 +118,36 @@ class SPHController extends Controller
 
     public function store(Request $request)
     {
+
+        $id_partner = $request['partner']['id'];
+
+        if (!$id_partner) {
+
+            $partnerExists = Partner::where('name', 'like', '%' . $request['partner']["name"] . '%')->first();
+            if (!$partnerExists) {
+                $partner = Partner::create([
+                    'uuid' => Str::uuid(),
+                    'name' => $request['partner']['name'],
+                    'province' => $request['partner']['province'],
+                    'regency' => $request['partner']['regency'],
+                    'status' => "Proses",
+                ]);
+                PartnerPIC::create([
+                    'uuid' => Str::uuid(),
+                    'partner_id' => $partner->id,
+                    'name' => $request->partner['pic'],
+                ]);
+                $id_partner = $partner->id;
+            } else {
+                $id_partner = $partnerExists->id;
+            }
+        }
+        
         $code = $this->generateCode();
         $sph = SPH::create([
             "uuid" => Str::uuid(),
             "code" => $code,
-            "partner_id" => $request['partner']['id'],
+            "partner_id" => $id_partner,
             "partner_name" => $request['partner']['name'],
             "partner_pic" => $request['partner']['pic'],
             "partner_province" => $request['partner']['province'],
@@ -176,8 +202,32 @@ class SPHController extends Controller
 
     public function update(Request $request, $uuid)
     {
+        $id_partner = $request['partner']['id'];
+
+        if (!$id_partner) {
+
+            $partnerExists = Partner::where('name', 'like', '%' . $request['partner']["name"] . '%')->first();
+            if (!$partnerExists) {
+                $partner = Partner::create([
+                    'uuid' => Str::uuid(),
+                    'name' => $request['partner']['name'],
+                    'province' => $request['partner']['province'],
+                    'regency' => $request['partner']['regency'],
+                    'status' => "Proses",
+                ]);
+                PartnerPIC::create([
+                    'uuid' => Str::uuid(),
+                    'partner_id' => $partner->id,
+                    'name' => $request->partner['pic'],
+                ]);
+                $id_partner = $partner->id;
+            } else {
+                $id_partner = $partnerExists->id;
+            }
+        }
+
         $sph = SPH::where('uuid', '=', $uuid)->update([
-            "partner_id" => $request['partner']['id'],
+            "partner_id" => $id_partner,
             "partner_name" => $request['partner']['name'],
             "partner_pic" => $request['partner']['pic'],
             "partner_province" => $request['partner']['province'],

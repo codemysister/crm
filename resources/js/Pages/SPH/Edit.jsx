@@ -374,7 +374,7 @@ const Edit = ({ usersProp, partnersProp, salesProp, productsProp, sph }) => {
                                     />
                                 </div>
 
-                                <div className="flex flex-col mt-3">
+                                {/* <div className="flex flex-col mt-3">
                                     <label htmlFor="lembaga">Lembaga *</label>
                                     <Dropdown
                                         value={data.partner}
@@ -420,6 +420,100 @@ const Edit = ({ usersProp, partnersProp, salesProp, productsProp, sph }) => {
                                         itemTemplate={optionTemplate}
                                         className="w-full md:w-14rem"
                                     />
+                                </div> */}
+
+<div className="flex flex-col mt-3">
+                                    <label htmlFor="partner_pic">PIC *</label>
+                                    <InputText
+                                        value={data.partner.pic}
+                                        onChange={(e) =>
+                                            setData("partner", {
+                                                ...data.partner,
+                                                pic: e.target.value,
+                                            })
+                                        }
+                                        className="dark:bg-gray-300"
+                                        id="partner_pic"
+                                        aria-describedby="partner_pic-help"
+                                        onFocus={() => {
+                                            triggerInputFocus(
+                                                animatePartnerRegencyRef
+                                            );
+                                        }}
+                                        onShow={() => {
+                                            triggerInputFocus(
+                                                animatePartnerRegencyRef
+                                            );
+                                        }}
+                                        onBlur={() => {
+                                            stopAnimateInputFocus(
+                                                animatePartnerRegencyRef
+                                            );
+                                        }}
+                                    />
+                                </div>
+                                
+<div className="flex flex-col mt-3">
+                                    <label htmlFor="lembaga">Lembaga *</label>
+                                    <div className="p-inputgroup flex-1">
+                                        <InputText
+                                            value={data.partner.name}
+                                            placeholder="Lembaga"
+                                            onChange={(e) => {
+                                                setData((prev) => ({
+                                                    ...prev,
+                                                    partner: {
+                                                        ...prev.partner,
+                                                        name: e.target.value,
+                                                    },
+                                                }));
+                                            }}
+                                            onFocus={() => {
+                                                triggerInputFocus(
+                                                    animatePartnerNameRef
+                                                );
+                                            }}
+                                            onBlur={() => {
+                                                stopAnimateInputFocus(
+                                                    animatePartnerNameRef
+                                                );
+                                            }}
+                                            className="w-[90%]"
+                                        />
+                                        <Dropdown
+                                            value={data.partner}
+                                            dataKey="name"
+                                            onChange={(e) => {
+                                                setData("partner", {
+                                                    ...data.partner,
+                                                    id: e.target.value.id,
+                                                    name: e.target.value.name,
+                                                    province:
+                                                        e.target.value.province,
+                                                    regency: e.target.value.regency,
+                                                    pic: e.target.value.pics[0]
+                                                        .name,
+                                                });
+                                                setcodeProvince(
+                                                    (prev) =>
+                                                        (prev = JSON.parse(
+                                                            e.target.value
+                                                                .province
+                                                        ).code)
+                                                );
+                                            }}
+                                            options={partners}
+                                            filter
+                                            placeholder={false}
+                                            showClear={false}
+                                            optionLabel="name"
+                                            valueTemplate={
+                                                selectedOptionTemplate
+                                            }
+                                            itemTemplate={optionTemplate}
+                                            className="w-[10%] dropdown-group border-l-0"
+                                        />
+                                    </div>
                                 </div>
 
                                 <div className="flex flex-col mt-3">
@@ -499,36 +593,7 @@ const Edit = ({ usersProp, partnersProp, salesProp, productsProp, sph }) => {
                                         className="w-full md:w-14rem"
                                     />
                                 </div>
-                                <div className="flex flex-col mt-3">
-                                    <label htmlFor="partner_pic">PIC *</label>
-                                    <InputText
-                                        value={data.partner.pic}
-                                        onChange={(e) =>
-                                            setData("partner", {
-                                                ...data.partner,
-                                                pic: e.target.value,
-                                            })
-                                        }
-                                        className="dark:bg-gray-300"
-                                        id="partner_pic"
-                                        aria-describedby="partner_pic-help"
-                                        onFocus={() => {
-                                            triggerInputFocus(
-                                                animatePartnerRegencyRef
-                                            );
-                                        }}
-                                        onShow={() => {
-                                            triggerInputFocus(
-                                                animatePartnerRegencyRef
-                                            );
-                                        }}
-                                        onBlur={() => {
-                                            stopAnimateInputFocus(
-                                                animatePartnerRegencyRef
-                                            );
-                                        }}
-                                    />
-                                </div>
+                                
                                 <div className="flex flex-col mt-3">
                                     <label htmlFor="sales">Sales *</label>
                                     <Dropdown
@@ -685,13 +750,13 @@ const Edit = ({ usersProp, partnersProp, salesProp, productsProp, sph }) => {
                     >
                         <div className="flex my-5 gap-3">
                             <Button
-                                label="Tambah produk dari stock"
+                                label="Pilh Produk"
                                 icon="pi pi-external-link"
                                 onClick={() => setDialogProductVisible(true)}
                                 className="text-xs md:text-base"
                             />
                             <Button
-                                label="Tambah Inputan Produk"
+                                label="Tambah Produk"
                                 icon="pi pi-plus"
                                 className="text-xs md:text-base"
                                 onClick={() => {

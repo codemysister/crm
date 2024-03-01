@@ -45,11 +45,11 @@ class PermissionSeeder extends Seeder
         Permission::create(['name' => 'edit kwitansi', 'group_name' => 'Kwitansi']);
         Permission::create(['name' => 'hapus kwitansi', 'group_name' => 'Kwitansi']);
 
-        // Official travel letter / spd
-        Permission::create(['name' => 'lihat spd', 'group_name' => 'Surat Perjalanan Dinas (SPD)']);
-        Permission::create(['name' => 'tambah spd', 'group_name' => 'Surat Perjalanan Dinas (SPD)']);
-        Permission::create(['name' => 'edit spd', 'group_name' => 'Surat Perjalanan Dinas (SPD)']);
-        Permission::create(['name' => 'hapus spd', 'group_name' => 'Surat Perjalanan Dinas (SPD)']);
+        // Official travel letter / stpd
+        Permission::create(['name' => 'lihat stpd', 'group_name' => 'Surat Perjalanan Dinas (stpd)']);
+        Permission::create(['name' => 'tambah stpd', 'group_name' => 'Surat Perjalanan Dinas (stpd)']);
+        Permission::create(['name' => 'edit stpd', 'group_name' => 'Surat Perjalanan Dinas (stpd)']);
+        Permission::create(['name' => 'hapus stpd', 'group_name' => 'Surat Perjalanan Dinas (stpd)']);
 
         // Product
         Permission::create(['name' => 'lihat produk', 'group_name' => 'Produk']);

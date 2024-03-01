@@ -6,6 +6,7 @@ use App\Http\Requests\MOURequest;
 use App\Jobs\GenerateMOUJob;
 use App\Models\MOU;
 use App\Models\Partner;
+use App\Models\PartnerPIC;
 use App\Models\Product;
 use App\Models\Signature;
 use App\Models\User;
@@ -34,7 +35,7 @@ class MOUController extends Controller
         $usersProp->transform(function ($user) {
             $user->position = $user->roles->first()->name;
             $user->user_id = $user->id;
-            unset($user->roles);
+            unset ($user->roles);
             return $user;
         });
         $partnersProp = Partner::with([
@@ -79,8 +80,19 @@ class MOUController extends Controller
 
     public function generateMOUDocx($mou)
     {
+        $template= "assets/template/mou.docx";
 
-        $phpWord = new \PhpOffice\PhpWord\TemplateProcessor('assets/template/mou.docx');
+        
+        if($mou->partner_pic_signature == null && $mou->referral_signature == null){
+            $template="assets/template/mou_tanpa_ttd_pic_referral.docx";
+        }else if($mou->referral_signature == null){
+            $template="assets/template/mou_tanpa_ttd_referral.docx";
+        }else if($mou->partner_pic_signature == null){
+            $template="assets/template/mou_tanpa_ttd_pic.docx";
+        }
+
+
+        $phpWord = new \PhpOffice\PhpWord\TemplateProcessor($template);
         $phpWord->setValues([
             'code' => $mou->code,
             'day' => $mou->day,
@@ -98,6 +110,7 @@ class MOUController extends Controller
             'period_subscription' => $mou->period_subscription,
             'price_training_offline' => "Rp" . number_format($mou->price_training_offline, 0, ',', '.'),
             'price_training_online' => "Rp" . number_format($mou->price_training_online, 0, ',', '.'),
+            'fee_qris'=> $mou->fee_qris,
             'fee_purchase_cazhpoin' => "Rp" . number_format($mou->fee_purchase_cazhpoin, 0, ',', '.'),
             'fee_bill_cazhpoin' => "Rp" . number_format($mou->fee_bill_cazhpoin, 0, ',', '.'),
             'fee_topup_cazhpos' => "Rp" . number_format($mou->fee_topup_cazhpos, 0, ',', '.'),
@@ -115,10 +128,10 @@ class MOUController extends Controller
         ]);
 
         $phpWord->setImageValue('signature_image', array('path' => public_path("/storage/$mou->signature_image")));
-        if($mou->partner_pic_signature){
+        if ($mou->partner_pic_signature) {
             $phpWord->setImageValue('pic_signature', array('path' => public_path("/storage/$mou->partner_pic_signature")));
         }
-        if($mou->referral){
+        if ($mou->referral) {
             $phpWord->setImageValue('referral_signature', array('path' => public_path("/storage/$mou->referral_signature")));
         }
         $fileName = $mou->uuid . '.docx';
@@ -143,14 +156,40 @@ class MOUController extends Controller
             $pathSignatureReferral = 'images/tanda_tangan/' . $filename;
             Storage::putFileAs('public/images/tanda_tangan', $file, $filename);
         }
-        
+
+        $id_partner = $request->partner['id'];
+
+        if (!$id_partner) {
+
+            $partnerExists = Partner::where('name', 'like', '%' . $request->partner["name"] . '%')->first();
+            if (!$partnerExists) {
+                $partner = Partner::create([
+                    'uuid' => Str::uuid(),
+                    'name' => $request['partner']['name'],
+                    'province' => $request['partner']['province'],
+                    'regency' => $request['partner']['regency'],
+                    'period' => $request->period_subscription,
+                    'status' => "Proses",
+                ]);
+                PartnerPIC::create([
+                    'uuid' => Str::uuid(),
+                    'partner_id' => $partner->id,
+                    'name' => $request->partner['pic'],
+                    'position' => $request->partner['pic_position']
+                ]);
+                $id_partner = $partner->id;
+            } else {
+                $id_partner = $partnerExists->id;
+            }
+        }
+
         $code = $this->generateCode();
         $mou = MOU::create([
             "uuid" => Str::uuid(),
             "code" => $code,
             "day" => $request->day,
             "date" => Carbon::parse($request->date)->setTimezone('GMT+7')->format('Y-m-d H:i:s'),
-            "partner_id" => $request->partner['id'],
+            "partner_id" => $id_partner,
             "partner_name" => $request->partner['name'],
             "partner_pic" => $request->partner['pic'],
             "partner_pic_position" => $request->partner['pic_position'],
@@ -164,6 +203,7 @@ class MOUController extends Controller
             "period_subscription" => $request->period_subscription,
             "price_training_offline" => $request->price_training_offline,
             "price_training_online" => $request->price_training_online,
+            "fee_qris" => $request->fee_qris,
             "fee_purchase_cazhpoin" => $request->fee_purchase_cazhpoin,
             "fee_bill_cazhpoin" => $request->fee_bill_cazhpoin,
             "fee_topup_cazhpos" => $request->fee_topup_cazhpos,
@@ -199,7 +239,7 @@ class MOUController extends Controller
         $usersProp->transform(function ($user) {
             $user->position = $user->roles->first()->name;
             $user->user_id = $user->id;
-            unset($user->roles);
+            unset ($user->roles);
             return $user;
         });
         $partnersProp = Partner::with([
@@ -219,7 +259,7 @@ class MOUController extends Controller
                 $query->latest();
             },
         ])->get();
-        $mou = MOU::where('uuid', '=', $uuid)->first();
+        $mou = MOU::with('partner')->where('uuid', '=', $uuid)->first();
         $signaturesProp = Signature::all();
         return Inertia::render('MOU/Edit', compact('mou', 'usersProp', 'partnersProp', 'signaturesProp'));
     }
@@ -278,11 +318,37 @@ class MOUController extends Controller
             }
         }
 
+        $id_partner = $request->partner['id'];
+
+        if (!$id_partner) {
+
+            $partnerExists = Partner::where('name', 'like', '%' . $request->partner["name"] . '%')->first();
+            if (!$partnerExists) {
+                $partner = Partner::create([
+                    'uuid' => Str::uuid(),
+                    'name' => $request['partner']['name'],
+                    'province' => $request['partner']['province'],
+                    'regency' => $request['partner']['regency'],
+                    'period' => $request->period_subscription,
+                    'status' => "Proses",
+                ]);
+                PartnerPIC::create([
+                    'uuid' => Str::uuid(),
+                    'partner_id' => $partner->id,
+                    'name' => $request->partner['pic'],
+                    'position' => $request->partner['pic_position']
+                ]);
+                $id_partner = $partner->id;
+            } else {
+                $id_partner = $partnerExists->id;
+            }
+        }
         
+
         $mou->update([
             "day" => $request->day,
             "date" => Carbon::parse($request->date)->setTimezone('GMT+7')->format('Y-m-d H:i:s'),
-            "partner_id" => $request->partner['id'],
+            "partner_id" => $id_partner,
             "partner_name" => $request->partner['name'],
             "partner_pic" => $request->partner['pic'],
             "partner_pic_position" => $request->partner['pic_position'],
@@ -320,7 +386,7 @@ class MOUController extends Controller
     }
     public function apiGetMou()
     {
-        $mouProp = MOU::with('user', 'partner')->get();
+        $mouProp = MOU::with('user', 'partner')->latest()->get();
         return response()->json($mouProp);
     }
 

@@ -151,7 +151,6 @@ export default function Index({ auth }) {
     ];
     const [visibleColumns, setVisibleColumns] = useState([
         { field: "code", header: "Kode", width: "8rem", type: "regular" },
-        { field: "day", header: "Hari", width: "6rem", type: "regular" },
         { field: "date", header: "Tanggal", width: "8rem", type: "date" },
         { field: "partner_pic", header: "PIC", width: "8rem", type: "regular" },
         {

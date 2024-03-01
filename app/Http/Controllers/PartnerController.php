@@ -88,7 +88,6 @@ class PartnerController extends Controller
             'status' => $request['partner']['status'],
             'payment_metode' => $request['partner']['payment_metode'],
             'period' => $request['partner']['period']['name'],
-
         ]);
 
         $pic = PartnerPIC::create([

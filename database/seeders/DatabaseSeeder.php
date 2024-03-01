@@ -23,6 +23,6 @@ class DatabaseSeeder extends Seeder
         // $this->call(PartnerAccountSeeder::class);
         // $this->call(PartnerSubscriptionSeeder::class);
         // $this->call(PartnerPriceListSeeder::class);
-        // $this->call(SignatureSeeder::class);
+        $this->call(SignatureSeeder::class);
     }
 }

@@ -583,7 +583,7 @@
                                                                             Rp5.000
                                                                         </li>
                                                                         <li>
-                                                                            1% dari nominal
+                                                                            {{$mou->fee_qris}}
                                                                         </li>
                                                                     </ul>
                                                                 </td>
@@ -620,7 +620,7 @@
                                                                             Gratis
                                                                         </li>
                                                                         <li>
-                                                                            1% dari nominal
+                                                                            {{$mou->fee_qris}}
                                                                         </li>
                                                                     </ul>
                                                                 </td>
@@ -663,7 +663,7 @@
                                                                             Rp7.500
                                                                         </li>
                                                                         <li>
-                                                                            1% dari nominal
+                                                                            {{$mou->fee_qris}}
                                                                         </li>
                                                                         <li>
                                                                             2% dari nominal
@@ -711,7 +711,7 @@
                                                                             Rp7.500
                                                                         </li>
                                                                         <li>
-                                                                            1% dari nominal
+                                                                            {{$mou->fee_qris}}
                                                                         </li>
                                                                         <li>
                                                                             Rp{{number_format($mou->fee_bill_cazhpoin,
@@ -1117,7 +1117,7 @@
                     <p>
                         Pihak Pertama,
                     </p>
-                    <img class="min-h-20 w-[15%]" src="{{ public_path($mou->signature_image) }}" />
+                    <img class="min-h-20 w-[15%]" src='{{ public_path("/storage/$mou->signature_image") }}' />
                     <p><b>{{$mou->signature_name}}</b></p>
                 </div>
                 <div class="w-[30%]">
