@@ -488,6 +488,39 @@ export default function DashboardLayout({ user, children }) {
                                             </Link>
                                         </li>
 
+                                        <li className="relative px-2 mt-3">
+                                            {currentPath == "/referral" && (
+                                                <span className="absolute inset-y-0 left-0 w-1 bg-purple-600 rounded-tr-lg rounded-br-lg"></span>
+                                            )}
+                                            <Link
+                                                className={`inline-flex items-center ${
+                                                    currentPath == "/referral"
+                                                        ? "text-gray-800 dark:text-gray-100"
+                                                        : ""
+                                                } w-full text-sm font-semibold transition-colors duration-150 hover:text-gray-800 dark:hover:text-gray-200 `}
+                                                href={"/referral"}
+                                            >
+                                                <svg
+                                                    className="w-5 h-5"
+                                                    fill="none"
+                                                    strokeLinecap="round"
+                                                    strokeLinejoin="round"
+                                                    strokeWidth="2"
+                                                    viewBox="0 0 24 24"
+                                                    stroke="currentColor"
+                                                >
+                                                    <path
+                                                        stroke-linecap="round"
+                                                        stroke-linejoin="round"
+                                                        d="m15 11.25 1.5 1.5.75-.75V8.758l2.276-.61a3 3 0 1 0-3.675-3.675l-.61 2.277H12l-.75.75 1.5 1.5M15 11.25l-8.47 8.47c-.34.34-.8.53-1.28.53s-.94.19-1.28.53l-.97.97-.75-.75.97-.97c.34-.34.53-.8.53-1.28s.19-.94.53-1.28L12.75 9M15 11.25 12.75 9"
+                                                    ></path>
+                                                </svg>
+                                                <span className="ml-4">
+                                                    Referral
+                                                </span>
+                                            </Link>
+                                        </li>
+
                                         {/* {roles[0] === 'super admin' && ( */}
                                         <li className="relative px-2 mt-3">
                                             {currentPath ==
