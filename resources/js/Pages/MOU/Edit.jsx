@@ -402,7 +402,7 @@ const Edit = ({ usersProp, partnersProp, mou, signaturesProp }) => {
                                 </Link>
                             </div>
                             <div className="flex flex-col">
-                            <div className="flex flex-col mt-3">
+                                <div className="flex flex-col mt-3">
                                     <InputText
                                         value={data.code}
                                         onChange={(e) =>
@@ -539,7 +539,7 @@ const Edit = ({ usersProp, partnersProp, mou, signaturesProp }) => {
                                             text={errors.partner_pic_position}
                                         />
                                     )}
-                                </div>                            
+                                </div>
                                 <div className="flex flex-col mt-3">
                                     <label htmlFor="lembaga">Lembaga *</label>
                                     <div className="p-inputgroup flex-1">
@@ -547,13 +547,31 @@ const Edit = ({ usersProp, partnersProp, mou, signaturesProp }) => {
                                             value={data.partner.name}
                                             placeholder="Lembaga"
                                             onChange={(e) => {
-                                                setData((prev) => ({
-                                                    ...prev,
-                                                    partner: {
-                                                        ...prev.partner,
-                                                        name: e.target.value,
-                                                    },
-                                                }));
+                                                if (
+                                                    typeof e.target.value ==
+                                                    "object"
+                                                ) {
+                                                    setData((prev) => ({
+                                                        ...prev,
+                                                        partner: {
+                                                            ...prev.partner,
+                                                            name: e.target.value
+                                                                .name,
+                                                            id: e.target.value
+                                                                .id,
+                                                        },
+                                                    }));
+                                                } else {
+                                                    setData((prev) => ({
+                                                        ...prev,
+                                                        partner: {
+                                                            ...prev.partner,
+                                                            name: e.target
+                                                                .value,
+                                                            id: null,
+                                                        },
+                                                    }));
+                                                }
                                             }}
                                             onFocus={() => {
                                                 triggerInputFocus(
@@ -1697,7 +1715,6 @@ const Edit = ({ usersProp, partnersProp, mou, signaturesProp }) => {
                                         Tanda Tangan PIC
                                     </label>
 
-                        
                                     {/* <div className="App">
                                         {data.pic_signature !== null &&
                                         typeof data.pic_signature ==
@@ -1758,68 +1775,68 @@ const Edit = ({ usersProp, partnersProp, mou, signaturesProp }) => {
                                         )}
                                     </div> */}
 
-<div className="App mt-3">
+                                    <div className="App mt-3">
                                         <label htmlFor="referral_name">
-                                                Tanda Tangan Pihak Ketiga
-                                            </label>
-                                            {data.pic_signature !== null &&
-                                            typeof data.pic_signature ==
-                                                "string" ? (
-                                                <>
-                                                    <FilePond
-                                                        files={
-                                                            "/storage/" +
-                                                            data.pic_signature
+                                            Tanda Tangan Pihak Ketiga
+                                        </label>
+                                        {data.pic_signature !== null &&
+                                        typeof data.pic_signature ==
+                                            "string" ? (
+                                            <>
+                                                <FilePond
+                                                    files={
+                                                        "/storage/" +
+                                                        data.pic_signature
+                                                    }
+                                                    onaddfile={(
+                                                        error,
+                                                        fileItems
+                                                    ) => {
+                                                        if (!error) {
+                                                            setData(
+                                                                "pic_signature",
+                                                                fileItems.file
+                                                            );
                                                         }
-                                                        onaddfile={(
-                                                            error,
-                                                            fileItems
-                                                        ) => {
-                                                            if (!error) {
-                                                                setData(
-                                                                    "pic_signature",
-                                                                    fileItems.file
-                                                                );
-                                                            }
-                                                        }}
-                                                        onremovefile={() => {
+                                                    }}
+                                                    onremovefile={() => {
+                                                        setData(
+                                                            "pic_signature",
+                                                            null
+                                                        );
+                                                    }}
+                                                    maxFileSize="2mb"
+                                                    labelMaxFileSizeExceeded="File terlalu besar"
+                                                    labelIdle='Drag & Drop your files or <span class="filepond--label-action">Browse</span>'
+                                                />
+                                            </>
+                                        ) : (
+                                            <>
+                                                <FilePond
+                                                    onaddfile={(
+                                                        error,
+                                                        fileItems
+                                                    ) => {
+                                                        if (!error) {
                                                             setData(
                                                                 "pic_signature",
-                                                                null
+                                                                fileItems.file
                                                             );
-                                                        }}
-                                                        maxFileSize="2mb"
-                                                        labelMaxFileSizeExceeded="File terlalu besar"
-                                                        labelIdle='Drag & Drop your files or <span class="filepond--label-action">Browse</span>'
-                                                    />
-                                                </>
-                                            ) : (
-                                                <>
-                                                    <FilePond
-                                                        onaddfile={(
-                                                            error,
-                                                            fileItems
-                                                        ) => {
-                                                            if (!error) {
-                                                                setData(
-                                                                    "pic_signature",
-                                                                    fileItems.file
-                                                                );
-                                                            }
-                                                        }}
-                                                        onremovefile={() => {
-                                                            setData(
-                                                                "pic_signature",
-                                                                null
-                                                            );
-                                                        }}
-                                                        maxFileSize="2mb"
-                                                        labelMaxFileSizeExceeded="File terlalu besar"
-                                                        labelIdle='Drag & Drop your files or <span class="filepond--label-action">Browse</span>'
-                                                    />
-                                                </>
-                                            )}
-                                        </div>
+                                                        }
+                                                    }}
+                                                    onremovefile={() => {
+                                                        setData(
+                                                            "pic_signature",
+                                                            null
+                                                        );
+                                                    }}
+                                                    maxFileSize="2mb"
+                                                    labelMaxFileSizeExceeded="File terlalu besar"
+                                                    labelIdle='Drag & Drop your files or <span class="filepond--label-action">Browse</span>'
+                                                />
+                                            </>
+                                        )}
+                                    </div>
                                 </div>
 
                                 <div className="flex flex-col mt-3">
@@ -1846,8 +1863,6 @@ const Edit = ({ usersProp, partnersProp, mou, signaturesProp }) => {
                                         </p>
                                     </div>
                                 </div>
-
-                               
 
                                 {data.referral && (
                                     <>
@@ -1883,7 +1898,7 @@ const Edit = ({ usersProp, partnersProp, mou, signaturesProp }) => {
                                             />
                                         </div>
                                         <div className="App mt-3">
-                                        <label htmlFor="referral_name">
+                                            <label htmlFor="referral_name">
                                                 Tanda Tangan Pihak Ketiga
                                             </label>
                                             {data.referral_signature !== null &&
@@ -3668,7 +3683,11 @@ const Edit = ({ usersProp, partnersProp, mou, signaturesProp }) => {
                                 >
                                     <p>Pihak Pertama</p>
                                     <img
-                                        src={BASE_URL +"/storage/"+ data.signature.image}
+                                        src={
+                                            BASE_URL +
+                                            "/storage/" +
+                                            data.signature.image
+                                        }
                                         alt=""
                                         className="min-h-20"
                                     />

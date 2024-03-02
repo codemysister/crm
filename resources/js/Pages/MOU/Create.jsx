@@ -34,7 +34,7 @@ const Create = ({ usersProp, partnersProp, signaturesProp }) => {
     const [regencys, setRegencys] = useState([]);
     const [codeProvince, setcodeProvince] = useState(null);
     const [signatures, setSignatures] = useState(signaturesProp);
-    
+
     const toast = useRef(null);
     const infoPriceTrainingOfflineRef = useRef(null);
     const infoPriceTrainingOnlineRef = useRef(null);
@@ -544,7 +544,7 @@ const Create = ({ usersProp, partnersProp, signaturesProp }) => {
                                             text={errors.partner_pic_position}
                                         />
                                     )}
-                                </div>                            
+                                </div>
                                 <div className="flex flex-col mt-3">
                                     <label htmlFor="lembaga">Lembaga *</label>
                                     <div className="p-inputgroup flex-1">
@@ -552,13 +552,31 @@ const Create = ({ usersProp, partnersProp, signaturesProp }) => {
                                             value={data.partner.name}
                                             placeholder="Lembaga"
                                             onChange={(e) => {
-                                                setData((prev) => ({
-                                                    ...prev,
-                                                    partner: {
-                                                        ...prev.partner,
-                                                        name: e.target.value,
-                                                    },
-                                                }));
+                                                if (
+                                                    typeof e.target.value ==
+                                                    "object"
+                                                ) {
+                                                    setData((prev) => ({
+                                                        ...prev,
+                                                        partner: {
+                                                            ...prev.partner,
+                                                            name: e.target.value
+                                                                .name,
+                                                            id: e.target.value
+                                                                .id,
+                                                        },
+                                                    }));
+                                                } else {
+                                                    setData((prev) => ({
+                                                        ...prev,
+                                                        partner: {
+                                                            ...prev.partner,
+                                                            name: e.target
+                                                                .value,
+                                                            id: null,
+                                                        },
+                                                    }));
+                                                }
                                             }}
                                             onFocus={() => {
                                                 triggerInputFocus(
