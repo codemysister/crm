@@ -17,10 +17,17 @@ import { Calendar } from "primereact/calendar";
 
 const BASE_URL = import.meta.env.VITE_BASE_URL;
 
-const Create = ({ usersProp, partnersProp, salesProp, productsProp }) => {
+const Create = ({
+    usersProp,
+    partnersProp,
+    salesProp,
+    productsProp,
+    signaturesProp,
+}) => {
     const [users, setUsers] = useState(usersProp);
     const [partners, setPartners] = useState(partnersProp);
     const [sales, setSales] = useState(salesProp);
+    const [signatures, setSignatures] = useState(signaturesProp);
     const [products, setProducts] = useState(productsProp);
     const [dialogVisible, setDialogVisible] = useState(false);
     const [dialogProductVisible, setDialogProductVisible] = useState(false);
@@ -55,7 +62,7 @@ const Create = ({ usersProp, partnersProp, salesProp, productsProp }) => {
         code: `#INV/121/XI/${new Date().getFullYear()}`,
         products: [],
         total: 0,
-        total_ppn: 0,
+        total_all_ppn: 0,
         total_all_ppn: 0,
         partner: {
             id: null,
@@ -102,18 +109,18 @@ const Create = ({ usersProp, partnersProp, salesProp, productsProp }) => {
         let today = new Date();
 
         const monthNames = [
-            "January",
-            "February",
-            "March",
+            "Januari",
+            "Februari",
+            "Maret",
             "April",
-            "May",
-            "June",
-            "July",
-            "August",
+            "Mei",
+            "Juni",
+            "Juli",
+            "Agustus",
             "September",
-            "October",
+            "Oktober",
             "November",
-            "December",
+            "Desember",
         ];
 
         let day = today.getDate();
@@ -204,13 +211,7 @@ const Create = ({ usersProp, partnersProp, salesProp, productsProp }) => {
             console.log(error);
         }
     };
-    const signatures = [
-        {
-            name: "Muh Arif Mahfudin",
-            position: "CEO",
-            image: "/assets/img/signatures/ttd.png",
-        },
-    ];
+
     const [filters, setFilters] = useState({
         global: { value: null, matchMode: FilterMatchMode.CONTAINS },
     });
@@ -306,7 +307,7 @@ const Create = ({ usersProp, partnersProp, salesProp, productsProp }) => {
             <div className="flex flex-wrap p-2 align-items-center gap-3">
                 <img
                     className="w-3rem shadow-2 flex-shrink-0 border-round"
-                    src={item.image}
+                    src={"/storage/" + item.image}
                     alt={item.name}
                 />
                 <div className="flex-1 flex flex-col gap-2 xl:mr-8">
@@ -872,13 +873,13 @@ const Create = ({ usersProp, partnersProp, salesProp, productsProp }) => {
                     >
                         <div className="flex my-5 gap-3">
                             <Button
-                                label="Tambah produk dari stock"
+                                label="Pilih Produk"
                                 icon="pi pi-external-link"
                                 className="text-xs md:text-base"
                                 onClick={() => setDialogProductVisible(true)}
                             />
                             <Button
-                                label="Tambah Inputan Produk"
+                                label="Tambah Produk"
                                 icon="pi pi-plus"
                                 className="text-xs md:text-base"
                                 onClick={() => {
@@ -1344,7 +1345,7 @@ const Create = ({ usersProp, partnersProp, salesProp, productsProp }) => {
                             </div>
                         </div>
 
-                        {data.total_ppn !== 0 && (
+                        {data.total_all_ppn == 0 && (
                             <div className="mt-16 w-full">
                                 <h1 className="font-bold underline">Catatan</h1>
                                 <p className="w-1/2">
@@ -1356,10 +1357,10 @@ const Create = ({ usersProp, partnersProp, salesProp, productsProp }) => {
 
                         <div
                             ref={animatePaymentMetodeRef}
-                            className="flex w-full mt-16 justify-between items-center"
+                            className="flex w-full mt-10 justify-between items-center"
                         >
                             <div className="w-[50%] leading-6">
-                                {data.payment_metode === "paymentlink" && (
+                                {data.payment_metode === "payment link" && (
                                     <div>
                                         <h1 className="font-bold underline">
                                             Payment Link:
@@ -1400,7 +1401,11 @@ const Create = ({ usersProp, partnersProp, salesProp, productsProp }) => {
                             >
                                 <p>{formatDateSignature()}</p>
                                 <img
-                                    src={BASE_URL + data.signature.image}
+                                    src={
+                                        BASE_URL +
+                                        "/storage/" +
+                                        data.signature.image
+                                    }
                                     alt=""
                                 />
                                 <p>{data.signature.name}</p>

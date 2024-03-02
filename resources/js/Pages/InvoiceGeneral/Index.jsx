@@ -1320,6 +1320,7 @@ export default function Index({
                                 optionLabel="name"
                                 placeholder="Pilih Lembaga"
                                 filter
+                                disabled
                                 valueTemplate={selectedOptionTemplate}
                                 itemTemplate={optionTemplate}
                                 className="w-full md:w-14rem"

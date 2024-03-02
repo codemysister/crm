@@ -37,7 +37,8 @@ class InvoiceGeneralController extends Controller
             'pics'
         )->get();
         $productsProp = Product::all();
-        return Inertia::render('InvoiceGeneral/Create', compact('partnersProp', 'productsProp'));
+        $signaturesProp = Signature::all();
+        return Inertia::render('InvoiceGeneral/Create', compact('partnersProp', 'productsProp', 'signaturesProp'));
     }
 
     public function edit($uuid)
@@ -46,8 +47,9 @@ class InvoiceGeneralController extends Controller
             'pics'
         )->get();
         $productsProp = Product::all();
+        $signaturesProp = Signature::all();
         $invoiceGeneral = InvoiceGeneral::with('products', 'transactions', 'partner')->where('uuid', '=', $uuid)->first();
-        return Inertia::render('InvoiceGeneral/Edit', compact('partnersProp', 'productsProp', 'invoiceGeneral'));
+        return Inertia::render('InvoiceGeneral/Edit', compact('partnersProp', 'productsProp', 'invoiceGeneral', 'signaturesProp'));
     }
 
     public function generateInvoiceGeneral($invoice_general, $products)
@@ -61,7 +63,7 @@ class InvoiceGeneralController extends Controller
             } else if ($invoice_general->payment_metode === "cazhbox") {
                 $templateInvoice = 'assets/template/revisi/invoice_umum_tanpa_pajak_cazhbox.docx';
             } else {
-                $templateInvoice = 'assets/template/revisi/invoice_umum_tanpa_pajak.docx';
+                $templateInvoice = 'assets/template/revisi/invoice_umum.docx';
             }
         } else {
             if ($invoice_general->payment_metode === "payment link") {
@@ -225,8 +227,8 @@ class InvoiceGeneralController extends Controller
             ]);
         }
 
-        $this->generateInvoiceGeneral($invoice_general, $request->products);
-
+        // $this->generateInvoiceGeneral($invoice_general, $request->products);
+        GenerateInvoiceGeneralJob::dispatch($invoice_general, $request->products);
     }
 
     public function calculateRestOfBill($invoice_general)
@@ -363,13 +365,14 @@ class InvoiceGeneralController extends Controller
 
         $invoice_general->update(['rest_of_bill' => $rest_of_bill, 'status' => $status]);
 
-        $this->generateInvoiceGeneral($invoice_general, $request->products);
+        // $this->generateInvoiceGeneral($invoice_general, $request->products);
+        GenerateInvoiceGeneralJob::dispatch($invoice_general, $request->products);
 
     }
 
     public function apiGetInvoiceGenerals()
     {
-        $invoiceGenerals = InvoiceGeneral::with(['partner', 'products', 'transactions.user'])->get();
+        $invoiceGenerals = InvoiceGeneral::with(['partner', 'products', 'transactions.user'])->latest()->get();
         return response()->json($invoiceGenerals);
     }
 

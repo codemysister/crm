@@ -17,10 +17,17 @@ import { Calendar } from "primereact/calendar";
 
 const BASE_URL = import.meta.env.VITE_BASE_URL;
 
-const Edit = ({ usersProp, partnersProp, productsProp, invoiceGeneral }) => {
+const Edit = ({
+    usersProp,
+    partnersProp,
+    productsProp,
+    invoiceGeneral,
+    signaturesProp,
+}) => {
     const [users, setUsers] = useState(usersProp);
     const [partners, setPartners] = useState(partnersProp);
     const [products, setProducts] = useState(productsProp);
+    const [signatures, setSignatures] = useState(signaturesProp);
     const [dialogVisible, setDialogVisible] = useState(false);
     const [dialogProductVisible, setDialogProductVisible] = useState(false);
     const [rowClick, setRowClick] = useState(true);
@@ -100,18 +107,18 @@ const Edit = ({ usersProp, partnersProp, productsProp, invoiceGeneral }) => {
         let today = new Date();
 
         const monthNames = [
-            "January",
-            "February",
-            "March",
+            "Januari",
+            "Februari",
+            "Maret",
             "April",
-            "May",
-            "June",
-            "July",
-            "August",
+            "Mei",
+            "Juni",
+            "Juli",
+            "Agustus",
             "September",
-            "October",
+            "Oktober",
             "November",
-            "December",
+            "Desember",
         ];
 
         let day = today.getDate();
@@ -202,13 +209,7 @@ const Edit = ({ usersProp, partnersProp, productsProp, invoiceGeneral }) => {
             console.log(error);
         }
     };
-    const signatures = [
-        {
-            name: "Muh Arif Mahfudin",
-            position: "CEO",
-            image: "/assets/img/signatures/ttd.png",
-        },
-    ];
+
     const [filters, setFilters] = useState({
         global: { value: null, matchMode: FilterMatchMode.CONTAINS },
     });
@@ -304,7 +305,7 @@ const Edit = ({ usersProp, partnersProp, productsProp, invoiceGeneral }) => {
             <div className="flex flex-wrap p-2 align-items-center gap-3">
                 <img
                     className="w-3rem shadow-2 flex-shrink-0 border-round"
-                    src={item.image}
+                    src={"/storage/" + item.image}
                     alt={item.name}
                 />
                 <div className="flex-1 flex flex-col gap-2 xl:mr-8">
@@ -1340,7 +1341,7 @@ const Edit = ({ usersProp, partnersProp, productsProp, invoiceGeneral }) => {
                             </div>
                         </div>
 
-                        {data.total_ppn !== 0 && (
+                        {data.total_all_ppn == 0 && (
                             <div className="mt-16 w-full">
                                 <h1 className="font-bold underline">Catatan</h1>
                                 <p className="w-1/2">
@@ -1396,7 +1397,11 @@ const Edit = ({ usersProp, partnersProp, productsProp, invoiceGeneral }) => {
                             >
                                 <p>{formatDateSignature()}</p>
                                 <img
-                                    src={BASE_URL + data.signature.image}
+                                    src={
+                                        BASE_URL +
+                                        "/storage/" +
+                                        data.signature.image
+                                    }
                                     alt=""
                                 />
                                 <p>{data.signature.name}</p>
