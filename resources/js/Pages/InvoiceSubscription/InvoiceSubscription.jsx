@@ -514,7 +514,7 @@ export default function InvoiceSubscription({
                 onClick={(e) => {
                     zipAll();
                 }}
-                disabled={selectedInvoices.length < 4}
+                disabled={selectedInvoices.length < 2}
             />
             <div className="flex w-full sm:w-[30%] flex-row justify-left gap-2 align-items-center items-end">
                 <div className="w-full">
@@ -1685,6 +1685,7 @@ export default function InvoiceSubscription({
                                 optionLabel="name"
                                 placeholder="Pilih Lembaga"
                                 filter
+                                disabled
                                 valueTemplate={selectedOptionTemplate}
                                 itemTemplate={optionTemplate}
                                 className="w-full md:w-14rem"
