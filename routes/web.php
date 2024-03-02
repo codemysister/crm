@@ -5,6 +5,7 @@ use App\Http\Controllers\InvoiceGeneralController;
 use App\Http\Controllers\InvoiceGeneralTransactionController;
 use App\Http\Controllers\InvoiceSubscriptionController;
 use App\Http\Controllers\InvoiceSubscriptionTransactionController;
+use App\Http\Controllers\MemoController;
 use App\Http\Controllers\MOUController;
 use App\Http\Controllers\PartnerAccountSettingController;
 use App\Http\Controllers\PartnerBankController;
@@ -74,7 +75,7 @@ Route::redirect('/', '/login', 301);
 
 Route::get('/pdf', function () {
 
-    $html = view('pdf.invoice_subscription')->render();
+    $html = view('pdf.memo')->render();
 
     $pdf = Browsershot::html($html)
         ->setIncludedPath(config('services.browsershot.included_path'))
@@ -216,6 +217,7 @@ Route::middleware('auth')->group(function () {
     Route::delete('/stpd/{stpd:uuid}', [STPDController::class, 'destroy'])->name('stpd.destroy')->middleware(['can:hapus stpd']);
     Route::get('/api/stpd', [STPDController::class, 'apiGetSTPD'])->name('api.stpd');
 
+
     // SPH
     Route::get('/sph', [SPHController::class, 'index'])->name('sph.view')->middleware(['can:lihat sph']);
     Route::get('/sph/create', [SPHController::class, 'create'])->name('sph.create');
@@ -224,6 +226,15 @@ Route::middleware('auth')->group(function () {
     Route::put('/sph/{sph:uuid}', [SPHController::class, 'update'])->name('sph.update')->middleware(['can:edit sph']);
     Route::delete('/sph/{sph:uuid}', [SPHController::class, 'destroy'])->name('sph.destroy')->middleware(['can:hapus sph']);
     Route::get('/api/sph', [SPHController::class, 'apiGetSPH'])->name('api.sph');
+
+    // Memo
+    Route::get('/memo', [MemoController::class, 'index'])->name('memo.view')->middleware(['can:lihat memo']);
+    Route::get('/memo/create', [MemoController::class, 'create'])->name('memo.create');
+    Route::post('/memo', [MemoController::class, 'store'])->name('memo.store')->middleware(['can:tambah memo']);
+    Route::get('/memo/{memo:uuid}', [MemoController::class, 'edit'])->name('memo.edit')->middleware(['can:edit memo']);
+    Route::put('/memo/{memo:uuid}', [MemoController::class, 'update'])->name('memo.update')->middleware(['can:edit memo']);
+    Route::delete('/memo/{memo:uuid}', [MemoController::class, 'destroy'])->name('memo.destroy')->middleware(['can:hapus memo']);
+    Route::get('/api/memo', [MemoController::class, 'apiGetMemo'])->name('api.memo');
 
     // MOU
     Route::get('/mou', [MOUController::class, 'index'])->name('mou.view')->middleware(['can:lihat mou']);
@@ -235,15 +246,15 @@ Route::middleware('auth')->group(function () {
     Route::get('/api/mou', [MOUController::class, 'apiGetmou'])->name('api.mou');
 
     // SLA
-    Route::get('/sla', [SLAController::class, 'index'])->name('sla.view')->middleware(['can:lihat produk']);
+    Route::get('/sla', [SLAController::class, 'index'])->name('sla.view')->middleware(['can:lihat sla']);
     Route::get('/sla/create', [SLAController::class, 'create'])->name('sla.create');
-    Route::post('/sla', [SLAController::class, 'store'])->name('sla.store')->middleware(['can:tambah produk']);
-    Route::get('/sla/{sla:uuid}', [SLAController::class, 'edit'])->name('sla.edit')->middleware(['can:edit produk']);
-    Route::post('/sla/{sla:uuid}', [SLAController::class, 'update'])->name('sla.update')->middleware(['can:edit produk']);
-    Route::delete('/sla/{sla:uuid}', [SLAController::class, 'destroy'])->name('sla.destroy')->middleware(['can:hapus produk']);
+    Route::post('/sla', [SLAController::class, 'store'])->name('sla.store')->middleware(['can:tambah sla']);
+    Route::get('/sla/{sla:uuid}', [SLAController::class, 'edit'])->name('sla.edit')->middleware(['can:edit sla']);
+    Route::post('/sla/{sla:uuid}', [SLAController::class, 'update'])->name('sla.update')->middleware(['can:edit sla']);
+    Route::delete('/sla/{sla:uuid}', [SLAController::class, 'destroy'])->name('sla.destroy')->middleware(['can:hapus sla']);
     Route::get('/api/sla', [SLAController::class, 'apiGetSla'])->name('api.sla');
-    Route::post('/activity/{activity:uuid}', [SLAController::class, 'activityUpdate'])->name('activity.update')->middleware(['can:hapus produk']);
-    Route::delete('/activity/{activity:uuid}', [SLAController::class, 'activityDestroy'])->name('activity.destroy')->middleware(['can:hapus produk']);
+    Route::post('/activity/{activity:uuid}', [SLAController::class, 'activityUpdate'])->name('activity.update')->middleware(['can:hapus sla']);
+    Route::delete('/activity/{activity:uuid}', [SLAController::class, 'activityDestroy'])->name('activity.destroy')->middleware(['can:hapus sla']);
 
     // Invoice Umum
     Route::get('/invoice_generals', [InvoiceGeneralController::class, 'index'])->name('invoice_generals.view')->middleware(['can:lihat invoice umum']);
@@ -255,10 +266,10 @@ Route::middleware('auth')->group(function () {
     Route::get('/api/invoice_generals', [InvoiceGeneralController::class, 'apiGetInvoiceGenerals'])->name('api.invoice_generals');
 
     // Invoice Umum Transaksi
-    Route::get('/invoice_generals/transaction', [InvoiceGeneralTransactionController::class, 'index'])->name('invoice_generals.transaction.view')->middleware(['can:lihat produk']);
-    Route::post('/invoice_generals/transaction', [InvoiceGeneralTransactionController::class, 'store'])->name('invoice_generals.transaction.store')->middleware(['can:tambah produk']);
-    Route::put('/invoice_generals/transaction/{transaction:uuid}', [InvoiceGeneralTransactionController::class, 'update'])->name('invoice_generals.transaction.update')->middleware(['can:edit produk']);
-    Route::delete('/invoice_generals/transaction/{transaction:uuid}', [InvoiceGeneralTransactionController::class, 'destroy'])->name('invoice_generals.transaction.destroy')->middleware(['can:edit produk']);
+    Route::get('/invoice_generals/transaction', [InvoiceGeneralTransactionController::class, 'index'])->name('invoice_generals.transaction.view')->middleware(['can:lihat transaksi']);
+    Route::post('/invoice_generals/transaction', [InvoiceGeneralTransactionController::class, 'store'])->name('invoice_generals.transaction.store')->middleware(['can:tambah transaksi']);
+    Route::put('/invoice_generals/transaction/{transaction:uuid}', [InvoiceGeneralTransactionController::class, 'update'])->name('invoice_generals.transaction.update')->middleware(['can:edit transaksi']);
+    Route::delete('/invoice_generals/transaction/{transaction:uuid}', [InvoiceGeneralTransactionController::class, 'destroy'])->name('invoice_generals.transaction.destroy')->middleware(['can:edit transaksi']);
 
     // Invoice Langganan
     Route::get('/invoice_subscriptions', [InvoiceSubscriptionController::class, 'index'])->name('invoice_subscriptions.view')->middleware(['can:lihat invoice langganan']);
@@ -273,10 +284,10 @@ Route::middleware('auth')->group(function () {
     Route::get('/invoice_langganan/{uuid}', [InvoiceSubscriptionController::class, 'editInvoice']);
 
     // Invoice Langganan Transaksi
-    Route::get('/invoice_subscriptions/transaction', [InvoiceSubscriptionTransactionController::class, 'index'])->name('invoice_subscriptions.transaction.view')->middleware(['can:lihat produk']);
-    Route::post('/invoice_subscriptions/transaction', [InvoiceSubscriptionTransactionController::class, 'store'])->name('invoice_subscriptions.transaction.store')->middleware(['can:tambah produk']);
-    Route::put('/invoice_subscriptions/transaction/{transaction:uuid}', [InvoiceSubscriptionTransactionController::class, 'update'])->name('invoice_subscriptions.transaction.update')->middleware(['can:edit produk']);
-    Route::delete('/invoice_subscriptions/transaction/{transaction:uuid}', [InvoiceSubscriptionTransactionController::class, 'destroy'])->name('invoice_subscriptions.transaction.destroy')->middleware(['can:edit produk']);
+    Route::get('/invoice_subscriptions/transaction', [InvoiceSubscriptionTransactionController::class, 'index'])->name('invoice_subscriptions.transaction.view')->middleware(['can:lihat transaksi']);
+    Route::post('/invoice_subscriptions/transaction', [InvoiceSubscriptionTransactionController::class, 'store'])->name('invoice_subscriptions.transaction.store')->middleware(['can:tambah transaksi']);
+    Route::put('/invoice_subscriptions/transaction/{transaction:uuid}', [InvoiceSubscriptionTransactionController::class, 'update'])->name('invoice_subscriptions.transaction.update')->middleware(['can:edit transaksi']);
+    Route::delete('/invoice_subscriptions/transaction/{transaction:uuid}', [InvoiceSubscriptionTransactionController::class, 'destroy'])->name('invoice_subscriptions.transaction.destroy')->middleware(['can:edit transaksi']);
 });
 
 

@@ -122,8 +122,8 @@ export default function DashboardLayout({ user, children }) {
                     <aside
                         className={`h-full ${
                             !isMobile
-                                ? "z-20 w-64 overflow-y-auto bg-white dark:bg-transparent dark:shadow-[rgba(0,0,15,0.5)_1px_1px_5px_0px] md:block flex-shrink-0"
-                                : "fixed inset-y-0 z-20 flex-shrink-0 w-64 mt-16 overflow-y-auto bg-white dark:bg-gray-800"
+                                ? "z-20 w-[17rem] overflow-y-auto bg-white dark:bg-transparent dark:shadow-[rgba(0,0,15,0.5)_1px_1px_5px_0px] md:block flex-shrink-0"
+                                : "fixed inset-y-0 z-20 flex-shrink-0 w-[17rem] mt-16 overflow-y-auto bg-white dark:bg-gray-800"
                         }`}
                     >
                         <div className="py-4 text-gray-500 dark:text-gray-400">
@@ -250,6 +250,39 @@ export default function DashboardLayout({ user, children }) {
 
                                         <span className="ml-4">
                                             Surat Penawaran Harga
+                                        </span>
+                                    </Link>
+                                </li>
+
+                                <li className="relative px-6 py-3">
+                                    {currentPath == "/memo" && (
+                                        <span className="absolute inset-y-0 left-0 w-1 bg-purple-600 rounded-tr-lg rounded-br-lg"></span>
+                                    )}
+                                    <Link
+                                        className={`inline-flex items-center ${
+                                            currentPath == "/memo"
+                                                ? "text-gray-800 dark:text-gray-100"
+                                                : ""
+                                        } w-full text-sm font-semibold transition-colors duration-150 hover:text-gray-800 dark:hover:text-gray-200 `}
+                                        href={route("memo.view")}
+                                    >
+                                        <svg
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            fill="none"
+                                            viewBox="0 0 24 24"
+                                            strokeWidth={1.5}
+                                            stroke="currentColor"
+                                            className="w-5 h-5"
+                                        >
+                                            <path
+                                                strokeLinecap="round"
+                                                strokeLinejoin="round"
+                                                d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 0 0 2.25-2.25V6.75A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25v10.5A2.25 2.25 0 0 0 4.5 19.5Z"
+                                            />
+                                        </svg>
+
+                                        <span className="ml-4">
+                                            Memo Deviasi Harga
                                         </span>
                                     </Link>
                                 </li>

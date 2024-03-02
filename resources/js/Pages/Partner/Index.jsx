@@ -2497,23 +2497,22 @@ export default function Index({ auth, partner }) {
                                 className="my-4"
                             >
                                 <div className="flex flex-col mt-3">
-                            <div className="flex bg-green-600 text-white text-xs p-3 rounded-lg justify-between w-full h-full">
-                                <p>Template</p>
-                                <p className="font-semibold">
-                                <a
-                                            href={
-                                                BASE_URL +
-                                                "/assets/template/excel/sample.xlsx"
-                                                
-                                            }
-                                            download="sample.xlsx"
-                                            class="font-bold underline w-full h-full text-center rounded-full "
-                                        >
-                                            sample.xlsx
-                                        </a>
-                                </p>
-                            </div>
-                        </div>
+                                    <div className="flex bg-green-600 text-white text-xs p-3 rounded-lg justify-between w-full h-full">
+                                        <p>Template</p>
+                                        <p className="font-semibold">
+                                            <a
+                                                href={
+                                                    BASE_URL +
+                                                    "/assets/template/excel/sample.xlsx"
+                                                }
+                                                download="sample.xlsx"
+                                                class="font-bold underline w-full h-full text-center rounded-full "
+                                            >
+                                                sample.xlsx
+                                            </a>
+                                        </p>
+                                    </div>
+                                </div>
                                 <div className="flex flex-col mt-3">
                                     <label htmlFor="name">Excell</label>
 
@@ -2940,6 +2939,7 @@ export default function Index({ auth, partner }) {
                                             options={status}
                                             optionLabel="name"
                                             optionValue="name"
+                                            editable
                                             placeholder="Pilih Status"
                                             className="w-full md:w-14rem"
                                         />
@@ -3119,8 +3119,9 @@ export default function Index({ auth, partner }) {
                                     headerClassName="dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300"
                                     header="Provinsi"
                                     body={(rowData) => {
-                                        return JSON.parse(rowData.province)
-                                            .name;
+                                        return rowData.province
+                                            ? JSON.parse(rowData.province).name
+                                            : "belum diiisi";
                                     }}
                                     align="left"
                                     style={{
@@ -3134,7 +3135,9 @@ export default function Index({ auth, partner }) {
                                     headerClassName="dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300"
                                     header="Kabupaten"
                                     body={(rowData) => {
-                                        return JSON.parse(rowData.regency).name;
+                                        return rowData.regency
+                                            ? JSON.parse(rowData.regency).name
+                                            : "belum diisi";
                                     }}
                                     align="left"
                                     style={{
