@@ -422,7 +422,7 @@ const Edit = ({ usersProp, partnersProp, salesProp, productsProp, sph }) => {
                                     />
                                 </div> */}
 
-<div className="flex flex-col mt-3">
+                                <div className="flex flex-col mt-3">
                                     <label htmlFor="partner_pic">PIC *</label>
                                     <InputText
                                         value={data.partner.pic}
@@ -452,21 +452,39 @@ const Edit = ({ usersProp, partnersProp, salesProp, productsProp, sph }) => {
                                         }}
                                     />
                                 </div>
-                                
-<div className="flex flex-col mt-3">
+
+                                <div className="flex flex-col mt-3">
                                     <label htmlFor="lembaga">Lembaga *</label>
                                     <div className="p-inputgroup flex-1">
                                         <InputText
                                             value={data.partner.name}
                                             placeholder="Lembaga"
                                             onChange={(e) => {
-                                                setData((prev) => ({
-                                                    ...prev,
-                                                    partner: {
-                                                        ...prev.partner,
-                                                        name: e.target.value,
-                                                    },
-                                                }));
+                                                if (
+                                                    typeof e.target.value ==
+                                                    "object"
+                                                ) {
+                                                    setData((prev) => ({
+                                                        ...prev,
+                                                        partner: {
+                                                            ...prev.partner,
+                                                            name: e.target.value
+                                                                .name,
+                                                            id: e.target.value
+                                                                .id,
+                                                        },
+                                                    }));
+                                                } else {
+                                                    setData((prev) => ({
+                                                        ...prev,
+                                                        partner: {
+                                                            ...prev.partner,
+                                                            name: e.target
+                                                                .value,
+                                                            id: null,
+                                                        },
+                                                    }));
+                                                }
                                             }}
                                             onFocus={() => {
                                                 triggerInputFocus(
@@ -490,7 +508,8 @@ const Edit = ({ usersProp, partnersProp, salesProp, productsProp, sph }) => {
                                                     name: e.target.value.name,
                                                     province:
                                                         e.target.value.province,
-                                                    regency: e.target.value.regency,
+                                                    regency:
+                                                        e.target.value.regency,
                                                     pic: e.target.value.pics[0]
                                                         .name,
                                                 });
@@ -593,7 +612,7 @@ const Edit = ({ usersProp, partnersProp, salesProp, productsProp, sph }) => {
                                         className="w-full md:w-14rem"
                                     />
                                 </div>
-                                
+
                                 <div className="flex flex-col mt-3">
                                     <label htmlFor="sales">Sales *</label>
                                     <Dropdown
@@ -957,7 +976,10 @@ const Edit = ({ usersProp, partnersProp, salesProp, productsProp, sph }) => {
                                     headerStyle={{ width: "3rem" }}
                                 ></Column>
                                 <Column field="name" header="Name"></Column>
-                                <Column field="description" header="Deskripsi"></Column>
+                                <Column
+                                    field="description"
+                                    header="Deskripsi"
+                                ></Column>
                                 <Column
                                     field="category"
                                     header="Kategori"
@@ -1000,7 +1022,9 @@ const Edit = ({ usersProp, partnersProp, salesProp, productsProp, sph }) => {
                             <h1 className="font-bold underline mx-auto">
                                 SURAT PENAWARAN HARGA
                             </h1>
-                            <p className="">Nomor : <b>{data.code}</b></p>
+                            <p className="">
+                                Nomor : <b>{data.code}</b>
+                            </p>
                         </div>
 
                         <div className="mt-5">
@@ -1070,7 +1094,14 @@ const Edit = ({ usersProp, partnersProp, salesProp, productsProp, sph }) => {
                                                 <td className="pl-2">{++i}</td>
                                                 <td>{data.name}</td>
                                                 <td>{data.detail}</td>
-                                                <td className="text-right px-4">Rp{data.total ? data.total.toLocaleString('id') : 0}</td>
+                                                <td className="text-right px-4">
+                                                    Rp
+                                                    {data.total
+                                                        ? data.total.toLocaleString(
+                                                              "id"
+                                                          )
+                                                        : 0}
+                                                </td>
                                             </tr>
                                         );
                                     })}
@@ -1110,12 +1141,22 @@ const Edit = ({ usersProp, partnersProp, salesProp, productsProp, sph }) => {
                             className="flex flex-col mt-5 justify-start w-[30%]"
                             ref={animateSignatureNameRef}
                         >
-                            <p>Purwokerto, {new Date().toLocaleDateString("id-ID", {
+                            <p>
+                                Purwokerto,{" "}
+                                {new Date().toLocaleDateString("id-ID", {
                                     day: "numeric",
                                     month: "long",
                                     year: "numeric",
-                                })}</p>
-                            <img src={BASE_URL +'/storage/'+ data.signature.image} alt="" />
+                                })}
+                            </p>
+                            <img
+                                src={
+                                    BASE_URL +
+                                    "/storage/" +
+                                    data.signature.image
+                                }
+                                alt=""
+                            />
                             <p>{data.signature.name}</p>
                         </div>
                     </div>

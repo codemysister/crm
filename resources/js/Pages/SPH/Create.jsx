@@ -160,7 +160,7 @@ const Create = ({
             console.log(error);
         }
     };
-  
+
     const [filters, setFilters] = useState({
         global: { value: null, matchMode: FilterMatchMode.CONTAINS },
     });
@@ -421,7 +421,7 @@ const Create = ({
                                     />
                                 </div> */}
 
-<div className="flex flex-col mt-3">
+                                <div className="flex flex-col mt-3">
                                     <label htmlFor="partner_pic">PIC *</label>
                                     <InputText
                                         value={data.partner.pic}
@@ -454,13 +454,31 @@ const Create = ({
                                             value={data.partner.name}
                                             placeholder="Lembaga"
                                             onChange={(e) => {
-                                                setData((prev) => ({
-                                                    ...prev,
-                                                    partner: {
-                                                        ...prev.partner,
-                                                        name: e.target.value,
-                                                    },
-                                                }));
+                                                if (
+                                                    typeof e.target.value ==
+                                                    "object"
+                                                ) {
+                                                    setData((prev) => ({
+                                                        ...prev,
+                                                        partner: {
+                                                            ...prev.partner,
+                                                            name: e.target.value
+                                                                .name,
+                                                            id: e.target.value
+                                                                .id,
+                                                        },
+                                                    }));
+                                                } else {
+                                                    setData((prev) => ({
+                                                        ...prev,
+                                                        partner: {
+                                                            ...prev.partner,
+                                                            name: e.target
+                                                                .value,
+                                                            id: null,
+                                                        },
+                                                    }));
+                                                }
                                             }}
                                             onFocus={() => {
                                                 triggerInputFocus(
@@ -484,7 +502,8 @@ const Create = ({
                                                     name: e.target.value.name,
                                                     province:
                                                         e.target.value.province,
-                                                    regency: e.target.value.regency,
+                                                    regency:
+                                                        e.target.value.regency,
                                                     pic: e.target.value.pics[0]
                                                         .name,
                                                 });
@@ -571,7 +590,6 @@ const Create = ({
                                                 : null
                                         }
                                         onChange={(e) => {
-                                            
                                             setData("partner", {
                                                 ...data.partner,
                                                 regency: JSON.stringify(
@@ -603,7 +621,7 @@ const Create = ({
                                         className="w-full md:w-14rem"
                                     />
                                 </div>
-                               
+
                                 <div className="flex flex-col mt-3">
                                     <label htmlFor="sales">Sales *</label>
                                     <Dropdown
@@ -968,7 +986,10 @@ const Create = ({
                                     headerStyle={{ width: "3rem" }}
                                 ></Column>
                                 <Column field="name" header="Nama"></Column>
-                                <Column field="description" header="Deskripsi"></Column>
+                                <Column
+                                    field="description"
+                                    header="Deskripsi"
+                                ></Column>
                                 <Column
                                     field="category"
                                     header="Kategori"
@@ -1011,7 +1032,9 @@ const Create = ({
                             <h1 className="font-bold underline mx-auto">
                                 SURAT PENAWARAN HARGA
                             </h1>
-                            <p className="">Nomor : <b>{data.code}</b></p>
+                            <p className="">
+                                Nomor : <b>{data.code}</b>
+                            </p>
                         </div>
 
                         <div className="mt-5" ref={partnerScrollRef}>
@@ -1081,7 +1104,14 @@ const Create = ({
                                                 <td className="pl-2">{++i}</td>
                                                 <td>{data.name}</td>
                                                 <td>{data.detail}</td>
-                                                <td className="text-right px-4">Rp{data.total ? data.total.toLocaleString('id') : 0}</td>
+                                                <td className="text-right px-4">
+                                                    Rp
+                                                    {data.total
+                                                        ? data.total.toLocaleString(
+                                                              "id"
+                                                          )
+                                                        : 0}
+                                                </td>
                                             </tr>
                                         );
                                     })}
