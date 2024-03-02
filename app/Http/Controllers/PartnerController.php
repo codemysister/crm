@@ -87,7 +87,7 @@ class PartnerController extends Controller
             'address' => $request['partner']['address'],
             'status' => $request['partner']['status'],
             'payment_metode' => $request['partner']['payment_metode'],
-            'period' => $request['partner']['period']['name'],
+            'period' => $request['partner']['period']['name'] ?? $request['partner']['period'],
         ]);
 
         $pic = PartnerPIC::create([
@@ -130,8 +130,8 @@ class PartnerController extends Controller
             'uuid' => Str::uuid(),
             'partner_id' => $partner->id,
             'price_card' => json_encode([
-                'price' => $request['price_list']['price_card']['price'],
-                'type' => $request['price_list']['price_card']['price'] !== null ? $request['price_list']['price_card']['type']['name'] : '',
+                'price' => $request['price_list']['price_card']['price'] !== 0 ? $request['price_list']['price_card']['price'] : null,
+                'type' => $request['price_list']['price_card']['price'] !== 0 ? $request['price_list']['price_card']['type']['name'] : null,
             ]),
             'price_lanyard' => $request['price_list']['price_lanyard'],
             'price_subscription_system' => $request['price_list']['price_subscription_system'],
