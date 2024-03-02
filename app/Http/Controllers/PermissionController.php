@@ -10,17 +10,18 @@ use Spatie\Permission\Models\Role;
 class PermissionController extends Controller
 {
 
-    public function apiGetPermission(){
+    public function apiGetPermission()
+    {
         $permissions = Permission::all();
 
         $permissionGroups = $permissions->pluck('group_name')->unique();
 
         $permissionGroups = $permissionGroups->values();
-        
+
         $permissionGroups = $permissionGroups->map(function ($groupName) {
             return ['name' => $groupName];
         });
-      
+
 
         return response()->json(['permissions' => $permissions, 'permissionGroups' => $permissionGroups]);
     }
@@ -30,15 +31,17 @@ class PermissionController extends Controller
         $permission = Permission::find($id)->update(request()->all());
     }
 
-    public function apiDeletePermission($id){
-        $permission = Permission::find($id)->delete();    
+    public function apiDeletePermission($id)
+    {
+        $permission = Permission::find($id)->delete();
     }
-    
-    public function permissionSync(Request $request, $id){
+
+    public function permissionSync(Request $request, $id)
+    {
         $role = Role::find($id);
-        $role->syncPermissions($request->data);   
+        $role->syncPermissions($request->data);
     }
-   
+
     public function store(Request $request)
     {
         Permission::create([

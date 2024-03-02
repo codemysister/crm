@@ -35,10 +35,10 @@ class RoleController extends Controller
 
     public function apiGetRole()
     {
-        $roles = Role::with('permissions')->get();
-        foreach($roles as $role){
+        $roles = Role::where('name', '!=', 'super admin')->with('permissions')->get();
+        foreach ($roles as $role) {
             $role['permissionIds'] = $role->permissions->pluck('id')->toArray();
-        }      
+        }
 
         return response()->json([
             'roles' => $roles
@@ -51,13 +51,14 @@ class RoleController extends Controller
     }
 
 
-    public function apiDeleteRole($id){
+    public function apiDeleteRole($id)
+    {
         $role = Role::find($id)->delete();
         return response()->json([
             "message" => "berhasil"
-        ]);      
+        ]);
     }
-    
+
 
     public function update(Request $request, string $id)
     {
