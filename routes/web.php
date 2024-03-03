@@ -16,6 +16,7 @@ use App\Http\Controllers\PartnerSubscriptionController;
 use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\ReferralController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\SignatureController;
 use App\Http\Controllers\SLAController;
@@ -95,7 +96,6 @@ Route::get('/tes', function () {
         'lembaga' => 'SMKN 1 Purwokerto'
     ]);
     $phpWord->saveAs('sample.docx');
-
 });
 // Route::get('/convert', function () {
 
@@ -288,6 +288,13 @@ Route::middleware('auth')->group(function () {
     Route::post('/invoice_subscriptions/transaction', [InvoiceSubscriptionTransactionController::class, 'store'])->name('invoice_subscriptions.transaction.store')->middleware(['can:tambah transaksi']);
     Route::put('/invoice_subscriptions/transaction/{transaction:uuid}', [InvoiceSubscriptionTransactionController::class, 'update'])->name('invoice_subscriptions.transaction.update')->middleware(['can:edit transaksi']);
     Route::delete('/invoice_subscriptions/transaction/{transaction:uuid}', [InvoiceSubscriptionTransactionController::class, 'destroy'])->name('invoice_subscriptions.transaction.destroy')->middleware(['can:edit transaksi']);
+
+    // Referral
+    Route::get('/referral', [ReferralController::class, 'index'])->name('referral.view')->middleware(['can:lihat invoice umum']);
+    Route::post('/referral', [ReferralController::class, 'store'])->name('referral.store')->middleware(['can:tambah invoice umum']);
+    Route::post('/referral/{referral:uuid}', [ReferralController::class, 'update'])->name('referral.update')->middleware(['can:edit invoice umum']);
+    Route::delete('/referral/{referral:uuid}', [ReferralController::class, 'destroy'])->name('referral.destroy')->middleware(['can:hapus invoice umum']);
+    Route::get('/api/referral', [ReferralController::class, 'apiGetReferral'])->name('api.referral');
 });
 
 
