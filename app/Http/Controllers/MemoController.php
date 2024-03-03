@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Jobs\GenerateMemoJob;
 use App\Models\Memo;
 use App\Models\Partner;
 use App\Models\Signature;
@@ -23,6 +24,52 @@ class MemoController extends Controller
         $signaturesProp = Signature::all();
         $partnersProp = Partner::all();
         return Inertia::render('Memo/Create', compact('signaturesProp', 'partnersProp'));
+    }
+
+    public function edit($uuid)
+    {
+        $signaturesProp = Signature::all();
+        $partnersProp = Partner::all();
+        $memo = Memo::where('uuid', '=', $uuid)->first();
+        return Inertia::render('Memo/Edit', compact('signaturesProp', 'partnersProp', 'memo'));
+    }
+
+    public function update(Request $request, $uuid)
+    {
+        $memo = Memo::where('uuid', '=', $uuid)->first();
+        $id_partner = $request->partner['id'];
+
+        if (!$id_partner) {
+
+            $partnerExists = Partner::where('name', 'like', '%' . $request->partner["name"] . '%')->first();
+            if (!$partnerExists) {
+                $partner = Partner::create([
+                    'uuid' => Str::uuid(),
+                    'name' => $request['partner']['name'],
+                    'status' => "Proses",
+                ]);
+                $id_partner = $partner->id;
+            } else {
+                $id_partner = $partnerExists->id;
+            }
+        }
+
+        $memo->update([
+            'partner_id' => $id_partner,
+            'partner_name' => $request['partner']['name'],
+            'price_card' => $request['price_card'],
+            'price_e_card' => $request['price_e_card'],
+            'price_subscription' => $request['price_subscription'],
+            'consideration' => $request['consideration'],
+            'signature_first_name' => $request['signature_first']['name'],
+            'signature_first_image' => $request['signature_first']['image'],
+            'signature_second_name' => $request['signature_second']['name'],
+            'signature_second_image' => $request['signature_second']['image'],
+            'signature_third_name' => $request['signature_third']['name'],
+            'signature_third_image' => $request['signature_third']['image']
+        ]);
+
+        GenerateMemoJob::dispatch($memo);
     }
 
     public function generateCode()
@@ -64,7 +111,7 @@ class MemoController extends Controller
                 $id_partner = $partnerExists->id;
             }
         }
-        Memo::create([
+        $memo = Memo::create([
             'uuid' => Str::uuid(),
             'code' => $this->generateCode(),
             'partner_id' => $id_partner,
@@ -83,6 +130,15 @@ class MemoController extends Controller
             'created_by' => Auth::user()->id,
         ]);
 
+        GenerateMemoJob::dispatch($memo);
+
+    }
+
+    public function destroy($uuid)
+    {
+        $memo = Memo::where('uuid', '=', $uuid)->first();
+        unlink($memo->memo_doc);
+        $memo->delete();
     }
 
     public function apiGetMemo()

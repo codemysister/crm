@@ -101,7 +101,7 @@ export default function Index({ auth, memosDefault }) {
                         outlined
                         severity="danger"
                         onClick={() => {
-                            handleDeleteProduct(rowData);
+                            handleDeleteMemo(rowData);
                         }}
                     />
                 )}
@@ -128,7 +128,7 @@ export default function Index({ auth, memosDefault }) {
         });
     };
 
-    const handleDeleteProduct = (memo) => {
+    const handleDeleteMemo = (memo) => {
         confirmDialog({
             message: "Apakah Anda yakin untuk menghapus ini?",
             header: "Konfirmasi hapus",
@@ -137,7 +137,7 @@ export default function Index({ auth, memosDefault }) {
             accept: async () => {
                 destroy("memo/" + memo.uuid, {
                     onSuccess: () => {
-                        getSpds();
+                        getMemos();
                         showSuccess("Hapus");
                     },
                     onError: () => {
@@ -352,7 +352,7 @@ export default function Index({ auth, memosDefault }) {
                         ></Column>
                         <Column
                             body={(rowData) => {
-                                return rowData.memo == null ? (
+                                return rowData.memo_doc == null ? (
                                     <ProgressSpinner
                                         style={{
                                             width: "30px",

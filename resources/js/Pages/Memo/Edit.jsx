@@ -18,7 +18,7 @@ import { InputTextarea } from "primereact/inputtextarea";
 
 const BASE_URL = import.meta.env.VITE_BASE_URL;
 
-const Create = ({ partnersProp, signaturesProp }) => {
+const Edit = ({ partnersProp, signaturesProp, memo }) => {
     const [partners, setPartners] = useState(partnersProp);
     const [signatures, setSignatures] = useState(signaturesProp);
     const toast = useRef(null);
@@ -73,18 +73,25 @@ const Create = ({ partnersProp, signaturesProp }) => {
         processing,
         errors,
     } = useForm({
-        uuid: "",
-        code: `MDH/${Math.floor(
-            Math.random() * 1000
-        )}/X/${new Date().getFullYear()}`,
-        partner: { id: null, name: null },
-        price_card: null,
-        price_e_card: null,
-        price_subscription: null,
-        consideration: null,
-        signature_first: { name: null, image: null },
-        signature_second: { name: null, image: null },
-        signature_third: { name: null, image: null },
+        uuid: memo.uuid,
+        code: memo.code,
+        partner: { id: memo.partner_id, name: memo.partner_name },
+        price_card: memo.price_card,
+        price_e_card: memo.price_e_card,
+        price_subscription: memo.price_subscription,
+        consideration: memo.consideration,
+        signature_first: {
+            name: memo.signature_first_name,
+            image: memo.signature_first_image,
+        },
+        signature_second: {
+            name: memo.signature_second_name,
+            image: memo.signature_second_image,
+        },
+        signature_third: {
+            name: memo.signature_third_name,
+            image: memo.signature_third_image,
+        },
     });
 
     const ubahFormatTanggal = (tanggal) => {
@@ -181,7 +188,7 @@ const Create = ({ partnersProp, signaturesProp }) => {
     const handleSubmitForm = (e) => {
         e.preventDefault();
 
-        post("/memo", {
+        put("/memo/" + data.uuid, {
             onSuccess: () => {
                 showSuccess("Tambah");
                 window.location = BASE_URL + "/memo";
@@ -716,4 +723,4 @@ const Create = ({ partnersProp, signaturesProp }) => {
     );
 };
 
-export default Create;
+export default Edit;
