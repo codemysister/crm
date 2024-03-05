@@ -13,8 +13,9 @@ return new class extends Migration {
         Schema::create('sphs', function (Blueprint $table) {
             $table->id();
             $table->uuid();
-            $table->foreignId('partner_id')->constrained('partners', 'id')->onDelete('cascade');
+            $table->foreignId('partner_id')->nullable()->constrained('partners', 'id')->onDelete('cascade');
             $table->string('code');
+            $table->date('date');
             $table->string('partner_name');
             $table->string('partner_pic');
             $table->json('partner_province');
