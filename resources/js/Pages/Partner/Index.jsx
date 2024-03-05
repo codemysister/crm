@@ -2502,7 +2502,6 @@ export default function Index({ auth, partner }) {
                                         <p className="font-semibold">
                                             <a
                                                 href={
-                                                    BASE_URL +
                                                     "/assets/template/excel/sample.xlsx"
                                                 }
                                                 download="sample.xlsx"

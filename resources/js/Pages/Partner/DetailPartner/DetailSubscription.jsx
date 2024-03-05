@@ -178,183 +178,212 @@ const DetailSubscription = ({
 
     return (
         <>
-            <table class="w-full">
-                <tr class="border-b">
-                    <td class="pt-2 pb-1 text-gray-700 text-base font-bold w-1/5">
-                        Tagihan
-                    </td>
-                    <td class="pt-2 pb-1 text-gray-700 text-base w-[2%]">:</td>
-                    <td class="pt-2 pb-1 text-gray-700 text-base w-7/12">
-                        {partner.subscriptions[0].bill}
-                    </td>
-                </tr>
+            {partner.subscriptions[0] !== null ? (
+                <>
+                    <table class="w-full">
+                        <tr class="border-b">
+                            <td class="pt-2 pb-1 text-gray-700 text-base font-bold w-1/5">
+                                Tagihan
+                            </td>
+                            <td class="pt-2 pb-1 text-gray-700 text-base w-[2%]">
+                                :
+                            </td>
+                            <td class="pt-2 pb-1 text-gray-700 text-base w-7/12">
+                                {partner.subscriptions[0].bill}
+                            </td>
+                        </tr>
 
-                <tr class="border-b">
-                    <td class="pt-2 pb-1 text-gray-700 text-base font-bold w-1/5">
-                        Nominal
-                    </td>
-                    <td class="pt-2 pb-1 text-gray-700 text-base w-[2%]">:</td>
-                    <td class="pt-2 pb-1 text-gray-700 text-base w-7/12">
-                        {partner.subscriptions[0].nominal.toLocaleString(
-                            "id-ID"
-                        )}
-                    </td>
-                </tr>
+                        <tr class="border-b">
+                            <td class="pt-2 pb-1 text-gray-700 text-base font-bold w-1/5">
+                                Nominal
+                            </td>
+                            <td class="pt-2 pb-1 text-gray-700 text-base w-[2%]">
+                                :
+                            </td>
+                            <td class="pt-2 pb-1 text-gray-700 text-base w-7/12">
+                                {partner.subscriptions[0].nominal.toLocaleString(
+                                    "id-ID"
+                                )}
+                            </td>
+                        </tr>
 
-                <tr class="border-b">
-                    <td class="pt-2 pb-1 text-gray-700 text-base font-bold w-1/5">
-                        PPN
-                    </td>
-                    <td class="pt-2 pb-1 text-gray-700 text-base w-[2%]">:</td>
-                    <td class="pt-2 pb-1 text-gray-700 text-base w-7/12">
-                        {partner.subscriptions[0].ppn != null
-                            ? partner.subscriptions[0].ppn
-                            : ""}
-                        %
-                    </td>
-                </tr>
+                        <tr class="border-b">
+                            <td class="pt-2 pb-1 text-gray-700 text-base font-bold w-1/5">
+                                PPN
+                            </td>
+                            <td class="pt-2 pb-1 text-gray-700 text-base w-[2%]">
+                                :
+                            </td>
+                            <td class="pt-2 pb-1 text-gray-700 text-base w-7/12">
+                                {partner.subscriptions[0].ppn != null
+                                    ? partner.subscriptions[0].ppn
+                                    : ""}
+                                %
+                            </td>
+                        </tr>
 
-                <tr class="border-b">
-                    <td class="pt-2 pb-1 text-gray-700 text-base font-bold w-1/5">
-                        Total Tagihan (nominal + ppn)
-                    </td>
-                    <td class="pt-2 pb-1 text-gray-700 text-base w-[2%]">:</td>
-                    <td class="pt-2 pb-1 text-gray-700 text-base w-7/12">
-                        {partner.subscriptions[0].total_bill.toLocaleString(
-                            "id-ID"
-                        )}
-                    </td>
-                </tr>
-                <tr class="border-b">
-                    <td class="pt-2 pb-1 text-gray-700 text-base font-bold w-1/5">
-                        Aksi
-                    </td>
-                    <td class="pt-2 pb-1 text-gray-700 text-base w-[2%]">:</td>
-                    <td class="pt-2 pb-1 text-gray-700 text-base w-7/12">
-                        <Button
-                            label="edit"
-                            className="p-0 underline bg-transparent text-blue-700 text-left"
-                            onClick={() =>
-                                handleEditSubscription(partner.subscriptions[0])
-                            }
-                        />
-                    </td>
-                </tr>
-            </table>
-
-            {/* Modal edit langganan */}
-            <div className="card flex justify-content-center">
-                <Dialog
-                    header="Langganan"
-                    headerClassName="dark:glass dark:text-white"
-                    className="bg-white w-[80%] md:w-[60%] lg:w-[35%] dark:glass dark:text-white"
-                    contentClassName="dark:glass dark:text-white"
-                    visible={modalEditSubscriptionIsVisible}
-                    onHide={() => setModalEditSubscriptionIsVisible(false)}
-                >
-                    <form onSubmit={(e) => handleSubmitFormSubscription(e)}>
-                        <div className="flex flex-col justify-around gap-4 mt-1">
-                            <div className="flex flex-col mt-3">
-                                <label htmlFor="bill">Tagihan *</label>
-
-                                <InputText
-                                    value={dataSubscription.bill}
-                                    onChange={(e) =>
-                                        setDataSubscription({
-                                            ...dataSubscription,
-                                            bill: e.target.value,
-                                        })
+                        <tr class="border-b">
+                            <td class="pt-2 pb-1 text-gray-700 text-base font-bold w-1/5">
+                                Total Tagihan (nominal + ppn)
+                            </td>
+                            <td class="pt-2 pb-1 text-gray-700 text-base w-[2%]">
+                                :
+                            </td>
+                            <td class="pt-2 pb-1 text-gray-700 text-base w-7/12">
+                                {partner.subscriptions[0].total_bill.toLocaleString(
+                                    "id-ID"
+                                )}
+                            </td>
+                        </tr>
+                        <tr class="border-b">
+                            <td class="pt-2 pb-1 text-gray-700 text-base font-bold w-1/5">
+                                Aksi
+                            </td>
+                            <td class="pt-2 pb-1 text-gray-700 text-base w-[2%]">
+                                :
+                            </td>
+                            <td class="pt-2 pb-1 text-gray-700 text-base w-7/12">
+                                <Button
+                                    label="edit"
+                                    className="p-0 underline bg-transparent text-blue-700 text-left"
+                                    onClick={() =>
+                                        handleEditSubscription(
+                                            partner.subscriptions[0]
+                                        )
                                     }
-                                    className="dark:bg-gray-300"
-                                    id="bill"
-                                    aria-describedby="bill-help"
                                 />
-                            </div>
-                            <div className="flex flex-col">
-                                <label htmlFor="nominal">
-                                    Nominal Langganan *
-                                </label>
-                                <InputNumber
-                                    value={dataSubscription.nominal}
-                                    onChange={(e) => {
-                                        const total_bill =
-                                            (e.value * dataSubscription.ppn) /
-                                            100;
+                            </td>
+                        </tr>
+                    </table>
 
-                                        setDataSubscription({
-                                            ...dataSubscription,
-                                            nominal: e.value,
-                                            total_ppn: total_bill,
-                                            total_bill:
-                                                dataSubscription.ppn === 0
-                                                    ? e.value
-                                                    : total_bill + e.value,
-                                        });
-                                    }}
-                                    locale="id-ID"
-                                />
-                            </div>
-                            <div className="flex flex-col">
-                                <label htmlFor="ppn">Pajak (%)</label>
-                                <InputNumber
-                                    value={dataSubscription.ppn}
-                                    onChange={(e) => {
-                                        const total_ppn =
-                                            (e.value *
-                                                dataSubscription.nominal) /
-                                            100;
+                    {/* Modal edit langganan */}
+                    <div className="card flex justify-content-center">
+                        <Dialog
+                            header="Langganan"
+                            headerClassName="dark:glass dark:text-white"
+                            className="bg-white w-[80%] md:w-[60%] lg:w-[35%] dark:glass dark:text-white"
+                            contentClassName="dark:glass dark:text-white"
+                            visible={modalEditSubscriptionIsVisible}
+                            onHide={() =>
+                                setModalEditSubscriptionIsVisible(false)
+                            }
+                        >
+                            <form
+                                onSubmit={(e) =>
+                                    handleSubmitFormSubscription(e)
+                                }
+                            >
+                                <div className="flex flex-col justify-around gap-4 mt-1">
+                                    <div className="flex flex-col mt-3">
+                                        <label htmlFor="bill">Tagihan *</label>
 
-                                        setDataSubscription({
-                                            ...dataSubscription,
-                                            ppn: e.value,
-                                            total_ppn: total_ppn,
-                                            total_bill:
-                                                dataSubscription.nominal +
-                                                total_ppn,
-                                        });
-                                    }}
-                                    locale="id-ID"
-                                />
-                            </div>
-                            <div className="flex flex-col">
-                                <label htmlFor="ppn">Jumlah PPN</label>
-                                <InputNumber
-                                    value={dataSubscription.total_ppn}
-                                    onChange={(e) => {
-                                        setDataSubscription({
-                                            ...dataSubscription,
-                                            total_ppn: e.target.value,
-                                        });
-                                    }}
-                                    locale="id-ID"
-                                />
-                            </div>
-                            <div className="flex flex-col">
-                                <label htmlFor="ppn">
-                                    Total Tagihan(nominal + ppn) *
-                                </label>
-                                <InputNumber
-                                    value={dataSubscription.total_bill}
-                                    onChange={(e) => {
-                                        setDataSubscription({
-                                            ...dataSubscription,
-                                            total_ppn: e.target.value,
-                                        });
-                                    }}
-                                    locale="id-ID"
-                                />
-                            </div>
-                        </div>
-                        <div className="flex justify-center mt-5">
-                            <Button
-                                label="Submit"
-                                disabled={processingSubscription}
-                                className="bg-purple-600 text-sm shadow-md rounded-lg"
-                            />
-                        </div>
-                    </form>
-                </Dialog>
-            </div>
+                                        <InputText
+                                            value={dataSubscription.bill}
+                                            onChange={(e) =>
+                                                setDataSubscription({
+                                                    ...dataSubscription,
+                                                    bill: e.target.value,
+                                                })
+                                            }
+                                            className="dark:bg-gray-300"
+                                            id="bill"
+                                            aria-describedby="bill-help"
+                                        />
+                                    </div>
+                                    <div className="flex flex-col">
+                                        <label htmlFor="nominal">
+                                            Nominal Langganan *
+                                        </label>
+                                        <InputNumber
+                                            value={dataSubscription.nominal}
+                                            onChange={(e) => {
+                                                const total_bill =
+                                                    (e.value *
+                                                        dataSubscription.ppn) /
+                                                    100;
+
+                                                setDataSubscription({
+                                                    ...dataSubscription,
+                                                    nominal: e.value,
+                                                    total_ppn: total_bill,
+                                                    total_bill:
+                                                        dataSubscription.ppn ===
+                                                        0
+                                                            ? e.value
+                                                            : total_bill +
+                                                              e.value,
+                                                });
+                                            }}
+                                            locale="id-ID"
+                                        />
+                                    </div>
+                                    <div className="flex flex-col">
+                                        <label htmlFor="ppn">Pajak (%)</label>
+                                        <InputNumber
+                                            value={dataSubscription.ppn}
+                                            onChange={(e) => {
+                                                const total_ppn =
+                                                    (e.value *
+                                                        dataSubscription.nominal) /
+                                                    100;
+
+                                                setDataSubscription({
+                                                    ...dataSubscription,
+                                                    ppn: e.value,
+                                                    total_ppn: total_ppn,
+                                                    total_bill:
+                                                        dataSubscription.nominal +
+                                                        total_ppn,
+                                                });
+                                            }}
+                                            locale="id-ID"
+                                        />
+                                    </div>
+                                    <div className="flex flex-col">
+                                        <label htmlFor="ppn">Jumlah PPN</label>
+                                        <InputNumber
+                                            value={dataSubscription.total_ppn}
+                                            onChange={(e) => {
+                                                setDataSubscription({
+                                                    ...dataSubscription,
+                                                    total_ppn: e.target.value,
+                                                });
+                                            }}
+                                            locale="id-ID"
+                                        />
+                                    </div>
+                                    <div className="flex flex-col">
+                                        <label htmlFor="ppn">
+                                            Total Tagihan(nominal + ppn) *
+                                        </label>
+                                        <InputNumber
+                                            value={dataSubscription.total_bill}
+                                            onChange={(e) => {
+                                                setDataSubscription({
+                                                    ...dataSubscription,
+                                                    total_ppn: e.target.value,
+                                                });
+                                            }}
+                                            locale="id-ID"
+                                        />
+                                    </div>
+                                </div>
+                                <div className="flex justify-center mt-5">
+                                    <Button
+                                        label="Submit"
+                                        disabled={processingSubscription}
+                                        className="bg-purple-600 text-sm shadow-md rounded-lg"
+                                    />
+                                </div>
+                            </form>
+                        </Dialog>
+                    </div>
+                </>
+            ) : (
+                <div class="w-full h-full min-h-[300px] -mt-4 flex items-center justify-center">
+                    <p class="text-center">Tidak ada data langganan</p>
+                </div>
+            )}
         </>
     );
 };

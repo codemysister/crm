@@ -388,7 +388,7 @@ const DetailPartner = ({
                                                         :
                                                     </td>
                                                     <td class="pt-2 pb-1 text-gray-700 text-base w-7/12">
-                                                    {partner.sales.name
+                                                        {partner.sales.name
                                                             ? partner.sales.name
                                                             : "belum diisi"}
                                                     </td>

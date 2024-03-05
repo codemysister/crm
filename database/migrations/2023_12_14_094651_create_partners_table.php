@@ -18,8 +18,8 @@ return new class extends Migration {
             $table->string('name');
             $table->string('logo')->nullable();
             $table->string('phone_number')->nullable();
-            $table->json('province')->nullable();
-            $table->json('regency')->nullable();
+            $table->json('province');
+            $table->json('regency');
             $table->json('subdistrict')->nullable();
             $table->string('address')->nullable();
             $table->date('onboarding_date')->nullable();
