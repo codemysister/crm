@@ -26,7 +26,7 @@ registerPlugin(FilePondPluginFileValidateSize);
 
 const BASE_URL = import.meta.env.VITE_BASE_URL;
 
-const Create = ({ usersProp, partnersProp, signaturesProp }) => {
+const Create = ({ usersProp, partnersProp, signaturesProp, referralsProp }) => {
     const [users, setUsers] = useState(usersProp);
     const [partners, setPartners] = useState(partnersProp);
     const [selectedPartner, setSelectedPartner] = useState(null);
@@ -34,6 +34,7 @@ const Create = ({ usersProp, partnersProp, signaturesProp }) => {
     const [regencys, setRegencys] = useState([]);
     const [codeProvince, setcodeProvince] = useState(null);
     const [signatures, setSignatures] = useState(signaturesProp);
+    const [referrals, setReferrals] = useState(referralsProp);
 
     const toast = useRef(null);
     const infoPriceTrainingOfflineRef = useRef(null);
@@ -111,9 +112,11 @@ const Create = ({ usersProp, partnersProp, signaturesProp }) => {
         expired_date: null,
         profit_sharing: false,
         profit_sharing_detail: null,
-        referral: false,
-        referral_name: null,
-        referral_signature: null,
+        // referral: false,
+        // referral_signature: {
+        //     name: null,
+        //     image: null,
+        // },
         signature: {
             name: null,
             position: null,
@@ -245,17 +248,18 @@ const Create = ({ usersProp, partnersProp, signaturesProp }) => {
     };
 
     const optionSignatureTemplate = (item) => {
+        const path = item.image ?? item.signature;
         return (
-            <div className="flex flex-wrap p-2 align-items-center gap-3">
+            <div className="flex flex-wrap p-2 align-items-center items-center gap-3">
                 <img
-                    className="w-3rem shadow-2 flex-shrink-0 border-round"
-                    src={"/storage/" + item.image}
+                    className="w-[6rem] shadow-2 flex-shrink-0 border-round"
+                    src={"/storage/" + path}
                     alt={item.name}
                 />
                 <div className="flex-1 flex flex-col gap-2 xl:mr-8">
                     <span className="font-bold">{item.name}</span>
                     <div className="flex align-items-center gap-2">
-                        <span>{item.position}</span>
+                        <span>{item.position ?? null}</span>
                     </div>
                 </div>
                 {/* <span className="font-bold text-900">${item.price}</span> */}
@@ -610,16 +614,16 @@ const Create = ({ usersProp, partnersProp, signaturesProp }) => {
                                                         number: e.target.value
                                                             .phone_number,
                                                         pic: e.target.value
-                                                            .pics[0].name,
+                                                            .pics[0]?.name,
                                                         pic_position:
                                                             e.target.value
                                                                 .pics[0]
-                                                                .position,
+                                                                ?.position,
                                                     },
                                                     url_subdomain:
                                                         e.target.value
                                                             .accounts[0]
-                                                            .subdomain,
+                                                            ?.subdomain,
                                                     period_subscription:
                                                         e.target.value.period,
                                                     price_card: e.target.value
@@ -653,6 +657,11 @@ const Create = ({ usersProp, partnersProp, signaturesProp }) => {
                                                         ? e.target.value
                                                               .price_list
                                                               .price_training_online
+                                                        : null,
+                                                    price_qris: e.target.value
+                                                        .price_qris
+                                                        ? e.target.value
+                                                              .price_qris
                                                         : null,
                                                     fee_purchase_cazhpoin: e
                                                         .target.value.price_list
@@ -1679,40 +1688,6 @@ const Create = ({ usersProp, partnersProp, signaturesProp }) => {
                                         }}
                                         showOnFocus
                                     />
-                                    {/* <Dropdown
-                                        value={data.signature_name}
-                                        onChange={(e) => {
-                                            setData({
-                                                ...data,
-                                                signature_name:
-                                                    e.target.value.name,
-                                                signature_position:
-                                                    e.target.value.position,
-                                                signature_image:
-                                                    e.target.value.image,
-                                            });
-                                        }}
-                                        dataKey="name"
-                                        options={signatures}
-                                        optionLabel="name"
-                                        placeholder="Pilih Tanda Tangan"
-                                        filter
-                                        valueTemplate={selectedOptionTemplate}
-                                        itemTemplate={optionSignatureTemplate}
-                                        className={`w-full md:w-14rem ${
-                                            errors.signature_name && "p-invalid"
-                                        }`}
-                                        onShow={(e) => {
-                                            triggerInputFocus(
-                                                animateSignatureName
-                                            );
-                                        }}
-                                        onHide={() => {
-                                            stopAnimateInputFocus(
-                                                animateSignatureName
-                                            );
-                                        }}
-                                    /> */}
                                 </div>
 
                                 <div className="flex flex-col mt-3">
@@ -1784,7 +1759,7 @@ const Create = ({ usersProp, partnersProp, signaturesProp }) => {
                                     </div>
                                 </div>
 
-                                <div className="flex flex-col mt-3">
+                                {/* <div className="flex flex-col mt-3">
                                     <label htmlFor="referral">Referral</label>
                                     <div className="flex items-center gap-2 my-2">
                                         <Checkbox
@@ -1812,103 +1787,60 @@ const Create = ({ usersProp, partnersProp, signaturesProp }) => {
                                 {data.referral && (
                                     <>
                                         <div className="flex flex-col mt-3">
-                                            <label htmlFor="referral_name">
-                                                Atas Nama
+                                            <label htmlFor="signature">
+                                                Pilih Referral
                                             </label>
 
-                                            <InputText
-                                                value={data.referral_name}
-                                                onChange={(e) =>
-                                                    setData(
-                                                        "referral_name",
-                                                        e.target.value
-                                                    )
+                                            <Dropdown
+                                                value={data.referral_signature}
+                                                onChange={(e) => {
+                                                    setData({
+                                                        ...data,
+                                                        referral_signature: {
+                                                            name: e.target.value
+                                                                .name,
+
+                                                            image: e.target
+                                                                .value
+                                                                .signature,
+                                                        },
+                                                    });
+                                                }}
+                                                dataKey="name"
+                                                options={referrals}
+                                                optionLabel="name"
+                                                placeholder="Pilih Tanda Tangan"
+                                                filter
+                                                valueTemplate={
+                                                    selectedOptionTemplate
                                                 }
-                                                className={`dark:bg-gray-300 ${
-                                                    errors.referral_name &&
+                                                itemTemplate={
+                                                    optionSignatureTemplate
+                                                }
+                                                className={`w-full md:w-14rem ${
+                                                    errors.referral_signature &&
                                                     "p-invalid"
                                                 }`}
-                                                id="referral_name"
-                                                aria-describedby="referral_name-help"
                                                 onFocus={() => {
                                                     triggerInputFocus(
                                                         animateReferral
                                                     );
                                                 }}
-                                                onBlur={() => {
+                                                onShow={() => {
+                                                    triggerInputFocus(
+                                                        animateReferral
+                                                    );
+                                                }}
+                                                onHide={() => {
                                                     stopAnimateInputFocus(
                                                         animateReferral
                                                     );
                                                 }}
+                                                showOnFocus
                                             />
                                         </div>
-
-                                        <div className="flex flex-col mt-3">
-                                            <label htmlFor="signature">
-                                                Tanda Tangan Pihak Ketiga
-                                            </label>
-
-                                            <div className="App">
-                                                {data.referral_signature !==
-                                                    null &&
-                                                typeof data.referral_signature ==
-                                                    "string" ? (
-                                                    <>
-                                                        <FilePond
-                                                            files={
-                                                                "/storage/" +
-                                                                data.referral_signature
-                                                            }
-                                                            onaddfile={(
-                                                                error,
-                                                                fileItems
-                                                            ) => {
-                                                                if (!error) {
-                                                                    setData(
-                                                                        "referral_signature",
-                                                                        fileItems.file
-                                                                    );
-                                                                }
-                                                            }}
-                                                            onremovefile={() => {
-                                                                reset(
-                                                                    "referral_signature"
-                                                                );
-                                                            }}
-                                                            maxFileSize="2mb"
-                                                            labelMaxFileSizeExceeded="File terlalu besar"
-                                                            labelIdle='Drag & Drop your files or <span class="filepond--label-action">Browse</span>'
-                                                        />
-                                                    </>
-                                                ) : (
-                                                    <>
-                                                        <FilePond
-                                                            onaddfile={(
-                                                                error,
-                                                                fileItems
-                                                            ) => {
-                                                                if (!error) {
-                                                                    setData(
-                                                                        "referral_signature",
-                                                                        fileItems.file
-                                                                    );
-                                                                }
-                                                            }}
-                                                            onremovefile={() => {
-                                                                reset(
-                                                                    "referral_signature"
-                                                                );
-                                                            }}
-                                                            maxFileSize="2mb"
-                                                            labelMaxFileSizeExceeded="File terlalu besar"
-                                                            labelIdle='Drag & Drop your files or <span class="filepond--label-action">Browse</span>'
-                                                        />
-                                                    </>
-                                                )}
-                                            </div>
-                                        </div>
                                     </>
-                                )}
+                                )} */}
 
                                 <div className="flex-flex-col mt-3">
                                     <form onSubmit={handleSubmitForm}>
@@ -3636,7 +3568,7 @@ const Create = ({ usersProp, partnersProp, signaturesProp }) => {
                                             data.signature.image
                                         }
                                         alt=""
-                                        className="min-h-20"
+                                        className="min-h-20 max-h-20"
                                     />
                                     <p>
                                         <b>
@@ -3666,18 +3598,21 @@ const Create = ({ usersProp, partnersProp, signaturesProp }) => {
                                     </p>
                                 </div>
                             </div>
-                            <div
+                            {/* <div
                                 className="px-8 flex flex-row mt-5 justify-center"
                                 ref={animateReferral}
                             >
                                 {data.referral && (
                                     <div className="w-[30%]">
                                         <p>Pihak Ketiga</p>
-                                        {data.referral_signature ? (
+                                        {data.referral_signature.image ? (
                                             <img
-                                                src={URL.createObjectURL(
+                                                src={
+                                                    BASE_URL +
+                                                    "/storage/" +
                                                     data.referral_signature
-                                                )}
+                                                        .image
+                                                }
                                                 className="min-h-20 max-h-20"
                                             />
                                         ) : (
@@ -3685,13 +3620,13 @@ const Create = ({ usersProp, partnersProp, signaturesProp }) => {
                                         )}
                                         <p>
                                             <b>
-                                                {data.referral_name ??
+                                                {data.referral_signature.name ??
                                                     "{{nama_referral}}"}
                                             </b>
                                         </p>
                                     </div>
                                 )}
-                            </div>
+                            </div> */}
                         </div>
                     </div>
                 </div>

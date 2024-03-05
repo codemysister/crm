@@ -96,6 +96,7 @@ const Edit = ({ usersProp, partnersProp, mou, signaturesProp }) => {
         period_subscription: mou.period_subscription,
         price_training_offline: mou.price_training_offline,
         price_training_online: mou.price_training_online,
+        fee_qris: mou.fee_qris,
         fee_purchase_cazhpoin: mou.fee_purchase_cazhpoin,
         fee_bill_cazhpoin: mou.fee_bill_cazhpoin,
         fee_topup_cazhpos: mou.fee_topup_cazhpos,
@@ -107,9 +108,9 @@ const Edit = ({ usersProp, partnersProp, mou, signaturesProp }) => {
         expired_date: mou.expired_date,
         profit_sharing: Boolean(mou.profit_sharing),
         profit_sharing_detail: mou.profit_sharing_detail,
-        referral: Boolean(mou.referral),
-        referral_name: mou.referral_name,
-        referral_signature: mou.referral_signature,
+        // referral: Boolean(mou.referral),
+        // referral_name: mou.referral_name,
+        // referral_signature: mou.referral_signature,
         signature: {
             name: mou.signature_name,
             position: mou.signature_position,
@@ -122,7 +123,7 @@ const Edit = ({ usersProp, partnersProp, mou, signaturesProp }) => {
         if (typeof data.pic_signature == "object") {
             setIsSignatureBlob(true);
         }
-    }, [data.pic_signature, data.referral_signature]);
+    }, [data.pic_signature]);
 
     useEffect(() => {
         setcodeProvince(
@@ -365,6 +366,7 @@ const Edit = ({ usersProp, partnersProp, mou, signaturesProp }) => {
             onSuccess: () => {
                 showSuccess("Tambah");
                 window.location = BASE_URL + "/mou";
+                window.location = BASE_URL + "/mou";
                 // reset("name", "category", "price", "unit", "description");
             },
 
@@ -605,16 +607,16 @@ const Edit = ({ usersProp, partnersProp, mou, signaturesProp }) => {
                                                         number: e.target.value
                                                             .phone_number,
                                                         pic: e.target.value
-                                                            .pics[0].name,
+                                                            .pics[0]?.name,
                                                         pic_position:
                                                             e.target.value
                                                                 .pics[0]
-                                                                .position,
+                                                                ?.position,
                                                     },
                                                     url_subdomain:
                                                         e.target.value
                                                             .accounts[0]
-                                                            .subdomain,
+                                                            ?.subdomain,
                                                     period_subscription:
                                                         e.target.value.period,
                                                     price_card: e.target.value
@@ -648,6 +650,11 @@ const Edit = ({ usersProp, partnersProp, mou, signaturesProp }) => {
                                                         ? e.target.value
                                                               .price_list
                                                               .price_training_online
+                                                        : null,
+                                                    price_qris: e.target.value
+                                                        .price_qris
+                                                        ? e.target.value
+                                                              .price_qris
                                                         : null,
                                                     fee_purchase_cazhpoin: e
                                                         .target.value.price_list
@@ -1715,7 +1722,7 @@ const Edit = ({ usersProp, partnersProp, mou, signaturesProp }) => {
                                         Tanda Tangan PIC
                                     </label>
 
-                                    {/* <div className="App">
+                                    <div className="App">
                                         {data.pic_signature !== null &&
                                         typeof data.pic_signature ==
                                             "string" ? (
@@ -1773,9 +1780,9 @@ const Edit = ({ usersProp, partnersProp, mou, signaturesProp }) => {
                                                 />
                                             </>
                                         )}
-                                    </div> */}
+                                    </div>
 
-                                    <div className="App mt-3">
+                                    {/* <div className="App mt-3">
                                         <label htmlFor="referral_name">
                                             Tanda Tangan Pihak Ketiga
                                         </label>
@@ -1836,10 +1843,10 @@ const Edit = ({ usersProp, partnersProp, mou, signaturesProp }) => {
                                                 />
                                             </>
                                         )}
-                                    </div>
+                                    </div> */}
                                 </div>
 
-                                <div className="flex flex-col mt-3">
+                                {/* <div className="flex flex-col mt-3">
                                     <label htmlFor="referral">Referral</label>
                                     <div className="flex items-center gap-2 my-2">
                                         <Checkbox
@@ -1960,7 +1967,7 @@ const Edit = ({ usersProp, partnersProp, mou, signaturesProp }) => {
                                             )}
                                         </div>
                                     </>
-                                )}
+                                )} */}
 
                                 <div className="flex-flex-col mt-3">
                                     <form onSubmit={handleSubmitForm}>
@@ -3689,7 +3696,7 @@ const Edit = ({ usersProp, partnersProp, mou, signaturesProp }) => {
                                             data.signature.image
                                         }
                                         alt=""
-                                        className="min-h-20"
+                                        className="min-h-20 max-h-20"
                                     />
                                     <p>
                                         <b>
@@ -3724,7 +3731,7 @@ const Edit = ({ usersProp, partnersProp, mou, signaturesProp }) => {
                                     </p>
                                 </div>
                             </div>
-                            <div
+                            {/* <div
                                 className="px-8 flex flex-row mt-5 justify-center"
                                 ref={animateReferral}
                             >
@@ -3754,7 +3761,7 @@ const Edit = ({ usersProp, partnersProp, mou, signaturesProp }) => {
                                         </p>
                                     </div>
                                 )}
-                            </div>
+                            </div> */}
                         </div>
                     </div>
                 </div>

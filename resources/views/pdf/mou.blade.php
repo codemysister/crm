@@ -69,8 +69,10 @@
         <div style="margin-top: 1.25rem;">
             <p>
                 Pada hari ini {{$mou["day"]}}, Tanggal {{
-                \Carbon\Carbon::parse($mou['date'])->locale('id')->isoFormat('D MMMM YYYY',
-                'Do MMMM YYYY') }}
+    \Carbon\Carbon::parse($mou['date'])->locale('id')->isoFormat(
+        'D MMMM YYYY',
+        'Do MMMM YYYY'
+    ) }}
                 telah disepakati
                 kerja sama antara:
             </p>
@@ -332,8 +334,12 @@
                                                                     Kartu Tercetak
                                                                 </td>
                                                                 <td style="border: 1px solid #000000; padding: 5px">
-                                                                    Rp{{number_format($mou->price_card, 0, ',',
-                                                                    '.')}}/kartu
+                                                                    Rp{{number_format(
+        $mou->price_card,
+        0,
+        ',',
+        '.'
+    )}}/kartu
                                                                 </td>
                                                             </tr>
                                                             <tr>
@@ -346,8 +352,12 @@
                                                                     Lanyard (Tali gantungan kartu)
                                                                 </td>
                                                                 <td style="border: 1px solid #000000; padding: 5px">
-                                                                    Rp{{number_format($mou->price_lanyard, 0, ',',
-                                                                    '.')}}/lanyard
+                                                                    Rp{{number_format(
+        $mou->price_lanyard,
+        0,
+        ',',
+        '.'
+    )}}/lanyard
                                                                 </td>
                                                             </tr>
                                                         </tbody>
@@ -387,9 +397,12 @@
                                                                     Langganan sistem
                                                                 </td>
                                                                 <td style="border: 1px solid #000000; padding: 5px">
-                                                                    Rp{{number_format($mou->price_subscription_system,
-                                                                    0,
-                                                                    ',', '.')}} per-{{$mou->period_subscription}}
+                                                                    Rp{{number_format(
+        $mou->price_subscription_system,
+        0,
+        ',',
+        '.'
+    )}} per-{{$mou->period_subscription}}
                                                                 </td>
                                                             </tr>
                                                         </tbody>
@@ -435,9 +448,12 @@
                                                                     Training dan/atau sosialisasi di lokasi
                                                                 </td>
                                                                 <td style="border: 1px solid #000000; padding: 5px">
-                                                                    Rp{{number_format($mou->price_training_offline, 0,
-                                                                    ',',
-                                                                    '.')}} sekali bayar
+                                                                    Rp{{number_format(
+        $mou->price_training_offline,
+        0,
+        ',',
+        '.'
+    )}} sekali bayar
                                                                 </td>
                                                             </tr>
                                                             <tr>
@@ -450,9 +466,12 @@
                                                                     Training dan/atau sosialisasi secara daring.
                                                                 </td>
                                                                 <td style="border: 1px solid #000000; padding: 5px">
-                                                                    Rp{{number_format($mou->price_training_online, 0,
-                                                                    ',',
-                                                                    '.')}}
+                                                                    Rp{{number_format(
+        $mou->price_training_online,
+        0,
+        ',',
+        '.'
+    )}}
                                                                 </td>
                                                             </tr>
                                                         </tbody>
@@ -669,9 +688,12 @@
                                                                             2% dari nominal
                                                                         </li>
                                                                         <li>
-                                                                            Rp{{number_format($mou->fee_purchase_cazhpoin,
-                                                                            0, ',',
-                                                                            '.')}}
+                                                                            Rp{{number_format(
+        $mou->fee_purchase_cazhpoin,
+        0,
+        ',',
+        '.'
+    )}}
                                                                         </li>
                                                                     </ul>
                                                                 </td>
@@ -714,9 +736,12 @@
                                                                             {{$mou->fee_qris}}
                                                                         </li>
                                                                         <li>
-                                                                            Rp{{number_format($mou->fee_bill_cazhpoin,
-                                                                            0, ',',
-                                                                            '.')}}
+                                                                            Rp{{number_format(
+        $mou->fee_bill_cazhpoin,
+        0,
+        ',',
+        '.'
+    )}}
                                                                         </li>
                                                                     </ul>
                                                                 </td>
@@ -758,8 +783,12 @@
                                                                     Top-up kartu
                                                                 </td>
                                                                 <td style="border: 1px solid #000000; padding: 5px">
-                                                                    Rp{{number_format($mou->fee_topup_cazhpos, 0, ',',
-                                                                    '.')}}
+                                                                    Rp{{number_format(
+        $mou->fee_topup_cazhpos,
+        0,
+        ',',
+        '.'
+    )}}
                                                                 </td>
                                                             </tr>
                                                             <tr>
@@ -772,9 +801,12 @@
                                                                     Withdraw kartu
                                                                 </td>
                                                                 <td style="border: 1px solid #000000; padding: 5px">
-                                                                    Rp{{number_format($mou->fee_withdraw_cazhpos, 0,
-                                                                    ',',
-                                                                    '.')}}
+                                                                    Rp{{number_format(
+        $mou->fee_withdraw_cazhpos,
+        0,
+        ',',
+        '.'
+    )}}
                                                                 </td>
                                                             </tr>
                                                             <tr>
@@ -895,9 +927,12 @@
                                                                             Rp0
                                                                         </li>
                                                                         <li>
-                                                                            Rp{{number_format($mou->fee_bill_saldokartu,
-                                                                            0, ',',
-                                                                            '.')}}
+                                                                            Rp{{number_format(
+        $mou->fee_bill_saldokartu,
+        0,
+        ',',
+        '.'
+    )}}
                                                                         </li>
                                                                         <li>
                                                                             Rp7.500/transaksi
@@ -1068,9 +1103,10 @@
                                                 <td>
                                                     Perjanjian ini mulai berlaku pada tanggal ditandatanganinya oleh
                                                     Para Pihak, sampai dengan <b>{{
-                                                        \Carbon\Carbon::parse($mou['expired_date'])->locale('id')->isoFormat('D
+    \Carbon\Carbon::parse($mou['expired_date'])->locale('id')->isoFormat('D
                                                         MMMM YYYY',
-                                                        'Do MMMM YYYY') }}</b>;
+        'Do MMMM YYYY'
+    ) }}</b>;
                                                 </td>
                                             </tr>
                                             <tr>
@@ -1113,43 +1149,30 @@
 
             </div>
             <div class="px-8 flex flex-row mt-5 justify-between">
-                <div class="w-[30%]">
-                    <p>
-                        Pihak Pertama,
-                    </p>
-                    <img class="min-h-20 w-[15%]" src='{{ public_path("/storage/$mou->signature_image") }}' />
-                    <p><b>{{$mou->signature_name}}</b></p>
-                </div>
-                <div class="w-[30%]">
-                    <p>Pihak Kedua</p>
-                    @if($mou->partner_pic_signature)
-                    <img src='{{ public_path("storage/$mou->partner_pic_signature") }}' alt="" class="min-h-20 w-full"
-                        style="width:90%; height: 80px" />
-                    @else
-                    <div style="min-height: 80px"></div>
-                    @endif
-                    <p><b>{{$mou->partner_pic}}</b></p>
-                </div>
+    <div  style="width:40%; height: 30%;">
+        <p>
+            Pihak Pertama,
+        </p>
+        <div style="width: 100px; height: 100px; overflow: hidden;">
+            <img class="w-full h-full object-fit-cover" style="object-fit: cover;" src='{{ public_path("/storage/$mou->signature_image") }}' />
+        </div>
+        <p><b>{{$mou->signature_name}}</b></p>
+    </div>
+    <div  style="width:40%; height: 30%;">
+        <p>Pihak Kedua</p>
+        @if($mou->partner_pic_signature)
+        <div style="width: 100px; height: 100px; overflow: hidden;">
+            <img src='{{ public_path("storage/$mou->partner_pic_signature") }}' alt="" class="min-h-20 w-full h-full object-fit-cover" style="object-fit: cover;" />
             </div>
+        @else
+        <div style="min-height: 80px"></div>
+        @endif
+        <p><b>{{$mou->partner_pic}}</b></p>
+    </div>
+</div>
 
-            @if($mou->referral)
-            <div class="px-8 flex flex-row mt-5 justify-center">
-                <div class="w-[30%]">
-                    <p>Pihak Ketiga</p>
-                    @if($mou->referral_signature)
-                    <img src='{{ public_path("storage/$mou->referral_signature") }}' alt="" class="min-h-20 w-full"
-                        style="width:90%; height: 80px" />
-                    @else
-                    <div style="min-height: 80px"></div>
-                    @endif
-                    <p>
-                        <b>
-                            {{$mou->referral_name}}
-                        </b>
-                    </p>
-                </div>
-            </div>
-            @endif
+
+            
         </div>
 
     </div>
