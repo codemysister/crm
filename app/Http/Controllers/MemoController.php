@@ -83,8 +83,8 @@ class MemoController extends Controller
             return $map[$number - 1];
         }
 
-        $totalDataPerMonth = Memo::whereYear('date', $currentYear)
-            ->whereMonth('date', $currentMonth)
+        $totalDataPerMonth = Memo::whereYear('created_at', $currentYear)
+            ->whereMonth('created_at', $currentMonth)
             ->count();
         $romanMonth = intToRoman($currentMonth);
         $latestData = "MDH/000/$romanMonth/$currentYear";
@@ -98,19 +98,19 @@ class MemoController extends Controller
     {
         $id_partner = $request['partner']['id'];
 
-        if (!$id_partner) {
-            $partnerExists = Partner::where('name', 'like', '%' . $request['partner']["name"] . '%')->first();
-            if (!$partnerExists) {
-                $partner = Partner::create([
-                    'uuid' => Str::uuid(),
-                    'name' => $request['partner']['name'],
-                    'status' => "Proses",
-                ]);
-                $id_partner = $partner->id;
-            } else {
-                $id_partner = $partnerExists->id;
-            }
-        }
+        // if (!$id_partner) {
+        //     $partnerExists = Partner::where('name', 'like', '%' . $request['partner']["name"] . '%')->first();
+        //     if (!$partnerExists) {
+        //         $partner = Partner::create([
+        //             'uuid' => Str::uuid(),
+        //             'name' => $request['partner']['name'],
+        //             'status' => "Proses",
+        //         ]);
+        //         $id_partner = $partner->id;
+        //     } else {
+        //         $id_partner = $partnerExists->id;
+        //     }
+        // }
         $memo = Memo::create([
             'uuid' => Str::uuid(),
             'code' => $this->generateCode(),
@@ -143,7 +143,7 @@ class MemoController extends Controller
 
     public function apiGetMemo()
     {
-        $memo = Memo::all();
+        $memo = Memo::with('partner')->latest()->get();
         return response()->json($memo);
     }
 }

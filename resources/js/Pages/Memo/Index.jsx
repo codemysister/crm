@@ -173,6 +173,11 @@ export default function Index({ auth, memosDefault }) {
         );
     };
 
+    const handleSelectedDetailPartner = (partner) => {
+        const newUrl = `/partners?uuid=${partner.uuid}`;
+        window.location = newUrl;
+    };
+
     if (preRenderLoad) {
         return (
             <>
@@ -269,6 +274,24 @@ export default function Index({ auth, memosDefault }) {
                             className="dark:border-none"
                             headerClassName="dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300"
                             header="Lembaga"
+                            body={(rowData) => {
+                                {
+                                    return rowData.partner_id == null ? (
+                                        rowData.partner_name
+                                    ) : (
+                                        <button
+                                            onClick={() =>
+                                                handleSelectedDetailPartner(
+                                                    rowData.partner
+                                                )
+                                            }
+                                            className="hover:text-blue-700"
+                                        >
+                                            {rowData.partner.name}
+                                        </button>
+                                    );
+                                }
+                            }}
                             align="left"
                             style={{
                                 width: "max-content",
