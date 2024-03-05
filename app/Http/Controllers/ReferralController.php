@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Referral;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -14,7 +15,8 @@ class ReferralController extends Controller
 {
     public function index()
     {
-        return Inertia::render('Referral/Index');
+        $userAsReferralProp = User::role('referral')->get();
+        return Inertia::render('Referral/Index', compact('userAsReferralProp'));
     }
 
     public function store(Request $request)
@@ -35,7 +37,8 @@ class ReferralController extends Controller
         }
         Referral::create([
             'uuid' => Str::uuid(),
-            'name' => $request->name,
+            'user_id' => $request->user['id'],
+            'institution' => $request->institution,
             'logo' => $pathLogo,
             'signature' => $pathSignature
         ]);
@@ -44,16 +47,16 @@ class ReferralController extends Controller
     public function update(Request $request, $uuid)
     {
         $referral = Referral::where('uuid', '=', $uuid)->first();
-        $pathLogo = null;
-        if ($request->hasFile('logo')) {
+        $pathLogo = $referral->logo;
+        if ($pathLogo == null && $request->hasFile('logo')) {
             Storage::delete('public/' . $referral->logo);
             $file = $request->file('logo');
             $filename = time() . '_' . Auth::user()->id . '.' . $file->getClientOriginalExtension();
             $pathLogo = '/images/logo/' . $filename;
             Storage::putFileAs('public/images/logo', $file, $filename);
         }
-        $pathSignature = null;
-        if ($request->hasFile('signature')) {
+        $pathSignature = $referral->signature;
+        if ($pathSignature == null && $request->hasFile('signature')) {
             Storage::delete('public/' . $referral->signature);
             $file = $request->file('signature');
             $filename = time() . '_' . Auth::user()->id . '.' . $file->getClientOriginalExtension();
@@ -62,7 +65,8 @@ class ReferralController extends Controller
         }
 
         $referral->update([
-            'name' => $request->name,
+            'user_id' => $request->user['id'],
+            'institution' => $request->institution,
             'logo' => $pathLogo,
             'signature' => $pathSignature
         ]);
@@ -70,7 +74,7 @@ class ReferralController extends Controller
 
     public function apiGetReferral()
     {
-        $referrals = Referral::all();
+        $referrals = Referral::with('user')->get();
         return response()->json($referrals);
     }
 
