@@ -2,6 +2,7 @@
 
 namespace App\Imports;
 
+use App\Jobs\GenerateInvoiceSubscriptionJob;
 use App\Models\InvoiceSubscription;
 use App\Models\InvoiceSubscriptionBill;
 use App\Models\Partner;
@@ -49,161 +50,6 @@ class InvoiceSubscriptionImport implements ToCollection, WithStartRow, WithHeadi
         return 50;
     }
 
-    // public function generateInvoiceSubscription($invoice_subscription, $bundle_uuid = null)
-    // {
-    //     $templateInvoice = 'assets/template/invoice_umum.docx';
-
-    //     if ($invoice_subscription->payment_metode === 'payment link') {
-    //         if ($invoice_subscription->total_ppn === 0) {
-    //             $templateInvoice = 'assets/template/invoice_langganan_tanpa_pajak.docx';
-    //         } else {
-    //             $templateInvoice = 'assets/template/invoice_langganan.docx';
-    //         }
-    //     } else {
-    //         $templateInvoice = 'assets/template/invoice_langganan_cazhbox.docx';
-    //     }
-
-    //     $phpWord = new \PhpOffice\PhpWord\TemplateProcessor($templateInvoice);
-    //     $phpWord->setValues([
-    //         'code' => $invoice_subscription->code,
-    //         'date' => Carbon::parse($invoice_subscription->date)->format('d/m/Y'),
-    //         'due_date' => Carbon::parse($invoice_subscription->due_date)->format('d/m/Y'),
-    //         'partner' => $invoice_subscription->partner_name,
-    //         'province' => json_decode($invoice_subscription->partner_province)->name,
-    //         'regency' => json_decode($invoice_subscription->partner_regency)->name,
-    //         'paid_off' => "Rp" . number_format($invoice_subscription->paid_off, 0, ',', '.'),
-    //         // 'xendit' => $invoice_subscription->xendit_link,
-    //         'signature_name' => $invoice_subscription->signature_name,
-    //     ]);
-
-    //     $linkVar = new \PhpOffice\PhpWord\Element\TextRun();
-    //     $linkTest = $linkVar->addLink('http://google.com', 'http://google.com');
-
-    //     $phpWord->setComplexValue('xendit', $linkTest);
-    //     $table = new Table(
-    //         array(
-    //             'width' => 100 * 50,
-    //             'alignment' => \PhpOffice\PhpWord\SimpleType\JcTable::CENTER,
-    //             'layout' => \PhpOffice\PhpWord\Style\Table::LAYOUT_FIXED,
-    //             'unit' => TblWidth::PERCENT
-    //         )
-    //     );
-    //     $table->addRow(400);
-    //     $pStyle = array('spaceAfter' => 20, 'align' => 'center');
-    //     $table->addCell(500, [
-    //         'bgColor' => '#D9D2E9',
-    //         'valign' => 'center',
-    //         'borderSize' => 8,
-    //         'borderColor' => 'ded8ee',
-    //     ])->addText('No', ['color' => '000000', 'name' => 'Inter', 'size' => 10, 'bold' => true], $pStyle);
-    //     $table->addCell(3000, [
-    //         'bgColor' => '#D9D2E9',
-    //         'valign' => 'center',
-    //         'borderSize' => 8,
-    //         'borderColor' => 'ded8ee',
-    //     ])->addText('Tagihan', ['color' => '000000', 'name' => 'Inter', 'size' => 10, 'bold' => true], $pStyle);
-    //     $table->addCell(2000, [
-    //         'bgColor' => '#D9D2E9',
-    //         'valign' => 'center',
-    //         'borderSize' => 8,
-    //         'borderColor' => 'ded8ee',
-    //     ])->addText('Harga', ['color' => '000000', 'name' => 'Inter', 'size' => 10, 'bold' => true], $pStyle);
-    //     $table->addCell(2000, [
-    //         'bgColor' => '#D9D2E9',
-    //         'valign' => 'center',
-    //         'borderSize' => 8,
-    //         'borderColor' => 'ded8ee',
-    //     ])->addText('Pajak', ['color' => '000000', 'name' => 'Inter', 'size' => 10, 'bold' => true], $pStyle);
-    //     $table->addCell(2000, [
-    //         'bgColor' => '#D9D2E9',
-    //         'valign' => 'center',
-    //         'borderSize' => 8,
-    //         'borderColor' => 'ded8ee',
-    //     ])->addText('Jumlah', ['color' => '000000', 'name' => 'Inter', 'size' => 10, 'bold' => true], $pStyle);
-
-    //     $values = collect($invoice_subscription->bills)->map(function ($bill) {
-    //         return ['bill' => $bill['bill'], 'nominal' => number_format($bill['nominal'], 0, ',', '.'), 'total_ppn' => number_format($bill['total_ppn'], 0, ',', '.'), 'total_bill' => number_format($bill['total_bill'], 0, ',', '.')];
-    //     });
-
-    //     foreach ($values as $key => $value) {
-    //         $table->addRow(400);
-    //         $table->addCell(null, [
-    //             'valign' => 'center',
-    //             'borderSize' => 8,
-    //             'borderColor' => 'ded8ee'
-    //         ])->addText($key + 1, ['name' => 'Inter', 'size' => 10], ['spaceAfter' => 20, 'align' => 'center']);
-    //         $table->addCell(null, [
-    //             'valign' => 'center',
-    //             'borderSize' => 8,
-    //             'borderColor' => 'ded8ee'
-    //         ])->addText($value['bill'], ['name' => 'Inter', 'size' => 10], ['spaceAfter' => 20, 'align' => 'left']);
-    //         $table->addCell(null, [
-    //             'valign' => 'center',
-    //             'borderSize' => 8,
-    //             'borderColor' => 'ded8ee'
-    //         ])->addText("Rp" . $value['nominal'], ['name' => 'Inter', 'size' => 10], ['spaceAfter' => 20, 'align' => 'left']);
-    //         $table->addCell(null, [
-    //             'valign' => 'center',
-    //             'borderSize' => 8,
-    //             'borderColor' => 'ded8ee'
-    //         ])->addText("Rp" . $value['total_ppn'], ['name' => 'Inter', 'size' => 10], ['spaceAfter' => 20, 'align' => 'left']);
-    //         $table->addCell(null, [
-    //             'valign' => 'center',
-    //             'borderSize' => 8,
-    //             'borderColor' => 'ded8ee'
-    //         ])->addText("Rp" . $value['total_bill'], ['name' => 'Inter', 'size' => 10], ['spaceAfter' => 20, 'align' => 'left']);
-    //     }
-
-    //     $cellColSpan = [
-    //         'gridSpan' => 4,
-    //         'valign' => 'center',
-    //         'align' => 'right',
-
-    //     ];
-
-    //     $table->addRow(400);
-    //     $cell1 = $table->addCell(400, $cellColSpan);
-    //     $cell1->addText('Sub Total', ['name' => 'Inter', 'size' => 10], ['spaceAfter' => 20, 'align' => 'right']);
-    //     $table->addCell(400, [
-    //         'valign' => 'center',
-    //         'borderSize' => 8,
-    //         'borderColor' => 'ded8ee'
-    //     ])->addText("Rp" . number_format($invoice_subscription->total_bill, 0, ',', '.'), ['name' => 'Inter', 'size' => 10], ['spaceAfter' => 20, 'align' => 'left']);
-
-    //     $table->addRow(400);
-    //     $cell2 = $table->addCell(400, $cellColSpan);
-    //     $cell2->addText('Diskon/Uang Muka', ['name' => 'Inter', 'size' => 10], ['spaceAfter' => 20, 'align' => 'right']);
-    //     $table->addCell(400, [
-    //         'valign' => 'center',
-    //         'borderSize' => 8,
-    //         'borderColor' => 'ded8ee'
-    //     ])->addText("Rp" . number_format($invoice_subscription->paid_off, 0, ',', '.'), ['name' => 'Inter', 'size' => 10], ['spaceAfter' => 20, 'align' => 'left']);
-
-    //     $table->addRow(400);
-    //     $cell3 = $table->addCell(400, $cellColSpan);
-    //     $cell3->addText('Total Tagihan', ['name' => 'Inter', 'size' => 10, 'bold' => true], ['spaceAfter' => 20, 'align' => 'right']);
-    //     $table->addCell(400, [
-    //         'valign' => 'center',
-    //         'borderSize' => 8,
-    //         'borderColor' => 'ded8ee'
-    //     ])->addText("Rp" . number_format($invoice_subscription->total_bill, 0, ',', '.'), ['name' => 'Inter', 'size' => 10, 'bold' => true], ['spaceAfter' => 20, 'align' => 'left']);
-
-    //     $phpWord->setComplexBlock('table', $table);
-
-
-    //     $phpWord->setImageValue('signature_image', array('path' => public_path("/storage/$invoice_subscription->signature_image")));
-    //     $fileName = str_replace(' ', '_', $invoice_subscription->partner_name) . '_' . str_replace('/', '_', $invoice_subscription->code) . '.docx';
-
-    //     $directoryPath = $bundle_uuid == null ? storage_path("app/public/invoice_langganan/") : storage_path("app/public/invoice_langganan/$bundle_uuid/");
-
-    //     if (!File::isDirectory($directoryPath)) {
-    //         File::makeDirectory($directoryPath, 0755, true, true);
-    //     }
-
-    //     $phpWord->saveAs($directoryPath . $fileName);
-    //     $invoice_subscription->update(['invoice_subscription_doc' => 'invoice_langganan/' . $fileName]);
-
-    // }
 
     public function generateInvoiceSubscription($invoice_subscription, $bundle_uuid = null)
     {
@@ -444,7 +290,7 @@ class InvoiceSubscriptionImport implements ToCollection, WithStartRow, WithHeadi
                 'paid_off' => $this->convertInteger($row['diskon']),
                 'status' => "belum terbayar",
                 'payment_metode' => $row['xendit'] ? 'payment link' : 'cazhbox',
-                'xendit_link' => $row['xendit'] ? "https://checkout.xendit.co/web/" . $row['xendit'] : null,
+                'xendit_link' => $row['xendit'] ? $row['xendit'] : null,
                 'created_by' => Auth()->user()->id,
             ]);
 
@@ -482,12 +328,11 @@ class InvoiceSubscriptionImport implements ToCollection, WithStartRow, WithHeadi
                 ]);
             }
 
+            $invoice_subscription = InvoiceSubscription::with('bills')->where('uuid', '=', $invoice_subscription->uuid)->first();
 
-            if ($invoice_subscription->payment_metode === 'payment link') {
-                $this->generateInvoiceSubscription($invoice_subscription);
-            } else {
-                $this->generateInvoiceSubscriptionPdf($invoice_subscription);
-            }
+            // dd($invoice_subscription);
+            GenerateInvoiceSubscriptionJob::dispatch($invoice_subscription, $invoice_subscription->bills);
+
         }
     }
 }

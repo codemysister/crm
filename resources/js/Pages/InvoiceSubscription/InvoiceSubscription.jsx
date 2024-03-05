@@ -1323,7 +1323,7 @@ export default function InvoiceSubscription({
                         <Column
                             body={(rowData) => {
                                 return rowData.invoice_subscription_doc ==
-                                    "" ? (
+                                    null ? (
                                     <ProgressSpinner
                                         style={{
                                             width: "30px",
@@ -1471,22 +1471,21 @@ export default function InvoiceSubscription({
             >
                 <form onSubmit={(e) => handleSubmitFormMassal(e, "tambah")}>
                     <div className="flex flex-col justify-around gap-4 mt-4">
-                    <div className="flex bg-green-600 text-white text-xs p-3 rounded-lg justify-between w-full h-full">
-                                <p>Template</p>
-                                <p className="font-semibold">
+                        <div className="flex bg-green-600 text-white text-xs p-3 rounded-lg justify-between w-full h-full">
+                            <p>Template</p>
+                            <p className="font-semibold">
                                 <a
-                                            href={
-                                                BASE_URL +
-                                                "/assets/template/excel/invoice_sample.csv"
-                                                
-                                            }
-                                            download="sample.csv"
-                                            class="font-bold underline w-full h-full text-center rounded-full "
-                                        >
-                                            sample.xlsx
-                                        </a>
-                                </p>
-                            </div>
+                                    href={
+                                        BASE_URL +
+                                        "/assets/template/excel/invoice_sample.csv"
+                                    }
+                                    download="sample.csv"
+                                    class="font-bold underline w-full h-full text-center rounded-full "
+                                >
+                                    sample.xlsx
+                                </a>
+                            </p>
+                        </div>
                         <div className="flex flex-col mt-3">
                             <label htmlFor="name">Excel</label>
 

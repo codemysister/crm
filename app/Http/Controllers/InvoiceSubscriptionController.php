@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\InvoiceSubscriptionRequest;
 use App\Imports\InvoiceSubscriptionImport;
+use App\Jobs\GenerateInvoiceGeneralJob;
+use App\Jobs\GenerateInvoiceSubscriptionJob;
 use App\Models\InvoiceSubscription;
 use App\Models\InvoiceSubscriptionBill;
 use App\Models\InvoiceSubscriptionBundle;
@@ -257,9 +259,18 @@ class InvoiceSubscriptionController extends Controller
         $currentMonth = date('n');
         $currentYear = date('Y');
 
-        $romanMonth = $this->intToRoman($currentMonth);
-        $latestData = InvoiceSubscription::latest()->first() ?? "$currentYear/$romanMonth/INV/0000";
-        $lastCode = $latestData ? explode('/', $latestData->code ?? $latestData)[3] : 0;
+        // $romanMonth = $this->intToRoman($currentMonth);
+        // $latestData = InvoiceSubscription::latest()->first() ?? "$currentYear/$romanMonth/INV/0000";
+        // $lastCode = $latestData ? explode('/', $latestData->code ?? $latestData)[3] : 0;
+
+        $totalDataPerMonth = InvoiceSubscription::whereYear('created_at', $currentYear)
+            ->whereMonth('created_at', $currentMonth)
+            ->count();
+        $romanMonth = intToRoman($currentMonth);
+        $latestData = "$currentYear/$romanMonth/INV/0000";
+        $lastCode = $latestData ? explode('/', $latestData)[3] : 0;
+        $newCode = str_pad((int) $lastCode + $totalDataPerMonth + 1, 4, '0', STR_PAD_LEFT);
+        $newCode = "$currentYear/$romanMonth/INV/$newCode";
 
         return $lastCode;
     }
@@ -343,11 +354,9 @@ class InvoiceSubscriptionController extends Controller
             ]);
         }
 
-        if ($invoice_subscription->payment_metode === 'payment link') {
-            $this->generateInvoiceSubscription($invoice_subscription);
-        } else {
-            $this->generateInvoiceSubscriptionPdf($invoice_subscription);
-        }
+
+        GenerateInvoiceSubscriptionJob::dispatch($invoice_subscription, $request->bills);
+
     }
 
     function updateBills($invoice_subscription, $oldData, $newData)
@@ -476,108 +485,6 @@ class InvoiceSubscriptionController extends Controller
     public function storeBatch(Request $request)
     {
         $imported = Excel::import(new InvoiceSubscriptionImport($request->signature), request()->file('excel'));
-
-
-        // $lastCode = $this->generateCode();
-        // $currentMonth = date('n');
-        // $currentYear = date('Y');
-        // $romanMonth = $this->intToRoman($currentMonth);
-
-        // foreach ($request->partners as $index => $partner) {
-        //     $newCode = str_pad((int) $lastCode + $index + 1, 4, '0', STR_PAD_LEFT);
-        //     $newCode = "$currentYear/$romanMonth/INV/$newCode";
-        //     $date = Carbon::parse($request->date)->setTimezone('GMT+7')->format('Y-m-d H:i:s');
-        //     $due_date = Carbon::parse($request->due_date)->setTimezone('GMT+7')->format('Y-m-d H:i:s');
-        //     $date_now = Carbon::now()->setTimezone('GMT+7');
-        //     $invoice_age = $date_now->diffInDays($date, false) + 1;
-        //     $month = Carbon::parse($request->date)->setTimezone('GMT+7')->locale('id-ID')->format('F');
-        //     $year = Carbon::parse($request->date)->setTimezone('GMT+7')->locale('id-ID')->format('Y');
-
-        //     $total_nominal = 0;
-        //     foreach ($partner['subscriptions'] as $subscription) {
-        //         $total_nominal += $subscription['nominal'];
-        //     }
-
-        //     $total_ppn = 0;
-        //     foreach ($partner['subscriptions'] as $subscription) {
-        //         $total_ppn += $subscription['total_ppn'];
-        //     }
-
-        //     $total_bill = 0;
-        //     foreach ($partner['subscriptions'] as $subscription) {
-        //         $total_bill += $subscription['total_bill'];
-        //     }
-
-
-        //     $rest_of_bill = $total_bill - 0;
-
-        //     $invoice_subscription = InvoiceSubscription::create([
-        //         'uuid' => Str::uuid(),
-        //         'partner_id' => $partner['id'],
-        //         'code' => $newCode,
-        //         'date' => $date,
-        //         'period' => Carbon::parse($date)->locale('id')->isoFormat('DD MMMM YYYY'),
-        //         'due_date' => $due_date,
-        //         'invoice_age' => $invoice_age,
-        //         'partner_name' => $partner['name'],
-        //         'partner_province' => $partner['province'],
-        //         'partner_regency' => $partner['regency'],
-        //         'signature_name' => $request->signature['name'],
-        //         'signature_image' => $request->signature['image'],
-        //         'total_nominal' => $total_nominal + $total_ppn,
-        //         'total_ppn' => $total_ppn,
-        //         'total_bill' => $total_bill,
-        //         'rest_of_bill' => $rest_of_bill,
-        //         'rest_of_bill_locked' => $rest_of_bill,
-        //         'paid_off' => 0,
-        //         'status' => "belum terbayar",
-        //         'payment_metode' => $partner['payment_metode'],
-        //         'xendit_link' => "https://checkout.xendit.co/web/",
-        //         'created_by' => Auth()->user()->id,
-        //     ]);
-
-        //     foreach ($partner['subscriptions'] as $subscription) {
-        //         if (strpos(strtolower($subscription['bill']), 'langganan bulan') !== false) {
-        //             $date = new \DateTime();
-        //             $monthIndex = $date->format('n') - 1;
-        //             $monthNames = [
-        //                 "Januari",
-        //                 "Februari",
-        //                 "Maret",
-        //                 "April",
-        //                 "Mei",
-        //                 "Juni",
-        //                 "Juli",
-        //                 "Agustus",
-        //                 "September",
-        //                 "Oktober",
-        //                 "November",
-        //                 "Desember",
-        //             ];
-        //             $monthName = $monthNames[$monthIndex];
-
-        //             $year = $date->format('Y');
-
-        //             $subscription['bill'] .= " " . $monthName . " " . $year;
-        //         }
-        //         InvoiceSubscriptionBill::create([
-        //             'uuid' => Str::uuid(),
-        //             'invoice_subscription_id' => $invoice_subscription->id,
-        //             'bill' => $subscription['bill'],
-        //             'nominal' => $subscription['nominal'],
-        //             'total_ppn' => $subscription['total_ppn'],
-        //             'ppn' => $subscription['ppn'],
-        //             'total_bill' => $subscription['total_bill'],
-        //         ]);
-        //     }
-
-        //     if ($invoice_subscription->payment_metode === 'payment link') {
-        //         $this->generateInvoiceSubscription($invoice_subscription);
-        //     } else {
-        //         $this->generateInvoiceSubscriptionPdf($invoice_subscription);
-        //     }
-
-        // }
     }
 
     public function edit($uuid)

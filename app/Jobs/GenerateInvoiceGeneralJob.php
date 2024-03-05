@@ -34,7 +34,7 @@ class GenerateInvoiceGeneralJob implements ShouldQueue
     public function handle(): void
     {
         try {
-            $path = "invoice_langganan/invoice_langganan-" . $this->invoice_general->uuid . ".pdf";
+            $path = "invoice_umum/invoice_umum-" . $this->invoice_general->uuid . ".pdf";
 
             $this->invoice_general->update([
                 "invoice_general_doc" => $path
