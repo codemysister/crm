@@ -45,14 +45,19 @@
         <header>
             <div class="flex justify-start items-center">
                 <div class="w-[10%]" style="width:10%;">
-                    <img src="{{ public_path('assets/img/logo/sla_logo.png') }}" alt="" class="float-left w-full h-full"
+                    <img src="{{ public_path($sla->logo) }}" alt="" class="float-left w-full h-full"
                         style="width: 100%; height: 100%" />
                 </div>
                 <div class="w-full text-center">
                     <h2 class="font-bold">PT CAZH TEKNOLOGI INOVASI</h2>
                     <h2 class="font-bold">TIME LINE PROSES IMPLEMENTASI LAYANAN CAZH CARDS</h2>
                 </div>
-                <div class="w-[10%]"></div>
+                <div class="w-[10%]" style="width:10%">
+                @if($sla->referral_logo !== null)
+                <img src="{{ public_path("storage/$sla->referral_logo") }}" alt="" class="float-left w-full h-full"
+                        style="width: 100%; height: 100%" />
+                @endif
+                </div>
             </div>
         </header>
 
@@ -134,8 +139,10 @@
                             {{date('j M Y', strtotime($activity["estimation_date"]))}}
                         </td>
                         <td class="border w-[15%] text-right p-1" style="width:15%">{{$activity["realization_date"] ?
-                            date('j M Y',
-                            strtotime($activity["realization_date"])) : ''}}</td>
+        date(
+            'j M Y',
+            strtotime($activity["realization_date"])
+        ) : ''}}</td>
 
                     </tr>
                     @endforeach
@@ -147,31 +154,38 @@
 
 
         <div class="flex flex-row mt-5 justify-between">
-            <div class="w-[30%]" style="width: 30%;">
+            <div class="w-[30%]" style="width: 30%; height: 30%;">
                 <p>Pihak Pertama</p>
-                <img src="{{ public_path($sla->signature_image) }}" alt="" class="min-h-20 w-full"
-                    style="width:90%; height: 80px" />
+                <div style="width: 100px; height: 100px; overflow: hidden;">
+
+                <img src="{{ public_path("storage/$sla->signature_image") }}" alt="" class="min-h-20 w-full"
+                    style="object-fit: cover;" />
+            </div>
                 <p>{{$sla->signature_name}}</p>
             </div>
-            <div class="w-[30%]" style="width: 30%;">
+            <div class="w-[30%]" style="width: 30%; height: 30%;">
                 <p>Pihak Kedua</p>
                 @if($sla->partner_pic_signature)
+                <div style="width: 100px; height: 100px; overflow: hidden;">
                 <img src='{{ public_path("storage/$sla->partner_pic_signature") }}' alt="" class="min-h-20 w-full"
-                    style="width:90%; height: 80px" />
+                    style="object-fit: cover;" />
+                </div>
                 @else
-                <div style="min-height: 80px"></div>
+                <div style="min-height: 100px"></div>
                 @endif
 
                 <p>{{$sla->partner_pic}}</p>
             </div>
             @if($sla->referral)
-            <div class="w-[30%]" style="width: 30%;">
+            <div class="w-[30%]" style="width: 30%; height: 30%;">
                 <p>Pihak Ketiga</p>
                 @if($sla->referral_signature)
+                <div style="width: 100px; height: 100px; overflow: hidden;">
                 <img src='{{ public_path("storage/$sla->referral_signature") }}' alt="" class="min-h-20 w-full"
-                    style="width:90%; height: 80px" />
+                style="object-fit: cover;" />
+                </div>
                 @else
-                <div style="min-height: 80px"></div>
+                <div style="min-height: 100px"></div>
                 @endif
                 <p>{{$sla->referral_name}}</p>
             </div>

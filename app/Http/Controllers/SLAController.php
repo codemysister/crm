@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Http\Requests\SLARequest;
 use App\Jobs\GenerateSLAJob;
 use App\Models\Partner;
+use App\Models\Referral;
+use App\Models\Signature;
 use App\Models\SLA;
 use App\Models\SlaActivity;
 use App\Models\User;
@@ -27,7 +29,7 @@ class SLAController extends Controller
 
     public function apiGetSla()
     {
-        $slas = SLA::with(['activities', 'partner', 'user'])->get();
+        $slas = SLA::with(['activities', 'partner', 'user'])->latest()->get();
         $roles = DB::table('roles')->distinct()->get("name");
         $users = User::all();
         return response()->json(["sla" => $slas, "roles" => $roles, "users" => $users]);
@@ -43,15 +45,16 @@ class SLAController extends Controller
         $usersProp->transform(function ($user) {
             $user->position = $user->roles->first()->name;
             $user->user_id = $user->id;
-            unset($user->roles);
+            unset ($user->roles);
             return $user;
         });
         $partnersProp = Partner::with(
             'pics'
         )->get();
         // $rolesProp = DB::table('roles')->distinct()->get("name");
-
-        return Inertia::render('SLA/Create', compact('partnersProp', 'usersProp'));
+        $referralsProp = Referral::with('user')->get();
+        $signaturesProp = Signature::all();
+        return Inertia::render('SLA/Create', compact('partnersProp', 'usersProp', 'referralsProp', 'signaturesProp'));
     }
 
     public function generateCode()
@@ -65,11 +68,16 @@ class SLAController extends Controller
             return $map[$number - 1];
         }
 
+        $totalDataPerMonth = SLA::whereYear('created_at', $currentYear)
+            ->whereMonth('created_at', $currentMonth)
+            ->count();
+
         $romanMonth = intToRoman($currentMonth);
-        $latestData = SLA::latest()->first() ?? "SLA/000/$romanMonth/$currentYear";
-        $lastCode = $latestData ? explode('/', $latestData->code ?? $latestData)[1] : 0;
-        $newCode = str_pad((int) $lastCode + 1, 3, '0', STR_PAD_LEFT);
+        $latestData = "SLA/000/$romanMonth/$currentYear";
+        $lastCode = $latestData ? explode('/', $latestData)[1] : 0;
+        $newCode = str_pad((int) $lastCode + $totalDataPerMonth + 1, 3, '0', STR_PAD_LEFT);
         $newCode = "SLA/$newCode/$romanMonth/$currentYear";
+
         return $newCode;
     }
 
@@ -134,18 +142,21 @@ class SLAController extends Controller
             $pathSignaturePic = 'images/tanda_tangan/' . $filename;
             Storage::putFileAs('public/images/tanda_tangan', $file, $filename);
         }
-        $pathSignatureReferral = null;
-        if ($request->hasFile('referral_signature')) {
-            $file = $request->file('referral_signature');
-            $filename = time() . '_' . rand() . '_' . $request->partner['id'] . '.' . $file->getClientOriginalExtension();
-            $pathSignatureReferral = 'images/tanda_tangan/' . $filename;
-            Storage::putFileAs('public/images/tanda_tangan', $file, $filename);
+        $logo = null;
+        if ($request->hasFile('logo')) {
+            $file = $request->file('logo');
+            $filename = time() . '_' . rand() . '_' . $request->partner['id'] . '.' . $file->guessExtension();
+            $logo = '/storage/images/logo/' . $filename;
+
+            Storage::putFileAs('public/images/logo/', $file, $filename);
         }
+
 
         $code = $this->generateCode();
         $sla = SLA::create([
             "uuid" => Str::uuid(),
             "code" => $code,
+            "logo" => $logo,
             "partner_id" => $request->partner['id'],
             "partner_name" => $request->partner['name'],
             "partner_province" => $request->partner['province'],
@@ -156,8 +167,10 @@ class SLAController extends Controller
             "partner_pic_number" => $request->partner['pic_number'],
             "partner_pic_signature" => $pathSignaturePic,
             "referral" => $request->referral,
-            "referral_name" => $request->referral_name,
-            "referral_signature" => $pathSignatureReferral,
+            "referral_logo" => $request->referral_logo ?? null,
+            "referral_name" => $request->referral_signature['name'] ?? null,
+            "referral_institution" => $request->referral_signature['institution'] ?? null,
+            "referral_signature" => $request->referral_signature['image'] ?? null,
             "created_by" => Auth::user()->id,
             "signature_name" => $request->signature['name'],
             "signature_image" => $request->signature['image'],
@@ -189,7 +202,7 @@ class SLAController extends Controller
         $usersProp->transform(function ($user) {
             $user->position = $user->roles->first()->name;
             $user->user_id = $user->id;
-            unset($user->roles);
+            unset ($user->roles);
             return $user;
         });
         $partnersProp = Partner::with(
@@ -197,15 +210,17 @@ class SLAController extends Controller
         )->get();
 
         $sla = SLA::where('uuid', '=', $uuid)->with('activities')->first();
-
-        return Inertia::render('SLA/Edit', compact('partnersProp', 'usersProp', 'sla'));
+        $referralsProp = Referral::with('user')->get();
+        $signaturesProp = Signature::all();
+        return Inertia::render('SLA/Edit', compact('partnersProp', 'usersProp', 'sla', 'referralsProp', 'signaturesProp'));
     }
 
     public function update(SLARequest $request, $uuid)
     {
         $sla = SLA::with('activities')->where('uuid', '=', $uuid)->first();
 
-        $pathSignaturePic = null;
+
+        $pathSignaturePic = $sla->partner_pic_signature;
         if ($request->hasFile('pic_signature')) {
             $file = $request->file('pic_signature');
             if ($file->getClientOriginalName() == 'blob') {
@@ -223,39 +238,38 @@ class SLAController extends Controller
 
                 }
             }
-        } else {
-            if ($sla->partner_pic_signature) {
-                Storage::delete('public/' . $sla->partner_pic_signature);
-                $pathSignaturePic = null;
-            }
         }
 
-        $pathSignatureReferral = null;
+        if ($request->pic_signature == null) {
+            Storage::delete('public/' . $sla->partner_pic_signature);
+            $pathSignaturePic = null;
+        }
 
-        if ($request->hasFile('referral_signature')) {
-            $file = $request->file('referral_signature');
+
+
+        $pathLogo = $sla->logo;
+
+        if ($request->hasFile('logo')) {
+            $file = $request->file('logo');
             if ($file->getClientOriginalName() == 'blob') {
-                $pathSignatureReferral = $sla->referral_signature;
+                $pathLogo = $sla->logo;
             } else {
-                if ($sla->referral_signature) {
-                    Storage::delete('public/' . $sla->referral_signature);
+                if ($sla->logo) {
+                    Storage::delete('public/' . $sla->logo);
                     $filename = time() . '_' . rand() . '_' . $request->partner['id'] . '.' . $file->getClientOriginalExtension();
-                    $pathSignatureReferral = "images/tanda_tangan/" . $filename;
-                    Storage::putFileAs('public/images/tanda_tangan', $file, $filename);
+                    $pathLogo = "/storage/images/logo/" . $filename;
+                    Storage::putFileAs('public/images/logo', $file, $filename);
                 } else {
                     $filename = time() . '_' . rand() . '_' . $request->partner['id'] . '.' . $file->getClientOriginalExtension();
-                    $pathSignatureReferral = "images/tanda_tangan/" . $filename;
-                    Storage::putFileAs('public/images/tanda_tangan', $file, $filename);
+                    $pathLogo = "/storage/images/logo/" . $filename;
+                    Storage::putFileAs('public/images/logo', $file, $filename);
                 }
-            }
-        } else {
-            if ($sla->referral_signature) {
-                Storage::delete('public/' . $sla->referral_signature);
-                $pathSignatureReferral = null;
             }
         }
 
+
         $sla->update([
+            "logo" => $pathLogo,
             "partner_id" => $request->partner['id'],
             "partner_name" => $request->partner['name'],
             "partner_province" => $request->partner['province'],
@@ -266,10 +280,13 @@ class SLAController extends Controller
             "partner_pic_number" => $request->partner['pic_number'],
             "partner_pic_signature" => $pathSignaturePic,
             "referral" => $request->referral,
-            "referral_name" => $request->referral_name,
-            "referral_signature" => $pathSignatureReferral,
+            "referral_logo" => $request->referral_logo ?? null,
+            "referral_name" => $request->referral_signature['name'] ?? null,
+            "referral_institution" => $request->referral_signature['institution'] ?? null,
+            "referral_signature" => $request->referral_signature['image'] ?? null,
             "signature_name" => $request->signature['name'],
             "signature_image" => $request->signature['image'],
+            "sla_doc" => 'tes'
         ]);
 
         $this->updateActivities($sla, $sla->activities, $request->activities);

@@ -12,15 +12,30 @@ import { Toast } from "primereact/toast";
 import { Badge } from "primereact/badge";
 import { Calendar } from "primereact/calendar";
 import { Checkbox } from "primereact/checkbox";
-import { FilePond, registerPlugin } from "react-filepond";
+import {
+    FilePond as FilePond1,
+    FilePond as FilePond2,
+    registerPlugin,
+} from "react-filepond";
 import FilePondPluginFileValidateSize from "filepond-plugin-file-validate-size";
 import "filepond/dist/filepond.min.css";
 registerPlugin(FilePondPluginFileValidateSize);
 
 const BASE_URL = import.meta.env.VITE_BASE_URL;
 
-const Edit = ({ usersProp, partnersProp, sla, productsProp }) => {
-    const [users, setUsers] = useState([...usersProp, {name: 'Account Executive'}, {name: 'Account Manager', name: 'Graphics Designer'}, {name: 'Account Manager'}]);
+const Edit = ({
+    usersProp,
+    partnersProp,
+    sla,
+    signaturesProp,
+    referralsProp,
+}) => {
+    const [users, setUsers] = useState([
+        ...usersProp,
+        { name: "Account Executive" },
+        { name: "Account Manager", name: "Graphics Designer" },
+        { name: "Account Manager" },
+    ]);
 
     const [partners, setPartners] = useState(partnersProp);
     const [dialogVisible, setDialogVisible] = useState(false);
@@ -29,6 +44,8 @@ const Edit = ({ usersProp, partnersProp, sla, productsProp }) => {
     const [regencys, setRegencys] = useState([]);
     const [codeProvince, setcodeProvince] = useState(null);
     const [partnerSignature, setPartnerSignature] = useState(null);
+    const [signatures, setSignatures] = useState(signaturesProp);
+    const [referrals, setReferrals] = useState(referralsProp);
 
     const animatePartnerProvinceRef = useRef(null);
     const animatePartnerRegencyRef = useRef(null);
@@ -84,16 +101,31 @@ const Edit = ({ usersProp, partnersProp, sla, productsProp }) => {
             pic_number: sla.partner_pic_number,
             pic_email: sla.partner_pic_email,
         },
-        pic_signature: sla.partner_pic_signature,
+        pic_signature: null,
         referral: Boolean(sla.referral),
         referral_name: sla.referral_name,
-        referral_signature: sla.referral_signature,
+        logo: null,
+        referral_signature: {
+            name: sla.referral_name,
+            image: sla.referral_signature,
+            institution: sla.referral_institution,
+        },
+        referral_logo: sla.referral_logo,
         signature: {
             name: sla.signature_name,
             image: sla.signature_image,
         },
     });
 
+    useEffect(() => {
+        setTimeout(() => {
+            setData({
+                ...data,
+                logo: sla.logo,
+                pic_signature: sla.partner_pic_signature,
+            });
+        }, 500);
+    }, []);
 
     const getProvince = async () => {
         const options = {
@@ -158,13 +190,6 @@ const Edit = ({ usersProp, partnersProp, sla, productsProp }) => {
         }
     };
 
-    const signatures = [
-        {
-            name: "Muh Arif Mahfudin",
-            position: "CEO",
-            image: "/assets/img/signatures/ttd.png",
-        },
-    ];
     const [filters, setFilters] = useState({
         global: { value: null, matchMode: FilterMatchMode.CONTAINS },
     });
@@ -195,9 +220,10 @@ const Edit = ({ usersProp, partnersProp, sla, productsProp }) => {
 
     const selectedOptionTemplate = (option, props) => {
         if (option) {
+            const name = option.name ?? option.user.name;
             return (
                 <div className="flex align-items-center">
-                    <div>{option.name}</div>
+                    <div>{name}</div>
                 </div>
             );
         }
@@ -214,17 +240,21 @@ const Edit = ({ usersProp, partnersProp, sla, productsProp }) => {
     };
 
     const optionSignatureTemplate = (item) => {
+        const path = item.image ?? item.signature;
+        const name = item.name ?? item.user.name;
+        const position = item.position ?? item.institution;
+
         return (
-            <div className="flex flex-wrap p-2 align-items-center gap-3">
+            <div className="flex flex-wrap p-2 align-items-center items-center gap-3">
                 <img
-                    className="w-3rem shadow-2 flex-shrink-0 border-round"
-                    src={item.image}
-                    alt={item.name}
+                    className="w-[6rem] shadow-2 flex-shrink-0 border-round"
+                    src={"/storage/" + path}
+                    alt={name}
                 />
                 <div className="flex-1 flex flex-col gap-2 xl:mr-8">
-                    <span className="font-bold">{item.name}</span>
+                    <span className="font-bold">{name}</span>
                     <div className="flex align-items-center gap-2">
-                        <span>{item.position}</span>
+                        <span>{position}</span>
                     </div>
                 </div>
                 {/* <span className="font-bold text-900">${item.price}</span> */}
@@ -354,8 +384,61 @@ const Edit = ({ usersProp, partnersProp, sla, productsProp }) => {
                                 </div>
 
                                 <div className="flex flex-col mt-3">
-                                    <label htmlFor="lembaga">Lembaga *</label>
+                                    <label htmlFor="logo">Logo</label>
 
+                                    <div className="App">
+                                        {data.logo !== null &&
+                                        typeof data.logo == "string" ? (
+                                            <>
+                                                <FilePond1
+                                                    files={data.logo}
+                                                    onaddfile={(
+                                                        error,
+                                                        fileItems
+                                                    ) => {
+                                                        if (!error) {
+                                                            setData(
+                                                                "logo",
+                                                                fileItems.file
+                                                            );
+                                                        }
+                                                    }}
+                                                    onremovefile={() => {
+                                                        setData("logo", null);
+                                                    }}
+                                                    maxFileSize="2mb"
+                                                    labelMaxFileSizeExceeded="File terlalu besar"
+                                                    labelIdle='Drag & Drop your files or <span class="filepond--label-action">Browse</span>'
+                                                />
+                                            </>
+                                        ) : (
+                                            <>
+                                                <FilePond1
+                                                    onaddfile={(
+                                                        error,
+                                                        fileItems
+                                                    ) => {
+                                                        if (!error) {
+                                                            setData(
+                                                                "logo",
+                                                                fileItems.file
+                                                            );
+                                                        }
+                                                    }}
+                                                    onremovefile={() => {
+                                                        setData("logo", null);
+                                                    }}
+                                                    maxFileSize="2mb"
+                                                    labelMaxFileSizeExceeded="File terlalu besar"
+                                                    labelIdle='Drag & Drop your files or <span class="filepond--label-action">Browse</span>'
+                                                />
+                                            </>
+                                        )}
+                                    </div>
+                                </div>
+
+                                <div className="flex flex-col mt-3">
+                                    <label htmlFor="lembaga">Lembaga *</label>
                                     <Dropdown
                                         value={data.partner}
                                         dataKey="id"
@@ -377,9 +460,6 @@ const Edit = ({ usersProp, partnersProp, sla, productsProp }) => {
                                                 pic_email:
                                                     e.target.value.pics[0]
                                                         .email,
-                                                pic_number:
-                                                    e.target.value.pics[0]
-                                                        .number,
                                                 pic_number:
                                                     e.target.value.pics[0]
                                                         .number,
@@ -566,7 +646,7 @@ const Edit = ({ usersProp, partnersProp, sla, productsProp }) => {
                                         Email Penanggungjawab *
                                     </label>
                                     <InputText
-                                        value={data.partner.pic_email}
+                                        value={data.partner.pic_email ?? ""}
                                         onChange={(e) => {
                                             setData("partner", {
                                                 ...data.partner,
@@ -655,74 +735,12 @@ const Edit = ({ usersProp, partnersProp, sla, productsProp }) => {
                                         Tanda Tangan PIC
                                     </label>
 
-                                    {/* <div className="App">
-                                        {data.partner.pic_signature !== null &&
-                                        typeof data.partner.pic_signature ==
-                                            "string" ? (
-                                            <>
-                                                <FilePond
-                                                    files={
-                                                        data.partner
-                                                            .pic_signature
-                                                    }
-                                                    onaddfile={(
-                                                        error,
-                                                        fileItems
-                                                    ) => {
-                                                        if (!error) {
-                                                            setData("partner", {
-                                                                ...data.partner,
-                                                                pic_signature:
-                                                                    fileItems.file,
-                                                            });
-                                                        }
-                                                    }}
-                                                    onremovefile={() => {
-                                                        setData("partner", {
-                                                            ...data.partner,
-                                                            pic_signature: null,
-                                                        });
-                                                    }}
-                                                    maxFileSize="2mb"
-                                                    labelMaxFileSizeExceeded="File terlalu besar"
-                                                    labelIdle='Drag & Drop your files or <span class="filepond--label-action">Browse</span>'
-                                                />
-                                            </>
-                                        ) : (
-                                            <>
-                                                <FilePond
-                                                    onaddfile={(
-                                                        error,
-                                                        fileItems
-                                                    ) => {
-                                                        if (!error) {
-                                                            setData("partner", {
-                                                                ...data.partner,
-                                                                pic_signature:
-                                                                    fileItems.file,
-                                                            });
-                                                        }
-                                                    }}
-                                                    onremovefile={() => {
-                                                        setData("partner", {
-                                                            ...data.partner,
-                                                            pic_signature: null,
-                                                        });
-                                                    }}
-                                                    maxFileSize="2mb"
-                                                    labelMaxFileSizeExceeded="File terlalu besar"
-                                                    labelIdle='Drag & Drop your files or <span class="filepond--label-action">Browse</span>'
-                                                />
-                                            </>
-                                        )}
-                                    </div> */}
-
                                     <div className="App">
                                         {data.pic_signature !== null &&
                                         typeof data.pic_signature ==
                                             "string" ? (
                                             <>
-                                                <FilePond
+                                                <FilePond2
                                                     files={
                                                         "/storage/" +
                                                         data.pic_signature
@@ -751,7 +769,7 @@ const Edit = ({ usersProp, partnersProp, sla, productsProp }) => {
                                             </>
                                         ) : (
                                             <>
-                                                <FilePond
+                                                <FilePond2
                                                     onaddfile={(
                                                         error,
                                                         fileItems
@@ -819,102 +837,60 @@ const Edit = ({ usersProp, partnersProp, sla, productsProp }) => {
                                 {data.referral && (
                                     <>
                                         <div className="flex flex-col mt-3">
-                                            <label htmlFor="referral_name">
-                                                Atas Nama Referral
+                                            <label htmlFor="signature">
+                                                Pilih Referral
                                             </label>
-
-                                            <InputText
-                                                value={data.referral_name}
-                                                onChange={(e) =>
-                                                    setData(
-                                                        "referral_name",
-                                                        e.target.value
-                                                    )
+                                            <Dropdown
+                                                value={data.referral_signature}
+                                                onChange={(e) => {
+                                                    setData({
+                                                        ...data,
+                                                        referral_signature: {
+                                                            name: e.target.value
+                                                                .user.name,
+                                                            image: e.target
+                                                                .value
+                                                                .signature,
+                                                            institution:
+                                                                e.target.value
+                                                                    .institution,
+                                                        },
+                                                        referral_logo:
+                                                            e.target.value.logo,
+                                                    });
+                                                }}
+                                                dataKey="institution"
+                                                options={referrals}
+                                                optionLabel="name"
+                                                placeholder="Pilih Tanda Tangan"
+                                                filter
+                                                valueTemplate={
+                                                    selectedOptionTemplate
                                                 }
-                                                className={`dark:bg-gray-300 ${
-                                                    errors.referral_name &&
+                                                itemTemplate={
+                                                    optionSignatureTemplate
+                                                }
+                                                className={`w-full md:w-14rem ${
+                                                    errors.referral_signature &&
                                                     "p-invalid"
                                                 }`}
-                                                id="referral_name"
-                                                aria-describedby="referral_name-help"
                                                 onFocus={() => {
                                                     triggerInputFocus(
-                                                        animateReferralNameRef
+                                                        animateReferralRef
                                                     );
                                                 }}
-                                                onBlur={() => {
+                                                onShow={() => {
+                                                    triggerInputFocus(
+                                                        animateReferralRef
+                                                    );
+                                                }}
+                                                onHide={() => {
                                                     stopAnimateInputFocus(
-                                                        animateReferralNameRef
+                                                        animateReferralRef
                                                     );
                                                 }}
+                                                showOnFocus
                                             />
-                                        </div>
-
-                                        <div className="flex flex-col mt-3">
-                                            <label htmlFor="signature">
-                                                Tanda Tangan Pihak Ketiga
-                                            </label>
-
-                                            <div className="App">
-                                                {data.referral_signature !==
-                                                    null &&
-                                                typeof data.referral_signature ==
-                                                    "string" ? (
-                                                    <>
-                                                        <FilePond
-                                                            files={
-                                                                "/storage/" +
-                                                                data.referral_signature
-                                                            }
-                                                            onaddfile={(
-                                                                error,
-                                                                fileItems
-                                                            ) => {
-                                                                if (!error) {
-                                                                    setData(
-                                                                        "referral_signature",
-                                                                        fileItems.file
-                                                                    );
-                                                                }
-                                                            }}
-                                                            onremovefile={() => {
-                                                                setData(
-                                                                    "referral_signature",
-                                                                    null
-                                                                );
-                                                            }}
-                                                            maxFileSize="2mb"
-                                                            labelMaxFileSizeExceeded="File terlalu besar"
-                                                            labelIdle='Drag & Drop your files or <span class="filepond--label-action">Browse</span>'
-                                                        />
-                                                    </>
-                                                ) : (
-                                                    <>
-                                                        <FilePond
-                                                            onaddfile={(
-                                                                error,
-                                                                fileItems
-                                                            ) => {
-                                                                if (!error) {
-                                                                    setData(
-                                                                        "referral_signature",
-                                                                        fileItems.file
-                                                                    );
-                                                                }
-                                                            }}
-                                                            onremovefile={() => {
-                                                                setData(
-                                                                    "referral_signature",
-                                                                    null
-                                                                );
-                                                            }}
-                                                            maxFileSize="2mb"
-                                                            labelMaxFileSizeExceeded="File terlalu besar"
-                                                            labelIdle='Drag & Drop your files or <span class="filepond--label-action">Browse</span>'
-                                                        />
-                                                    </>
-                                                )}
-                                            </div>
                                         </div>
                                     </>
                                 )}
@@ -1095,62 +1071,6 @@ const Edit = ({ usersProp, partnersProp, sla, productsProp }) => {
                                         </div>
                                     </div>
 
-                                    {/* <div className="flex">
-                                        <div className="flex flex-col">
-                                            <label htmlFor="estimation_date">
-                                                Tanggal *
-                                            </label>
-                                            <Calendar
-                                                value={
-                                                    activity.estimation_date
-                                                        ? new Date(
-                                                              activity.estimation_date
-                                                          )
-                                                        : null
-                                                }
-                                                style={{ height: "35px" }}
-                                                onChange={(e) => {
-                                                    handleInputChange(
-                                                        index,
-                                                        "estimation_date",
-                                                        e.target.value
-                                                    );
-                                                }}
-                                                dateFormat="dd/mm/yy"
-                                                showIcon
-                                                className="w-full min-w-[12rem] md:w-12rem"
-                                            />{" "}
-                                        </div>
-                                    </div>
-
-                                    <div className="flex">
-                                        <div className="flex flex-col">
-                                            <label htmlFor="partner_address">
-                                                Realisasi
-                                            </label>
-                                            <Calendar
-                                                // value={
-                                                //     activity.realization_date
-                                                //         ? new Date(
-                                                //               activity.realization_date
-                                                //           )
-                                                //         : null
-                                                // }
-                                                style={{ height: "35px" }}
-                                                onChange={(e) => {
-                                                    handleInputChange(
-                                                        index,
-                                                        "realization_date",
-                                                        e.target.value
-                                                    );
-                                                }}
-                                                showIcon
-                                                dateFormat="dd/mm/yy"
-                                                className="w-full min-w-[12rem] md:w-12rem"
-                                            />{" "}
-                                        </div>
-                                    </div> */}
-
                                     <div className="flex self-center pt-4">
                                         <Button
                                             className="bg-red-500 h-1 w-1 shadow-md rounded-full "
@@ -1191,11 +1111,19 @@ const Edit = ({ usersProp, partnersProp, sla, productsProp }) => {
                         <header>
                             <div className="flex justify-start items-center">
                                 <div className="w-[10%]">
-                                    <img
-                                        src="/assets/img/logo/sla_logo.png"
-                                        alt=""
-                                        className="float-left w-full h-full"
-                                    />
+                                    {data.logo && (
+                                        <img
+                                            src={
+                                                typeof data.logo == "object"
+                                                    ? URL.createObjectURL(
+                                                          data.logo
+                                                      )
+                                                    : data.logo
+                                            }
+                                            alt=""
+                                            className="float-left w-full h-full"
+                                        />
+                                    )}
                                 </div>
                                 <div className="w-full text-center ">
                                     <h2 className="font-bold">
@@ -1206,7 +1134,17 @@ const Edit = ({ usersProp, partnersProp, sla, productsProp }) => {
                                         CAZH CARDS
                                     </h2>
                                 </div>
-                                <div className="w-[10%]"></div>
+                                <div className="w-[10%]">
+                                    {data.referral_logo && (
+                                        <img
+                                            src={
+                                                "/storage/" + data.referral_logo
+                                            }
+                                            alt=""
+                                            className="float-left w-full h-full"
+                                        />
+                                    )}
+                                </div>
                             </div>
                         </header>
 
@@ -1398,12 +1336,6 @@ const Edit = ({ usersProp, partnersProp, sla, productsProp }) => {
                                 </tbody>
                             </table>
                         </div>
-                        {/* 
-                        <div className="flex flex-col text-xs mt-5 justify-start w-[30%]">
-                            <p>Purwokerto, {new Date().getFullYear()}</p>
-                            <img src={BASE_URL + data.signature_image} alt="" />
-                            <p>{data.signature_name}</p>
-                        </div> */}
 
                         <div className="flex text-xs flex-row mt-5 justify-between">
                             <div
@@ -1412,7 +1344,11 @@ const Edit = ({ usersProp, partnersProp, sla, productsProp }) => {
                             >
                                 <p>Pihak Pertama</p>
                                 <img
-                                    src={BASE_URL + data.signature.image}
+                                    src={
+                                        BASE_URL +
+                                        "/storage/" +
+                                        data.signature.image
+                                    }
                                     alt=""
                                     className="min-h-20 max-h-20"
                                 />
@@ -1422,7 +1358,6 @@ const Edit = ({ usersProp, partnersProp, sla, productsProp }) => {
                                             "{{nama_pihak_pertama}}"}
                                     </b>
                                 </p>
-                                {/* <p>{data.signature_position}</p> */}
                             </div>
                             <div className="w-[30%]">
                                 <p>Pihak Kedua</p>
@@ -1431,7 +1366,8 @@ const Edit = ({ usersProp, partnersProp, sla, productsProp }) => {
                                         src={
                                             typeof data.pic_signature ===
                                             "string"
-                                                ? data.pic_signature
+                                                ? "/storage/" +
+                                                  data.pic_signature
                                                 : URL.createObjectURL(
                                                       data.pic_signature
                                                   )
@@ -1454,15 +1390,12 @@ const Edit = ({ usersProp, partnersProp, sla, productsProp }) => {
                                     ref={animateReferralRef}
                                 >
                                     <p>Pihak Ketiga</p>
-                                    {data.referral_signature ? (
+                                    {data.referral_signature.image ? (
                                         <img
                                             src={
-                                                typeof data.referral_signature ===
-                                                "string"
-                                                    ? data.referral_signature
-                                                    : URL.createObjectURL(
-                                                          data.referral_signature
-                                                      )
+                                                BASE_URL +
+                                                "/storage" +
+                                                data.referral_signature.image
                                             }
                                             className="min-h-20 max-h-20"
                                         />
@@ -1471,7 +1404,7 @@ const Edit = ({ usersProp, partnersProp, sla, productsProp }) => {
                                     )}
                                     <p>
                                         <b ref={animateReferralNameRef}>
-                                            {data.referral_name ??
+                                            {data.referral_signature.name ??
                                                 "{{nama_referral}}"}
                                         </b>
                                     </p>

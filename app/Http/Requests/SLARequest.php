@@ -23,6 +23,7 @@ class SLARequest extends FormRequest
     {
         return [
             "code" => "required",
+            "logo" => "required",
             "partner.name" => "required",
             "partner.province" => "required",
             "partner.regency" => "required",
