@@ -49,7 +49,7 @@ export default function Index({ auth, signaturesProp, rolesProp, usersProp }) {
         errors,
     } = useForm({
         id: null,
-        user: { name: null },
+        user: { name: null, id: null },
         image: null,
         position: null,
     });
@@ -140,7 +140,7 @@ export default function Index({ auth, signaturesProp, rolesProp, usersProp }) {
         setData((data) => ({
             ...data,
             uuid: signature.uuid,
-            user: { name: signature.name },
+            user: { name: signature.name, id: signature.user_id },
             image: signature.image,
             position: signature.position,
         }));
@@ -326,7 +326,10 @@ export default function Index({ auth, signaturesProp, rolesProp, usersProp }) {
                                     onChange={(e) => {
                                         setData((data) => ({
                                             ...data,
-                                            user: { name: e.target.value.name },
+                                            user: {
+                                                name: e.target.value.name,
+                                                id: e.target.value.id,
+                                            },
                                             position: e.target.value.position,
                                         }));
                                     }}
@@ -394,6 +397,7 @@ export default function Index({ auth, signaturesProp, rolesProp, usersProp }) {
                                 </div>
                             </div>
                         </div>
+
                         <div className="flex flex-col">
                             <label htmlFor="name">Divisi</label>
                             <Dropdown
@@ -442,7 +446,10 @@ export default function Index({ auth, signaturesProp, rolesProp, usersProp }) {
                                     onChange={(e) => {
                                         setData((data) => ({
                                             ...data,
-                                            user: { name: e.target.value.name },
+                                            user: {
+                                                name: e.target.value.name,
+                                                id: e.target.value.id,
+                                            },
                                             position: e.target.value.position,
                                         }));
                                     }}

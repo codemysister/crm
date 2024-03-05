@@ -13,7 +13,7 @@ return new class extends Migration {
         Schema::create('signatures', function (Blueprint $table) {
             $table->id();
             $table->uuid('uuid');
-            // $table->foreignId('user_id')->constrained("users","id")->onDelete("cascade");
+            $table->foreignId('user_id')->constrained("users", "id")->onDelete("cascade");
             $table->string('name');
             $table->string('image');
             $table->string('position');

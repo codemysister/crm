@@ -16,8 +16,9 @@ class SignatureSeeder extends Seeder
     {
         Signature::create([
             'uuid' => Str::uuid(),
+            'user_id' => 2,
             'name' => 'Muh Arif Mahfudin',
-            'position' => "CEO",
+            'position' => "ceo",
             'image' => 'images/tanda_tangan/tanda_tangan.png'
         ]);
     }
