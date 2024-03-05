@@ -36,7 +36,6 @@ const Create = ({ usersDefault, partnersDefault, signaturesProp }) => {
     const animatePartnerProvinceRef = useRef(null);
     const animatePartnerRegencyRef = useRef(null);
 
-   
     const [filters, setFilters] = useState({
         global: { value: null, matchMode: FilterMatchMode.CONTAINS },
     });
@@ -86,7 +85,7 @@ const Create = ({ usersDefault, partnersDefault, signaturesProp }) => {
         partner: {
             name: null,
             province: null,
-            regency: null
+            regency: null,
         },
         departure_date: new Date(),
         return_date: new Date(),
@@ -95,7 +94,7 @@ const Create = ({ usersDefault, partnersDefault, signaturesProp }) => {
         signature: {
             name: null,
             image: null,
-            position: null
+            position: null,
         },
         stpd_doc: "",
     });
@@ -243,8 +242,6 @@ const Create = ({ usersDefault, partnersDefault, signaturesProp }) => {
         );
     };
 
-   
-
     const header = (
         <div className="flex flex-row justify-left gap-2 align-items-center items-end">
             <div className="w-[30%]">
@@ -304,9 +301,9 @@ const Create = ({ usersDefault, partnersDefault, signaturesProp }) => {
                 <div className="flex flex-col h-screen max-h-screen overflow-hidden md:flex-row z-40 relative gap-5">
                     <div className="md:w-[35%] overflow-y-auto h-screen max-h-screen p-5">
                         <Card>
-                        <div className="flex justify-between items-center mb-4">
+                            <div className="flex justify-between items-center mb-4">
                                 <h1 className="font-bold text-xl">
-                                Surat Keterangan Perjalanan Dinas
+                                    Surat Keterangan Perjalanan Dinas
                                 </h1>
                                 <Link href="/stpd">
                                     <svg
@@ -347,48 +344,71 @@ const Create = ({ usersDefault, partnersDefault, signaturesProp }) => {
 
                                 <div className="flex flex-col mt-3">
                                     <label htmlFor="lembaga">Lembaga *</label>
-                                    <Dropdown
-                                        value={data.partner}
-                                        dataKey="id"
-                                        onChange={(e) => {
-                                            setData("partner", {
-                                                ...data.partner,
-                                                id: e.target.value.id,
-                                                name: e.target.value.name,
-                                                province:
-                                                    e.target.value.province,
-                                                regency: e.target.value.regency,
-                                            });
-                                            setcodeProvince(
-                                                (prev) =>
-                                                    (prev = JSON.parse(
-                                                        e.target.value.province
-                                                    ).code)
-                                            );
-                                        }}
-                                        onFocus={() => {
-                                            triggerInputFocus(
-                                                animatePartnerNameRef
-                                            );
-                                        }}
-                                        onShow={() => {
-                                            triggerInputFocus(
-                                                animatePartnerNameRef
-                                            );
-                                        }}
-                                        onBlur={() => {
-                                            stopAnimateInputFocus(
-                                                animatePartnerNameRef
-                                            );
-                                        }}
-                                        options={partners}
-                                        optionLabel="name"
-                                        placeholder="Pilih Lembaga"
-                                        filter
-                                        valueTemplate={selectedOptionTemplate}
-                                        itemTemplate={optionTemplate}
-                                        className="w-full md:w-14rem"
-                                    />
+                                    <div className="p-inputgroup flex-1">
+                                        <InputText
+                                            value={data.partner.name}
+                                            placeholder="Lembaga"
+                                            onChange={(e) => {
+                                                setData((prev) => ({
+                                                    ...prev,
+                                                    partner: {
+                                                        ...prev.partner,
+                                                        name: e.target.value,
+                                                        id: null,
+                                                    },
+                                                }));
+                                            }}
+                                            onFocus={() => {
+                                                triggerInputFocus(
+                                                    animatePartnerNameRef
+                                                );
+                                            }}
+                                            onBlur={() => {
+                                                stopAnimateInputFocus(
+                                                    animatePartnerNameRef
+                                                );
+                                            }}
+                                            className="w-[90%]"
+                                        />
+                                        <Dropdown
+                                            value={data.partner}
+                                            dataKey="name"
+                                            onChange={(e) => {
+                                                setData((prev) => ({
+                                                    ...prev,
+                                                    partner: {
+                                                        ...prev.partner,
+                                                        name: e.target.value
+                                                            .name,
+                                                        id: e.target.value.id,
+                                                        province:
+                                                            e.target.value
+                                                                .province,
+                                                        regency:
+                                                            e.target.value
+                                                                .regency,
+                                                    },
+                                                }));
+                                                setcodeProvince(
+                                                    (prev) =>
+                                                        (prev = JSON.parse(
+                                                            e.target.value
+                                                                .province
+                                                        ).code)
+                                                );
+                                            }}
+                                            options={partners}
+                                            filter
+                                            placeholder={false}
+                                            showClear={false}
+                                            optionLabel="name"
+                                            valueTemplate={
+                                                selectedOptionTemplate
+                                            }
+                                            itemTemplate={optionTemplate}
+                                            className="w-[10%] dropdown-group border-l-0"
+                                        />
+                                    </div>
                                 </div>
 
                                 <div className="flex flex-col mt-3">
@@ -452,7 +472,6 @@ const Create = ({ usersDefault, partnersDefault, signaturesProp }) => {
                                                 : null
                                         }
                                         onChange={(e) => {
-                                           
                                             setData("partner", {
                                                 ...data.partner,
                                                 regency: JSON.stringify(
@@ -583,7 +602,6 @@ const Create = ({ usersDefault, partnersDefault, signaturesProp }) => {
                                                 animateTransportationRef
                                             );
                                         }}
-                                       
                                         onBlur={() => {
                                             stopAnimateInputFocus(
                                                 animateTransportationRef
@@ -611,7 +629,6 @@ const Create = ({ usersDefault, partnersDefault, signaturesProp }) => {
                                                 animateAccomodationRef
                                             );
                                         }}
-                                        
                                         onBlur={() => {
                                             stopAnimateInputFocus(
                                                 animateAccomodationRef
@@ -635,7 +652,8 @@ const Create = ({ usersDefault, partnersDefault, signaturesProp }) => {
                                                 signature: {
                                                     name: e.target.value.name,
                                                     image: e.target.value.image,
-                                                    position: e.target.value.position,
+                                                    position:
+                                                        e.target.value.position,
                                                 },
                                             });
                                         }}
@@ -650,7 +668,6 @@ const Create = ({ usersDefault, partnersDefault, signaturesProp }) => {
                                 </div>
 
                                 <div className="flex-flex-col mt-3">
-                                    
                                     <form onSubmit={handleSubmitForm}>
                                         <Button className="mx-auto justify-center block">
                                             Submit
@@ -660,7 +677,6 @@ const Create = ({ usersDefault, partnersDefault, signaturesProp }) => {
                             </div>
                         </Card>
                     </div>
-                 
 
                     <Dialog
                         header="Karyawan"
@@ -705,8 +721,8 @@ const Create = ({ usersDefault, partnersDefault, signaturesProp }) => {
                         </DataTable>
                     </Dialog>
 
-                    <div className="md:w-[65%] h-screen text-sm max-h-screen overflow-y-auto p-5">
-                    <header>
+                    <div className="md:w-[65%] hidden md:block h-screen text-sm max-h-screen overflow-y-auto p-5">
+                        <header>
                             <div className="flex justify-between items-center">
                                 <div className="w-full">
                                     <img
@@ -759,9 +775,15 @@ const Create = ({ usersDefault, partnersDefault, signaturesProp }) => {
                                     {data.employees?.map((data, i) => {
                                         return (
                                             <tr key={data.name + i}>
-                                                <td className="px-2 py-1">{++i}</td>
-                                                <td className="px-2 py-1">{data.name}</td>
-                                                <td className="px-2 py-1">{data.position}</td>
+                                                <td className="px-2 py-1">
+                                                    {++i}
+                                                </td>
+                                                <td className="px-2 py-1">
+                                                    {data.name}
+                                                </td>
+                                                <td className="px-2 py-1">
+                                                    {data.position}
+                                                </td>
                                             </tr>
                                         );
                                     })}
@@ -796,17 +818,25 @@ const Create = ({ usersDefault, partnersDefault, signaturesProp }) => {
                                             :
                                         </td>
                                         <td className="text-gray-700 font-bold w-7/12">
-                                        <span ref={animatePartnerRegencyRef}>
-                                    {data.partner.regency
-                                        ? JSON.parse(data.partner.regency).name
-                                        : "{{Kab/Kota}}"}
-                                </span>
-                                {", "}
-                                <span ref={animatePartnerProvinceRef}>
-                                    {data.partner.province
-                                        ? JSON.parse(data.partner.province).name
-                                        : "{{Provinsi}}"}
-                                </span>
+                                            <span
+                                                ref={animatePartnerRegencyRef}
+                                            >
+                                                {data.partner.regency
+                                                    ? JSON.parse(
+                                                          data.partner.regency
+                                                      ).name
+                                                    : "{{Kab/Kota}}"}
+                                            </span>
+                                            {", "}
+                                            <span
+                                                ref={animatePartnerProvinceRef}
+                                            >
+                                                {data.partner.province
+                                                    ? JSON.parse(
+                                                          data.partner.province
+                                                      ).name
+                                                    : "{{Provinsi}}"}
+                                            </span>
                                         </td>
                                     </tr>
                                     <br />
@@ -817,7 +847,10 @@ const Create = ({ usersDefault, partnersDefault, signaturesProp }) => {
                                         <td className="text-gray-700 w-[1%]">
                                             :
                                         </td>
-                                        <td ref={animateDepartureDateRef} className="text-gray-700 font-bold w-7/12">
+                                        <td
+                                            ref={animateDepartureDateRef}
+                                            className="text-gray-700 font-bold w-7/12"
+                                        >
                                             {ubahFormatTanggal(
                                                 data.departure_date
                                             )}
@@ -830,7 +863,10 @@ const Create = ({ usersDefault, partnersDefault, signaturesProp }) => {
                                         <td className="text-gray-700 w-[1%]">
                                             :
                                         </td>
-                                        <td ref={animateReturnDateRef} className="text-gray-700 font-bold w-7/12">
+                                        <td
+                                            ref={animateReturnDateRef}
+                                            className="text-gray-700 font-bold w-7/12"
+                                        >
                                             {ubahFormatTanggal(
                                                 data.return_date
                                             )}
@@ -843,8 +879,12 @@ const Create = ({ usersDefault, partnersDefault, signaturesProp }) => {
                                         <td className="text-gray-700 w-[1%]">
                                             :
                                         </td>
-                                        <td ref={animateTransportationRef} className="text-gray-700 font-bold w-7/12">
-                                            {data.transportation ?? "{{Kendaraan}}"}
+                                        <td
+                                            ref={animateTransportationRef}
+                                            className="text-gray-700 font-bold w-7/12"
+                                        >
+                                            {data.transportation ??
+                                                "{{Kendaraan}}"}
                                         </td>
                                     </tr>
                                     <tr>
@@ -854,8 +894,12 @@ const Create = ({ usersDefault, partnersDefault, signaturesProp }) => {
                                         <td className="text-gray-700 w-[1%]">
                                             :
                                         </td>
-                                        <td ref={animateAccomodationRef} className="text-gray-700 font-bold w-7/12">
-                                            {data.accommodation ?? "{{Akomodasi}}"}
+                                        <td
+                                            ref={animateAccomodationRef}
+                                            className="text-gray-700 font-bold w-7/12"
+                                        >
+                                            {data.accommodation ??
+                                                "{{Akomodasi}}"}
                                         </td>
                                     </tr>
                                 </tbody>
@@ -880,7 +924,11 @@ const Create = ({ usersDefault, partnersDefault, signaturesProp }) => {
                         <div className="flex flex-col mt-5 justify-start w-[30%]">
                             <p>Purwokerto, {new Date().getFullYear()}</p>
                             <img
-                                src={BASE_URL +'/storage/'+ data.signature.image}
+                                src={
+                                    BASE_URL +
+                                    "/storage/" +
+                                    data.signature.image
+                                }
                                 alt=""
                             />
                             <p>{data.signature.name}</p>

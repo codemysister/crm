@@ -35,7 +35,7 @@ class STPDController extends Controller
         $usersDefault->transform(function ($user) {
             $user->position = $user->roles->first()->name;
             $user->user_id = $user->id;
-            unset($user->roles);
+            unset ($user->roles);
             return $user;
         });
         $partnersDefault = Partner::all();
@@ -49,11 +49,11 @@ class STPDController extends Controller
         $usersDefault->transform(function ($user) {
             $user->position = $user->roles->first()->name;
             $user->user_id = $user->id;
-            unset($user->roles);
+            unset ($user->roles);
             return $user;
         });
 
-        $partnersDefault = Partner::all(["id", "name", "address"]);
+        $partnersDefault = Partner::all();
         $stpd = STPD::with([
             'employees' => function ($query) {
                 $query->get();

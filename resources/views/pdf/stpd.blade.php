@@ -129,7 +129,7 @@
         </div>
 
 
-        <div class="mt-4">
+        <div class="mt-4 text-justify">
             <div>
                 Semua biaya dalam perjalanan dinas, konsumsi, serta akomodasi dalam rangka perjalanan
                 dinas ini akan menjadi tanggung jawab PT Cazh Teknologi Inovasi sesuai peraturan perjalanan
@@ -137,7 +137,7 @@
             </div>
         </div>
 
-        <div class="mt-4">
+        <div class="mt-4 text-justify">
             <div>
                 Demikian surat ini dibuat agar dapat dilaksanakan dengan baik dan penuh tanggung jawab. Kepada semua
                 pihak yang terlibat dimohon kerja sama yang baik agar perjalanan dinas ini dapat terlaksana dengan
@@ -158,7 +158,7 @@
             <div class="self-start text-left">
                 <div>.........................., ..........................</div>
                 <div>Mengetahui*,</div>
-                <div style="margin-top: 50px;">(....................................................)</div>
+                <div style="margin-top: 80px;">(....................................................)</div>
                 <div style="font-size: 8px;">*)Tanda Tangan dan stempel lembaga tujuan</div>
             </div>
         </div>
