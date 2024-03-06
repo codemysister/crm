@@ -398,11 +398,7 @@ export default function Index({ auth, memosDefault }) {
                                 ) : (
                                     <div className="flex w-full h-full items-center justify-center">
                                         <a
-                                            href={
-                                                BASE_URL +
-                                                "/" +
-                                                rowData.memo_doc
-                                            }
+                                            href={"/" + rowData.memo_doc}
                                             download={`${rowData.code}_${rowData.partner_name}`}
                                             class="font-bold  w-full h-full text-center rounded-full "
                                         >

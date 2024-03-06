@@ -817,7 +817,6 @@ export default function InvoiceSubscription({
                                     <div className="flex w-full h-full items-center justify-center">
                                         <a
                                             href={
-                                                BASE_URL +
                                                 "/storage/" +
                                                 rowData.receipt_doc
                                             }
@@ -1337,7 +1336,6 @@ export default function InvoiceSubscription({
                                     <div className="flex w-full h-full items-center justify-center">
                                         <a
                                             href={
-                                                BASE_URL +
                                                 "/storage/" +
                                                 rowData.invoice_subscription_doc
                                             }
@@ -1476,7 +1474,6 @@ export default function InvoiceSubscription({
                             <p className="font-semibold">
                                 <a
                                     href={
-                                        BASE_URL +
                                         "/assets/template/excel/invoice_sample.csv"
                                     }
                                     download="sample.csv"

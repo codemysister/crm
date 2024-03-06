@@ -749,7 +749,6 @@ export default function Index({
                                     <div className="flex w-full h-full items-center justify-center">
                                         <a
                                             href={
-                                                BASE_URL +
                                                 "/storage/" +
                                                 rowData.receipt_doc
                                             }
@@ -1119,7 +1118,6 @@ export default function Index({
                                     <div className="flex w-full h-full items-center justify-center">
                                         <a
                                             href={
-                                                BASE_URL +
                                                 "/storage/" +
                                                 rowData.invoice_general_doc
                                             }

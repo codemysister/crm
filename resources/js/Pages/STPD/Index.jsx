@@ -381,11 +381,7 @@ export default function Index({ auth, spdsDefault }) {
                                 ) : (
                                     <div className="flex w-full h-full items-center justify-center">
                                         <a
-                                            href={
-                                                BASE_URL +
-                                                "/" +
-                                                rowData.stpd_doc
-                                            }
+                                            href={"/" + rowData.stpd_doc}
                                             download={`${rowData.code}_${rowData.partner_name}`}
                                             class="font-bold  w-full h-full text-center rounded-full "
                                         >

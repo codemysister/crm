@@ -1293,7 +1293,7 @@ const Edit = ({ usersProp, partnersProp, rolesProp, sla, productsProp }) => {
                             >
                                 <p>Pihak Pertama</p>
                                 <img
-                                    src={BASE_URL + data.signature.image}
+                                    src={"/" + data.signature.image}
                                     alt=""
                                     className="min-h-20 max-h-20"
                                 />

@@ -1344,11 +1344,7 @@ const Edit = ({
                             >
                                 <p>Pihak Pertama</p>
                                 <img
-                                    src={
-                                        BASE_URL +
-                                        "/storage/" +
-                                        data.signature.image
-                                    }
+                                    src={"/storage/" + data.signature.image}
                                     alt=""
                                     className="min-h-20 max-h-20"
                                 />
@@ -1393,7 +1389,6 @@ const Edit = ({
                                     {data.referral_signature.image ? (
                                         <img
                                             src={
-                                                BASE_URL +
                                                 "/storage" +
                                                 data.referral_signature.image
                                             }

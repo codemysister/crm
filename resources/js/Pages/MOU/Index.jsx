@@ -583,7 +583,6 @@ export default function Index({ auth }) {
                                                 <span>
                                                     <a
                                                         href={
-                                                            BASE_URL +
                                                             "/storage/" +
                                                             rowData.mou_doc_word
                                                         }
@@ -604,7 +603,6 @@ export default function Index({ auth }) {
                                                 <span>
                                                     <a
                                                         href={
-                                                            BASE_URL +
                                                             "/" +
                                                             rowData.mou_doc
                                                         }

@@ -3690,11 +3690,7 @@ const Edit = ({ usersProp, partnersProp, mou, signaturesProp }) => {
                                 >
                                     <p>Pihak Pertama</p>
                                     <img
-                                        src={
-                                            BASE_URL +
-                                            "/storage/" +
-                                            data.signature.image
-                                        }
+                                        src={"/storage/" + data.signature.image}
                                         alt=""
                                         className="min-h-20 max-h-20"
                                     />
