@@ -1,0 +1,47 @@
+<?php
+
+namespace Database\Seeders;
+
+// use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use App\Models\User;
+use Illuminate\Database\Seeder;
+use Spatie\Permission\Models\Permission;
+use Spatie\Permission\Models\Role;
+
+
+class RolePermissionSeeder extends Seeder
+{
+    /**
+     * Seed the application's database.
+     */
+    public function run(): void
+    {
+        $permissions = Permission::all();
+        $role = Role::find(1);
+        $role->syncPermissions($permissions);
+        $role = Role::find(2);
+        $role->syncPermissions($permissions);
+        $role = Role::find(3);
+        $role->syncPermissions($permissions);
+        $role = Role::find(4);
+        $role->syncPermissions($permissions);
+        $role = Role::find(5);
+        $role->syncPermissions($permissions);
+        $role = Role::find(6);
+        $role->syncPermissions($permissions);
+        $role = Role::find(7);
+        $role->syncPermissions($permissions);
+        $role = Role::find(8);
+        $role->syncPermissions($permissions);
+        $role = Role::find(9);
+        $role->syncPermissions($permissions);
+        $role = Role::find(10);
+        $role->syncPermissions($permissions);
+        $role = Role::find(11);
+        $role->syncPermissions($permissions);
+        $role = Role::find(12);
+        $role->syncPermissions($permissions);
+        $role = Role::find(13);
+        $role->syncPermissions($permissions);
+    }
+}

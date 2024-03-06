@@ -1,0 +1,493 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap');
+@layer tailwind-base, primereact, tailwind-utilities;
+
+@layer tailwind-base {
+  @tailwind base;
+}
+
+@layer tailwind-utilities {
+  @tailwind components;
+  @tailwind utilities;
+}
+
+@layer utilities {
+    /* Glassmorphism */
+    .glass {
+      background: #0F172A;
+      backdrop-filter: blur(10px);
+    }
+    /* End Glassmorphism */
+
+
+    /* Paginator */
+    .dark .p-paginator .p-paginator-pages .p-paginator-page {
+      color: white;
+    }
+
+    .dark .p-paginator .p-paginator-first,
+    .dark .p-paginator .p-paginator-prev,
+    .dark .p-paginator .p-paginator-next,
+    .dark .p-paginator .p-paginator-last {
+      color: white;
+    }
+
+    .dark .paginator-custome{
+      box-shadow: 0px -2px 3px rgba(0, 0, 0, 0.267);
+      border: none;
+    }
+    /* End Paginator */
+
+
+    /* Datatable */
+    .p-datatable .p-datatable-header {
+      border-top-left-radius: 0.5rem;
+      border-top-right-radius: 0.5rem;
+    }
+
+    .dark .p-datatable .p-datatable-tbody > tr{
+      background: transparent;
+      color: rgb(209 213 219 / 1);
+;
+    }
+
+    .dark .p-datatable .p-datatable-tbody > tr > td{
+      border: none;
+    }
+
+    .p-datatable{
+      font-size: 15px;
+    }
+
+    .dark .p-datatable .p-datatable-header, .dark .p-datatable-table .p-datatable-scrollable-table .p-datatable-header, .dark .p-datatable .p-datatable-thead > tr > th{
+      background-color: transparent;
+    }
+
+    .dark .p-datatable.p-datatable-scrollable > .p-datatable-wrapper > .p-datatable-table > .p-datatable-thead{
+      background-color: transparent;
+      color: rgb(209 213 219 / 1);
+;
+    }
+
+    .dark .p-datatable .p-sortable-column.p-highlight .p-sortable-column-icon,
+    .dark .p-datatable .p-sortable-column .p-sortable-column-icon, .dark .p-inputtext .p-component {
+      color: rgb(209 213 219 / 1);
+;
+    }
+     
+    .dark .p-datatable .p-datatable-header, .dark .p-datatable .p-datatable-thead > tr > th {
+      border:none;
+    }
+
+    .dark .p-datatable .p-datatable-thead > tr > th{
+      color: rgb(209 213 219 / 1);
+;
+    }
+    
+    .dark .p-paginator{
+      border: none;
+      background-color: transparent;
+    }
+
+    .dark .p-datatable-thead tr{
+      box-shadow: 0px 2px 3px rgba(0, 0, 0, 0.267);
+    }
+
+    .dark .shadow-custome{
+      box-shadow: 0px 2px 3px rgba(0, 0, 0, 0.267);
+    }
+
+    .dark .p-datatable-emptymessage{
+      background-color: transparent;
+      color: rgb(209 213 219 / 1);
+;
+    }
+    
+    /* End Datatable */
+
+    
+    /* Input Text */
+    .dark .p-fluid .p-inputtext {
+      width: 100%;
+      color:rgb(175, 175, 175);
+      border: none;
+    }
+
+   
+
+    .p-input-icon-left{
+      border: 1px solid #673AB7;
+      border-radius: 4px;
+    }
+
+    /* Card */
+    .dark .p-card{
+      background-color: #0F172A;
+    }
+
+    .dark .App{
+      color: red;
+    }
+    .dark .filepond--wrapper{
+      color: red;
+    }
+    .dark .filepond--root .filepond--drop-label{
+      color: red;
+    }
+
+    .dark .p-card-content div h1, .dark .p-card-content label, .dark .p-dialog-content label{
+      color: rgb(209 213 219 / 1);
+
+    }
+    /* End Card */
+    
+
+    
+    /* End Input Text */
+
+
+    /* Dialog */
+    .p-dialog .p-dialog-header{
+      --tw-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+        --tw-shadow-colored: 0 4px 6px -1px var(--tw-shadow-color), 0 2px 4px -2px var(--tw-shadow-color);
+        box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow);
+        z-index: 20;
+    }
+
+    .dark .p-dialog .p-dialog-content{
+      background-color: #0F172A;
+    }
+
+    .p-confirm-dialog .p-dialog-content{
+      padding-top: 1rem;
+    }
+
+    .dark .shadow-footer{
+      background-color: transparent;
+    }
+    .shadow-footer .p-dialog-footer{
+      box-shadow: 0px -2px 3px rgba(0, 0, 0, 0.267);
+    }
+    /* End Dialog */
+
+
+    /* Step */
+    .p-steps .p-steps-item .p-menuitem-link{
+      /* padding: 0.5rem 0.5rem; */
+      gap: 8px;
+      flex-direction: row;
+    }
+
+    .p-steps {
+      padding: 0;
+    }
+    .p-steps ol{
+      gap: 15px;
+    }
+
+    .p-steps .p-steps-item .p-menuitem-link .p-steps-title{
+      padding-left: 0px;
+    }
+
+    .dark .p-steps.p-component.p-readonly{
+      background-color: #0F172A;
+    }
+
+    .dark .p-inputgroup{
+      border-radius: 4px;
+      background-color: #D1D5DB;
+    }
+
+    .dark .p-inputgroup .p-inputtext{
+      background-color: transparent;
+    }
+
+    .dark .p-dropdown,  .dark .p-inputwrapper{
+      background-color: #D1D5DB;
+    }
+     .dark textarea, .dark .filepond--drop-label, .dark .p-inputnumber-input{
+      border-radius: 4px;
+      background-color: #D1D5DB;
+    }
+
+    .dark .p-unselectable-text .p-highlight .p-tabview-title{
+      color: white;
+    }
+    .dark .p-unselectable-text .p-tabview-title{
+      color: rgb(209 213 219 / 1);
+;
+    }
+
+    .dark .p-dialog .p-dialog-header{
+      background-color: #0F172A;
+      box-shadow: 0px 2px 3px rgba(0, 0, 0, 0.267);
+      color: rgb(209 213 219 / 1);
+;
+    }
+
+    .dark .p-dialog-footer{
+      background-color: #0F172A;
+      box-shadow: 0px -2px 3px rgba(0, 0, 0, 0.267);
+    }
+
+    .dark .p-multiselect-chip{
+      background-color: transparent;
+      border: 1px solid #673AB7;
+    }
+
+    .dark .p-multiselect.p-multiselect-chip .p-multiselect-token {
+      background-color: rgb(209 213 219 / 1);
+;
+    }
+    /* End Step */
+
+    
+    /* Row Editor */
+    .p-row-editor-init{
+      box-shadow: inset 0 0 0 1px;
+      outline-color: #673AB7;
+      height: 2.25rem;
+      width: 2.25rem;
+    }
+    /* End Row Editor */
+
+
+    /* Input Password */
+    .p-password .p-icon {
+      display: block;
+    }
+    /* End Input Password */
+
+
+    /* Scroll */
+    ::-webkit-scrollbar {
+      width: 4px; 
+      max-height: 4px;
+    }
+    
+    ::-webkit-scrollbar-thumb {
+      background-color: #ababac9d; 
+      border-radius: 4px; 
+    }
+    
+    ::-webkit-scrollbar-track {
+      background-color: #cbd5e077; 
+    }
+    /* End Scroll */
+
+
+    /* Textarea */
+    textarea.p-inputtextarea.p-inputtext.p-component{
+      height: 50px;
+    }
+    /* End Textarea */
+
+
+    /* Dropdown */
+    .p-inputtext, .p-dropdown{
+      height: 35px;
+      font-size: 0.9rem;
+    }
+
+    .dark .p-icon{
+      color: white;
+    }
+
+    
+
+    .dark .p-dropdown-filter.p-inputtext.p-component{
+      background-color: rgb(209 213 219 / 1);
+;
+      color: white;
+    }
+
+    .dark .p-dropdown-panel, .dark .p-dropdown-header{
+      background-color: #080808;
+      color: white;
+    }
+
+    .dark .p-multiselect-items-wrapper, .dark .p-multiselect-header{
+      background-color: #0F172A;
+    }
+
+    .dark .p-multiselect-item{
+      color: white;
+    }
+
+    .dark .p-dropdown-item{
+      color: rgb(209 213 219 / 1);
+;
+    }
+
+    .p-dropdown .p-dropdown-label.p-placeholder{
+      font-size: 0.9rem;
+    }
+
+    .dark .p-dropdown .p-dropdown-label.p-placeholder{
+      color: #D1D5DB;
+    }
+    
+
+   
+
+    span.p-dropdown-label.p-inputtext{
+      margin-top: -6px;
+    }
+
+    .dropdown-group .p-dropdown-label-empty{
+      display: none;
+    }
+
+    .dropdown-group .p-dropdown-trigger{
+      width: 100%;
+    }
+
+    .p-dropdown-trigger{
+      height: 36px;
+    }
+
+    .dark .p-dropdown-label p-inputtext{
+      border-radius: 4px;
+      color: #D1D5DB;
+    }
+
+    .dark .p-dropdown-label.p-inputtext{
+  
+     height: 35px;
+    }
+
+    .dropdown-group .p-dropdown-label{
+      display: none;
+    }
+
+    /* End Dropdown */
+
+
+    /* Tab View */
+    .p-tabview, .p-tabview-panels{
+      background-color: transparent;
+      padding: 0;
+    }
+    
+    .p-tabview-nav{
+      background-color: transparent;
+    }
+    
+    .p-tabview .p-tabview-nav li.p-highlight .p-tabview-nav-link{
+      background-color: transparent;
+    }
+    
+    .p-tabview .p-tabview-nav li .p-tabview-nav-link{
+      background-color: transparent;
+    }
+
+    /* End Tab View */
+
+
+    /* Datepicker */
+    button.p-datepicker-trigger.p-button.p-component.p-button-icon-only{
+      background-color: #673AB7;
+      z-index: 9;
+    }
+
+    .dark .p-datepicker-title, .dark .p-datepicker .p-datepicker-header .p-datepicker-title .p-datepicker-month, .dark .p-datepicker .p-datepicker-header .p-datepicker-title .p-datepicker-year{
+      color: white;
+    }
+    .dark .p-datepicker:not(.p-datepicker-inline), .dark .p-datepicker:not(.p-datepicker-inline) .p-datepicker-header{
+      background-color: #000000;
+      color: white;
+    }
+    
+    /* End Datepicker */
+
+    /* Tooltip */
+    .p-tooltip .p-tooltip-text{
+      background-color: rgba(189, 188, 188, 0.966);
+    }
+    /* Endtooltip */
+
+    
+    /* Menu */
+    .p-menuitem-active{
+      background-color: #f5f5f5;
+      color:white;
+    }
+
+    .dark .p-menu{
+      background-color: #D1D5DB;
+    }
+    @media screen and (max-width: 992px) {
+
+    .dark .p-menu ul{
+      display: flex;
+    }
+
+    .dark .p-menuitem-active .p-menuitem-link{
+      background-color: #d4d4d4;
+      border-radius: 4px;
+    }
+  }
+    /* End Menu */
+
+    
+    .dark .twinkle {
+      color: rgb(209 213 219 / 1);
+;
+      animation: twinkleAnimation 0.8s infinite alternate;
+    }
+    .twinkle {
+      color: rgb(0, 0, 0); /* Warna awal */
+      animation: twinkleAnimation 0.8s infinite alternate;
+    }
+    
+    @keyframes twinkleAnimation {
+      to {
+        color: rgba(0, 0, 0, 0); /* Warna akhir dengan transparansi 0 */
+      }
+    }
+
+   /* button */
+   .p-button.p-component.p-fileupload-choose{
+    width: 100%;
+   }
+   .p-image-preview-indicator{
+    width: 50%;
+   }
+
+   /* message */
+   .p-inline-message {
+    gap: 5px;
+    text-align: left;
+    justify-content: start;
+  }
+  .p-inline-message-text{
+    font-size: 13px;
+    
+  }
+  .p-inline-message-icon{
+    color: #fff;
+    fill: #fff;
+  }
+  /* end message */
+    
+}
+
+.dark .p-card-content svg{
+  color: white;
+}
+
+
+label{
+  font-size: 0.9rem;
+}
+
+body{
+  font-family: 'Inter', sans-serif;
+}
+
+.dark body{
+  background-color: rgb(2 6 23 / 1);
+  color: rgb(209 213 219 / 1);
+;
+}
+
+

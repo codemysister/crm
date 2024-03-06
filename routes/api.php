@@ -1,5 +1,8 @@
 <?php
 
+use App\Http\Controllers\ApiConvertRupiah;
+use App\Http\Controllers\ApiWilayahController;
+use App\Http\Controllers\InvoiceSubscriptionController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -17,3 +20,8 @@ use Illuminate\Support\Facades\Route;
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
+
+Route::get('wilayah/provinsi', [ApiWilayahController::class, 'provinsi']);
+Route::get('wilayah/kabupaten', [ApiWilayahController::class, 'kabupaten']);
+Route::get('wilayah/kecamatan', [ApiWilayahController::class, 'kecamatan']);
+Route::get('convert/rupiah', [ApiConvertRupiah::class, 'convert']);
