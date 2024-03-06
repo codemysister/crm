@@ -254,23 +254,33 @@ export default function Index({ auth, signaturesProp, rolesProp, usersProp }) {
                     <div className="card my-5">
                         <DataTable
                             value={dummyArray}
-                            className="p-datatable-striped"
+                            className="p-datatable-striped dark:bg-slate-900"
+                            pt={{
+                                bodyRow:
+                                    "dark:bg-transparent bg-transparent dark:text-gray-300",
+                                table: "dark:bg-transparent bg-white dark:text-gray-300",
+                                header: "dark:bg-transparent",
+                            }}
                         >
                             <Column
                                 style={{ width: "25%" }}
                                 body={<Skeleton />}
+                                headerClassName="dark:border-none pl-6 bg-transparent dark:bg-transparent dark:text-gray-300"
                             ></Column>
                             <Column
                                 style={{ width: "25%" }}
                                 body={<Skeleton />}
+                                headerClassName="dark:border-none pl-6 bg-transparent dark:bg-transparent dark:text-gray-300"
                             ></Column>
                             <Column
                                 style={{ width: "25%" }}
                                 body={<Skeleton />}
+                                headerClassName="dark:border-none pl-6 bg-transparent dark:bg-transparent dark:text-gray-300"
                             ></Column>
                             <Column
                                 style={{ width: "25%" }}
                                 body={<Skeleton />}
+                                headerClassName="dark:border-none pl-6 bg-transparent dark:bg-transparent dark:text-gray-300"
                             ></Column>
                         </DataTable>
                     </div>
@@ -592,7 +602,8 @@ export default function Index({ auth, signaturesProp, rolesProp, usersProp }) {
                         ></Column>
                         <Column
                             field="image"
-                            header="Gambar"
+                            header="Tanda Tangan"
+                            headerClassName="dark:border-none pl-6 bg-transparent dark:bg-transparent dark:text-gray-300"
                             body={(rowData) => {
                                 return rowData.image ? (
                                     <div className="flex justify-center">
@@ -606,7 +617,7 @@ export default function Index({ auth, signaturesProp, rolesProp, usersProp }) {
                                         />
                                     </div>
                                 ) : (
-                                    "belum diisi"
+                                    "-"
                                 );
                             }}
                             style={{ width: "10rem" }}

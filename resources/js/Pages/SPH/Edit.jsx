@@ -227,7 +227,7 @@ const Edit = ({ usersProp, partnersProp, salesProp, productsProp, sph }) => {
 
     const optionSignatureTemplate = (item) => {
         return (
-            <div className="flex flex-wrap p-2 align-items-center gap-3">
+            <div className="flex flex-wrap p-2 align-items-center items-center gap-3">
                 <img
                     className="w-3rem shadow-2 flex-shrink-0 border-round"
                     src={item.image}
@@ -1149,20 +1149,17 @@ const Edit = ({ usersProp, partnersProp, salesProp, productsProp, sph }) => {
                                     year: "numeric",
                                 })}
                             </p>
-                            <img
-                                src={
-                                    BASE_URL +
-                                    "/storage/" +
-                                    data.signature.image
-                                }
-                                alt=""
-                            />
-                            <p>{data.signature.name}</p>
+                            <div className="h-[150px] w-[150px] self-start">
+                                <img
+                                    src={"/storage/" + data.signature.image}
+                                    alt=""
+                                    className="object-fit"
+                                />
+                                <p>{data.signature.name}</p>
+                            </div>
                         </div>
                     </div>
                 </div>
-
-                <div className="bg-white h-screen z-10 w-full absolute top-0 left-0"></div>
             </div>
         </>
     );

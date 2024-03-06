@@ -83,7 +83,7 @@ const DetailPIC = ({
     };
     return (
         <>
-            {partner.pics[0] !== null ? (
+            {partner.pics[0] !== undefined ? (
                 <>
                     <table class="w-full">
                         <tr class="border-b">
@@ -116,7 +116,7 @@ const DetailPIC = ({
                                 :
                             </td>
                             <td class="pt-2 pb-1 text-gray-700 text-base w-7/12">
-                                {partner.pics[0].number}
+                                {partner.pics[0].number ?? "-"}
                             </td>
                         </tr>
                         <tr class="border-b">
@@ -127,7 +127,7 @@ const DetailPIC = ({
                                 :
                             </td>
                             <td class="pt-2 pb-1 text-gray-700 text-base w-7/12">
-                                {partner.pics[0].email}
+                                {partner.pics[0].email ?? "-"}
                             </td>
                         </tr>
                         <tr class="border-b">

@@ -149,7 +149,9 @@
 
         <div class="flex flex-col justify-start mt-8 float-left">
             <div>Purwokerto, {{date("d/m/Y")}}</div>
-            <img class="h-20 w-[15%]" src='{{ public_path("/storage/$stpd->signature_image") }}' alt="Signature">
+            <div style="width: 130px; height: 130px; overflow: hidden;" class="p-2">
+            <img class="h-20 w-[15%]" src='{{ public_path("/storage/$stpd->signature_image") }}' style="object-fit:cover;" alt="Signature">
+            </div>
             <div>{{ $stpd->signature_name }}</div>
             <div>{{ $stpd->signature_position }}</div>
         </div>
@@ -158,7 +160,7 @@
             <div class="self-start text-left">
                 <div>.........................., ..........................</div>
                 <div>Mengetahui*,</div>
-                <div style="margin-top: 80px;">(....................................................)</div>
+                <div style="margin-top: 1300px;">(....................................................)</div>
                 <div style="font-size: 8px;">*)Tanda Tangan dan stempel lembaga tujuan</div>
             </div>
         </div>

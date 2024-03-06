@@ -164,7 +164,7 @@ const DetailPriceList = ({
                                 {partner.price_list.price_card
                                     ? JSON.parse(partner.price_list.price_card)
                                           .price
-                                    : "belum diisi"}{" "}
+                                    : "-"}{" "}
                                 (
                                 {partner.price_list.price_card
                                     ? JSON.parse(partner.price_list.price_card)
@@ -185,7 +185,7 @@ const DetailPriceList = ({
                                     ? partner.price_list.price_lanyard.toLocaleString(
                                           "id-ID"
                                       )
-                                    : "belum diisi"}
+                                    : "-"}
                             </td>
                         </tr>
                         <tr class="border-b">
@@ -200,7 +200,7 @@ const DetailPriceList = ({
                                     ? partner.price_list.price_subscription_system.toLocaleString(
                                           "id-ID"
                                       )
-                                    : "belum diisi"}
+                                    : "-"}
                             </td>
                         </tr>
                         <tr class="border-b">
@@ -215,7 +215,7 @@ const DetailPriceList = ({
                                     ? partner.price_list.price_training_offline.toLocaleString(
                                           "id-ID"
                                       )
-                                    : "belum diisi"}
+                                    : "-"}
                             </td>
                         </tr>
                         <tr class="border-b">
@@ -230,7 +230,7 @@ const DetailPriceList = ({
                                     ? partner.price_list.price_training_online.toLocaleString(
                                           "id-ID"
                                       )
-                                    : "belum diisi"}
+                                    : "-"}
                             </td>
                         </tr>
                         <tr class="border-b">
@@ -245,7 +245,7 @@ const DetailPriceList = ({
                                     ? partner.price_list.fee_purchase_cazhpoin.toLocaleString(
                                           "id-ID"
                                       )
-                                    : "belum diisi"}
+                                    : "-"}
                             </td>
                         </tr>
                         <tr class="border-b">
@@ -260,7 +260,7 @@ const DetailPriceList = ({
                                     ? partner.price_list.fee_bill_cazhpoin.toLocaleString(
                                           "id-ID"
                                       )
-                                    : "belum diisi"}
+                                    : "-"}
                             </td>
                         </tr>
                         <tr class="border-b">
@@ -275,7 +275,7 @@ const DetailPriceList = ({
                                     ? partner.price_list.fee_topup_cazhpos.toLocaleString(
                                           "id-ID"
                                       )
-                                    : "belum diisi"}
+                                    : "-"}
                             </td>
                         </tr>
                         <tr class="border-b">
@@ -290,7 +290,7 @@ const DetailPriceList = ({
                                     ? partner.price_list.fee_withdraw_cazhpos.toLocaleString(
                                           "id-ID"
                                       )
-                                    : "belum diisi"}
+                                    : "-"}
                             </td>
                         </tr>
                         <tr class="border-b">
@@ -305,7 +305,7 @@ const DetailPriceList = ({
                                     ? partner.price_list.fee_bill_saldokartu.toLocaleString(
                                           "id-ID"
                                       )
-                                    : "belum diisi"}
+                                    : "-"}
                             </td>
                         </tr>
 

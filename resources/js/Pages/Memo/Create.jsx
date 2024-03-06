@@ -709,8 +709,6 @@ const Create = ({ partnersProp, signaturesProp }) => {
                         </div> */}
                     </div>
                 </div>
-
-                <div className="bg-white h-screen z-10 w-full absolute top-0 left-0"></div>
             </div>
         </>
     );

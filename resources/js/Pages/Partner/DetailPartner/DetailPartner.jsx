@@ -140,7 +140,7 @@ const DetailPartner = ({
     const title = () => {
         return (
             <>
-                <div className="flex w-full gap-5 items-center ">
+                <div className="flex flex-col lg:flex-row w-full gap-5 items-center ">
                     <Dropdown
                         optionLabel="name"
                         dataKey="id"
@@ -153,7 +153,7 @@ const DetailPartner = ({
                         filter
                         valueTemplate={selectedOptionTemplate}
                         itemTemplate={optionTemplate}
-                        className="w-[40%] flex justify-center rounded-lg shadow-md border-none"
+                        className="w-full lg:w-[40%] flex justify-center rounded-lg shadow-md border-none"
                     />
                     <div className="text-center w-full flex items-center gap-2 justify-center">
                         {partner?.logo ? (
@@ -164,7 +164,7 @@ const DetailPartner = ({
                                 preview
                             />
                         ) : null}
-                        <h1 className="">{partner?.name}</h1>
+                        <h1 className="dark:text-white">{partner?.name}</h1>
                     </div>
                 </div>
             </>
@@ -271,15 +271,18 @@ const DetailPartner = ({
 
     return (
         <>
-            <Card title={title} className="mt-5 mx-auto p-3 rounded-lg">
-                <div className="flex gap-5 min-h-[300px]">
-                    <div className="w-[40%]">
+            <Card
+                title={title}
+                className="mt-5 mx-auto dark:glass p-3 rounded-lg"
+            >
+                <div className="flex flex-col lg:flex-row gap-5 min-h-[300px]">
+                    <div className="w-full lg:w-[40%]">
                         <Menu
                             model={menuDetailPartnerItems}
                             className="w-full rounded-lg"
                         />
                     </div>
-                    <div class="w-full rounded-lg bg-gray-50/50 border overflow-y-auto min-h-[300px] max-h-[300px] h-full  p-4">
+                    <div class="w-full rounded-lg bg-gray-50/50 dark:bg-[#D1D5DB] border overflow-y-auto min-h-[300px] max-h-[300px] h-full  p-4">
                         {partner ? (
                             <>
                                 {isLoading ? (
@@ -299,202 +302,202 @@ const DetailPartner = ({
                                         {activeMenu === "lembaga" && (
                                             <table class="w-full">
                                                 <tr class="border-b">
-                                                    <td class="pt-2 pb-1 text-gray-700 text-base font-bold w-1/5">
+                                                    <td class="pt-2 pb-1 text-gray-900 text-base font-bold w-1/5">
                                                         Nama
                                                     </td>
-                                                    <td class="pt-2 pb-1 text-gray-700 text-base w-[2%]">
+                                                    <td class="pt-2 pb-1 text-gray-900 text-base w-[2%]">
                                                         :
                                                     </td>
-                                                    <td class="pt-2 pb-1 text-gray-700 text-base w-7/12">
+                                                    <td class="pt-2 pb-1 text-gray-900 text-base w-7/12">
                                                         {partner.name}
                                                     </td>
                                                 </tr>
                                                 <tr class="border-b">
-                                                    <td class="pt-2 pb-1 text-gray-700 text-base font-bold w-1/5">
+                                                    <td class="pt-2 pb-1 text-gray-900 text-base font-bold w-1/5">
                                                         Nomor Telepon
                                                     </td>
-                                                    <td class="pt-2 pb-1 text-gray-700 text-base w-[2%]">
+                                                    <td class="pt-2 pb-1 text-gray-900 text-base w-[2%]">
                                                         :
                                                     </td>
-                                                    <td class="pt-2 pb-1 text-gray-700 text-base w-7/12">
+                                                    <td class="pt-2 pb-1 text-gray-900 text-base w-7/12">
                                                         {partner.phone_number
                                                             ? partner.phone_number
-                                                            : "belum diisi"}
+                                                            : "-"}
                                                     </td>
                                                 </tr>
                                                 <tr class="border-b">
-                                                    <td class="pt-2 pb-1 text-gray-700 text-base font-bold w-1/5">
+                                                    <td class="pt-2 pb-1 text-gray-900 text-base font-bold w-1/5">
                                                         Provinsi
                                                     </td>
-                                                    <td class="pt-2 pb-1 text-gray-700 text-base w-[2%]">
+                                                    <td class="pt-2 pb-1 text-gray-900 text-base w-[2%]">
                                                         :
                                                     </td>
-                                                    <td class="pt-2 pb-1 text-gray-700 text-base w-7/12">
+                                                    <td class="pt-2 pb-1 text-gray-900 text-base w-7/12">
                                                         {partner.province
                                                             ? JSON.parse(
                                                                   partner.province
                                                               ).name
-                                                            : "belum diisi"}
+                                                            : "-"}
                                                     </td>
                                                 </tr>
                                                 <tr class="border-b">
-                                                    <td class="pt-2 pb-1 text-gray-700 text-base font-bold w-1/5">
+                                                    <td class="pt-2 pb-1 text-gray-900 text-base font-bold w-1/5">
                                                         Kabupaten
                                                     </td>
-                                                    <td class="pt-2 pb-1 text-gray-700 text-base w-[2%]">
+                                                    <td class="pt-2 pb-1 text-gray-900 text-base w-[2%]">
                                                         :
                                                     </td>
-                                                    <td class="pt-2 pb-1 text-gray-700 text-base w-7/12">
+                                                    <td class="pt-2 pb-1 text-gray-900 text-base w-7/12">
                                                         {partner.regency
                                                             ? JSON.parse(
                                                                   partner.regency
                                                               ).name
-                                                            : "belum diisi"}
+                                                            : "-"}
                                                     </td>
                                                 </tr>
                                                 <tr class="border-b">
-                                                    <td class="pt-2 pb-1 text-gray-700 text-base font-bold w-1/5">
+                                                    <td class="pt-2 pb-1 text-gray-900 text-base font-bold w-1/5">
                                                         Kecamatan
                                                     </td>
-                                                    <td class="pt-2 pb-1 text-gray-700 text-base w-[2%]">
+                                                    <td class="pt-2 pb-1 text-gray-900 text-base w-[2%]">
                                                         :
                                                     </td>
-                                                    <td class="pt-2 pb-1 text-gray-700 text-base w-7/12">
+                                                    <td class="pt-2 pb-1 text-gray-900 text-base w-7/12">
                                                         {partner.subdistrict
                                                             ? JSON.parse(
                                                                   partner.subdistrict
                                                               ).name
-                                                            : "belum diisi"}
+                                                            : "-"}
                                                     </td>
                                                 </tr>
                                                 <tr class="border-b">
-                                                    <td class="pt-2 pb-1 text-gray-700 text-base font-bold w-1/5">
+                                                    <td class="pt-2 pb-1 text-gray-900 text-base font-bold w-1/5">
                                                         Alamat
                                                     </td>
-                                                    <td class="pt-2 pb-1 text-gray-700 text-base w-[2%]">
+                                                    <td class="pt-2 pb-1 text-gray-900 text-base w-[2%]">
                                                         :
                                                     </td>
-                                                    <td class="pt-2 pb-1 text-gray-700 text-base w-7/12">
+                                                    <td class="pt-2 pb-1 text-gray-900 text-base w-7/12">
                                                         {partner.address
                                                             ? partner.address
-                                                            : "belum diisi"}
+                                                            : "-"}
                                                     </td>
                                                 </tr>
                                                 <tr class="border-b">
-                                                    <td class="pt-2 pb-1 text-gray-700 text-base font-bold w-1/5">
+                                                    <td class="pt-2 pb-1 text-gray-900 text-base font-bold w-1/5">
                                                         Sales
                                                     </td>
-                                                    <td class="pt-2 pb-1 text-gray-700 text-base w-[2%]">
+                                                    <td class="pt-2 pb-1 text-gray-900 text-base w-[2%]">
                                                         :
                                                     </td>
-                                                    <td class="pt-2 pb-1 text-gray-700 text-base w-7/12">
-                                                        {partner.sales.name
+                                                    <td class="pt-2 pb-1 text-gray-900 text-base w-7/12">
+                                                        {partner.sales?.name
                                                             ? partner.sales.name
-                                                            : "belum diisi"}
+                                                            : "-"}
                                                     </td>
                                                 </tr>
                                                 <tr class="border-b">
-                                                    <td class="pt-2 pb-1 text-gray-700 text-base font-bold w-1/5">
+                                                    <td class="pt-2 pb-1 text-gray-900 text-base font-bold w-1/5">
                                                         Account Manager
                                                     </td>
-                                                    <td class="pt-2 pb-1 text-gray-700 text-base w-[2%]">
+                                                    <td class="pt-2 pb-1 text-gray-900 text-base w-[2%]">
                                                         :
                                                     </td>
-                                                    <td class="pt-2 pb-1 text-gray-700 text-base w-7/12">
+                                                    <td class="pt-2 pb-1 text-gray-900 text-base w-7/12">
                                                         {partner.account_manager !==
                                                         null
                                                             ? partner
                                                                   .account_manager
                                                                   .name
-                                                            : "belum diisi"}
+                                                            : "-"}
                                                     </td>
                                                 </tr>
                                                 <tr class="border-b">
-                                                    <td class="pt-2 pb-1 text-gray-700 text-base font-bold w-1/5">
+                                                    <td class="pt-2 pb-1 text-gray-900 text-base font-bold w-1/5">
                                                         Tanggal Onboarding
                                                     </td>
-                                                    <td class="pt-2 pb-1 text-gray-700 text-base w-[2%]">
+                                                    <td class="pt-2 pb-1 text-gray-900 text-base w-[2%]">
                                                         :
                                                     </td>
-                                                    <td class="pt-2 pb-1 text-gray-700 text-base w-7/12">
+                                                    <td class="pt-2 pb-1 text-gray-900 text-base w-7/12">
                                                         {partner.onboarding_date
                                                             ? new Date(
                                                                   partner.onboarding_date
                                                               ).toLocaleDateString(
                                                                   "id"
                                                               )
-                                                            : "belum diisi"}
+                                                            : "-"}
                                                     </td>
                                                 </tr>
                                                 <tr class="border-b">
-                                                    <td class="pt-2 pb-1 text-gray-700 text-base font-bold w-1/5">
+                                                    <td class="pt-2 pb-1 text-gray-900 text-base font-bold w-1/5">
                                                         Umur Onboarding
                                                     </td>
-                                                    <td class="pt-2 pb-1 text-gray-700 text-base w-[2%]">
+                                                    <td class="pt-2 pb-1 text-gray-900 text-base w-[2%]">
                                                         :
                                                     </td>
-                                                    <td class="pt-2 pb-1 text-gray-700 text-base w-7/12">
+                                                    <td class="pt-2 pb-1 text-gray-900 text-base w-7/12">
                                                         {partner.onboarding_age
                                                             ? partner.onboarding_age
-                                                            : "belum diisi"}
+                                                            : "-"}
                                                     </td>
                                                 </tr>
                                                 <tr class="border-b">
-                                                    <td class="pt-2 pb-1 text-gray-700 text-base font-bold w-1/5">
+                                                    <td class="pt-2 pb-1 text-gray-900 text-base font-bold w-1/5">
                                                         Tanggal Live
                                                     </td>
-                                                    <td class="pt-2 pb-1 text-gray-700 text-base w-[2%]">
+                                                    <td class="pt-2 pb-1 text-gray-900 text-base w-[2%]">
                                                         :
                                                     </td>
-                                                    <td class="pt-2 pb-1 text-gray-700 text-base w-7/12">
+                                                    <td class="pt-2 pb-1 text-gray-900 text-base w-7/12">
                                                         {partner.live_date
                                                             ? new Date(
                                                                   partner.live_date
                                                               ).toLocaleDateString(
                                                                   "id"
                                                               )
-                                                            : "belum diisi"}
+                                                            : "-"}
                                                     </td>
                                                 </tr>
                                                 <tr class="border-b">
-                                                    <td class="pt-2 pb-1 text-gray-700 text-base font-bold w-1/5">
+                                                    <td class="pt-2 pb-1 text-gray-900 text-base font-bold w-1/5">
                                                         Umur Live
                                                     </td>
-                                                    <td class="pt-2 pb-1 text-gray-700 text-base w-[2%]">
+                                                    <td class="pt-2 pb-1 text-gray-900 text-base w-[2%]">
                                                         :
                                                     </td>
-                                                    <td class="pt-2 pb-1 text-gray-700 text-base w-7/12">
+                                                    <td class="pt-2 pb-1 text-gray-900 text-base w-7/12">
                                                         {partner.live_age
                                                             ? partner.live_age
-                                                            : "belum diisi"}
+                                                            : "-"}
                                                     </td>
                                                 </tr>
                                                 <tr class="border-b">
-                                                    <td class="pt-2 pb-1 text-gray-700 text-base font-bold w-1/5">
+                                                    <td class="pt-2 pb-1 text-gray-900 text-base font-bold w-1/5">
                                                         Tanggal Monitoring
                                                         setelah 3 bulan live
                                                     </td>
-                                                    <td class="pt-2 pb-1 text-gray-700 text-base w-[2%]">
+                                                    <td class="pt-2 pb-1 text-gray-900 text-base w-[2%]">
                                                         :
                                                     </td>
-                                                    <td class="pt-2 pb-1 text-gray-700 text-base w-7/12">
+                                                    <td class="pt-2 pb-1 text-gray-900 text-base w-7/12">
                                                         {partner.monitoring_date_after_3_month_live
                                                             ? new Date(
                                                                   partner.monitoring_date_after_3_month_live
                                                               ).toLocaleDateString(
                                                                   "id"
                                                               )
-                                                            : "belum diisi"}
+                                                            : "-"}
                                                     </td>
                                                 </tr>
                                                 <tr class="border-b">
-                                                    <td class="pt-2 pb-1 text-gray-700 text-base font-bold w-1/5">
+                                                    <td class="pt-2 pb-1 text-gray-900 text-base font-bold w-1/5">
                                                         Status
                                                     </td>
-                                                    <td class="pt-2 pb-1 text-gray-700 text-base w-[2%]">
+                                                    <td class="pt-2 pb-1 text-gray-900 text-base w-[2%]">
                                                         :
                                                     </td>
-                                                    <td class="pt-2 pb-1 text-gray-700 text-base w-7/12">
+                                                    <td class="pt-2 pb-1 text-gray-900 text-base w-7/12">
                                                         <Badge
                                                             value={
                                                                 partner.status
@@ -522,13 +525,13 @@ const DetailPartner = ({
                                                     </td>
                                                 </tr>
                                                 <tr class="border-b">
-                                                    <td class="pt-2 pb-1 text-gray-700 text-base font-bold w-1/5">
+                                                    <td class="pt-2 pb-1 text-gray-900 text-base font-bold w-1/5">
                                                         Aksi
                                                     </td>
-                                                    <td class="pt-2 pb-1 text-gray-700 text-base w-[2%]">
+                                                    <td class="pt-2 pb-1 text-gray-900 text-base w-[2%]">
                                                         :
                                                     </td>
-                                                    <td class="pt-2 pb-1 text-gray-700 text-base w-7/12">
+                                                    <td class="pt-2 pb-1 text-gray-900 text-base w-7/12">
                                                         <Button
                                                             label="edit"
                                                             className="p-0 underline bg-transparent text-blue-700 text-left"

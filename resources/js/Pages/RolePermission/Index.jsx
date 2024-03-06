@@ -355,69 +355,33 @@ const Index = ({ auth }) => {
                     <div className="card my-5">
                         <DataTable
                             value={dummyArray}
-                            className="p-datatable-striped"
+                            className="p-datatable-striped dark:bg-slate-900"
+                            pt={{
+                                bodyRow:
+                                    "dark:bg-transparent bg-transparent dark:text-gray-300",
+                                table: "dark:bg-transparent bg-white dark:text-gray-300",
+                                header: "dark:bg-transparent",
+                            }}
                         >
                             <Column
                                 style={{ width: "25%" }}
                                 body={<Skeleton />}
+                                headerClassName="dark:border-none pl-6 bg-transparent dark:bg-transparent dark:text-gray-300"
                             ></Column>
                             <Column
                                 style={{ width: "25%" }}
                                 body={<Skeleton />}
+                                headerClassName="dark:border-none pl-6 bg-transparent dark:bg-transparent dark:text-gray-300"
                             ></Column>
                             <Column
                                 style={{ width: "25%" }}
                                 body={<Skeleton />}
+                                headerClassName="dark:border-none pl-6 bg-transparent dark:bg-transparent dark:text-gray-300"
                             ></Column>
                             <Column
                                 style={{ width: "25%" }}
                                 body={<Skeleton />}
-                            ></Column>
-                        </DataTable>
-                    </div>
-                    <div className="card my-5">
-                        <DataTable
-                            value={dummyArray}
-                            className="p-datatable-striped"
-                        >
-                            <Column
-                                style={{ width: "25%" }}
-                                body={<Skeleton />}
-                            ></Column>
-                            <Column
-                                style={{ width: "25%" }}
-                                body={<Skeleton />}
-                            ></Column>
-                            <Column
-                                style={{ width: "25%" }}
-                                body={<Skeleton />}
-                            ></Column>
-                            <Column
-                                style={{ width: "25%" }}
-                                body={<Skeleton />}
-                            ></Column>
-                        </DataTable>
-                    </div>
-                    <div className="card my-5">
-                        <DataTable
-                            value={dummyArray}
-                            className="p-datatable-striped"
-                        >
-                            <Column
-                                style={{ width: "25%" }}
-                                body={<Skeleton />}
-                            ></Column>
-                            <Column
-                                style={{ width: "25%" }}
-                                body={<Skeleton />}
-                            ></Column>
-                            <Column
-                                style={{ width: "25%" }}
-                                body={<Skeleton />}
-                            ></Column>
-                            <Column
-                                style={{ width: "25%" }}
-                                body={<Skeleton />}
+                                headerClassName="dark:border-none pl-6 bg-transparent dark:bg-transparent dark:text-gray-300"
                             ></Column>
                         </DataTable>
                     </div>

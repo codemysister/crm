@@ -180,19 +180,17 @@ use Carbon\Carbon;
 
         </div>
 
-        @php
-$imagePath = public_path("storage/{$invoice_general->signature_image}");
-$imageSize = getimagesize($imagePath);
-$calculatedHeight = round(200 * $imageSize[1] / $imageSize[0]);
-        @endphp
 
         <div class="w-[30%]" style="width: 30%;">
             <p>{{\Carbon\Carbon::parse(now())->locale('id')->isoFormat(
     'D MMMM YYYY',
     'Do MMMM YYYY'
 ) }}</p>
+            <div style="width: 130px; height: 130px; overflow: hidden;" class="p-2">
+
             <img src="{{ public_path("storage/$invoice_general->signature_image") }}" alt="" class="min-h-20 w-full"
-            style="width:200px; height: {{ $calculatedHeight }}px" />
+            style="object-fit: cover;" />
+            </div>
             <!-- <div style="min-height: 80px"></div> -->
             <p class="font-bold">{{$invoice_general->signature_name}}</p>
         </div>

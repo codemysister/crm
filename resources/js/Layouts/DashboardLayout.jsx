@@ -12,6 +12,7 @@ export default function DashboardLayout({ user, children }) {
     const profileMenuBtnRef = useRef(null);
     const currentPath = window.location.pathname;
     const [isMobile, setIsMobile] = useState(false);
+    const userLoggin = usePage().props.auth.user;
     const { roles, permissions } = usePage().props.auth.user;
 
     useEffect(() => {
@@ -44,7 +45,8 @@ export default function DashboardLayout({ user, children }) {
         currentPath == "/users" ||
         currentPath == "/products" ||
         currentPath == "/signature" ||
-        currentPath == "/role-permission"
+        currentPath == "/role-permission" ||
+        currentPath == "/referral"
             ? setIsPagesMenuOpen((prev) => (prev = true))
             : null;
 
@@ -123,7 +125,7 @@ export default function DashboardLayout({ user, children }) {
                         className={`h-full ${
                             !isMobile
                                 ? "z-20 w-[17rem] overflow-y-auto bg-white dark:bg-transparent dark:shadow-[rgba(0,0,15,0.5)_1px_1px_5px_0px] md:block flex-shrink-0"
-                                : "fixed inset-y-0 z-20 flex-shrink-0 w-[17rem] mt-16 overflow-y-auto bg-white dark:bg-gray-800"
+                                : "fixed inset-y-0 z-20 flex-shrink-0 w-[17rem] mt-16 overflow-y-auto bg-white dark:bg-transparent"
                         }`}
                     >
                         <div className="py-4 text-gray-500 dark:text-gray-400">
@@ -282,7 +284,7 @@ export default function DashboardLayout({ user, children }) {
                                         </svg>
 
                                         <span className="ml-4">
-                                            Memo Deviasi Harga
+                                            Memo Internal
                                         </span>
                                     </Link>
                                 </li>
@@ -468,20 +470,20 @@ export default function DashboardLayout({ user, children }) {
                                                 href={route("users.view")}
                                             >
                                                 <svg
-                                                    className="w-5 h-5"
+                                                    xmlns="http://www.w3.org/2000/svg"
                                                     fill="none"
-                                                    strokeLinecap="round"
-                                                    strokeLinejoin="round"
-                                                    strokeWidth="2"
                                                     viewBox="0 0 24 24"
+                                                    strokeWidth={1.5}
                                                     stroke="currentColor"
+                                                    className="w-5 h-5"
                                                 >
                                                     <path
                                                         strokeLinecap="round"
                                                         strokeLinejoin="round"
-                                                        d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z"
-                                                    ></path>
+                                                        d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z"
+                                                    />
                                                 </svg>
+
                                                 <span className="ml-4">
                                                     User
                                                 </span>
@@ -510,9 +512,9 @@ export default function DashboardLayout({ user, children }) {
                                                     stroke="currentColor"
                                                 >
                                                     <path
-                                                        stroke-linecap="round"
-                                                        stroke-linejoin="round"
-                                                        d="m15 11.25 1.5 1.5.75-.75V8.758l2.276-.61a3 3 0 1 0-3.675-3.675l-.61 2.277H12l-.75.75 1.5 1.5M15 11.25l-8.47 8.47c-.34.34-.8.53-1.28.53s-.94.19-1.28.53l-.97.97-.75-.75.97-.97c.34-.34.53-.8.53-1.28s.19-.94.53-1.28L12.75 9M15 11.25 12.75 9"
+                                                        strokeLinecap="round"
+                                                        strokeLinejoin="round"
+                                                        d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z"
                                                     ></path>
                                                 </svg>
                                                 <span className="ml-4">
@@ -926,7 +928,7 @@ export default function DashboardLayout({ user, children }) {
                 {/* End Mobile sidebar */}
 
                 <div className="flex flex-col flex-1 w-full md:w-3/5">
-                    <header className="z-10 py-4 bg-white shadow-lg dark:bg-transparent">
+                    <header className="z-10 py-4 bg-white shadow-md dark:shadow-black/90 dark:bg-transparent">
                         <div className="container flex items-center justify-between h-full px-6 mx-auto text-purple-600 dark:text-purple-300">
                             <button
                                 className="p-1 mr-5 -ml-1 rounded-md md:hidden focus:outline-none focus:shadow-outline-purple"
@@ -1004,67 +1006,9 @@ export default function DashboardLayout({ user, children }) {
                                 </li>
 
                                 <li className="relative">
-                                    <button
-                                        className="relative align-middle rounded-md focus:outline-none focus:shadow-outline-purple"
-                                        onClick={() => {}}
-                                        aria-label="Notifications"
-                                        aria-haspopup="true"
-                                    >
-                                        <svg
-                                            className="w-5 h-5"
-                                            fill="currentColor"
-                                            viewBox="0 0 20 20"
-                                        >
-                                            <path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z"></path>
-                                        </svg>
-
-                                        <span className="absolute top-0 right-0 inline-block w-3 h-3 transform translate-x-1 -translate-y-1  border-2 border-white rounded-full dark:border-gray-800"></span>
-                                    </button>
-                                    {/* <template x-if="isNotificationsMenuOpen">
-                            <ul
-                                x-transition:leave="transition ease-in duration-150"
-                                x-transition:leave-start="opacity-100"
-                                x-transition:leave-end="opacity-0"
-                                @click.away="closeNotificationsMenu"
-                                @keydown.escape="closeNotificationsMenu"
-                                className="absolute right-0 w-56 p-2 mt-2 space-y-2 text-gray-600 bg-white border border-gray-100 rounded-md shadow-md dark:text-gray-300 dark:border-gray-700 dark:bg-gray-700"
-                            >
-                                <li className="flex">
-                                <a
-                                    className="inline-flex items-center justify-between w-full px-2 py-1 text-sm font-semibold transition-colors duration-150 rounded-md hover:bg-gray-100 hover:text-gray-800 dark:hover:bg-gray-800 dark:hover:text-gray-200"
-                                    href="#"
-                                >
-                                    <span>Messages</span>
-                                    <span
-                                    className="inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-red-600 bg-red-100 rounded-full dark:text-red-100 dark:bg-red-600"
-                                    >
-                                    13
-                                    </span>
-                                </a>
-                                </li>
-                                <li className="flex">
-                                <a
-                                    className="inline-flex items-center justify-between w-full px-2 py-1 text-sm font-semibold transition-colors duration-150 rounded-md hover:bg-gray-100 hover:text-gray-800 dark:hover:bg-gray-800 dark:hover:text-gray-200"
-                                    href="#"
-                                >
-                                    <span>Sales</span>
-                                    <span
-                                    className="inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-red-600 bg-red-100 rounded-full dark:text-red-100 dark:bg-red-600"
-                                    >
-                                    2
-                                    </span>
-                                </a>
-                                </li>
-                                <li className="flex">
-                                <a
-                                    className="inline-flex items-center justify-between w-full px-2 py-1 text-sm font-semibold transition-colors duration-150 rounded-md hover:bg-gray-100 hover:text-gray-800 dark:hover:bg-gray-800 dark:hover:text-gray-200"
-                                    href="#"
-                                >
-                                    <span>Alerts</span>
-                                </a>
-                                </li>
-                            </ul>
-                            </template> */}
+                                    <p className="font-sm">
+                                        {userLoggin.data.name}
+                                    </p>
                                 </li>
                                 {/* Profile menu */}
                                 <li className="relative">
@@ -1090,7 +1034,7 @@ export default function DashboardLayout({ user, children }) {
                                                 className="absolute right-0 w-56 p-2 mt-2 space-y-2 text-gray-600 bg-white border border-gray-100 rounded-md shadow-md dark:border-gray-700 dark:text-gray-300 dark:bg-gray-700"
                                                 aria-label="submenu"
                                             >
-                                                <li className="flex">
+                                                {/* <li className="flex">
                                                     <a
                                                         className="inline-flex items-center w-full px-2 py-1 text-sm font-semibold transition-colors duration-150 rounded-md hover:bg-gray-100 hover:text-gray-800 dark:hover:bg-gray-800 dark:hover:text-gray-200"
                                                         href="#"
@@ -1128,7 +1072,7 @@ export default function DashboardLayout({ user, children }) {
                                                         </svg>
                                                         <span>Settings</span>
                                                     </a>
-                                                </li>
+                                                </li> */}
                                                 <li className="flex">
                                                     <Link
                                                         href={route("logout")}

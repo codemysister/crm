@@ -1153,7 +1153,7 @@
         <p>
             Pihak Pertama,
         </p>
-        <div style="width: 100px; height: 100px; overflow: hidden;">
+        <div style="width: 130px; height: 130px; overflow: hidden;" class="p-2">
             <img class="w-full h-full object-fit-cover" style="object-fit: cover;" src='{{ public_path("/storage/$mou->signature_image") }}' />
         </div>
         <p><b>{{$mou->signature_name}}</b></p>
@@ -1161,7 +1161,7 @@
     <div  style="width:40%; height: 30%;">
         <p>Pihak Kedua</p>
         @if($mou->partner_pic_signature)
-        <div style="width: 100px; height: 100px; overflow: hidden;">
+        <div style="width: 130px; height: 130px; overflow: hidden;" class="p-2">
             <img src='{{ public_path("storage/$mou->partner_pic_signature") }}' alt="" class="min-h-20 w-full h-full object-fit-cover" style="object-fit: cover;" />
             </div>
         @else

@@ -101,18 +101,22 @@
         </div>
 
         <div class="flex w-full flex-start my-1" style="width:40%">
-            <p class="text-sm">Rp{{number_format($receipt->nominal, 0, ',','.')}}</p>
+            <p class="text-sm">Rp{{number_format($receipt->nominal, 0, ',', '.')}}</p>
         </div>
 
         <div class="flex w-full flex-start my-1" style="width: 40%">
             <div style="width: 100%">
                 <p class="text-sm">Purwokerto, {{
-                    \Carbon\Carbon::parse(now())->locale('id')->isoFormat('D
+    \Carbon\Carbon::parse(now())->locale('id')->isoFormat('D
                     MMMM YYYY',
-                    'Do MMMM YYYY') }}</p>
-                <img class="h-20 w-[15%]" style="width:100%;" src="{{ public_path("/storage/$receipt->signature_image")
+        'Do MMMM YYYY'
+    ) }}</p>
+                <div style="width: 130px; height: 130px; overflow: hidden;">
+
+                <img class="h-20 w-[15%]" style="width:100%; object-fit:cover;" src="{{ public_path("/storage/$receipt->signature_image")
                 }}"
                 alt="Signature">
+            </div>
                 <div class="text-sm">{{$receipt->signature_name}}</div>
                 <div></div>
             </div>

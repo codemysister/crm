@@ -673,7 +673,7 @@ export default function InvoiceSubscription({
     const headerPartner = renderHeaderPartner();
 
     const headerTransaction = (
-        <div className="flex flex-row gap-2 bg-gray-50 p-2 rounded-lg align-items-center items-center justify-between justify-content-between">
+        <div className="flex flex-row gap-2 bg-gray-50 dark:bg-transparent p-2 rounded-lg align-items-center items-center justify-between justify-content-between">
             <div className="w-[15%]">
                 <Button
                     label="Input Pembayaran"
@@ -1263,7 +1263,7 @@ export default function InvoiceSubscription({
                                             ? new Date(
                                                   rowData[col.field]
                                               ).toLocaleDateString("id")
-                                            : "belum diisi";
+                                            : "-";
                                     } else if (col.type === "price") {
                                         return rowData[col.field]
                                             ? Number(

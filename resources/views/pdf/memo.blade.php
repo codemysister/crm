@@ -110,47 +110,39 @@
 
     <div class="flex justify-around mt-5">
         <div class="text-center" style="width: 33%">
-            @php
-$imagePath = public_path("storage/{$memo->signature_first_image}");
-$imageSize = getimagesize($imagePath);
-$calculatedHeight = round(200 * $imageSize[1] / $imageSize[0]);
-            @endphp
 
             @if($memo->signature_first_name)
             <p>Yang Mengajukan</p>
+            <div style="width: 130px; height: 130px; overflow: hidden;" class="p-2">
             <img src="{{ public_path("storage/$memo->signature_first_image") }}" alt="" class="min-h-20 w-full"
-            style="width:200px; height: {{ $calculatedHeight }}px" />
+            style="object-fit:cover;" />
+            </div>
             <p>{{$memo->signature_first_name}}</p>
             @else
             <div style="height: 80px"></div>
             @endif
         </div>
         <div class="text-center" style="width: 33%">
-        @php
-$imagePath = public_path("storage/{$memo->signature_second_image}");
-$imageSize = getimagesize($imagePath);
-$calculatedHeight = round(200 * $imageSize[1] / $imageSize[0]);
-            @endphp
-
+       
             @if($memo->signature_second_name)
             <p>Mengetahui</p>
+            <div style="width: 130px; height: 130px; overflow: hidden;" class="p-2">
             <img src="{{ public_path("storage/$memo->signature_second_image") }}" alt="" class="min-h-20 w-full"
-            style="width:200px; height: {{ $calculatedHeight }}px" />
+            style="object-fit:cover;" />
+            </div>
             <p>{{$memo->signature_second_name}}</p>
             @else
             <div style="height: 80px"></div>
             @endif
         </div>
         <div class="text-center" style="width: 33%">
-        @php
-$imagePath = public_path("storage/{$memo->signature_third_image}");
-$imageSize = getimagesize($imagePath);
-$calculatedHeight = round(200 * $imageSize[1] / $imageSize[0]);
-            @endphp
+ 
             @if($memo->signature_third_name)
             <p>Menyetujui</p>
+            <div style="width: 130px; height: 130px; overflow: hidden;" class="p-2">
             <img src="{{ public_path("storage/$memo->signature_third_image") }}" alt="" class="min-h-20 w-full"
-            style="width:200px; height: {{ $calculatedHeight }}px" />
+            style="object-fit:cover;" />
+            </div>
             <p>{{$memo->signature_third_name}}</p>
             @else
             <div style="height: 80px"></div>

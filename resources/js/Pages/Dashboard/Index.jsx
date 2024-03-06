@@ -186,12 +186,12 @@ const Index = ({ statisticGeneral, accountManagers }) => {
                     filter
                     valueTemplate={selectedOptionTemplate}
                     itemTemplate={optionTemplate}
-                    className="w-[30%] flex justify-center dark:bg-gray-800 dark:text-gray-400 dark:border-b-slate-600 focus: rounded-none border-t-0 border-r-0 border-l-0 border-b-[1px] border-b-slate-200"
+                    className="w-[30%] flex justify-center dark:bg-slate-900 dark:text-gray-400 dark:border-b-slate-600 focus: rounded-none border-t-0 border-r-0 border-l-0 border-b-[1px] border-b-slate-200"
                 />
             </HeaderModule>
             <div className="flex mx-auto flex-col justify-center gap-5 mt-5">
                 <div className="grid gap-6 mb-8 grid-cols-2 md:grid-cols-3 xl:grid-cols-3">
-                    <div className="flex items-center p-4 bg-white rounded-lg shadow-md dark:bg-gray-800">
+                    <div className="flex items-center p-4 bg-white rounded-lg shadow-md dark:bg-slate-900">
                         <div className="p-3 mr-4 text-pink-500 bg-pink-100 rounded-full dark:text-pink-100 dark:bg-pink-500">
                             <svg
                                 className="w-5 h-5"
@@ -213,7 +213,7 @@ const Index = ({ statisticGeneral, accountManagers }) => {
                         </div>
                     </div>
 
-                    <div className="flex items-center p-4 bg-white rounded-lg shadow-md dark:bg-gray-800">
+                    <div className="flex items-center p-4 bg-white rounded-lg shadow-md dark:bg-slate-900">
                         <div className="p-3 mr-4 text-orange-500 bg-orange-100 rounded-full dark:text-orange-100 dark:bg-orange-500">
                             <svg
                                 xmlns="http://www.w3.org/2000/svg"
@@ -242,7 +242,7 @@ const Index = ({ statisticGeneral, accountManagers }) => {
                         </div>
                     </div>
 
-                    <div className="flex items-center p-4 bg-white rounded-lg shadow-md dark:bg-gray-800">
+                    <div className="flex items-center p-4 bg-white rounded-lg shadow-md dark:bg-slate-900">
                         <div className="p-3 mr-4 text-green-500 bg-green-100 rounded-full dark:text-green-100 dark:bg-green-500">
                             <svg
                                 xmlns="http://www.w3.org/2000/svg"
@@ -271,7 +271,7 @@ const Index = ({ statisticGeneral, accountManagers }) => {
                         </div>
                     </div>
 
-                    <div className="flex items-center p-4 bg-white rounded-lg shadow-md dark:bg-gray-800">
+                    <div className="flex items-center p-4 bg-white rounded-lg shadow-md dark:bg-slate-900">
                         <div className="p-3 mr-4 text-gray-500 bg-gray-100 rounded-full dark:text-gray-100 dark:bg-gray-500">
                             <svg
                                 xmlns="http://www.w3.org/2000/svg"
@@ -300,7 +300,7 @@ const Index = ({ statisticGeneral, accountManagers }) => {
                         </div>
                     </div>
 
-                    <div className="flex items-center p-4 bg-white rounded-lg shadow-md dark:bg-gray-800">
+                    <div className="flex items-center p-4 bg-white rounded-lg shadow-md dark:bg-slate-900">
                         <div className="p-3 mr-4 text-purple-500 bg-purple-100 rounded-full dark:text-purple-100 dark:bg-purple-500">
                             <svg
                                 xmlns="http://www.w3.org/2000/svg"
@@ -328,7 +328,7 @@ const Index = ({ statisticGeneral, accountManagers }) => {
                         </div>
                     </div>
 
-                    <div className="flex items-center p-4 bg-white rounded-lg shadow-md dark:bg-gray-800">
+                    <div className="flex items-center p-4 bg-white rounded-lg shadow-md dark:bg-slate-900">
                         <div className="p-3 mr-4 text-blue-500 bg-blue-100 rounded-full dark:text-blue-100 dark:bg-blue-500">
                             <svg
                                 xmlns="http://www.w3.org/2000/svg"
@@ -360,7 +360,7 @@ const Index = ({ statisticGeneral, accountManagers }) => {
                 </div>
 
                 <div className="card flex flex-col -mt-6 w-full md:max-h-[320px] md:flex-row mx-auto justify-between gap-5">
-                    <div className="flex flex-col text-center md:w-[25%] justify-center border bg-white dark:bg-gray-800 dark:border-none dark:text-gray-400 p-3  shadow-md rounded-lg">
+                    <div className="flex flex-col text-center md:w-[25%] justify-center border bg-white dark:bg-slate-900 dark:border-none dark:text-gray-400 p-3  shadow-md rounded-lg">
                         <h1 className="mb-2 font-semibold">
                             Presentase Status Partner AM
                         </h1>
@@ -390,7 +390,7 @@ const Index = ({ statisticGeneral, accountManagers }) => {
                             options={options}
                         />
                     </div>
-                    <div className=" flex flex-col text-center md:w-[25%] justify-center border bg-white dark:bg-gray-800 dark:border-none dark:text-gray-400 p-3 shadow-md rounded-lg">
+                    <div className=" flex flex-col text-center md:w-[25%] justify-center border bg-white dark:bg-slate-900 dark:border-none dark:text-gray-400 p-3 shadow-md rounded-lg">
                         <h1 className="mb-2 font-semibold">
                             Presentase Status Partner
                         </h1>
@@ -436,9 +436,9 @@ const Index = ({ statisticGeneral, accountManagers }) => {
                             options={options}
                         />
                     </div>
-                    <div className="flex md:w-[45%] text-center justify-center border dark:border-none bg-white dark:bg-gray-800 shadow-md rounded-lg">
+                    <div className="flex md:w-[45%] text-center justify-center border dark:border-none bg-white dark:bg-slate-900 shadow-md rounded-lg">
                         <Bar
-                            className="w-full bg-white dark:bg-gray-800 h-full p-5 rounded-lg shadow-md "
+                            className="w-full bg-white dark:bg-slate-900 h-full p-5 rounded-lg shadow-md "
                             data={{
                                 labels:
                                     statiscticAM.partnersByProvince?.length > 0
@@ -668,13 +668,14 @@ const Index = ({ statisticGeneral, accountManagers }) => {
                 <div className="card p-fluid w-full h-full flex justify-center rounded-lg">
                     <DataTable
                         loading={isLoadingData}
-                        className="w-full h-auto rounded-lg dark:bg-gray-800 dark:text-gray-400 border-none text-center shadow-md"
+                        className="w-full h-auto rounded-lg dark:bg-slate-900 dark:text-gray-400 border-none text-center shadow-md"
                         pt={{
                             bodyRow:
                                 "dark:bg-transparent bg-transparent dark:text-gray-300",
                             table: "dark:bg-transparent bg-white dark:text-gray-300",
                             header: "",
-                            emptyMessage: "dark:bg-gray-800 dark:text-gray-400",
+                            emptyMessage:
+                                "dark:bg-slate-900 dark:text-gray-400",
                         }}
                         paginator
                         rows={5}
@@ -722,179 +723,6 @@ const Index = ({ statisticGeneral, accountManagers }) => {
                             }}
                         ></Column>
                         <Column
-                            field="uuid"
-                            hidden
-                            className="dark:border-none"
-                            headerClassName="dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300"
-                            header="Nama"
-                            align="left"
-                            style={{
-                                width: "max-content",
-                                whiteSpace: "nowrap",
-                            }}
-                        ></Column>
-                        <Column
-                            field="phone_number"
-                            className="dark:border-none"
-                            headerClassName="dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300"
-                            header="No. Telepon"
-                            align="left"
-                            style={{
-                                width: "max-content",
-                                whiteSpace: "nowrap",
-                            }}
-                        ></Column>
-                        <Column
-                            header="Sales"
-                            body={(rowData) => rowData.sales.name}
-                            className="dark:border-none"
-                            headerClassName="dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300"
-                            align="left"
-                            style={{
-                                width: "max-content",
-                                whiteSpace: "nowrap",
-                            }}
-                        ></Column>
-                        <Column
-                            header="Account Manager"
-                            body={(rowData) =>
-                                rowData.account_manager !== null
-                                    ? rowData.account_manager.name
-                                    : "belum diisi"
-                            }
-                            className="dark:border-none w-max"
-                            headerClassName="dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300"
-                            align="left"
-                            style={{
-                                width: "max-content",
-                                whiteSpace: "nowrap",
-                            }}
-                        ></Column>
-                        <Column
-                            field="province"
-                            className="dark:border-none"
-                            headerClassName="dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300"
-                            header="Provinsi"
-                            body={(rowData) => {
-                                return JSON.parse(rowData.province).name;
-                            }}
-                            align="left"
-                            style={{
-                                width: "max-content",
-                                whiteSpace: "nowrap",
-                            }}
-                        ></Column>
-                        <Column
-                            field="regency"
-                            className="dark:border-none"
-                            headerClassName="dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300"
-                            header="Kabupaten"
-                            body={(rowData) => {
-                                return JSON.parse(rowData.regency).name;
-                            }}
-                            align="left"
-                            style={{
-                                width: "max-content",
-                                whiteSpace: "nowrap",
-                            }}
-                        ></Column>
-                        <Column
-                            field="subdistrict"
-                            className="dark:border-none"
-                            headerClassName="dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300"
-                            header="Kecamatan"
-                            body={(rowData) => {
-                                return rowData.subdistrict
-                                    ? JSON.parse(rowData.subdistrict).name
-                                    : "belum diisi";
-                            }}
-                            align="left"
-                            style={{
-                                width: "max-content",
-                                whiteSpace: "nowrap",
-                            }}
-                        ></Column>
-                        <Column
-                            header="Tanggal onboarding"
-                            body={(rowData) =>
-                                new Date(
-                                    rowData.onboarding_date
-                                ).toLocaleDateString("id")
-                            }
-                            className="dark:border-none"
-                            headerClassName="dark:border-none  bg-transparent dark:bg-transparent dark:text-gray-300"
-                            align="left"
-                            style={{
-                                width: "max-content",
-                                whiteSpace: "nowrap",
-                            }}
-                        ></Column>
-                        <Column
-                            header="Tanggal live"
-                            body={(rowData) =>
-                                rowData.live_date !== null
-                                    ? new Date(
-                                          rowData.live_date
-                                      ).toLocaleDateString("id")
-                                    : "belum diisi"
-                            }
-                            className="dark:border-none"
-                            headerClassName="dark:border-none  bg-transparent dark:bg-transparent dark:text-gray-300"
-                            align="left"
-                            style={{
-                                width: "max-content",
-                                whiteSpace: "nowrap",
-                            }}
-                        ></Column>
-                        <Column
-                            header="Tanggal Monitoring (3 bulan setelah live)"
-                            body={(rowData) =>
-                                rowData.monitoring_date_after_3_month_live !==
-                                null
-                                    ? new Date(
-                                          rowData.monitoring_date_after_3_month_live
-                                      ).toLocaleDateString("id")
-                                    : "belum diisi"
-                            }
-                            className="dark:border-none"
-                            headerClassName="dark:border-none  bg-transparent dark:bg-transparent dark:text-gray-300"
-                            align="left"
-                            style={{
-                                width: "max-content",
-                                whiteSpace: "nowrap",
-                            }}
-                        ></Column>
-                        <Column
-                            header="Umur Onboarding"
-                            body={(rowData) =>
-                                rowData.onboarding_age !== null
-                                    ? rowData.onboarding_age + " hari"
-                                    : "belum diisi"
-                            }
-                            className="dark:border-none"
-                            headerClassName="dark:border-none  bg-transparent dark:bg-transparent dark:text-gray-300"
-                            align="left"
-                            style={{
-                                width: "max-content",
-                                whiteSpace: "nowrap",
-                            }}
-                        ></Column>
-                        <Column
-                            header="Umur Live"
-                            body={(rowData) =>
-                                rowData.live_age !== null
-                                    ? rowData.live_age + " hari"
-                                    : "belum diisi"
-                            }
-                            className="dark:border-none"
-                            headerClassName="dark:border-none  bg-transparent dark:bg-transparent dark:text-gray-300"
-                            align="left"
-                            style={{
-                                width: "max-content",
-                                whiteSpace: "nowrap",
-                            }}
-                        ></Column>
-                        <Column
                             header="Status"
                             body={(rowData) => {
                                 return (
@@ -918,6 +746,192 @@ const Index = ({ statisticGeneral, accountManagers }) => {
                                     ></Badge>
                                 );
                             }}
+                            className="dark:border-none"
+                            headerClassName="dark:border-none  bg-transparent dark:bg-transparent dark:text-gray-300"
+                            align="left"
+                            style={{
+                                width: "max-content",
+                                whiteSpace: "nowrap",
+                            }}
+                        ></Column>
+                        <Column
+                            field="uuid"
+                            hidden
+                            className="dark:border-none"
+                            headerClassName="dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300"
+                            header="Nama"
+                            align="left"
+                            style={{
+                                width: "max-content",
+                                whiteSpace: "nowrap",
+                            }}
+                        ></Column>
+                        <Column
+                            field="phone_number"
+                            body={(rowData) => {
+                                return rowData.phone_number
+                                    ? rowData.phone_number
+                                    : "-";
+                            }}
+                            className="dark:border-none"
+                            headerClassName="dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300"
+                            header="No. Telepon"
+                            align="left"
+                            style={{
+                                width: "max-content",
+                                whiteSpace: "nowrap",
+                            }}
+                        ></Column>
+                        <Column
+                            header="Sales"
+                            body={(rowData) => {
+                                return rowData.sales ? rowData.sales.name : "-";
+                            }}
+                            className="dark:border-none"
+                            headerClassName="dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300"
+                            align="left"
+                            style={{
+                                width: "max-content",
+                                whiteSpace: "nowrap",
+                            }}
+                        ></Column>
+                        <Column
+                            header="Account Manager"
+                            body={(rowData) =>
+                                rowData.account_manager !== null
+                                    ? rowData.account_manager.name
+                                    : "-"
+                            }
+                            className="dark:border-none"
+                            headerClassName="dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300"
+                            align="left"
+                            style={{
+                                width: "max-content",
+                                whiteSpace: "nowrap",
+                            }}
+                        ></Column>
+                        <Column
+                            field="province"
+                            className="dark:border-none"
+                            headerClassName="dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300"
+                            header="Provinsi"
+                            body={(rowData) => {
+                                return rowData.province
+                                    ? JSON.parse(rowData.province).name
+                                    : "belum diiisi";
+                            }}
+                            align="left"
+                            style={{
+                                width: "max-content",
+                                whiteSpace: "nowrap",
+                            }}
+                        ></Column>
+                        <Column
+                            field="regency"
+                            className="dark:border-none"
+                            headerClassName="dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300"
+                            header="Kabupaten"
+                            body={(rowData) => {
+                                return rowData.regency
+                                    ? JSON.parse(rowData.regency).name
+                                    : "-";
+                            }}
+                            align="left"
+                            style={{
+                                width: "max-content",
+                                whiteSpace: "nowrap",
+                            }}
+                        ></Column>
+                        <Column
+                            field="subdistrict"
+                            className="dark:border-none"
+                            headerClassName="dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300"
+                            header="Kecamatan"
+                            body={(rowData) => {
+                                return rowData.subdistrict
+                                    ? JSON.parse(rowData.subdistrict).name
+                                    : "-";
+                            }}
+                            align="left"
+                            style={{
+                                width: "max-content",
+                                whiteSpace: "nowrap",
+                            }}
+                        ></Column>
+                        <Column
+                            header="Tanggal onboarding"
+                            body={(rowData) => {
+                                return rowData.onboarding_date
+                                    ? new Date(
+                                          rowData.onboarding_date
+                                      ).toLocaleDateString("id")
+                                    : "-";
+                            }}
+                            className="dark:border-none"
+                            headerClassName="dark:border-none  bg-transparent dark:bg-transparent dark:text-gray-300"
+                            align="left"
+                            style={{
+                                width: "max-content",
+                                whiteSpace: "nowrap",
+                            }}
+                        ></Column>
+                        <Column
+                            header="Tanggal live"
+                            body={(rowData) =>
+                                rowData.live_date !== null
+                                    ? new Date(
+                                          rowData.live_date
+                                      ).toLocaleDateString("id")
+                                    : "-"
+                            }
+                            className="dark:border-none"
+                            headerClassName="dark:border-none  bg-transparent dark:bg-transparent dark:text-gray-300"
+                            align="left"
+                            style={{
+                                width: "max-content",
+                                whiteSpace: "nowrap",
+                            }}
+                        ></Column>
+                        <Column
+                            header="Tanggal Monitoring (3 bulan setelah live)"
+                            body={(rowData) =>
+                                rowData.monitoring_date_after_3_month_live !==
+                                null
+                                    ? new Date(
+                                          rowData.monitoring_date_after_3_month_live
+                                      ).toLocaleDateString("id")
+                                    : "-"
+                            }
+                            className="dark:border-none"
+                            headerClassName="dark:border-none  bg-transparent dark:bg-transparent dark:text-gray-300"
+                            align="left"
+                            style={{
+                                width: "max-content",
+                                whiteSpace: "nowrap",
+                            }}
+                        ></Column>
+                        <Column
+                            header="Umur Onboarding"
+                            body={(rowData) =>
+                                rowData.onboarding_age !== null
+                                    ? rowData.onboarding_age + " hari"
+                                    : "-"
+                            }
+                            className="dark:border-none"
+                            headerClassName="dark:border-none  bg-transparent dark:bg-transparent dark:text-gray-300"
+                            align="left"
+                            style={{
+                                width: "max-content",
+                                whiteSpace: "nowrap",
+                            }}
+                        ></Column>
+                        <Column
+                            header="Umur Live"
+                            body={(rowData) =>
+                                rowData.live_age !== null
+                                    ? rowData.live_age + " hari"
+                                    : "-"
+                            }
                             className="dark:border-none"
                             headerClassName="dark:border-none  bg-transparent dark:bg-transparent dark:text-gray-300"
                             align="left"

@@ -178,7 +178,7 @@ const DetailSubscription = ({
 
     return (
         <>
-            {partner.subscriptions[0] !== null ? (
+            {partner.subscriptions[0] !== undefined ? (
                 <>
                     <table class="w-full">
                         <tr class="border-b">

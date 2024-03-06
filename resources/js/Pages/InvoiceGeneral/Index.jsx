@@ -499,7 +499,7 @@ export default function Index({
         return (
             <div className="flex flex-wrap p-2 align-items-center gap-3">
                 <img
-                    className="w-3rem shadow-2 flex-shrink-0 border-round"
+                    className="w-[6rem] bg-red-500 shadow-2 flex-shrink-0 border-round"
                     src={"/storage/" + item.image}
                     alt={item.name}
                 />
@@ -580,23 +580,33 @@ export default function Index({
                     <div className="card my-5">
                         <DataTable
                             value={dummyArray}
-                            className="p-datatable-striped"
+                            className="p-datatable-striped dark:bg-slate-900"
+                            pt={{
+                                bodyRow:
+                                    "dark:bg-transparent bg-transparent dark:text-gray-300",
+                                table: "dark:bg-transparent bg-white dark:text-gray-300",
+                                header: "dark:bg-transparent",
+                            }}
                         >
                             <Column
                                 style={{ width: "25%" }}
                                 body={<Skeleton />}
+                                headerClassName="dark:border-none pl-6 bg-transparent dark:bg-transparent dark:text-gray-300"
                             ></Column>
                             <Column
                                 style={{ width: "25%" }}
                                 body={<Skeleton />}
+                                headerClassName="dark:border-none pl-6 bg-transparent dark:bg-transparent dark:text-gray-300"
                             ></Column>
                             <Column
                                 style={{ width: "25%" }}
                                 body={<Skeleton />}
+                                headerClassName="dark:border-none pl-6 bg-transparent dark:bg-transparent dark:text-gray-300"
                             ></Column>
                             <Column
                                 style={{ width: "25%" }}
                                 body={<Skeleton />}
+                                headerClassName="dark:border-none pl-6 bg-transparent dark:bg-transparent dark:text-gray-300"
                             ></Column>
                         </DataTable>
                     </div>
@@ -606,7 +616,7 @@ export default function Index({
     }
 
     const headerTransaction = (
-        <div className="flex flex-row gap-2 bg-gray-50 p-2 rounded-lg align-items-center items-center justify-between justify-content-between">
+        <div className="flex flex-row gap-2 bg-gray-50 dark:bg-transparent p-2 rounded-lg align-items-center items-center justify-between justify-content-between">
             <div className="w-[30%]">
                 <Button
                     label="Input Pembayaran"
@@ -858,7 +868,6 @@ export default function Index({
                     }
                 )
                 .then((response) => {
-                    console.log(response.data.error);
                     if (response.data.error) {
                         showError(response.data.error);
                     } else {
@@ -880,24 +889,6 @@ export default function Index({
                         }));
                     }
                 });
-            // put("/invoice_generals/transaction/" + data.uuid, {
-            //     onSuccess: () => {
-            //         showSuccess("Update");
-            //         setModalEditTransactionIsVisible((prev) => false);
-            //         getInvoiceGenerals();
-            //         reset(
-            //             "date",
-            //             "metode",
-            //             "money",
-            //             "nominal",
-            //             "payment_for",
-            //             "signature"
-            //         );
-            //     },
-            //     onError: () => {
-            //         showError("Update");
-            //     },
-            // });
         }
     };
 
@@ -954,6 +945,7 @@ export default function Index({
                                 width: "max-content",
                                 whiteSpace: "nowrap",
                             }}
+                            headerClassName="dark:border-none pl-6 bg-transparent dark:bg-transparent dark:text-gray-300"
                         />
 
                         <Column
@@ -978,14 +970,6 @@ export default function Index({
                                 whiteSpace: "nowrap",
                             }}
                         ></Column>
-                        {/* <Column
-                            field="code"
-                            className="dark:border-none"
-                            headerClassName="dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300"
-                            header="Kode"
-                            align="left"
-                            style={{ minWidth: "8rem" }}
-                        ></Column> */}
                         <Column
                             header="Status"
                             body={(rowData) => {
@@ -1049,6 +1033,7 @@ export default function Index({
                                     width: "max-content",
                                     whiteSpace: "nowrap",
                                 }}
+                                headerClassName="dark:border-none pl-6 bg-transparent dark:bg-transparent dark:text-gray-300"
                                 field={col.field}
                                 header={col.header}
                                 body={(rowData) => {
@@ -1060,7 +1045,7 @@ export default function Index({
                                             ? new Date(
                                                   rowData[col.field]
                                               ).toLocaleDateString("id")
-                                            : "belum diisi";
+                                            : "-";
                                     } else if (col.type === "price") {
                                         return rowData[col.field]
                                             ? rowData[col.field].toLocaleString(

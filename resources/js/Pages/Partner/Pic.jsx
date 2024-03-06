@@ -526,6 +526,9 @@ const Pic = ({
                         <Column
                             field="email"
                             header="Email"
+                            body={(rowData) => {
+                                return rowData.email ?? "-";
+                            }}
                             className="dark:border-none"
                             headerClassName="dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300"
                             align="left"
@@ -540,6 +543,9 @@ const Pic = ({
                             className="dark:border-none"
                             headerClassName="dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300"
                             align="left"
+                            body={(rowData) => {
+                                return rowData.number ?? "-";
+                            }}
                             style={{
                                 width: "max-content",
                                 whiteSpace: "nowrap",
@@ -548,6 +554,9 @@ const Pic = ({
                         <Column
                             field="position"
                             header="Jabatan"
+                            body={(rowData) => {
+                                return rowData.position ?? "-";
+                            }}
                             className="dark:border-none"
                             headerClassName="dark:border-none  bg-transparent dark:bg-transparent dark:text-gray-300"
                             align="left"

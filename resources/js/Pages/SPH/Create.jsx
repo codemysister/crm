@@ -242,9 +242,9 @@ const Create = ({
 
     const optionSignatureTemplate = (item) => {
         return (
-            <div className="flex flex-wrap p-2 align-items-center gap-3">
+            <div className="flex flex-wrap p-2 align-items-center items-center gap-3">
                 <img
-                    className="w-3rem shadow-2 flex-shrink-0 border-round"
+                    className="w-[6rem] shadow-2 flex-shrink-0 border-round"
                     src={"/storage/" + item.image}
                     alt={item.name}
                 />
@@ -372,54 +372,6 @@ const Create = ({
                                         hidden
                                     />
                                 </div>
-
-                                {/* <div className="flex flex-col mt-3">
-                                    <label htmlFor="lembaga">Lembaga *</label>
-                                    <Dropdown
-                                        value={data.partner}
-                                        dataKey="id"
-                                        onChange={(e) => {
-                                            setData("partner", {
-                                                ...data.partner,
-                                                id: e.target.value.id,
-                                                name: e.target.value.name,
-                                                province:
-                                                    e.target.value.province,
-                                                regency: e.target.value.regency,
-                                                pic: e.target.value.pics[0]
-                                                    .name,
-                                            });
-                                            setcodeProvince(
-                                                (prev) =>
-                                                    (prev = JSON.parse(
-                                                        e.target.value.province
-                                                    ).code)
-                                            );
-                                        }}
-                                        onFocus={() => {
-                                            triggerInputFocus(
-                                                animatePartnerNameRef
-                                            );
-                                        }}
-                                        onShow={() => {
-                                            triggerInputFocus(
-                                                animatePartnerNameRef
-                                            );
-                                        }}
-                                        onBlur={() => {
-                                            stopAnimateInputFocus(
-                                                animatePartnerNameRef
-                                            );
-                                        }}
-                                        options={partners}
-                                        optionLabel="name"
-                                        placeholder="Pilih Lembaga"
-                                        filter
-                                        valueTemplate={selectedOptionTemplate}
-                                        itemTemplate={optionTemplate}
-                                        className="w-full md:w-14rem"
-                                    />
-                                </div> */}
 
                                 <div className="flex flex-col mt-3">
                                     <label htmlFor="partner_pic">PIC *</label>
@@ -1084,7 +1036,7 @@ const Create = ({
 
                         <div className="w-full mt-5">
                             <table className="w-full">
-                                <thead className="bg-blue-100 text-left">
+                                <thead className="bg-blue-100 dark:text-black text-left">
                                     <th className="pl-2">No</th>
                                     <th className="py-2">Produk/Layanan</th>
                                     <th className="py-2">Rincian</th>
@@ -1159,21 +1111,18 @@ const Create = ({
                                     year: "numeric",
                                 })}
                             </p>
-                            <img
-                                src={
-                                    BASE_URL +
-                                    "/storage/" +
-                                    data.signature.image
-                                }
-                                alt=""
-                            />
-                            <p>{data.signature.name}</p>
-                            <p>{data.signature.position}</p>
+                            <div className="h-[150px] w-[150px] self-start">
+                                <img
+                                    src={"/storage/" + data.signature.image}
+                                    alt=""
+                                    className="object-fit"
+                                />
+                                <p>{data.signature.name}</p>
+                                <p>{data.signature.position}</p>
+                            </div>
                         </div>
                     </div>
                 </div>
-
-                <div className="bg-white h-screen z-10 w-full absolute top-0 left-0"></div>
             </div>
         </>
     );

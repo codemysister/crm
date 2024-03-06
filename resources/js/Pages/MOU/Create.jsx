@@ -3562,11 +3562,7 @@ const Create = ({ usersProp, partnersProp, signaturesProp, referralsProp }) => {
                                 >
                                     <p>Pihak Pertama</p>
                                     <img
-                                        src={
-                                            BASE_URL +
-                                            "/storage/" +
-                                            data.signature.image
-                                        }
+                                        src={"/storage/" + data.signature.image}
                                         alt=""
                                         className="min-h-20 max-h-20"
                                     />
@@ -3630,8 +3626,6 @@ const Create = ({ usersProp, partnersProp, signaturesProp, referralsProp }) => {
                         </div>
                     </div>
                 </div>
-
-                <div className="bg-white h-screen z-10 w-full absolute top-0 left-0"></div>
             </div>
         </>
     );

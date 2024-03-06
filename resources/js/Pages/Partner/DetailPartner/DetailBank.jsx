@@ -66,7 +66,7 @@ const DetailBank = ({
 
     return (
         <>
-            {partner.banks[0] !== null ? (
+            {partner.banks[0] !== undefined ? (
                 <>
                     <table class="w-full">
                         <tr class="border-b">
@@ -77,7 +77,7 @@ const DetailBank = ({
                                 :
                             </td>
                             <td class="pt-2 pb-1 text-gray-700 text-base w-7/12">
-                                {partner.banks[0].bank}
+                                {partner.banks[0]?.bank ?? "-"}
                             </td>
                         </tr>
                         <tr class="border-b">
@@ -88,7 +88,7 @@ const DetailBank = ({
                                 :
                             </td>
                             <td class="pt-2 pb-1 text-gray-700 text-base w-7/12">
-                                {partner.banks[0].account_bank_number}
+                                {partner.banks[0]?.account_bank_number ?? "-"}
                             </td>
                         </tr>
                         <tr class="border-b">
@@ -99,7 +99,7 @@ const DetailBank = ({
                                 :
                             </td>
                             <td class="pt-2 pb-1 text-gray-700 text-base w-7/12">
-                                {partner.banks[0].account_bank_name}
+                                {partner.banks[0]?.account_bank_name ?? "-"}
                             </td>
                         </tr>
                         <tr class="border-b">

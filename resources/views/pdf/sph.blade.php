@@ -126,7 +126,7 @@
     'D MMMM YYYY',
     'Do MMMM YYYY'
 ) }}</p>
-        <div style="width: 100px; height: 100px; overflow: hidden;">
+        <div style="width: 130px; height: 130px; overflow: hidden;" class="p-2">
             <img class="h-20 w-[15%]" style="width: 100%; height: 100%; object-fit:cover;" src="{{ public_path("/storage/$sph->signature_image") }}" alt="Signature">
         </div>
         <div class="text-sm">{{ $sph->signature_name }}</div>

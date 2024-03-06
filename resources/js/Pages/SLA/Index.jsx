@@ -252,7 +252,7 @@ export default function Index({ auth }) {
 
     const rowExpansionTemplate = (data) => {
         return (
-            <div className="px-14 py-5 flex">
+            <div className="px-14 py-5 flex dark:bg-transparent">
                 <DataTable
                     value={data.activities}
                     paginator
@@ -320,7 +320,7 @@ export default function Index({ auth }) {
                                 ? new Date(
                                       rowData.realization_date
                                   ).toLocaleDateString("id")
-                                : "belum diisi";
+                                : "-";
                         }}
                         style={{
                             width: "max-content",
@@ -344,7 +344,7 @@ export default function Index({ auth }) {
                                     />
                                 </div>
                             ) : (
-                                "belum diisi"
+                                "-"
                             );
                         }}
                         style={{
@@ -376,7 +376,7 @@ export default function Index({ auth }) {
                                     </OverlayPanel>
                                 </>
                             ) : (
-                                "belum diisi"
+                                "-"
                             );
                         }}
                         style={{
@@ -462,23 +462,33 @@ export default function Index({ auth }) {
                     <div className="card my-5">
                         <DataTable
                             value={dummyArray}
-                            className="p-datatable-striped"
+                            className="p-datatable-striped dark:bg-slate-900"
+                            pt={{
+                                bodyRow:
+                                    "dark:bg-transparent bg-transparent dark:text-gray-300",
+                                table: "dark:bg-transparent bg-white dark:text-gray-300",
+                                header: "dark:bg-transparent",
+                            }}
                         >
                             <Column
                                 style={{ width: "25%" }}
                                 body={<Skeleton />}
+                                headerClassName="dark:border-none pl-6 bg-transparent dark:bg-transparent dark:text-gray-300"
                             ></Column>
                             <Column
                                 style={{ width: "25%" }}
                                 body={<Skeleton />}
+                                headerClassName="dark:border-none pl-6 bg-transparent dark:bg-transparent dark:text-gray-300"
                             ></Column>
                             <Column
                                 style={{ width: "25%" }}
                                 body={<Skeleton />}
+                                headerClassName="dark:border-none pl-6 bg-transparent dark:bg-transparent dark:text-gray-300"
                             ></Column>
                             <Column
                                 style={{ width: "25%" }}
                                 body={<Skeleton />}
+                                headerClassName="dark:border-none pl-6 bg-transparent dark:bg-transparent dark:text-gray-300"
                             ></Column>
                         </DataTable>
                     </div>
@@ -533,6 +543,7 @@ export default function Index({ auth }) {
                     >
                         <Column
                             expander={allowExpansion}
+                            headerClassName="dark:border-none pl-6 bg-transparent dark:bg-transparent dark:text-gray-300"
                             style={{
                                 width: "max-content",
                                 whiteSpace: "nowrap",

@@ -1298,7 +1298,7 @@ const PriceList = ({
                                       ` (${
                                           JSON.parse(rowData.price_card).type
                                       })`
-                                    : "belum diisi"
+                                    : "-"
                             }
                             className="dark:border-none"
                             headerClassName="dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300"
@@ -1316,6 +1316,7 @@ const PriceList = ({
                                     width: "max-content",
                                     whiteSpace: "nowrap",
                                 }}
+                                headerClassName="dark:border-none pl-6 bg-transparent dark:bg-transparent dark:text-gray-300"
                                 field={col.field}
                                 header={col.header}
                                 body={(rowData) => {
@@ -1325,7 +1326,7 @@ const PriceList = ({
                                         ? rowData[col.field].toLocaleString(
                                               "id-ID"
                                           )
-                                        : "belum diisi";
+                                        : "-";
                                 }}
                             />
                         ))}

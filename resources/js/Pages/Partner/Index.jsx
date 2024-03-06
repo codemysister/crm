@@ -779,23 +779,33 @@ export default function Index({ auth, partner }) {
                     <div className="card my-5">
                         <DataTable
                             value={dummyArray}
-                            className="p-datatable-striped"
+                            className="p-datatable-striped dark:bg-slate-900"
+                            pt={{
+                                bodyRow:
+                                    "dark:bg-transparent bg-transparent dark:text-gray-300",
+                                table: "dark:bg-transparent bg-white dark:text-gray-300",
+                                header: "dark:bg-transparent",
+                            }}
                         >
                             <Column
                                 style={{ width: "25%" }}
                                 body={<Skeleton />}
+                                headerClassName="dark:border-none pl-6 bg-transparent dark:bg-transparent dark:text-gray-300"
                             ></Column>
                             <Column
                                 style={{ width: "25%" }}
                                 body={<Skeleton />}
+                                headerClassName="dark:border-none pl-6 bg-transparent dark:bg-transparent dark:text-gray-300"
                             ></Column>
                             <Column
                                 style={{ width: "25%" }}
                                 body={<Skeleton />}
+                                headerClassName="dark:border-none pl-6 bg-transparent dark:bg-transparent dark:text-gray-300"
                             ></Column>
                             <Column
                                 style={{ width: "25%" }}
                                 body={<Skeleton />}
+                                headerClassName="dark:border-none pl-6 bg-transparent dark:bg-transparent dark:text-gray-300"
                             ></Column>
                         </DataTable>
                     </div>
@@ -822,9 +832,9 @@ export default function Index({ auth, partner }) {
                         <Dialog
                             ref={modalPartner}
                             header="Partner"
-                            headerClassName="dark:glass dark:text-white"
+                            headerClassName="dark:bg-slate-900 dark:text-white"
                             className="bg-white min-h-[500px] max-h-[80%] w-[80%] md:w-[60%] lg:w-[35%] dark:glass dark:text-white"
-                            contentClassName=" dark:glass dark:text-white"
+                            contentClassName="dark:bg-slate-900 dark:text-white"
                             visible={modalPartnersIsVisible}
                             onHide={() => setModalPartnersIsVisible(false)}
                             footer={footerTemplate}
@@ -3071,7 +3081,7 @@ export default function Index({ auth, partner }) {
                                     body={(rowData) => {
                                         return rowData.phone_number
                                             ? rowData.phone_number
-                                            : "belum diisi";
+                                            : "-";
                                     }}
                                     className="dark:border-none"
                                     headerClassName="dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300"
@@ -3087,7 +3097,7 @@ export default function Index({ auth, partner }) {
                                     body={(rowData) => {
                                         return rowData.sales
                                             ? rowData.sales.name
-                                            : "belum diisi";
+                                            : "-";
                                     }}
                                     className="dark:border-none"
                                     headerClassName="dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300"
@@ -3102,7 +3112,7 @@ export default function Index({ auth, partner }) {
                                     body={(rowData) =>
                                         rowData.account_manager !== null
                                             ? rowData.account_manager.name
-                                            : "belum diisi"
+                                            : "-"
                                     }
                                     className="dark:border-none"
                                     headerClassName="dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300"
@@ -3136,7 +3146,7 @@ export default function Index({ auth, partner }) {
                                     body={(rowData) => {
                                         return rowData.regency
                                             ? JSON.parse(rowData.regency).name
-                                            : "belum diisi";
+                                            : "-";
                                     }}
                                     align="left"
                                     style={{
@@ -3153,7 +3163,7 @@ export default function Index({ auth, partner }) {
                                         return rowData.subdistrict
                                             ? JSON.parse(rowData.subdistrict)
                                                   .name
-                                            : "belum diisi";
+                                            : "-";
                                     }}
                                     align="left"
                                     style={{
@@ -3168,7 +3178,7 @@ export default function Index({ auth, partner }) {
                                             ? new Date(
                                                   rowData.onboarding_date
                                               ).toLocaleDateString("id")
-                                            : "belum diisi";
+                                            : "-";
                                     }}
                                     className="dark:border-none"
                                     headerClassName="dark:border-none  bg-transparent dark:bg-transparent dark:text-gray-300"
@@ -3185,7 +3195,7 @@ export default function Index({ auth, partner }) {
                                             ? new Date(
                                                   rowData.live_date
                                               ).toLocaleDateString("id")
-                                            : "belum diisi"
+                                            : "-"
                                     }
                                     className="dark:border-none"
                                     headerClassName="dark:border-none  bg-transparent dark:bg-transparent dark:text-gray-300"
@@ -3203,7 +3213,7 @@ export default function Index({ auth, partner }) {
                                             ? new Date(
                                                   rowData.monitoring_date_after_3_month_live
                                               ).toLocaleDateString("id")
-                                            : "belum diisi"
+                                            : "-"
                                     }
                                     className="dark:border-none"
                                     headerClassName="dark:border-none  bg-transparent dark:bg-transparent dark:text-gray-300"
@@ -3218,7 +3228,7 @@ export default function Index({ auth, partner }) {
                                     body={(rowData) =>
                                         rowData.onboarding_age !== null
                                             ? rowData.onboarding_age + " hari"
-                                            : "belum diisi"
+                                            : "-"
                                     }
                                     className="dark:border-none"
                                     headerClassName="dark:border-none  bg-transparent dark:bg-transparent dark:text-gray-300"
@@ -3233,7 +3243,7 @@ export default function Index({ auth, partner }) {
                                     body={(rowData) =>
                                         rowData.live_age !== null
                                             ? rowData.live_age + " hari"
-                                            : "belum diisi"
+                                            : "-"
                                     }
                                     className="dark:border-none"
                                     headerClassName="dark:border-none  bg-transparent dark:bg-transparent dark:text-gray-300"

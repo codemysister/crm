@@ -14,6 +14,7 @@ import { Toast } from "primereact/toast";
 import { Badge } from "primereact/badge";
 import { InputNumber } from "primereact/inputnumber";
 import { Calendar } from "primereact/calendar";
+// import "../../../css/app.css";
 
 const BASE_URL = import.meta.env.VITE_BASE_URL;
 
@@ -304,9 +305,9 @@ const Create = ({
 
     const optionSignatureTemplate = (item) => {
         return (
-            <div className="flex flex-wrap p-2 align-items-center gap-3">
+            <div className="flex flex-wrap p-2 align-items-center items-center gap-3">
                 <img
-                    className="w-3rem shadow-2 flex-shrink-0 border-round"
+                    className="w-[6rem] shadow-2 flex-shrink-0 border-round"
                     src={"/storage/" + item.image}
                     alt={item.name}
                 />
@@ -415,10 +416,10 @@ const Create = ({
         <>
             <Head title="Invoice Umum"></Head>
             <Toast ref={toast} />
-            <div className="h-screen max-h-screen overflow-y-hidden">
+            <div className="h-screen max-h-screen overflow-y-hidden ">
                 <div className="flex flex-col h-screen max-h-screen overflow-hidden md:flex-row z-40 relative gap-5">
-                    <div className="md:w-[30%] overflow-y-auto h-screen max-h-screen p-5">
-                        <Card>
+                    <div className="md:w-[30%]  overflow-y-auto h-screen max-h-screen p-5">
+                        <Card className="">
                             <div className="flex justify-between items-center mb-4">
                                 <h1 className="font-bold text-2xl">
                                     Invoice Umum
@@ -1396,25 +1397,22 @@ const Create = ({
                                 )}
                             </div>
                             <div
-                                className="flex flex-col text-center justify-start w-[30%]"
+                                className="flex flex-col text-center justify-center w-[30%]"
                                 ref={animateSignatureNameRef}
                             >
                                 <p>{formatDateSignature()}</p>
-                                <img
-                                    src={
-                                        BASE_URL +
-                                        "/storage/" +
-                                        data.signature.image
-                                    }
-                                    alt=""
-                                />
-                                <p>{data.signature.name}</p>
+                                <div className="h-[150px] w-[150px] self-center">
+                                    <img
+                                        src={"/storage/" + data.signature.image}
+                                        alt=""
+                                        className="object-fit"
+                                    />
+                                    <p>{data.signature.name}</p>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
-
-                <div className="bg-white h-screen z-10 w-full absolute top-0 left-0"></div>
             </div>
         </>
     );
