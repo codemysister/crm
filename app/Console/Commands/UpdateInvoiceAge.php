@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Models\InvoiceGeneral;
+use App\Models\InvoiceSubscription;
 use Illuminate\Console\Command;
 
 class UpdateInvoiceAge extends Command
@@ -26,7 +27,17 @@ class UpdateInvoiceAge extends Command
      */
     public function handle()
     {
-        $invoices = InvoiceGeneral::where('status', '!=', 'lunas')->get();
+        $invoices = InvoiceGeneral::whereNotIn('status', ['lunas', 'telat'])->get();
+        foreach ($invoices as $invoice) {
+            $age = $invoice->invoice_age + 1;
+            if (now()->gt($invoice->due_date)) {
+                $invoice->update(['invoice_age' => $age, 'status' => 'telat']);
+            } else {
+                $invoice->update(['invoice_age' => $age]);
+            }
+        }
+
+        $invoices = InvoiceSubscription::whereNotIn('status', ['lunas', 'telat'])->get();
         foreach ($invoices as $invoice) {
             $age = $invoice->invoice_age + 1;
             if (now()->gt($invoice->due_date)) {
