@@ -31,7 +31,7 @@ class SignatureController extends Controller
             return $user;
         });
         $rolesProp = DB::table('roles')->distinct()->get("name");
-        return Inertia::render("Signature/Index", compact('usersProp', 'rolesProp'));
+        return Inertia::render("Signature/Signature", compact('usersProp', 'rolesProp'));
     }
 
     public function store(SignatureRequest $request)

@@ -27,6 +27,22 @@ const Create = ({ usersDefault, partnersDefault, signaturesProp }) => {
     const [regencys, setRegencys] = useState([]);
     const [codeProvince, setcodeProvince] = useState(null);
 
+    const [theme, setTheme] = useState(localStorage.theme);
+    useEffect(() => {
+        theme
+            ? (localStorage.theme = "dark")
+            : localStorage.removeItem("theme");
+
+        if (
+            localStorage.theme === "dark" &&
+            window.matchMedia("(prefers-color-scheme: dark)").matches
+        ) {
+            document.documentElement.classList.add("dark");
+        } else {
+            document.documentElement.classList.remove("dark");
+        }
+    }, [theme]);
+
     const animatePartnerNameRef = useRef(null);
     const animateLocationRef = useRef(null);
     const animateDepartureDateRef = useRef(null);
@@ -217,9 +233,9 @@ const Create = ({ usersDefault, partnersDefault, signaturesProp }) => {
 
     const optionSignatureTemplate = (item) => {
         return (
-            <div className="flex flex-wrap p-2 align-items-center gap-3">
+            <div className="flex flex-wrap p-2 align-items-center items-center gap-3">
                 <img
-                    className="w-3rem shadow-2 flex-shrink-0 border-round"
+                    className="w-[6rem] shadow-2 flex-shrink-0 border-round"
                     src={"/storage/" + item.image}
                     alt={item.name}
                 />
@@ -283,7 +299,7 @@ const Create = ({ usersDefault, partnersDefault, signaturesProp }) => {
         post("/stpd", {
             onSuccess: () => {
                 showSuccess("Tambah");
-                window.location = BASE_URL + "/stpd";
+                window.location = "/stpd";
                 // reset("name", "category", "price", "unit", "description");
             },
 
@@ -759,7 +775,7 @@ const Create = ({ usersDefault, partnersDefault, signaturesProp }) => {
 
                         <div className="w-full mt-5">
                             <table className="w-full">
-                                <thead className="bg-blue-100 text-left">
+                                <thead className="bg-blue-100  dark:text-gray-600 text-left">
                                     <th className="px-2 py-1">No</th>
                                     <th className="px-2 py-1">Nama Karyawan</th>
                                     <th className="px-2 py-1">Jabatan</th>
@@ -800,24 +816,24 @@ const Create = ({ usersDefault, partnersDefault, signaturesProp }) => {
                             <table className="w-full">
                                 <tbody>
                                     <tr>
-                                        <td className="text-gray-700 w-1/6">
+                                        <td className="text-gray-700 dark:text-gray-300 w-1/6">
                                             Lembaga Tujuan
                                         </td>
-                                        <td className="text-gray-700 w-[1%]">
+                                        <td className="text-gray-700 dark:text-gray-300 w-[1%]">
                                             :
                                         </td>
-                                        <td className="text-gray-700 font-bold w-7/12">
+                                        <td className="text-gray-700 dark:text-gray-300 font-bold w-7/12">
                                             {data.partner.name ?? "{{Lembaga}}"}
                                         </td>
                                     </tr>
                                     <tr>
-                                        <td className="text-gray-700 w-1/6">
+                                        <td className="text-gray-700 dark:text-gray-300 w-1/6">
                                             Lokasi
                                         </td>
-                                        <td className="text-gray-700 w-[1%]">
+                                        <td className="text-gray-700 dark:text-gray-300 w-[1%]">
                                             :
                                         </td>
-                                        <td className="text-gray-700 font-bold w-7/12">
+                                        <td className="text-gray-700 dark:text-gray-300 font-bold w-7/12">
                                             <span
                                                 ref={animatePartnerRegencyRef}
                                             >
@@ -841,15 +857,15 @@ const Create = ({ usersDefault, partnersDefault, signaturesProp }) => {
                                     </tr>
                                     <br />
                                     <tr>
-                                        <td className="text-gray-700 w-1/6">
+                                        <td className="text-gray-700 dark:text-gray-300 w-1/6">
                                             Berangkat
                                         </td>
-                                        <td className="text-gray-700 w-[1%]">
+                                        <td className="text-gray-700 dark:text-gray-300 w-[1%]">
                                             :
                                         </td>
                                         <td
                                             ref={animateDepartureDateRef}
-                                            className="text-gray-700 font-bold w-7/12"
+                                            className="text-gray-700 dark:text-gray-300 font-bold w-7/12"
                                         >
                                             {ubahFormatTanggal(
                                                 data.departure_date
@@ -857,15 +873,15 @@ const Create = ({ usersDefault, partnersDefault, signaturesProp }) => {
                                         </td>
                                     </tr>
                                     <tr>
-                                        <td className="text-gray-700 w-1/6">
+                                        <td className="text-gray-700 dark:text-gray-300 w-1/6">
                                             Kembali
                                         </td>
-                                        <td className="text-gray-700 w-[1%]">
+                                        <td className="text-gray-700 dark:text-gray-300 w-[1%]">
                                             :
                                         </td>
                                         <td
                                             ref={animateReturnDateRef}
-                                            className="text-gray-700 font-bold w-7/12"
+                                            className="text-gray-700 dark:text-gray-300 font-bold w-7/12"
                                         >
                                             {ubahFormatTanggal(
                                                 data.return_date
@@ -873,30 +889,30 @@ const Create = ({ usersDefault, partnersDefault, signaturesProp }) => {
                                         </td>
                                     </tr>
                                     <tr>
-                                        <td className="text-gray-700 w-1/6">
+                                        <td className="text-gray-700 dark:text-gray-300 w-1/6">
                                             Kendaraan
                                         </td>
-                                        <td className="text-gray-700 w-[1%]">
+                                        <td className="text-gray-700 dark:text-gray-300 w-[1%]">
                                             :
                                         </td>
                                         <td
                                             ref={animateTransportationRef}
-                                            className="text-gray-700 font-bold w-7/12"
+                                            className="text-gray-700 dark:text-gray-300 font-bold w-7/12"
                                         >
                                             {data.transportation ??
                                                 "{{Kendaraan}}"}
                                         </td>
                                     </tr>
                                     <tr>
-                                        <td className="text-gray-700 w-1/6">
+                                        <td className="text-gray-700 dark:text-gray-300 w-1/6">
                                             Akomodasi
                                         </td>
-                                        <td className="text-gray-700 w-[1%]">
+                                        <td className="text-gray-700 dark:text-gray-300 w-[1%]">
                                             :
                                         </td>
                                         <td
                                             ref={animateAccomodationRef}
-                                            className="text-gray-700 font-bold w-7/12"
+                                            className="text-gray-700 dark:text-gray-300 font-bold w-7/12"
                                         >
                                             {data.accommodation ??
                                                 "{{Akomodasi}}"}
@@ -923,14 +939,13 @@ const Create = ({ usersDefault, partnersDefault, signaturesProp }) => {
 
                         <div className="flex flex-col mt-5 justify-start w-[30%]">
                             <p>Purwokerto, {new Date().getFullYear()}</p>
-                            <img
-                                src={
-                                    BASE_URL +
-                                    "/storage/" +
-                                    data.signature.image
-                                }
-                                alt=""
-                            />
+                            <div className="h-[130px] w-[130px] py-2">
+                                <img
+                                    src={"/storage/" + data.signature.image}
+                                    alt=""
+                                    className="w-full h-full object-cover"
+                                />
+                            </div>
                             <p>{data.signature.name}</p>
                             <p>{data.signature.position}</p>
                         </div>

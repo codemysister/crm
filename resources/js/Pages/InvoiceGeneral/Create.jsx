@@ -40,6 +40,22 @@ const Create = ({
     const [regencys, setRegencys] = useState([]);
     const [codeProvince, setcodeProvince] = useState(null);
 
+    const [theme, setTheme] = useState(localStorage.theme);
+    useEffect(() => {
+        theme
+            ? (localStorage.theme = "dark")
+            : localStorage.removeItem("theme");
+
+        if (
+            localStorage.theme === "dark" &&
+            window.matchMedia("(prefers-color-scheme: dark)").matches
+        ) {
+            document.documentElement.classList.add("dark");
+        } else {
+            document.documentElement.classList.remove("dark");
+        }
+    }, [theme]);
+
     const animatePartnerNameRef = useRef(null);
     const animatePartnerNumberRef = useRef(null);
     const animateDateRef = useRef(null);
@@ -402,7 +418,7 @@ const Create = ({
         post("/invoice_generals", {
             onSuccess: () => {
                 showSuccess("Tambah");
-                window.location = BASE_URL + "/invoice_generals";
+                window.location = "/invoice_generals";
                 // reset("name", "category", "price", "unit", "description");
             },
 
@@ -1401,11 +1417,11 @@ const Create = ({
                                 ref={animateSignatureNameRef}
                             >
                                 <p>{formatDateSignature()}</p>
-                                <div className="h-[150px] w-[150px] self-center">
+                                <div className="h-[130px] w-[130px] self-center py-2">
                                     <img
                                         src={"/storage/" + data.signature.image}
                                         alt=""
-                                        className="object-fit"
+                                        className="object-fit w-full h-full"
                                     />
                                     <p>{data.signature.name}</p>
                                 </div>

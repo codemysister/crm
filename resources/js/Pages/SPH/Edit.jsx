@@ -31,6 +31,22 @@ const Edit = ({ usersProp, partnersProp, salesProp, productsProp, sph }) => {
     const [regencys, setRegencys] = useState([]);
     const [codeProvince, setcodeProvince] = useState(null);
 
+    const [theme, setTheme] = useState(localStorage.theme);
+    useEffect(() => {
+        theme
+            ? (localStorage.theme = "dark")
+            : localStorage.removeItem("theme");
+
+        if (
+            localStorage.theme === "dark" &&
+            window.matchMedia("(prefers-color-scheme: dark)").matches
+        ) {
+            document.documentElement.classList.add("dark");
+        } else {
+            document.documentElement.classList.remove("dark");
+        }
+    }, [theme]);
+
     const animatePartnerNameRef = useRef(null);
     const animatePartnerPicRef = useRef(null);
     const animatePartnerProvinceRef = useRef(null);
@@ -315,7 +331,7 @@ const Edit = ({ usersProp, partnersProp, salesProp, productsProp, sph }) => {
         put("/sph/" + sph.uuid, {
             onSuccess: () => {
                 showSuccess("Update");
-                window.location = BASE_URL + "/sph";
+                window.location = "/sph";
                 // reset("name", "category", "price", "unit", "description");
             },
 
@@ -1149,11 +1165,11 @@ const Edit = ({ usersProp, partnersProp, salesProp, productsProp, sph }) => {
                                     year: "numeric",
                                 })}
                             </p>
-                            <div className="h-[150px] w-[150px] self-start">
+                            <div className="h-[130px] w-[130px] self-start py-2">
                                 <img
                                     src={"/storage/" + data.signature.image}
                                     alt=""
-                                    className="object-fit"
+                                    className="object-cover w-full h-full"
                                 />
                                 <p>{data.signature.name}</p>
                             </div>

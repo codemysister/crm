@@ -178,10 +178,10 @@ use Carbon\Carbon;
 
         <div class="w-[30%]" style="width: 30%; height: 30%">
             <p>Hormat Kami,</p>
-            <div style="width: 130px; height: 130px; overflow: hidden;" class="p-2">
+            <div style="width: 130px; height: 130px; overflow: hidden;" class="py-2">
                 <img src="{{ public_path("/storage/$invoice_subscription->signature_image") }}" alt="" class="min-h-20
                 w-full"
-                style="object-fit: cover;" />
+                style="object-fit: cover; width:100%; height:100%;" />
             </div>
             <!-- <div style="min-height: 80px"></div> -->
             <p class="font-bold">{{$invoice_subscription->signature_name}}</p>

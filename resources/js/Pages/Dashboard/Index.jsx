@@ -96,7 +96,15 @@ const Index = ({ statisticGeneral, accountManagers }) => {
     const selectedOptionTemplate = (option, props) => {
         if (option) {
             return (
-                <div className="flex align-items-center">
+                <div
+                    className="flex align-items-center"
+                    style={{
+                        color:
+                            localStorage.theme == "dark"
+                                ? "rgb(156 163 175 / 1)"
+                                : "black",
+                    }}
+                >
                     <div>{option.name}</div>
                 </div>
             );

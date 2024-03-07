@@ -27,6 +27,22 @@ const Edit = ({ stpd, usersDefault, partnersDefault, signaturesProp }) => {
     const [regencys, setRegencys] = useState([]);
     const [codeProvince, setcodeProvince] = useState(null);
 
+    const [theme, setTheme] = useState(localStorage.theme);
+    useEffect(() => {
+        theme
+            ? (localStorage.theme = "dark")
+            : localStorage.removeItem("theme");
+
+        if (
+            localStorage.theme === "dark" &&
+            window.matchMedia("(prefers-color-scheme: dark)").matches
+        ) {
+            document.documentElement.classList.add("dark");
+        } else {
+            document.documentElement.classList.remove("dark");
+        }
+    }, [theme]);
+
     const animatePartnerNameRef = useRef(null);
     const animateDepartureDateRef = useRef(null);
     const animateReturnDateRef = useRef(null);
@@ -216,9 +232,9 @@ const Edit = ({ stpd, usersDefault, partnersDefault, signaturesProp }) => {
 
     const optionSignatureTemplate = (item) => {
         return (
-            <div className="flex flex-wrap p-2 align-items-center gap-3">
+            <div className="flex flex-wrap p-2 align-items-center items-center gap-3">
                 <img
-                    className="w-3rem shadow-2 flex-shrink-0 border-round"
+                    className="w-[6rem] shadow-2 flex-shrink-0 border-round"
                     src={"/storage/" + item.image}
                     alt={item.name}
                 />
@@ -282,7 +298,7 @@ const Edit = ({ stpd, usersDefault, partnersDefault, signaturesProp }) => {
         put("/stpd/" + data.uuid, {
             onSuccess: () => {
                 showSuccess("Tambah");
-                window.location = BASE_URL + "/stpd";
+                window.location = "/stpd";
                 // reset("name", "category", "price", "unit", "description");
             },
 
@@ -759,7 +775,7 @@ const Edit = ({ stpd, usersDefault, partnersDefault, signaturesProp }) => {
 
                         <div className="w-full mt-5">
                             <table className="w-full">
-                                <thead className="bg-blue-100 text-left">
+                                <thead className="bg-blue-100 dark:text-gray-600 text-left">
                                     <th className="px-2 py-1">No</th>
                                     <th className="px-2 py-1">Nama Karyawan</th>
                                     <th className="px-2 py-1">Jabatan</th>
@@ -923,14 +939,13 @@ const Edit = ({ stpd, usersDefault, partnersDefault, signaturesProp }) => {
 
                         <div className="flex flex-col mt-5 justify-start w-[30%]">
                             <p>Purwokerto, {new Date().getFullYear()}</p>
-                            <img
-                                src={
-                                    BASE_URL +
-                                    "/storage/" +
-                                    data.signature.image
-                                }
-                                alt=""
-                            />
+                            <div className="h-[130px] w-[130px] py-2">
+                                <img
+                                    src={"/storage/" + data.signature.image}
+                                    alt=""
+                                    className="w-full h-full object-fit"
+                                />
+                            </div>
                             <p>{data.signature.name}</p>
                             <p>{data.signature.position}</p>
                         </div>

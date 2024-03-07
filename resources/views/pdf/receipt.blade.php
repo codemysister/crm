@@ -111,9 +111,9 @@
                     MMMM YYYY',
         'Do MMMM YYYY'
     ) }}</p>
-                <div style="width: 130px; height: 130px; overflow: hidden;">
+                <div style="width: 130px; height: 130px; overflow: hidden;" class="py-2">
 
-                <img class="h-20 w-[15%]" style="width:100%; object-fit:cover;" src="{{ public_path("/storage/$receipt->signature_image")
+                <img class="h-20 w-[15%]" style="width:100%; height:100%;object-fit:cover;" src="{{ public_path("/storage/$receipt->signature_image")
                 }}"
                 alt="Signature">
             </div>

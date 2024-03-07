@@ -23,6 +23,22 @@ const Edit = ({ partnersProp, signaturesProp, memo }) => {
     const [signatures, setSignatures] = useState(signaturesProp);
     const toast = useRef(null);
 
+    const [theme, setTheme] = useState(localStorage.theme);
+    useEffect(() => {
+        theme
+            ? (localStorage.theme = "dark")
+            : localStorage.removeItem("theme");
+
+        if (
+            localStorage.theme === "dark" &&
+            window.matchMedia("(prefers-color-scheme: dark)").matches
+        ) {
+            document.documentElement.classList.add("dark");
+        } else {
+            document.documentElement.classList.remove("dark");
+        }
+    }, [theme]);
+
     const animatePartnerNameRef = useRef(null);
     const animatePriceCardRef = useRef(null);
     const animatePriceECardRef = useRef(null);
@@ -191,7 +207,7 @@ const Edit = ({ partnersProp, signaturesProp, memo }) => {
         put("/memo/" + data.uuid, {
             onSuccess: () => {
                 showSuccess("Tambah");
-                window.location = BASE_URL + "/memo";
+                window.location = "/memo";
                 // reset("name", "category", "price", "unit", "description");
             },
 
@@ -654,12 +670,15 @@ const Edit = ({ partnersProp, signaturesProp, memo }) => {
                             >
                                 <p>Yang Mengajukan</p>
                                 {data.signature_first.image ? (
-                                    <img
-                                        src={`/storage/${data.signature_first.image}`}
-                                        alt=""
-                                        className="min-h-20 w-full"
-                                        style={{ width: "80%", height: "80px" }}
-                                    />
+                                    <>
+                                        <div className="h-[130px] w-[130px] mx-auto py-2">
+                                            <img
+                                                src={`/storage/${data.signature_first.image}`}
+                                                alt=""
+                                                className="min-h-20 w-full h-full object-cover"
+                                            />
+                                        </div>
+                                    </>
                                 ) : (
                                     <div style={{ minHeight: "80px" }}></div>
                                 )}
@@ -671,12 +690,15 @@ const Edit = ({ partnersProp, signaturesProp, memo }) => {
                             >
                                 <p>Mengetahui</p>
                                 {data.signature_second.image ? (
-                                    <img
-                                        src={`/storage/${data.signature_second.image}`}
-                                        alt=""
-                                        className="min-h-20 w-full"
-                                        style={{ width: "80%", height: "80px" }}
-                                    />
+                                    <>
+                                        <div className="h-[130px] w-[130px] mx-auto py-2">
+                                            <img
+                                                src={`/storage/${data.signature_second.image}`}
+                                                alt=""
+                                                className="min-h-20 w-full h-full object-cover"
+                                            />
+                                        </div>
+                                    </>
                                 ) : (
                                     <div style={{ minHeight: "80px" }}></div>
                                 )}
@@ -688,32 +710,21 @@ const Edit = ({ partnersProp, signaturesProp, memo }) => {
                             >
                                 <p>Menyetujui</p>
                                 {data.signature_third.image ? (
-                                    <img
-                                        src={`/storage/${data.signature_third.image}`}
-                                        alt=""
-                                        className="min-h-20 w-full"
-                                        style={{ width: "80%", height: "80px" }}
-                                    />
+                                    <>
+                                        <div className="h-[130px] w-[130px] mx-auto py-2">
+                                            <img
+                                                src={`/storage/${data.signature_third.image}`}
+                                                alt=""
+                                                className="min-h-20 w-full h-full object-cover"
+                                            />
+                                        </div>
+                                    </>
                                 ) : (
                                     <div style={{ minHeight: "80px" }}></div>
                                 )}
                                 <p>{data.signature_third.name}</p>
                             </div>
                         </div>
-
-                        {/* <div className="flex flex-col mt-5 justify-start w-[30%]">
-                            <p>Purwokerto, {new Date().getFullYear()}</p>
-                            <img
-                                src={
-                                    BASE_URL +
-                                    "/storage/" +
-                                    data.signature.image
-                                }
-                                alt=""
-                            />
-                            <p>{data.signature.name}</p>
-                            <p>{data.signature.position}</p>
-                        </div> */}
                     </div>
                 </div>
             </div>

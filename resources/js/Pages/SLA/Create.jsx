@@ -41,6 +41,21 @@ const Create = ({ usersProp, partnersProp, signaturesProp, referralsProp }) => {
     const [codeProvince, setcodeProvince] = useState(null);
     const [signatures, setSignatures] = useState(signaturesProp);
     const [referrals, setReferrals] = useState(referralsProp);
+    const [theme, setTheme] = useState(localStorage.theme);
+    useEffect(() => {
+        theme
+            ? (localStorage.theme = "dark")
+            : localStorage.removeItem("theme");
+
+        if (
+            localStorage.theme === "dark" &&
+            window.matchMedia("(prefers-color-scheme: dark)").matches
+        ) {
+            document.documentElement.classList.add("dark");
+        } else {
+            document.documentElement.classList.remove("dark");
+        }
+    }, [theme]);
 
     const animatePartnerProvinceRef = useRef(null);
     const animatePartnerRegencyRef = useRef(null);
@@ -507,7 +522,7 @@ const Create = ({ usersProp, partnersProp, signaturesProp, referralsProp }) => {
         post("/sla", {
             onSuccess: () => {
                 showSuccess("Tambah");
-                window.location = BASE_URL + "/sla";
+                window.location = "/sla";
                 // reset("name", "category", "price", "unit", "description");
             },
 
@@ -1097,6 +1112,206 @@ const Create = ({ usersProp, partnersProp, signaturesProp, referralsProp }) => {
                         </Card>
                     </div>
 
+                    <Dialog
+                        header="Input Produk"
+                        visible={dialogVisible}
+                        style={{ width: "85vw" }}
+                        maximizable
+                        modal
+                        contentStyle={{ height: "550px" }}
+                        onHide={() => setDialogVisible(false)}
+                        footer={dialogFooterTemplate}
+                    >
+                        <div className="flex my-5 gap-3">
+                            <Button
+                                label="Tambah Inputan"
+                                icon="pi pi-plus"
+                                onClick={() => {
+                                    let inputNew = {
+                                        activity: null,
+                                        cazh_pic: { name: null },
+                                        duration: null,
+                                        estimation_date: null,
+                                        realization_date: null,
+                                        link_drive_proof: null,
+                                    };
+
+                                    let updatedActivities = [
+                                        ...data.activities,
+                                        inputNew,
+                                    ];
+
+                                    setData("activities", updatedActivities);
+                                }}
+                            />
+                        </div>
+
+                        {data.activities?.map((activity, index) => {
+                            const no = index + 1;
+                            return (
+                                <div
+                                    className="flex gap-5 mt-2 items-center"
+                                    key={activity + index}
+                                >
+                                    <div>
+                                        <Badge
+                                            value={no}
+                                            className="rounded-full"
+                                            size="large"
+                                        ></Badge>
+                                    </div>
+
+                                    <div className="flex flex-col">
+                                        <label htmlFor="partner_address">
+                                            Tahapan *
+                                        </label>
+                                        <InputText
+                                            value={activity.activity}
+                                            onChange={(e) =>
+                                                handleInputChange(
+                                                    index,
+                                                    "activity",
+                                                    e.target.value
+                                                )
+                                            }
+                                            className="dark:bg-gray-300"
+                                            id="partner_address"
+                                            aria-describedby="partner_address-help"
+                                        />
+                                    </div>
+
+                                    <div className="flex">
+                                        <div className="flex flex-col">
+                                            <label htmlFor="partner_address">
+                                                Penanggungjawab *
+                                            </label>
+                                            <Dropdown
+                                                dataKey="name"
+                                                value={activity.cazh_pic}
+                                                onChange={(e) => {
+                                                    handleInputChange(
+                                                        index,
+                                                        "cazh_pic",
+                                                        e.target.value
+                                                    );
+                                                }}
+                                                options={users}
+                                                optionLabel="name"
+                                                placeholder="Pilih Penanggungjawab"
+                                                filter
+                                                valueTemplate={
+                                                    selectedOptionTemplate
+                                                }
+                                                itemTemplate={optionTemplate}
+                                                className="w-full min-w-[14rem] md:w-14rem"
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <div className="flex">
+                                        <div className="flex flex-col">
+                                            <label htmlFor="duration">
+                                                Estimasi Waktu *
+                                            </label>
+                                            <InputText
+                                                value={activity.duration}
+                                                onChange={(e) =>
+                                                    handleInputChange(
+                                                        index,
+                                                        "duration",
+                                                        e.target.value
+                                                    )
+                                                }
+                                                className="dark:bg-gray-300"
+                                                id="duration"
+                                                aria-describedby="duration-help"
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <div className="flex">
+                                        <div className="flex flex-col">
+                                            <label htmlFor="duration">
+                                                Estimasi Waktu *
+                                            </label>
+                                            <input
+                                                type="date"
+                                                id="birthday"
+                                                name="birthday"
+                                                value={activity.estimation_date}
+                                                style={{ height: "35px" }}
+                                                className="rounded-md border-gray-400 text-sm"
+                                                onChange={(e) => {
+                                                    handleInputChange(
+                                                        index,
+                                                        "estimation_date",
+                                                        e.target.value
+                                                    );
+                                                }}
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <div className="flex">
+                                        <div className="flex flex-col">
+                                            <label htmlFor="duration">
+                                                Realisasi
+                                            </label>
+                                            <input
+                                                type="date"
+                                                id="birthday"
+                                                name="birthday"
+                                                value={
+                                                    activity.realization_date
+                                                }
+                                                style={{ height: "35px" }}
+                                                onChange={(e) => {
+                                                    handleInputChange(
+                                                        index,
+                                                        "realization_date",
+                                                        e.target.value
+                                                    );
+                                                }}
+                                                className="rounded-md border-gray-400 text-sm"
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <div className="flex self-center pt-4">
+                                        <Button
+                                            className="bg-red-500 h-1 w-1 shadow-md rounded-full "
+                                            icon={() => (
+                                                <i
+                                                    className="pi pi-minus"
+                                                    style={{
+                                                        fontSize: "0.7rem",
+                                                    }}
+                                                ></i>
+                                            )}
+                                            onClick={() => {
+                                                const updatedActivities = [
+                                                    ...data.activities,
+                                                ];
+
+                                                updatedActivities.splice(
+                                                    index,
+                                                    1
+                                                );
+
+                                                setData((prevData) => ({
+                                                    ...prevData,
+                                                    activities:
+                                                        updatedActivities,
+                                                }));
+                                            }}
+                                            aria-controls="popup_menu_right"
+                                            aria-haspopup
+                                        />
+                                    </div>
+                                </div>
+                            );
+                        })}
+                    </Dialog>
                     <div className="md:w-[65%] hidden md:block text-xs h-screen max-h-screen overflow-y-auto p-5">
                         <header>
                             <div className="flex justify-start items-center">
@@ -1326,12 +1541,6 @@ const Create = ({ usersProp, partnersProp, signaturesProp, referralsProp }) => {
                                 </tbody>
                             </table>
                         </div>
-                        {/* 
-                        <div className="flex flex-col text-xs mt-5 justify-start w-[30%]">
-                            <p>Purwokerto, {new Date().getFullYear()}</p>
-                            <img src={BASE_URL + data.signature_image} alt="" />
-                            <p>{data.signature_name}</p>
-                        </div> */}
 
                         <div className="flex text-xs flex-row mt-5 justify-between">
                             <div
@@ -1339,11 +1548,13 @@ const Create = ({ usersProp, partnersProp, signaturesProp, referralsProp }) => {
                                 ref={animateSignatureNameRef}
                             >
                                 <p>Pihak Pertama</p>
-                                <img
-                                    src={"/storage/" + data.signature.image}
-                                    alt=""
-                                    className="min-h-20 max-h-20"
-                                />
+                                <div className="h-[130px] w-[130px] py-2">
+                                    <img
+                                        src={"/storage/" + data.signature.image}
+                                        alt=""
+                                        className="w-full h-full object-cover"
+                                    />
+                                </div>
                                 <p>
                                     <b>
                                         {data.signature.name ??
@@ -1355,12 +1566,14 @@ const Create = ({ usersProp, partnersProp, signaturesProp, referralsProp }) => {
                             <div className="w-[30%]">
                                 <p>Pihak Kedua</p>
                                 {data.partner.pic_signature ? (
-                                    <img
-                                        src={URL.createObjectURL(
-                                            data.partner.pic_signature
-                                        )}
-                                        className="min-h-20 max-h-20"
-                                    />
+                                    <div className="h-[130px] w-[130px] py-2">
+                                        <img
+                                            src={URL.createObjectURL(
+                                                data.partner.pic_signature
+                                            )}
+                                            className="w-full h-full object-cover"
+                                        />
+                                    </div>
                                 ) : (
                                     <div className="min-h-20"></div>
                                 )}
@@ -1378,13 +1591,16 @@ const Create = ({ usersProp, partnersProp, signaturesProp, referralsProp }) => {
                                 >
                                     <p>Pihak Ketiga</p>
                                     {data.referral_signature.image ? (
-                                        <img
-                                            src={
-                                                "/storage" +
-                                                data.referral_signature.image
-                                            }
-                                            className="min-h-20 max-h-20"
-                                        />
+                                        <div className="h-[130px] w-[130px] py-2">
+                                            <img
+                                                src={
+                                                    "/storage" +
+                                                    data.referral_signature
+                                                        .image
+                                                }
+                                                className="w-full h-full object-cover"
+                                            />
+                                        </div>
                                     ) : (
                                         <div className="min-h-20"></div>
                                     )}

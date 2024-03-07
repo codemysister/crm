@@ -182,25 +182,25 @@ const DetailSubscription = ({
                 <>
                     <table class="w-full">
                         <tr class="border-b">
-                            <td class="pt-2 pb-1 text-gray-700 text-base font-bold w-1/5">
+                            <td class="pt-2 pb-1 text-gray-900 text-base font-bold w-1/5">
                                 Tagihan
                             </td>
-                            <td class="pt-2 pb-1 text-gray-700 text-base w-[2%]">
+                            <td class="pt-2 pb-1 text-gray-900 text-base w-[2%]">
                                 :
                             </td>
-                            <td class="pt-2 pb-1 text-gray-700 text-base w-7/12">
+                            <td class="pt-2 pb-1 text-gray-900 text-base w-7/12">
                                 {partner.subscriptions[0].bill}
                             </td>
                         </tr>
 
                         <tr class="border-b">
-                            <td class="pt-2 pb-1 text-gray-700 text-base font-bold w-1/5">
+                            <td class="pt-2 pb-1 text-gray-900 text-base font-bold w-1/5">
                                 Nominal
                             </td>
-                            <td class="pt-2 pb-1 text-gray-700 text-base w-[2%]">
+                            <td class="pt-2 pb-1 text-gray-900 text-base w-[2%]">
                                 :
                             </td>
-                            <td class="pt-2 pb-1 text-gray-700 text-base w-7/12">
+                            <td class="pt-2 pb-1 text-gray-900 text-base w-7/12">
                                 {partner.subscriptions[0].nominal.toLocaleString(
                                     "id-ID"
                                 )}
@@ -208,13 +208,13 @@ const DetailSubscription = ({
                         </tr>
 
                         <tr class="border-b">
-                            <td class="pt-2 pb-1 text-gray-700 text-base font-bold w-1/5">
+                            <td class="pt-2 pb-1 text-gray-900 text-base font-bold w-1/5">
                                 PPN
                             </td>
-                            <td class="pt-2 pb-1 text-gray-700 text-base w-[2%]">
+                            <td class="pt-2 pb-1 text-gray-900 text-base w-[2%]">
                                 :
                             </td>
-                            <td class="pt-2 pb-1 text-gray-700 text-base w-7/12">
+                            <td class="pt-2 pb-1 text-gray-900 text-base w-7/12">
                                 {partner.subscriptions[0].ppn != null
                                     ? partner.subscriptions[0].ppn
                                     : ""}
@@ -223,26 +223,26 @@ const DetailSubscription = ({
                         </tr>
 
                         <tr class="border-b">
-                            <td class="pt-2 pb-1 text-gray-700 text-base font-bold w-1/5">
+                            <td class="pt-2 pb-1 text-gray-900 text-base font-bold w-1/5">
                                 Total Tagihan (nominal + ppn)
                             </td>
-                            <td class="pt-2 pb-1 text-gray-700 text-base w-[2%]">
+                            <td class="pt-2 pb-1 text-gray-900 text-base w-[2%]">
                                 :
                             </td>
-                            <td class="pt-2 pb-1 text-gray-700 text-base w-7/12">
+                            <td class="pt-2 pb-1 text-gray-900 text-base w-7/12">
                                 {partner.subscriptions[0].total_bill.toLocaleString(
                                     "id-ID"
                                 )}
                             </td>
                         </tr>
                         <tr class="border-b">
-                            <td class="pt-2 pb-1 text-gray-700 text-base font-bold w-1/5">
+                            <td class="pt-2 pb-1 text-gray-900 text-base font-bold w-1/5">
                                 Aksi
                             </td>
-                            <td class="pt-2 pb-1 text-gray-700 text-base w-[2%]">
+                            <td class="pt-2 pb-1 text-gray-900 text-base w-[2%]">
                                 :
                             </td>
-                            <td class="pt-2 pb-1 text-gray-700 text-base w-7/12">
+                            <td class="pt-2 pb-1 text-gray-900 text-base w-7/12">
                                 <Button
                                     label="edit"
                                     className="p-0 underline bg-transparent text-blue-700 text-left"

@@ -34,6 +34,21 @@ const Edit = ({ usersProp, partnersProp, mou, signaturesProp }) => {
     const [codeProvince, setcodeProvince] = useState(null);
     const [isSignatureBlob, setIsSignatureBlob] = useState(false);
     const [signatures, setSignatures] = useState(signaturesProp);
+    const [theme, setTheme] = useState(localStorage.theme);
+    useEffect(() => {
+        theme
+            ? (localStorage.theme = "dark")
+            : localStorage.removeItem("theme");
+
+        if (
+            localStorage.theme === "dark" &&
+            window.matchMedia("(prefers-color-scheme: dark)").matches
+        ) {
+            document.documentElement.classList.add("dark");
+        } else {
+            document.documentElement.classList.remove("dark");
+        }
+    }, [theme]);
 
     const toast = useRef(null);
     const infoPriceTrainingOfflineRef = useRef(null);
@@ -264,9 +279,9 @@ const Edit = ({ usersProp, partnersProp, mou, signaturesProp }) => {
 
     const optionSignatureTemplate = (item) => {
         return (
-            <div className="flex flex-wrap p-2 align-items-center gap-3">
+            <div className="flex flex-wrap p-2 align-items-center items-center gap-3">
                 <img
-                    className="w-3rem shadow-2 flex-shrink-0 border-round"
+                    className="w-[6rem] shadow-2 flex-shrink-0 border-round"
                     src={item.image}
                     alt={item.name}
                 />
@@ -365,8 +380,8 @@ const Edit = ({ usersProp, partnersProp, mou, signaturesProp }) => {
         post("/mou/" + data.uuid, {
             onSuccess: () => {
                 showSuccess("Tambah");
-                window.location = BASE_URL + "/mou";
-                window.location = BASE_URL + "/mou";
+                window.location = "/mou";
+                window.location = "/mou";
                 // reset("name", "category", "price", "unit", "description");
             },
 
@@ -3689,11 +3704,16 @@ const Edit = ({ usersProp, partnersProp, mou, signaturesProp }) => {
                                     ref={animateSignatureName}
                                 >
                                     <p>Pihak Pertama</p>
-                                    <img
-                                        src={"/storage/" + data.signature.image}
-                                        alt=""
-                                        className="min-h-20 max-h-20"
-                                    />
+                                    <div className="h-[130px] w-[130px] py-2">
+                                        <img
+                                            src={
+                                                "/storage/" +
+                                                data.signature.image
+                                            }
+                                            alt=""
+                                            className="w-full h-full object-cover"
+                                        />
+                                    </div>
                                     <p>
                                         <b>
                                             {data.signature.name ??
@@ -3705,17 +3725,19 @@ const Edit = ({ usersProp, partnersProp, mou, signaturesProp }) => {
                                 <div className="w-[30%]">
                                     <p>Pihak Kedua</p>
                                     {data.pic_signature && isSignatureBlob ? (
-                                        <img
-                                            src={
-                                                typeof data.pic_signature ===
-                                                "string"
-                                                    ? data.pic_signature
-                                                    : URL.createObjectURL(
-                                                          data.pic_signature
-                                                      )
-                                            }
-                                            className="min-h-20 max-h-20"
-                                        />
+                                        <div className="h-[130px] w-[130px] py-2">
+                                            <img
+                                                src={
+                                                    typeof data.pic_signature ===
+                                                    "string"
+                                                        ? data.pic_signature
+                                                        : URL.createObjectURL(
+                                                              data.pic_signature
+                                                          )
+                                                }
+                                                className="w-full h-full object-cover"
+                                            />
+                                        </div>
                                     ) : (
                                         <div className="min-h-20"></div>
                                     )}

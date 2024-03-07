@@ -2,19 +2,15 @@ import { InputText } from "primereact/inputtext";
 import { Card } from "primereact/card";
 import { useState } from "react";
 import { Button } from "primereact/button";
-import { DataTable } from "primereact/datatable";
-import { Dialog } from "primereact/dialog";
 import { Head, Link, useForm } from "@inertiajs/react";
-import { Calendar } from "primereact/calendar";
 import { useRef } from "react";
 import { FilterMatchMode } from "primereact/api";
 import { Dropdown } from "primereact/dropdown";
 import React from "react";
 import { Toast } from "primereact/toast";
-import { Column } from "primereact/column";
-import { useEffect } from "react";
-import { InputNumber } from "primereact/inputnumber";
 import { InputTextarea } from "primereact/inputtextarea";
+import OptionSignatureTemplate from "@/Components/OptionSignatureTemplate";
+import OptionTemplate from "@/Components/OptionTemplate";
 
 const BASE_URL = import.meta.env.VITE_BASE_URL;
 
@@ -22,6 +18,22 @@ const Create = ({ partnersProp, signaturesProp }) => {
     const [partners, setPartners] = useState(partnersProp);
     const [signatures, setSignatures] = useState(signaturesProp);
     const toast = useRef(null);
+
+    const [theme, setTheme] = useState(localStorage.theme);
+    useEffect(() => {
+        theme
+            ? (localStorage.theme = "dark")
+            : localStorage.removeItem("theme");
+
+        if (
+            localStorage.theme === "dark" &&
+            window.matchMedia("(prefers-color-scheme: dark)").matches
+        ) {
+            document.documentElement.classList.add("dark");
+        } else {
+            document.documentElement.classList.remove("dark");
+        }
+    }, [theme]);
 
     const animatePartnerNameRef = useRef(null);
     const animatePriceCardRef = useRef(null);
@@ -116,33 +128,6 @@ const Create = ({ partnersProp, signaturesProp }) => {
         return <span>{props.placeholder}</span>;
     };
 
-    const optionSignatureTemplate = (item) => {
-        return (
-            <div className="flex flex-wrap p-2 align-items-center gap-3">
-                <img
-                    className="w-3rem shadow-2 flex-shrink-0 border-round"
-                    src={"/storage/" + item.image}
-                    alt={item.name}
-                />
-                <div className="flex-1 flex flex-col gap-2 xl:mr-8">
-                    <span className="font-bold">{item.name}</span>
-                    <div className="flex align-items-center gap-2">
-                        <span>{item.position}</span>
-                    </div>
-                </div>
-                {/* <span className="font-bold text-900">${item.price}</span> */}
-            </div>
-        );
-    };
-
-    const optionTemplate = (option) => {
-        return (
-            <div className="flex align-items-center">
-                <div>{option.name}</div>
-            </div>
-        );
-    };
-
     const header = (
         <div className="flex flex-row justify-left gap-2 align-items-center items-end">
             <div className="w-[30%]">
@@ -184,7 +169,7 @@ const Create = ({ partnersProp, signaturesProp }) => {
         post("/memo", {
             onSuccess: () => {
                 showSuccess("Tambah");
-                window.location = BASE_URL + "/memo";
+                window.location = "/memo";
                 // reset("name", "category", "price", "unit", "description");
             },
 
@@ -287,7 +272,11 @@ const Create = ({ partnersProp, signaturesProp }) => {
                                             valueTemplate={
                                                 selectedOptionTemplate
                                             }
-                                            itemTemplate={optionTemplate}
+                                            itemTemplate={(option) => (
+                                                <OptionTemplate
+                                                    option={option}
+                                                />
+                                            )}
                                             className="w-[10%] dropdown-group border-l-0"
                                         />
                                     </div>
@@ -435,7 +424,11 @@ const Create = ({ partnersProp, signaturesProp }) => {
                                         placeholder="Pilih Tanda Tangan"
                                         filter
                                         valueTemplate={selectedOptionTemplate}
-                                        itemTemplate={optionSignatureTemplate}
+                                        itemTemplate={(option) => (
+                                            <OptionSignatureTemplate
+                                                item={option}
+                                            />
+                                        )}
                                         className="w-full md:w-14rem"
                                     />
                                 </div>
@@ -471,7 +464,14 @@ const Create = ({ partnersProp, signaturesProp }) => {
                                             );
                                         }}
                                         valueTemplate={selectedOptionTemplate}
-                                        itemTemplate={optionSignatureTemplate}
+                                        itemTemplate={(option) => (
+                                            <>
+                                                {console.log(option)}
+                                                <OptionSignatureTemplate
+                                                    item={option}
+                                                />
+                                            </>
+                                        )}
                                         className="w-full md:w-14rem"
                                     />
                                 </div>
@@ -507,7 +507,11 @@ const Create = ({ partnersProp, signaturesProp }) => {
                                             );
                                         }}
                                         valueTemplate={selectedOptionTemplate}
-                                        itemTemplate={optionSignatureTemplate}
+                                        itemTemplate={(option) => (
+                                            <OptionSignatureTemplate
+                                                item={option}
+                                            />
+                                        )}
                                         className="w-full md:w-14rem"
                                     />
                                 </div>
@@ -647,12 +651,15 @@ const Create = ({ partnersProp, signaturesProp }) => {
                             >
                                 <p>Yang Mengajukan</p>
                                 {data.signature_first.image ? (
-                                    <img
-                                        src={`/storage/${data.signature_first.image}`}
-                                        alt=""
-                                        className="min-h-20 w-full"
-                                        style={{ width: "80%", height: "80px" }}
-                                    />
+                                    <>
+                                        <div className="h-[130px] w-[130px] mx-auto py-2">
+                                            <img
+                                                src={`/storage/${data.signature_first.image}`}
+                                                alt=""
+                                                className="min-h-20 h-full w-full object-cover"
+                                            />
+                                        </div>
+                                    </>
                                 ) : (
                                     <div style={{ minHeight: "80px" }}></div>
                                 )}
@@ -663,13 +670,17 @@ const Create = ({ partnersProp, signaturesProp }) => {
                                 ref={animateSignatureSecondRef}
                             >
                                 <p>Mengetahui</p>
+
                                 {data.signature_second.image ? (
-                                    <img
-                                        src={`/storage/${data.signature_second.image}`}
-                                        alt=""
-                                        className="min-h-20 w-full"
-                                        style={{ width: "80%", height: "80px" }}
-                                    />
+                                    <>
+                                        <div className="h-[130px] w-[130px] mx-auto py-2">
+                                            <img
+                                                src={`/storage/${data.signature_second.image}`}
+                                                alt=""
+                                                className="min-h-20 h-full w-full object-cover"
+                                            />
+                                        </div>
+                                    </>
                                 ) : (
                                     <div style={{ minHeight: "80px" }}></div>
                                 )}
@@ -681,32 +692,21 @@ const Create = ({ partnersProp, signaturesProp }) => {
                             >
                                 <p>Menyetujui</p>
                                 {data.signature_third.image ? (
-                                    <img
-                                        src={`/storage/${data.signature_third.image}`}
-                                        alt=""
-                                        className="min-h-20 w-full"
-                                        style={{ width: "80%", height: "80px" }}
-                                    />
+                                    <>
+                                        <div className="h-[130px] w-[130px] mx-auto py-2">
+                                            <img
+                                                src={`/storage/${data.signature_third.image}`}
+                                                alt=""
+                                                className="min-h-20 w-full h-full object-cover"
+                                            />
+                                        </div>
+                                    </>
                                 ) : (
                                     <div style={{ minHeight: "80px" }}></div>
                                 )}
                                 <p>{data.signature_third.name}</p>
                             </div>
                         </div>
-
-                        {/* <div className="flex flex-col mt-5 justify-start w-[30%]">
-                            <p>Purwokerto, {new Date().getFullYear()}</p>
-                            <img
-                                src={
-                                    BASE_URL +
-                                    "/storage/" +
-                                    data.signature.image
-                                }
-                                alt=""
-                            />
-                            <p>{data.signature.name}</p>
-                            <p>{data.signature.position}</p>
-                        </div> */}
                     </div>
                 </div>
             </div>

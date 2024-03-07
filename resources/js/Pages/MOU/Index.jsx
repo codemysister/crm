@@ -622,26 +622,6 @@ export default function Index({ auth }) {
                                             </div>
                                         </OverlayPanel>
                                     </>
-                                    // <div className="flex w-full h-full items-center justify-center">
-                                    //     <a
-                                    //         href={
-                                    //             BASE_URL +
-                                    //             "/" +
-                                    //             rowData.mou_doc_word
-                                    //         }
-                                    //         download={`MOU_${rowData.partner_name}`}
-                                    //         class="font-bold  w-full h-full text-center rounded-full "
-                                    //     >
-                                    //         <i
-                                    //             className="pi pi-file-pdf"
-                                    //             style={{
-                                    //                 width: "100%",
-                                    //                 height: "100%",
-                                    //                 fontSize: "1.5rem",
-                                    //             }}
-                                    //         ></i>
-                                    //     </a>
-                                    // </div>
                                 );
                             }}
                             className="dark:border-none"

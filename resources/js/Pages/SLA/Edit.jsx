@@ -47,6 +47,22 @@ const Edit = ({
     const [signatures, setSignatures] = useState(signaturesProp);
     const [referrals, setReferrals] = useState(referralsProp);
 
+    const [theme, setTheme] = useState(localStorage.theme);
+    useEffect(() => {
+        theme
+            ? (localStorage.theme = "dark")
+            : localStorage.removeItem("theme");
+
+        if (
+            localStorage.theme === "dark" &&
+            window.matchMedia("(prefers-color-scheme: dark)").matches
+        ) {
+            document.documentElement.classList.add("dark");
+        } else {
+            document.documentElement.classList.remove("dark");
+        }
+    }, [theme]);
+
     const animatePartnerProvinceRef = useRef(null);
     const animatePartnerRegencyRef = useRef(null);
     const animatePartnerNameRef = useRef();
@@ -324,7 +340,7 @@ const Edit = ({
         post("/sla/" + data.uuid, {
             onSuccess: () => {
                 showSuccess("Tambah");
-                window.location = BASE_URL + "/sla";
+                window.location = "/sla";
                 // reset("name", "category", "price", "unit", "description");
             },
 
@@ -1343,11 +1359,13 @@ const Edit = ({
                                 ref={animateSignatureNameRef}
                             >
                                 <p>Pihak Pertama</p>
-                                <img
-                                    src={"/storage/" + data.signature.image}
-                                    alt=""
-                                    className="min-h-20 max-h-20"
-                                />
+                                <div className="h-[130px] w-[130px] py-2">
+                                    <img
+                                        src={"/storage/" + data.signature.image}
+                                        alt=""
+                                        className="w-full h-full object-cover"
+                                    />
+                                </div>
                                 <p>
                                     <b>
                                         {data.signature.name ??
@@ -1358,18 +1376,20 @@ const Edit = ({
                             <div className="w-[30%]">
                                 <p>Pihak Kedua</p>
                                 {data.pic_signature ? (
-                                    <img
-                                        src={
-                                            typeof data.pic_signature ===
-                                            "string"
-                                                ? "/storage/" +
-                                                  data.pic_signature
-                                                : URL.createObjectURL(
+                                    <div className="h-[130px] w-[130px] py-2">
+                                        <img
+                                            src={
+                                                typeof data.pic_signature ===
+                                                "string"
+                                                    ? "/storage/" +
                                                       data.pic_signature
-                                                  )
-                                        }
-                                        className="min-h-20 max-h-20"
-                                    />
+                                                    : URL.createObjectURL(
+                                                          data.pic_signature
+                                                      )
+                                            }
+                                            className="w-full h-full object-cover"
+                                        />
+                                    </div>
                                 ) : (
                                     <div className="min-h-20"></div>
                                 )}
@@ -1387,13 +1407,16 @@ const Edit = ({
                                 >
                                     <p>Pihak Ketiga</p>
                                     {data.referral_signature.image ? (
-                                        <img
-                                            src={
-                                                "/storage" +
-                                                data.referral_signature.image
-                                            }
-                                            className="min-h-20 max-h-20"
-                                        />
+                                        <div className="h-[130px] w-[130px] py-2">
+                                            <img
+                                                src={
+                                                    "/storage" +
+                                                    data.referral_signature
+                                                        .image
+                                                }
+                                                className="w-full h-full object-cover"
+                                            />
+                                        </div>
                                     ) : (
                                         <div className="min-h-20"></div>
                                     )}

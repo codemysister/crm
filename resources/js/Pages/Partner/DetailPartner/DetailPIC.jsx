@@ -87,57 +87,57 @@ const DetailPIC = ({
                 <>
                     <table class="w-full">
                         <tr class="border-b">
-                            <td class="pt-2 pb-1 text-gray-700 text-base font-bold w-1/5">
+                            <td class="pt-2 pb-1 text-gray-900 text-base font-bold w-1/5">
                                 Nama
                             </td>
-                            <td class="pt-2 pb-1 text-gray-700 text-base w-[2%]">
+                            <td class="pt-2 pb-1 text-gray-900 text-base w-[2%]">
                                 :
                             </td>
-                            <td class="pt-2 pb-1 text-gray-700 text-base w-7/12">
+                            <td class="pt-2 pb-1 text-gray-900 text-base w-7/12">
                                 {partner.pics[0].name}
                             </td>
                         </tr>
                         <tr class="border-b">
-                            <td class="pt-2 pb-1 text-gray-700 text-base font-bold w-1/5">
+                            <td class="pt-2 pb-1 text-gray-900 text-base font-bold w-1/5">
                                 Jabatan
                             </td>
-                            <td class="pt-2 pb-1 text-gray-700 text-base w-[2%]">
+                            <td class="pt-2 pb-1 text-gray-900 text-base w-[2%]">
                                 :
                             </td>
-                            <td class="pt-2 pb-1 text-gray-700 text-base w-7/12">
+                            <td class="pt-2 pb-1 text-gray-900 text-base w-7/12">
                                 {partner.pics[0].position}
                             </td>
                         </tr>
                         <tr class="border-b">
-                            <td class="pt-2 pb-1 text-gray-700 text-base font-bold w-1/5">
+                            <td class="pt-2 pb-1 text-gray-900 text-base font-bold w-1/5">
                                 No. Telp
                             </td>
-                            <td class="pt-2 pb-1 text-gray-700 text-base w-[2%]">
+                            <td class="pt-2 pb-1 text-gray-900 text-base w-[2%]">
                                 :
                             </td>
-                            <td class="pt-2 pb-1 text-gray-700 text-base w-7/12">
+                            <td class="pt-2 pb-1 text-gray-900 text-base w-7/12">
                                 {partner.pics[0].number ?? "-"}
                             </td>
                         </tr>
                         <tr class="border-b">
-                            <td class="pt-2 pb-1 text-gray-700 text-base font-bold w-1/5">
+                            <td class="pt-2 pb-1 text-gray-900 text-base font-bold w-1/5">
                                 Email
                             </td>
-                            <td class="pt-2 pb-1 text-gray-700 text-base w-[2%]">
+                            <td class="pt-2 pb-1 text-gray-900 text-base w-[2%]">
                                 :
                             </td>
-                            <td class="pt-2 pb-1 text-gray-700 text-base w-7/12">
+                            <td class="pt-2 pb-1 text-gray-900 text-base w-7/12">
                                 {partner.pics[0].email ?? "-"}
                             </td>
                         </tr>
                         <tr class="border-b">
-                            <td class="pt-2 pb-1 text-gray-700 text-base font-bold w-1/5">
+                            <td class="pt-2 pb-1 text-gray-900 text-base font-bold w-1/5">
                                 Aksi
                             </td>
-                            <td class="pt-2 pb-1 text-gray-700 text-base w-[2%]">
+                            <td class="pt-2 pb-1 text-gray-900 text-base w-[2%]">
                                 :
                             </td>
-                            <td class="pt-2 pb-1 text-gray-700 text-base w-7/12">
+                            <td class="pt-2 pb-1 text-gray-900 text-base w-7/12">
                                 <Button
                                     label="edit"
                                     className="p-0 underline bg-transparent text-blue-700 text-left"

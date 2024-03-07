@@ -286,7 +286,7 @@ const Edit = ({ usersProp, partnersProp, rolesProp, sla, productsProp }) => {
         post("/sla/" + data.uuid, {
             onSuccess: () => {
                 showSuccess("Tambah");
-                window.location = BASE_URL + "/sla";
+                window.location = "/sla";
                 // reset("name", "category", "price", "unit", "description");
             },
 

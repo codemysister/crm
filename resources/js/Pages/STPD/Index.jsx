@@ -396,13 +396,6 @@ export default function Index({ auth, spdsDefault }) {
                                         </a>
                                     </div>
                                 );
-                                // return (
-                                //     <a
-                                //         href={BASE_URL + "/" + rowData.stpd_doc}
-                                //         download={`Surat_Tugas_Perjalanan_Dinas_${rowData.institution}`}
-                                //         class="p-button font-bold text-center rounded-full block pi pi-file-pdf"
-                                //     ></a>
-                                // );
                             }}
                             className="dark:border-none"
                             headerClassName="dark:border-none  bg-transparent dark:bg-transparent dark:text-gray-300"

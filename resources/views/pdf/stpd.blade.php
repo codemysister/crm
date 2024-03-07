@@ -149,8 +149,8 @@
 
         <div class="flex flex-col justify-start mt-8 float-left">
             <div>Purwokerto, {{date("d/m/Y")}}</div>
-            <div style="width: 130px; height: 130px; overflow: hidden;" class="p-2">
-            <img class="h-20 w-[15%]" src='{{ public_path("/storage/$stpd->signature_image") }}' style="object-fit:cover;" alt="Signature">
+            <div style="width: 130px; height: 130px; overflow: hidden;" class="py-2">
+            <img class="h-20 w-[15%]" src='{{ public_path("/storage/$stpd->signature_image") }}' style="object-fit:cover; width:100%; height:100%;" alt="Signature">
             </div>
             <div>{{ $stpd->signature_name }}</div>
             <div>{{ $stpd->signature_position }}</div>

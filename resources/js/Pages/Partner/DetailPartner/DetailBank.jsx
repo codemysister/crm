@@ -70,46 +70,46 @@ const DetailBank = ({
                 <>
                     <table class="w-full">
                         <tr class="border-b">
-                            <td class="pt-2 pb-1 text-gray-700 text-base font-bold w-1/5">
+                            <td class="pt-2 pb-1 text-gray-900 text-base font-bold w-1/5">
                                 Bank
                             </td>
-                            <td class="pt-2 pb-1 text-gray-700 text-base w-[2%]">
+                            <td class="pt-2 pb-1 text-gray-900 text-base w-[2%]">
                                 :
                             </td>
-                            <td class="pt-2 pb-1 text-gray-700 text-base w-7/12">
+                            <td class="pt-2 pb-1 text-gray-900 text-base w-7/12">
                                 {partner.banks[0]?.bank ?? "-"}
                             </td>
                         </tr>
                         <tr class="border-b">
-                            <td class="pt-2 pb-1 text-gray-700 text-base font-bold w-1/5">
+                            <td class="pt-2 pb-1 text-gray-900 text-base font-bold w-1/5">
                                 No. Rekening
                             </td>
-                            <td class="pt-2 pb-1 text-gray-700 text-base w-[2%]">
+                            <td class="pt-2 pb-1 text-gray-900 text-base w-[2%]">
                                 :
                             </td>
-                            <td class="pt-2 pb-1 text-gray-700 text-base w-7/12">
+                            <td class="pt-2 pb-1 text-gray-900 text-base w-7/12">
                                 {partner.banks[0]?.account_bank_number ?? "-"}
                             </td>
                         </tr>
                         <tr class="border-b">
-                            <td class="pt-2 pb-1 text-gray-700 text-base font-bold w-1/5">
+                            <td class="pt-2 pb-1 text-gray-900 text-base font-bold w-1/5">
                                 Atas Nama
                             </td>
-                            <td class="pt-2 pb-1 text-gray-700 text-base w-[2%]">
+                            <td class="pt-2 pb-1 text-gray-900 text-base w-[2%]">
                                 :
                             </td>
-                            <td class="pt-2 pb-1 text-gray-700 text-base w-7/12">
+                            <td class="pt-2 pb-1 text-gray-900 text-base w-7/12">
                                 {partner.banks[0]?.account_bank_name ?? "-"}
                             </td>
                         </tr>
                         <tr class="border-b">
-                            <td class="pt-2 pb-1 text-gray-700 text-base font-bold w-1/5">
+                            <td class="pt-2 pb-1 text-gray-900 text-base font-bold w-1/5">
                                 Aksi
                             </td>
-                            <td class="pt-2 pb-1 text-gray-700 text-base w-[2%]">
+                            <td class="pt-2 pb-1 text-gray-900 text-base w-[2%]">
                                 :
                             </td>
-                            <td class="pt-2 pb-1 text-gray-700 text-base w-7/12">
+                            <td class="pt-2 pb-1 text-gray-900 text-base w-7/12">
                                 <Button
                                     label="edit"
                                     className="p-0 underline bg-transparent text-blue-700 text-left"

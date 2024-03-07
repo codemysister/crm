@@ -65,13 +65,12 @@
     .dark .p-datatable.p-datatable-scrollable > .p-datatable-wrapper > .p-datatable-table > .p-datatable-thead{
       background-color: transparent;
       color: rgb(209 213 219 / 1);
-;
     }
 
+   
     .dark .p-datatable .p-sortable-column.p-highlight .p-sortable-column-icon,
     .dark .p-datatable .p-sortable-column .p-sortable-column-icon, .dark .p-inputtext .p-component {
       color: rgb(209 213 219 / 1);
-;
     }
      
     .dark .p-datatable .p-datatable-header, .dark .p-datatable .p-datatable-thead > tr > th {
@@ -124,20 +123,19 @@
       background-color: #0F172A;
     }
 
-    .dark .App{
-      color: red;
-    }
-    .dark .filepond--wrapper{
-      color: red;
-    }
-    .dark .filepond--root .filepond--drop-label{
-      color: red;
-    }
-
-    .dark .p-card-content div h1, .dark .p-card-content label, .dark .p-dialog-content label{
+    .dark .p-card p{
       color: rgb(209 213 219 / 1);
-
     }
+
+
+    .dark .p-card-content div h1, .dark .p-card-content, .dark .p-dialog-content label{
+      color: rgb(209 213 219 / 1);
+    }
+
+    .dark .p-dialog-content .App label{
+      color: rgb(87, 87, 87)
+    }
+
     /* End Card */
     
 
@@ -201,11 +199,12 @@
       background-color: transparent;
     }
 
-    .dark .p-dropdown,  .dark .p-inputwrapper{
+    .dark .p-dropdown,  .dark .p-inputwrapper, .dark textarea, .dark .filepond--drop-label{
+      border-radius: 4px;
       background-color: #D1D5DB;
     }
-     .dark textarea, .dark .filepond--drop-label, .dark .p-inputnumber-input{
-      border-radius: 4px;
+    .dark .p-inputnumber-input{
+     
       background-color: #D1D5DB;
     }
 
@@ -291,13 +290,17 @@
     .dark .p-icon{
       color: white;
     }
-
-    
+    .dark .p-dropdown-trigger svg, .dark .p-multiselect-token svg{
+      color: rgb(87, 86, 86);
+    }
 
     .dark .p-dropdown-filter.p-inputtext.p-component{
       background-color: rgb(209 213 219 / 1);
-;
-      color: white;
+      color: black;
+    }
+
+    .dark .p-dropdown-panel .p-dropdown-items .p-dropdown-empty-message{
+      color: #D1D5DB
     }
 
     .dark .p-dropdown-panel, .dark .p-dropdown-header{
@@ -323,7 +326,7 @@
     }
 
     .dark .p-dropdown .p-dropdown-label.p-placeholder{
-      color: #D1D5DB;
+      color: rgb(209 213 219 / 1);
     }
     
 
@@ -389,6 +392,14 @@
       z-index: 9;
     }
 
+    .dark .p-highlight:hover{
+      background-color: white;
+    }
+
+    .dark #birthday{
+      background-color: rgb(209 213 219 / 1);
+    }
+
     .dark .p-datepicker-title, .dark .p-datepicker .p-datepicker-header .p-datepicker-title .p-datepicker-month, .dark .p-datepicker .p-datepicker-header .p-datepicker-title .p-datepicker-year{
       color: white;
     }
@@ -412,6 +423,14 @@
       color:white;
     }
 
+    .dark .p-menuitem-active .p-menuitem-link{
+      background-color: #7e7e7e;
+      border-radius: 4px;
+      color: white;
+    }
+
+   
+
     .dark .p-menu{
       background-color: #D1D5DB;
     }
@@ -421,10 +440,7 @@
       display: flex;
     }
 
-    .dark .p-menuitem-active .p-menuitem-link{
-      background-color: #d4d4d4;
-      border-radius: 4px;
-    }
+   
   }
     /* End Menu */
 
@@ -471,7 +487,7 @@
     
 }
 
-.dark .p-card-content svg{
+.dark .p-card-content a svg{
   color: white;
 }
 

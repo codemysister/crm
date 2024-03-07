@@ -36,6 +36,22 @@ const Create = ({ usersProp, partnersProp, signaturesProp, referralsProp }) => {
     const [signatures, setSignatures] = useState(signaturesProp);
     const [referrals, setReferrals] = useState(referralsProp);
 
+    const [theme, setTheme] = useState(localStorage.theme);
+    useEffect(() => {
+        theme
+            ? (localStorage.theme = "dark")
+            : localStorage.removeItem("theme");
+
+        if (
+            localStorage.theme === "dark" &&
+            window.matchMedia("(prefers-color-scheme: dark)").matches
+        ) {
+            document.documentElement.classList.add("dark");
+        } else {
+            document.documentElement.classList.remove("dark");
+        }
+    }, [theme]);
+
     const toast = useRef(null);
     const infoPriceTrainingOfflineRef = useRef(null);
     const infoPriceTrainingOnlineRef = useRef(null);
@@ -373,7 +389,7 @@ const Create = ({ usersProp, partnersProp, signaturesProp, referralsProp }) => {
         post("/mou", {
             onSuccess: () => {
                 showSuccess("Tambah");
-                window.location = BASE_URL + "/mou";
+                window.location = "/mou";
                 // reset("name", "category", "price", "unit", "description");
             },
 
@@ -2397,7 +2413,7 @@ const Create = ({ usersProp, partnersProp, signaturesProp, referralsProp }) => {
                                                                             1
                                                                         }
                                                                     >
-                                                                        <thead className="bg-[#efefef] font-bold">
+                                                                        <thead className="bg-[#efefef] dark:bg-[#D1D5DB] dark:text-gray-600 font-bold">
                                                                             <th className="w-[5%] border border-[#d1d5db] p-[5px]">
                                                                                 No
                                                                             </th>
@@ -2477,7 +2493,7 @@ const Create = ({ usersProp, partnersProp, signaturesProp, referralsProp }) => {
                                                                             1
                                                                         }
                                                                     >
-                                                                        <thead className="bg-[#efefef] font-bold">
+                                                                        <thead className="bg-[#efefef] dark:bg-[#D1D5DB] dark:text-gray-600 font-bold">
                                                                             <th className="w-[5%] border border-[#d1d5db] p-[5px]">
                                                                                 No
                                                                             </th>
@@ -2570,7 +2586,7 @@ const Create = ({ usersProp, partnersProp, signaturesProp, referralsProp }) => {
                                                                             1
                                                                         }
                                                                     >
-                                                                        <thead className="bg-[#efefef] font-bold">
+                                                                        <thead className="bg-[#efefef] dark:bg-[#D1D5DB] dark:text-gray-600 font-bold">
                                                                             <th className="w-[5%] border border-[#d1d5db] p-[5px]">
                                                                                 No
                                                                             </th>
@@ -2741,7 +2757,7 @@ const Create = ({ usersProp, partnersProp, signaturesProp, referralsProp }) => {
                                                                             1
                                                                         }
                                                                     >
-                                                                        <thead className="bg-[#efefef] font-bold">
+                                                                        <thead className="bg-[#efefef] dark:bg-[#D1D5DB] dark:text-gray-600 font-bold">
                                                                             <th className="w-[5%] border border-[#d1d5db] p-[5px]">
                                                                                 No
                                                                             </th>
@@ -2982,7 +2998,7 @@ const Create = ({ usersProp, partnersProp, signaturesProp, referralsProp }) => {
                                                                             1
                                                                         }
                                                                     >
-                                                                        <thead className="bg-[#efefef] font-bold">
+                                                                        <thead className="bg-[#efefef] dark:bg-[#D1D5DB] dark:text-gray-600 font-bold">
                                                                             <th className="w-[5%] border border-[#d1d5db] p-[5px]">
                                                                                 No
                                                                             </th>
@@ -3090,7 +3106,7 @@ const Create = ({ usersProp, partnersProp, signaturesProp, referralsProp }) => {
                                                                             1
                                                                         }
                                                                     >
-                                                                        <thead className="bg-[#efefef] font-bold">
+                                                                        <thead className="bg-[#efefef] dark:bg-[#D1D5DB] dark:text-gray-600 font-bold">
                                                                             <th className="w-[5%] border border-[#d1d5db] p-[5px]">
                                                                                 No
                                                                             </th>
@@ -3561,11 +3577,16 @@ const Create = ({ usersProp, partnersProp, signaturesProp, referralsProp }) => {
                                     ref={animateSignatureName}
                                 >
                                     <p>Pihak Pertama</p>
-                                    <img
-                                        src={"/storage/" + data.signature.image}
-                                        alt=""
-                                        className="min-h-20 max-h-20"
-                                    />
+                                    <div className="h-[130px] w-[130px] py-2">
+                                        <img
+                                            src={
+                                                "/storage/" +
+                                                data.signature.image
+                                            }
+                                            alt=""
+                                            className="h-full w-full object-cover"
+                                        />
+                                    </div>
                                     <p>
                                         <b>
                                             {data.signature.name ??
@@ -3577,12 +3598,14 @@ const Create = ({ usersProp, partnersProp, signaturesProp, referralsProp }) => {
                                 <div className="w-[30%]">
                                     <p>Pihak Kedua</p>
                                     {data.partner.pic_signature ? (
-                                        <img
-                                            src={URL.createObjectURL(
-                                                data.partner.pic_signature
-                                            )}
-                                            className="min-h-20 max-h-20"
-                                        />
+                                        <div className="h-[130px] w-[130px] py-2">
+                                            <img
+                                                src={URL.createObjectURL(
+                                                    data.partner.pic_signature
+                                                )}
+                                                className="h-full w-full object-cover"
+                                            />
+                                        </div>
                                     ) : (
                                         <div className="min-h-20"></div>
                                     )}
@@ -3594,35 +3617,6 @@ const Create = ({ usersProp, partnersProp, signaturesProp, referralsProp }) => {
                                     </p>
                                 </div>
                             </div>
-                            {/* <div
-                                className="px-8 flex flex-row mt-5 justify-center"
-                                ref={animateReferral}
-                            >
-                                {data.referral && (
-                                    <div className="w-[30%]">
-                                        <p>Pihak Ketiga</p>
-                                        {data.referral_signature.image ? (
-                                            <img
-                                                src={
-                                                    BASE_URL +
-                                                    "/storage/" +
-                                                    data.referral_signature
-                                                        .image
-                                                }
-                                                className="min-h-20 max-h-20"
-                                            />
-                                        ) : (
-                                            <div className="min-h-20"></div>
-                                        )}
-                                        <p>
-                                            <b>
-                                                {data.referral_signature.name ??
-                                                    "{{nama_referral}}"}
-                                            </b>
-                                        </p>
-                                    </div>
-                                )}
-                            </div> */}
                         </div>
                     </div>
                 </div>

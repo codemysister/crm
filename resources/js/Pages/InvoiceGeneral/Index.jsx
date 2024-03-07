@@ -1161,7 +1161,7 @@ export default function Index({
             </div>
 
             <OverlayPanel
-                className="w-[95%] md:max-w-[50%]"
+                className="w-[95%] md:max-w-[50%] dark:bg-slate-900 dark:text-gray-300"
                 ref={op}
                 showCloseIcon
             >

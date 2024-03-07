@@ -39,6 +39,7 @@ const PriceList = ({
     const [modalEditSubscriptionIsVisible, setModalEditSubscriptionIsVisible] =
         useState(false);
     const [isLoadingData, setIsLoadingData] = useState(false);
+    const infoPriceTrainingOfflineRef = useRef(null);
     const infoPriceTrainingOnlineRef = useRef(null);
     const [visibleColumnsSubscription, setVisibleColumnsSubscription] =
         useState([
@@ -488,7 +489,6 @@ const PriceList = ({
                                             }
                                             options={cardCategories}
                                             optionLabel="name"
-                                            optionValue="name"
                                             placeholder="kategori"
                                             className="w-full md:w-14rem"
                                         />
@@ -500,11 +500,13 @@ const PriceList = ({
                                 <label htmlFor="price_card">
                                     Tarif Lanyard
                                 </label>
+
                                 <div className="flex justify-between gap-1 w-full items-center">
                                     <div className="w-full flex gap-2 h-full">
-                                        <Dropdown
+                                        <InputNumber
+                                            placeholder="tarif"
                                             value={dataPriceList.price_lanyard}
-                                            onChange={(e) =>
+                                            onValueChange={(e) =>
                                                 setDataPriceList({
                                                     ...dataPriceList,
                                                     price_lanyard: Number(
@@ -512,18 +514,10 @@ const PriceList = ({
                                                     ),
                                                 })
                                             }
-                                            options={option_price_lanyard}
-                                            optionLabel="price"
-                                            optionValue="price"
-                                            placeholder="Pilih Tarif"
-                                            editable
-                                            valueTemplate={
-                                                selectedOptionTrainingTemplate
-                                            }
-                                            itemTemplate={
-                                                optionTrainingTemplate
-                                            }
-                                            className="w-full md:w-14rem"
+                                            className="dark:bg-gray-300 w-full"
+                                            id="lanyard"
+                                            aria-describedby="lanyard-help"
+                                            locale="id-ID"
                                         />
                                     </div>
                                 </div>
@@ -533,6 +527,7 @@ const PriceList = ({
                                 <label htmlFor="price_card">
                                     Tarif Langganan Sistem
                                 </label>
+
                                 <div className="flex justify-between gap-1 w-full items-center">
                                     <div className="w-full flex gap-2 h-full">
                                         <InputNumber
@@ -560,32 +555,59 @@ const PriceList = ({
                                 <label htmlFor="price_card">
                                     Tarif Pelatihan Offline
                                 </label>
+
                                 <div className="flex justify-between gap-1 w-full items-center">
                                     <div className="w-full flex gap-2 h-full">
-                                        <Dropdown
-                                            value={
-                                                dataPriceList.price_training_offline
-                                            }
-                                            onChange={(e) =>
-                                                setDataPriceList({
-                                                    ...dataPriceList,
-                                                    price_training_offline:
-                                                        Number(e.target.value),
-                                                })
-                                            }
-                                            options={option_training_offline}
-                                            optionLabel="price"
-                                            optionValue="price"
-                                            placeholder="Pilih Tarif"
-                                            editable
-                                            valueTemplate={
-                                                selectedOptionTrainingTemplate
-                                            }
-                                            itemTemplate={
-                                                optionTrainingTemplate
-                                            }
-                                            className="w-full md:w-14rem"
-                                        />
+                                        <div className="p-inputgroup flex-1 h-full">
+                                            <InputNumber
+                                                value={
+                                                    dataPriceList.price_training_offline
+                                                }
+                                                onChange={(e) =>
+                                                    setDataPriceList({
+                                                        ...dataPriceList,
+                                                        price_training_offline:
+                                                            e.value,
+                                                    })
+                                                }
+                                                className={`h-full`}
+                                                locale="id-ID"
+                                            />
+
+                                            <Button
+                                                type="button"
+                                                className="h-[35px]"
+                                                icon="pi pi-info-circle"
+                                                onClick={(e) =>
+                                                    infoPriceTrainingOfflineRef.current.toggle(
+                                                        e
+                                                    )
+                                                }
+                                            />
+                                            <OverlayPanel
+                                                className="shadow-md"
+                                                ref={
+                                                    infoPriceTrainingOfflineRef
+                                                }
+                                            >
+                                                <ul className="list-disc list-inside">
+                                                    <li>Jawa - 15.000.000</li>
+                                                    <li>
+                                                        Kalimatan - 25.000.000
+                                                    </li>
+                                                    <li>
+                                                        Sulawesi - 27.000.000
+                                                    </li>
+                                                    <li>
+                                                        Sumatra - 23.000.000
+                                                    </li>
+                                                    <li>Bali - 26.000.000</li>
+                                                    <li>
+                                                        Jabodetabek - 15.000.000
+                                                    </li>
+                                                </ul>
+                                            </OverlayPanel>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -594,6 +616,7 @@ const PriceList = ({
                                 <label htmlFor="price_card">
                                     Tarif Pelatihan Online
                                 </label>
+
                                 <div className="flex justify-between gap-1 w-full items-center">
                                     <div className="w-full flex gap-2 h-full">
                                         <div className="p-inputgroup flex-1 h-full">
@@ -611,6 +634,7 @@ const PriceList = ({
                                                 className={`h-full`}
                                                 locale="id-ID"
                                             />
+
                                             <Button
                                                 type="button"
                                                 className="h-[35px]"
@@ -650,29 +674,25 @@ const PriceList = ({
                                 <label htmlFor="price_card">
                                     Tarif Isi Kartu Via Cazhpoin
                                 </label>
+
                                 <div className="flex justify-between gap-1 w-full items-center">
                                     <div className="w-full flex gap-2 h-full">
-                                        <Dropdown
+                                        <InputNumber
+                                            placeholder="tarif"
                                             value={
                                                 dataPriceList.fee_purchase_cazhpoin
                                             }
-                                            onChange={(e) =>
+                                            onValueChange={(e) =>
                                                 setDataPriceList({
                                                     ...dataPriceList,
                                                     fee_purchase_cazhpoin:
                                                         Number(e.target.value),
                                                 })
                                             }
-                                            options={option_fee_price}
-                                            optionLabel="price"
-                                            optionValue="price"
-                                            placeholder="Pilih Tarif"
-                                            editable
-                                            valueTemplate={
-                                                selectedOptionFeeTemplate
-                                            }
-                                            itemTemplate={optionFeeTemplate}
-                                            className="w-full md:w-14rem"
+                                            className="dark:bg-gray-300 w-full"
+                                            id="lanyard"
+                                            aria-describedby="lanyard-help"
+                                            locale="id-ID"
                                         />
                                     </div>
                                 </div>
@@ -682,13 +702,15 @@ const PriceList = ({
                                 <label htmlFor="price_card">
                                     Tarif Bayar Tagihan via CazhPOIN
                                 </label>
+
                                 <div className="flex justify-between gap-1 w-full items-center">
                                     <div className="w-full flex gap-2 h-full">
-                                        <Dropdown
+                                        <InputNumber
+                                            placeholder="tarif"
                                             value={
                                                 dataPriceList.fee_bill_cazhpoin
                                             }
-                                            onChange={(e) =>
+                                            onValueChange={(e) =>
                                                 setDataPriceList({
                                                     ...dataPriceList,
                                                     fee_bill_cazhpoin: Number(
@@ -696,16 +718,10 @@ const PriceList = ({
                                                     ),
                                                 })
                                             }
-                                            options={option_fee_price}
-                                            optionLabel="price"
-                                            optionValue="price"
-                                            placeholder="Pilih Tarif"
-                                            editable
-                                            valueTemplate={
-                                                selectedOptionFeeTemplate
-                                            }
-                                            itemTemplate={optionFeeTemplate}
-                                            className="w-full md:w-14rem"
+                                            className="dark:bg-gray-300 w-full"
+                                            id="lanyard"
+                                            aria-describedby="lanyard-help"
+                                            locale="id-ID"
                                         />
                                     </div>
                                 </div>
@@ -715,13 +731,15 @@ const PriceList = ({
                                 <label htmlFor="price_card">
                                     Tarif TopUp Kartu via Cazh POS
                                 </label>
+
                                 <div className="flex justify-between gap-1 w-full items-center">
                                     <div className="w-full flex gap-2 h-full">
-                                        <Dropdown
+                                        <InputNumber
+                                            placeholder="tarif"
                                             value={
                                                 dataPriceList.fee_topup_cazhpos
                                             }
-                                            onChange={(e) =>
+                                            onValueChange={(e) =>
                                                 setDataPriceList({
                                                     ...dataPriceList,
                                                     fee_topup_cazhpos: Number(
@@ -729,16 +747,10 @@ const PriceList = ({
                                                     ),
                                                 })
                                             }
-                                            options={option_fee_price}
-                                            optionLabel="price"
-                                            optionValue="price"
-                                            placeholder="Pilih Tarif"
-                                            editable
-                                            valueTemplate={
-                                                selectedOptionFeeTemplate
-                                            }
-                                            itemTemplate={optionFeeTemplate}
-                                            className="w-full md:w-14rem"
+                                            className="dark:bg-gray-300 w-full"
+                                            id="lanyard"
+                                            aria-describedby="lanyard-help"
+                                            locale="id-ID"
                                         />
                                     </div>
                                 </div>
@@ -748,29 +760,25 @@ const PriceList = ({
                                 <label htmlFor="price_card">
                                     Tarif Penarikan Saldo Kartu via Cazh POS
                                 </label>
+
                                 <div className="flex justify-between gap-1 w-full items-center">
                                     <div className="w-full flex gap-2 h-full">
-                                        <Dropdown
+                                        <InputNumber
+                                            placeholder="tarif"
                                             value={
                                                 dataPriceList.fee_withdraw_cazhpos
                                             }
-                                            onChange={(e) =>
+                                            onValueChange={(e) =>
                                                 setDataPriceList({
                                                     ...dataPriceList,
                                                     fee_withdraw_cazhpos:
                                                         Number(e.target.value),
                                                 })
                                             }
-                                            options={option_fee_price}
-                                            optionLabel="price"
-                                            optionValue="price"
-                                            placeholder="Pilih Tarif"
-                                            editable
-                                            valueTemplate={
-                                                selectedOptionFeeTemplate
-                                            }
-                                            itemTemplate={optionFeeTemplate}
-                                            className="w-full md:w-14rem"
+                                            className="dark:bg-gray-300 w-full"
+                                            id="lanyard"
+                                            aria-describedby="lanyard-help"
+                                            locale="id-ID"
                                         />
                                     </div>
                                 </div>
@@ -780,13 +788,15 @@ const PriceList = ({
                                 <label htmlFor="price_card">
                                     Tarif Pembayaran Tagihan via Saldo Kartu
                                 </label>
+
                                 <div className="flex justify-between gap-1 w-full items-center">
                                     <div className="w-full flex gap-2 h-full">
-                                        <Dropdown
+                                        <InputNumber
+                                            placeholder="tarif"
                                             value={
                                                 dataPriceList.fee_bill_saldokartu
                                             }
-                                            onChange={(e) =>
+                                            onValueChange={(e) =>
                                                 setDataPriceList({
                                                     ...dataPriceList,
                                                     fee_bill_saldokartu: Number(
@@ -794,16 +804,10 @@ const PriceList = ({
                                                     ),
                                                 })
                                             }
-                                            options={option_fee_price}
-                                            optionLabel="price"
-                                            optionValue="price"
-                                            placeholder="Pilih Tarif"
-                                            editable
-                                            valueTemplate={
-                                                selectedOptionFeeTemplate
-                                            }
-                                            itemTemplate={optionFeeTemplate}
-                                            className="w-full md:w-14rem"
+                                            className="dark:bg-gray-300 w-full"
+                                            id="lanyard"
+                                            aria-describedby="lanyard-help"
+                                            locale="id-ID"
                                         />
                                     </div>
                                 </div>
@@ -900,7 +904,6 @@ const PriceList = ({
                                             }
                                             options={cardCategories}
                                             optionLabel="name"
-                                            optionValue="name"
                                             placeholder="kategori"
                                             className="w-full md:w-14rem"
                                         />
@@ -912,11 +915,13 @@ const PriceList = ({
                                 <label htmlFor="price_card">
                                     Tarif Lanyard
                                 </label>
+
                                 <div className="flex justify-between gap-1 w-full items-center">
                                     <div className="w-full flex gap-2 h-full">
-                                        <Dropdown
+                                        <InputNumber
+                                            placeholder="tarif"
                                             value={dataPriceList.price_lanyard}
-                                            onChange={(e) =>
+                                            onValueChange={(e) =>
                                                 setDataPriceList({
                                                     ...dataPriceList,
                                                     price_lanyard: Number(
@@ -924,18 +929,10 @@ const PriceList = ({
                                                     ),
                                                 })
                                             }
-                                            options={option_price_lanyard}
-                                            optionLabel="price"
-                                            optionValue="price"
-                                            placeholder="Pilih Tarif"
-                                            editable
-                                            valueTemplate={
-                                                selectedOptionTrainingTemplate
-                                            }
-                                            itemTemplate={
-                                                optionTrainingTemplate
-                                            }
-                                            className="w-full md:w-14rem"
+                                            className="dark:bg-gray-300 w-full"
+                                            id="lanyard"
+                                            aria-describedby="lanyard-help"
+                                            locale="id-ID"
                                         />
                                     </div>
                                 </div>
@@ -945,6 +942,7 @@ const PriceList = ({
                                 <label htmlFor="price_card">
                                     Tarif Langganan Sistem
                                 </label>
+
                                 <div className="flex justify-between gap-1 w-full items-center">
                                     <div className="w-full flex gap-2 h-full">
                                         <InputNumber
@@ -972,32 +970,59 @@ const PriceList = ({
                                 <label htmlFor="price_card">
                                     Tarif Pelatihan Offline
                                 </label>
+
                                 <div className="flex justify-between gap-1 w-full items-center">
                                     <div className="w-full flex gap-2 h-full">
-                                        <Dropdown
-                                            value={
-                                                dataPriceList.price_training_offline
-                                            }
-                                            onChange={(e) =>
-                                                setDataPriceList({
-                                                    ...dataPriceList,
-                                                    price_training_offline:
-                                                        Number(e.target.value),
-                                                })
-                                            }
-                                            options={option_training_offline}
-                                            optionLabel="price"
-                                            optionValue="price"
-                                            placeholder="Pilih Tarif"
-                                            editable
-                                            valueTemplate={
-                                                selectedOptionTrainingTemplate
-                                            }
-                                            itemTemplate={
-                                                optionTrainingTemplate
-                                            }
-                                            className="w-full md:w-14rem"
-                                        />
+                                        <div className="p-inputgroup flex-1 h-full">
+                                            <InputNumber
+                                                value={
+                                                    dataPriceList.price_training_offline
+                                                }
+                                                onChange={(e) =>
+                                                    setDataPriceList({
+                                                        ...dataPriceList,
+                                                        price_training_offline:
+                                                            e.value,
+                                                    })
+                                                }
+                                                className={`h-full`}
+                                                locale="id-ID"
+                                            />
+
+                                            <Button
+                                                type="button"
+                                                className="h-[35px]"
+                                                icon="pi pi-info-circle"
+                                                onClick={(e) =>
+                                                    infoPriceTrainingOfflineRef.current.toggle(
+                                                        e
+                                                    )
+                                                }
+                                            />
+                                            <OverlayPanel
+                                                className="shadow-md"
+                                                ref={
+                                                    infoPriceTrainingOfflineRef
+                                                }
+                                            >
+                                                <ul className="list-disc list-inside">
+                                                    <li>Jawa - 15.000.000</li>
+                                                    <li>
+                                                        Kalimatan - 25.000.000
+                                                    </li>
+                                                    <li>
+                                                        Sulawesi - 27.000.000
+                                                    </li>
+                                                    <li>
+                                                        Sumatra - 23.000.000
+                                                    </li>
+                                                    <li>Bali - 26.000.000</li>
+                                                    <li>
+                                                        Jabodetabek - 15.000.000
+                                                    </li>
+                                                </ul>
+                                            </OverlayPanel>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -1006,6 +1031,7 @@ const PriceList = ({
                                 <label htmlFor="price_card">
                                     Tarif Pelatihan Online
                                 </label>
+
                                 <div className="flex justify-between gap-1 w-full items-center">
                                     <div className="w-full flex gap-2 h-full">
                                         <div className="p-inputgroup flex-1 h-full">
@@ -1023,6 +1049,7 @@ const PriceList = ({
                                                 className={`h-full`}
                                                 locale="id-ID"
                                             />
+
                                             <Button
                                                 type="button"
                                                 className="h-[35px]"
@@ -1062,29 +1089,25 @@ const PriceList = ({
                                 <label htmlFor="price_card">
                                     Tarif Isi Kartu Via Cazhpoin
                                 </label>
+
                                 <div className="flex justify-between gap-1 w-full items-center">
                                     <div className="w-full flex gap-2 h-full">
-                                        <Dropdown
+                                        <InputNumber
+                                            placeholder="tarif"
                                             value={
                                                 dataPriceList.fee_purchase_cazhpoin
                                             }
-                                            onChange={(e) =>
+                                            onValueChange={(e) =>
                                                 setDataPriceList({
                                                     ...dataPriceList,
                                                     fee_purchase_cazhpoin:
                                                         Number(e.target.value),
                                                 })
                                             }
-                                            options={option_fee_price}
-                                            optionLabel="price"
-                                            optionValue="price"
-                                            placeholder="Pilih Tarif"
-                                            editable
-                                            valueTemplate={
-                                                selectedOptionFeeTemplate
-                                            }
-                                            itemTemplate={optionFeeTemplate}
-                                            className="w-full md:w-14rem"
+                                            className="dark:bg-gray-300 w-full"
+                                            id="lanyard"
+                                            aria-describedby="lanyard-help"
+                                            locale="id-ID"
                                         />
                                     </div>
                                 </div>
@@ -1094,13 +1117,15 @@ const PriceList = ({
                                 <label htmlFor="price_card">
                                     Tarif Bayar Tagihan via CazhPOIN
                                 </label>
+
                                 <div className="flex justify-between gap-1 w-full items-center">
                                     <div className="w-full flex gap-2 h-full">
-                                        <Dropdown
+                                        <InputNumber
+                                            placeholder="tarif"
                                             value={
                                                 dataPriceList.fee_bill_cazhpoin
                                             }
-                                            onChange={(e) =>
+                                            onValueChange={(e) =>
                                                 setDataPriceList({
                                                     ...dataPriceList,
                                                     fee_bill_cazhpoin: Number(
@@ -1108,16 +1133,10 @@ const PriceList = ({
                                                     ),
                                                 })
                                             }
-                                            options={option_fee_price}
-                                            optionLabel="price"
-                                            optionValue="price"
-                                            placeholder="Pilih Tarif"
-                                            editable
-                                            valueTemplate={
-                                                selectedOptionFeeTemplate
-                                            }
-                                            itemTemplate={optionFeeTemplate}
-                                            className="w-full md:w-14rem"
+                                            className="dark:bg-gray-300 w-full"
+                                            id="lanyard"
+                                            aria-describedby="lanyard-help"
+                                            locale="id-ID"
                                         />
                                     </div>
                                 </div>
@@ -1127,13 +1146,15 @@ const PriceList = ({
                                 <label htmlFor="price_card">
                                     Tarif TopUp Kartu via Cazh POS
                                 </label>
+
                                 <div className="flex justify-between gap-1 w-full items-center">
                                     <div className="w-full flex gap-2 h-full">
-                                        <Dropdown
+                                        <InputNumber
+                                            placeholder="tarif"
                                             value={
                                                 dataPriceList.fee_topup_cazhpos
                                             }
-                                            onChange={(e) =>
+                                            onValueChange={(e) =>
                                                 setDataPriceList({
                                                     ...dataPriceList,
                                                     fee_topup_cazhpos: Number(
@@ -1141,16 +1162,10 @@ const PriceList = ({
                                                     ),
                                                 })
                                             }
-                                            options={option_fee_price}
-                                            optionLabel="price"
-                                            optionValue="price"
-                                            placeholder="Pilih Tarif"
-                                            editable
-                                            valueTemplate={
-                                                selectedOptionFeeTemplate
-                                            }
-                                            itemTemplate={optionFeeTemplate}
-                                            className="w-full md:w-14rem"
+                                            className="dark:bg-gray-300 w-full"
+                                            id="lanyard"
+                                            aria-describedby="lanyard-help"
+                                            locale="id-ID"
                                         />
                                     </div>
                                 </div>
@@ -1160,29 +1175,25 @@ const PriceList = ({
                                 <label htmlFor="price_card">
                                     Tarif Penarikan Saldo Kartu via Cazh POS
                                 </label>
+
                                 <div className="flex justify-between gap-1 w-full items-center">
                                     <div className="w-full flex gap-2 h-full">
-                                        <Dropdown
+                                        <InputNumber
+                                            placeholder="tarif"
                                             value={
                                                 dataPriceList.fee_withdraw_cazhpos
                                             }
-                                            onChange={(e) =>
+                                            onValueChange={(e) =>
                                                 setDataPriceList({
                                                     ...dataPriceList,
                                                     fee_withdraw_cazhpos:
                                                         Number(e.target.value),
                                                 })
                                             }
-                                            options={option_fee_price}
-                                            optionLabel="price"
-                                            optionValue="price"
-                                            placeholder="Pilih Tarif"
-                                            editable
-                                            valueTemplate={
-                                                selectedOptionFeeTemplate
-                                            }
-                                            itemTemplate={optionFeeTemplate}
-                                            className="w-full md:w-14rem"
+                                            className="dark:bg-gray-300 w-full"
+                                            id="lanyard"
+                                            aria-describedby="lanyard-help"
+                                            locale="id-ID"
                                         />
                                     </div>
                                 </div>
@@ -1192,13 +1203,15 @@ const PriceList = ({
                                 <label htmlFor="price_card">
                                     Tarif Pembayaran Tagihan via Saldo Kartu
                                 </label>
+
                                 <div className="flex justify-between gap-1 w-full items-center">
                                     <div className="w-full flex gap-2 h-full">
-                                        <Dropdown
+                                        <InputNumber
+                                            placeholder="tarif"
                                             value={
                                                 dataPriceList.fee_bill_saldokartu
                                             }
-                                            onChange={(e) =>
+                                            onValueChange={(e) =>
                                                 setDataPriceList({
                                                     ...dataPriceList,
                                                     fee_bill_saldokartu: Number(
@@ -1206,16 +1219,10 @@ const PriceList = ({
                                                     ),
                                                 })
                                             }
-                                            options={option_fee_price}
-                                            optionLabel="price"
-                                            optionValue="price"
-                                            placeholder="Pilih Tarif"
-                                            editable
-                                            valueTemplate={
-                                                selectedOptionFeeTemplate
-                                            }
-                                            itemTemplate={optionFeeTemplate}
-                                            className="w-full md:w-14rem"
+                                            className="dark:bg-gray-300 w-full"
+                                            id="lanyard"
+                                            aria-describedby="lanyard-help"
+                                            locale="id-ID"
                                         />
                                     </div>
                                 </div>

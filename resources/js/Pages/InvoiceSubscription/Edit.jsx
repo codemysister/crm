@@ -30,6 +30,22 @@ const Edit = ({
     const [bills, setBills] = useState([]);
     const [dialogVisible, setDialogVisible] = useState(false);
 
+    const [theme, setTheme] = useState(localStorage.theme);
+    useEffect(() => {
+        theme
+            ? (localStorage.theme = "dark")
+            : localStorage.removeItem("theme");
+
+        if (
+            localStorage.theme === "dark" &&
+            window.matchMedia("(prefers-color-scheme: dark)").matches
+        ) {
+            document.documentElement.classList.add("dark");
+        } else {
+            document.documentElement.classList.remove("dark");
+        }
+    }, [theme]);
+
     const toast = useRef(null);
 
     const animatePartnerNameRef = useRef(null);
@@ -178,9 +194,9 @@ const Edit = ({
 
     const optionSignatureTemplate = (item) => {
         return (
-            <div className="flex flex-wrap p-2 align-items-center gap-3">
+            <div className="flex flex-wrap p-2 align-items-center items-center gap-3">
                 <img
-                    className="w-3rem shadow-2 flex-shrink-0 border-round"
+                    className="w-[6rem] shadow-2 flex-shrink-0 border-round"
                     src={"/storage/" + item.image}
                     alt={item.name}
                 />
@@ -252,7 +268,7 @@ const Edit = ({
         put("/invoice_subscriptions/" + data.uuid, {
             onSuccess: () => {
                 showSuccess("Tambah");
-                window.location = BASE_URL + "/invoice_subscriptions";
+                window.location = "/invoice_subscriptions";
             },
 
             onError: () => {
@@ -838,9 +854,9 @@ const Edit = ({
                             >
                                 <thead
                                     style={{
-                                        backgroundColor: "#D9D2E9",
                                         padding: "10px 10px",
                                     }}
+                                    className="bg-[#D9D2E9] dark:bg-[#D1D5DB] dark:text-gray-600"
                                 >
                                     <tr>
                                         <th
@@ -1090,12 +1106,13 @@ const Edit = ({
                             >
                                 <p>Hormat Kami,</p>
                                 {data.signature.image ? (
-                                    <img
-                                        src={`/storage/${data.signature.image}`}
-                                        alt=""
-                                        className="min-h-20 w-full"
-                                        style={{ width: "90%", height: "80px" }}
-                                    />
+                                    <div className="h-[130px] w-[130px] self-center py-2">
+                                        <img
+                                            src={`/storage/${data.signature.image}`}
+                                            alt=""
+                                            className="w-full h-full object-cover"
+                                        />
+                                    </div>
                                 ) : (
                                     <div style={{ minHeight: "80px" }}></div>
                                 )}
