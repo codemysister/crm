@@ -347,24 +347,29 @@ export default function InvoiceSubscription({
     const actionBodyTemplate = (rowData) => {
         return (
             <React.Fragment>
-                <Button
-                    icon="pi pi-pencil"
-                    rounded
-                    outlined
-                    className="mr-2"
-                    onClick={() => {
-                        window.location = "/invoice_langganan/" + rowData.uuid;
-                    }}
-                />
-                <Button
-                    icon="pi pi-trash"
-                    rounded
-                    outlined
-                    severity="danger"
-                    onClick={() => {
-                        handleDeleteInvoiceSubscription(rowData);
-                    }}
-                />
+                {permissions.includes("edit invoice langganan") && (
+                    <Button
+                        icon="pi pi-pencil"
+                        rounded
+                        outlined
+                        className="mr-2"
+                        onClick={() => {
+                            window.location =
+                                "/invoice_langganan/" + rowData.uuid;
+                        }}
+                    />
+                )}
+                {permissions.includes("hapus invoice langganan") && (
+                    <Button
+                        icon="pi pi-trash"
+                        rounded
+                        outlined
+                        severity="danger"
+                        onClick={() => {
+                            handleDeleteInvoiceSubscription(rowData);
+                        }}
+                    />
+                )}
             </React.Fragment>
         );
     };
@@ -675,17 +680,21 @@ export default function InvoiceSubscription({
     const headerTransaction = (
         <div className="flex flex-row gap-2 bg-gray-50 dark:bg-transparent p-2 rounded-lg align-items-center items-center justify-between justify-content-between">
             <div className="w-[15%]">
-                <Button
-                    label="Input Pembayaran"
-                    className="bg-purple-600 w-full text-xs shadow-md rounded-lg mr-2"
-                    icon={addButtonIcon}
-                    onClick={() => {
-                        setModalTransactionIsVisible((prev) => (prev = true));
-                        // resetTransaction("nominal");
-                    }}
-                    aria-controls="popup_menu_right"
-                    aria-haspopup
-                />
+                {permissions.includes("tambah transaksi") && (
+                    <Button
+                        label="Input Pembayaran"
+                        className="bg-purple-600 w-full text-xs shadow-md rounded-lg mr-2"
+                        icon={addButtonIcon}
+                        onClick={() => {
+                            setModalTransactionIsVisible(
+                                (prev) => (prev = true)
+                            );
+                            // resetTransaction("nominal");
+                        }}
+                        aria-controls="popup_menu_right"
+                        aria-haspopup
+                    />
+                )}
             </div>
         </div>
     );
@@ -719,25 +728,29 @@ export default function InvoiceSubscription({
     const actionTransactionBodyTemplate = (rowData) => {
         return (
             <React.Fragment>
-                <Button
-                    icon="pi pi-pencil"
-                    rounded
-                    outlined
-                    className="mr-2"
-                    onClick={() => {
-                        setModalEditTransactionIsVisible(true);
-                        handleEditTransaction(rowData);
-                    }}
-                />
-                <Button
-                    icon="pi pi-trash"
-                    rounded
-                    outlined
-                    severity="danger"
-                    onClick={() => {
-                        handleDeleteTransaction(rowData);
-                    }}
-                />
+                {permissions.includes("edit transaksi") && (
+                    <Button
+                        icon="pi pi-pencil"
+                        rounded
+                        outlined
+                        className="mr-2"
+                        onClick={() => {
+                            setModalEditTransactionIsVisible(true);
+                            handleEditTransaction(rowData);
+                        }}
+                    />
+                )}
+                {permissions.includes("hapus transaksi") && (
+                    <Button
+                        icon="pi pi-trash"
+                        rounded
+                        outlined
+                        severity="danger"
+                        onClick={() => {
+                            handleDeleteTransaction(rowData);
+                        }}
+                    />
+                )}
             </React.Fragment>
         );
     };
@@ -856,7 +869,7 @@ export default function InvoiceSubscription({
 
     const handleSubmitForm = (e, type) => {
         e.preventDefault();
-        console.log(dataTransaction);
+
         if (type === "tambah") {
             // postTransaction("/invoice_subscriptions/transaction", {
             //     onSuccess: () => {
@@ -1467,7 +1480,10 @@ export default function InvoiceSubscription({
                 visible={modalBundleIsVisible}
                 onHide={() => setModalBundleIsVisible(false)}
             >
-                <form onSubmit={(e) => handleSubmitFormMassal(e, "tambah")}>
+                <form
+                    onSubmit={(e) => handleSubmitFormMassal(e, "tambah")}
+                    encType="multipart/form-data"
+                >
                     <div className="flex flex-col justify-around gap-4 mt-4">
                         <div className="flex bg-green-600 text-white text-xs p-3 rounded-lg justify-between w-full h-full">
                             <p>Template</p>
