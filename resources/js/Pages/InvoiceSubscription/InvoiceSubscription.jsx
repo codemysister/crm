@@ -94,6 +94,7 @@ export default function InvoiceSubscription({
             name: null,
             image: null,
         },
+        excel: null,
     });
 
     const {
@@ -1480,6 +1481,7 @@ export default function InvoiceSubscription({
                 visible={modalBundleIsVisible}
                 onHide={() => setModalBundleIsVisible(false)}
             >
+                {console.log(data)}
                 <form
                     onSubmit={(e) => handleSubmitFormMassal(e, "tambah")}
                     encType="multipart/form-data"
