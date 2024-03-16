@@ -485,6 +485,10 @@ class InvoiceSubscriptionController extends Controller
 
     public function storeBatch(Request $request)
     {
+        dump(request()->file('excel'));
+        dump($request->file('excel'));
+        dump($request->all());
+        dd($request->file('excel')->getRealPath());
         $imported = Excel::import(new InvoiceSubscriptionImport($request->signature), request()->file('excel'), null, ExcelExcel::CSV);
     }
 
