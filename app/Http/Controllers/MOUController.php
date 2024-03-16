@@ -15,6 +15,7 @@ use Carbon\Carbon;
 use DateTime;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
@@ -139,6 +140,11 @@ class MOUController extends Controller
         // if ($mou->referral) {
         //     $phpWord->setImageValue('referral_signature', array('path' => public_path("/storage/$mou->referral_signature")));
         // }
+
+        if (!Storage::exists('mou')) {
+            Storage::makeDirectory('mou');
+        }
+
         $fileName = $mou->uuid . '.docx';
         $phpWord->saveAs(storage_path('app/public/mou/' . $fileName));
         $mou->update(['mou_doc_word' => 'mou/' . $fileName]);
