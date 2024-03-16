@@ -189,7 +189,7 @@ class PartnerImport implements ToCollection, WithStartRow, WithHeadingRow, WithC
                 'regency' => json_encode($regency),
                 'province' => json_encode($province),
                 'period' => $row["per"],
-                'status' => $row["status"]
+                'status' => $row['status'] == 'CLBK' ? $row['status'] : ucwords(strtolower($row["status"]))
             ]);
 
 
