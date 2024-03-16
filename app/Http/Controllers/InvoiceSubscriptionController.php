@@ -25,6 +25,7 @@ use PhpOffice\PhpWord\Element\TextRun;
 use Spatie\Browsershot\Browsershot;
 use PhpOffice\PhpWord\Element\Table;
 use PhpOffice\PhpWord\SimpleType\TblWidth;
+use Maatwebsite\Excel\Excel as ExcelExcel;
 
 class InvoiceSubscriptionController extends Controller
 {
@@ -484,7 +485,7 @@ class InvoiceSubscriptionController extends Controller
 
     public function storeBatch(Request $request)
     {
-        $imported = Excel::import(new InvoiceSubscriptionImport($request->signature), request()->file('excel'));
+        $imported = Excel::import(new InvoiceSubscriptionImport($request->signature), request()->file('excel'), ExcelExcel::CSV);
     }
 
     public function edit($uuid)
