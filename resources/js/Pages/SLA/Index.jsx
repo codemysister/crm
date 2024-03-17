@@ -129,7 +129,7 @@ export default function Index({ auth }) {
     const actionBodyTemplate = (rowData) => {
         return (
             <React.Fragment>
-                {permissions.includes("edit produk") && (
+                {permissions.includes("edit sla") && (
                     <Button
                         icon="pi pi-pencil"
                         rounded
@@ -140,7 +140,7 @@ export default function Index({ auth }) {
                         }
                     />
                 )}
-                {permissions.includes("hapus produk") && (
+                {permissions.includes("hapus sla") && (
                     <Button
                         icon="pi pi-trash"
                         rounded

@@ -1359,11 +1359,11 @@ const Edit = ({
                                 ref={animateSignatureNameRef}
                             >
                                 <p>Pihak Pertama</p>
-                                <div className="h-[130px] w-[130px] py-2">
+                                <div className="h-[100px] w-[170px] py-2">
                                     <img
                                         src={"/storage/" + data.signature.image}
                                         alt=""
-                                        className="w-full h-full object-cover"
+                                        className="w-full h-full object-fill"
                                     />
                                 </div>
                                 <p>
@@ -1376,7 +1376,7 @@ const Edit = ({
                             <div className="w-[30%]">
                                 <p>Pihak Kedua</p>
                                 {data.pic_signature ? (
-                                    <div className="h-[130px] w-[130px] py-2">
+                                    <div className="h-[100px] w-[170px] py-2">
                                         <img
                                             src={
                                                 typeof data.pic_signature ===
@@ -1387,7 +1387,7 @@ const Edit = ({
                                                           data.pic_signature
                                                       )
                                             }
-                                            className="w-full h-full object-cover"
+                                            className="w-full h-full object-fill"
                                         />
                                     </div>
                                 ) : (
@@ -1407,14 +1407,14 @@ const Edit = ({
                                 >
                                     <p>Pihak Ketiga</p>
                                     {data.referral_signature.image ? (
-                                        <div className="h-[130px] w-[130px] py-2">
+                                        <div className="h-[100px] w-[170px] py-2">
                                             <img
                                                 src={
                                                     "/storage" +
                                                     data.referral_signature
                                                         .image
                                                 }
-                                                className="w-full h-full object-cover"
+                                                className="w-full h-full object-fill"
                                             />
                                         </div>
                                     ) : (
