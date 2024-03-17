@@ -26,6 +26,7 @@ import { Tooltip } from "primereact/tooltip";
 import { Card } from "primereact/card";
 import { OverlayPanel } from "primereact/overlaypanel";
 import { MultiSelect } from "primereact/multiselect";
+import InputError from "@/Components/InputError";
 
 const Pic = ({
     partners,
@@ -47,6 +48,7 @@ const Pic = ({
         reset: resetPIC,
         processing: processingPIC,
         errors: errorPIC,
+        clearErrors: clearErrorsPIC,
     } = useForm({
         uuid: "",
         partner: {},
@@ -122,6 +124,7 @@ const Pic = ({
     };
 
     const handleEditPIC = (pic) => {
+        clearErrorsPIC();
         setDataPIC((data) => ({
             ...data,
             uuid: pic.uuid,
@@ -267,7 +270,7 @@ const Pic = ({
                     <form onSubmit={(e) => handleSubmitFormPIC(e, "tambah")}>
                         <div className="flex flex-col justify-around gap-4 mt-4">
                             <div className="flex flex-col">
-                                <label htmlFor="name">Nama</label>
+                                <label htmlFor="name">Nama *</label>
                                 <InputText
                                     value={dataPIC.name}
                                     onChange={(e) =>
@@ -280,7 +283,7 @@ const Pic = ({
                             </div>
 
                             <div className="flex flex-col">
-                                <label htmlFor="pic_partner">Partner</label>
+                                <label htmlFor="pic_partner">Partner *</label>
                                 <Dropdown
                                     dataKey="name"
                                     optionLabel="name"
@@ -295,10 +298,15 @@ const Pic = ({
                                     itemTemplate={optionTemplate}
                                     className="w-full md:w-14rem"
                                 />
+
+                                <InputError
+                                    message={errorPIC.partner}
+                                    className="mt-2"
+                                />
                             </div>
 
                             <div className="flex flex-col">
-                                <label htmlFor="number">Email *</label>
+                                <label htmlFor="number">Email </label>
                                 <InputText
                                     value={dataPIC.email}
                                     onChange={(e) =>
@@ -311,7 +319,7 @@ const Pic = ({
                             </div>
 
                             <div className="flex flex-col">
-                                <label htmlFor="number">No.Hp</label>
+                                <label htmlFor="number">No.Hp *</label>
                                 <InputText
                                     keyfilter="int"
                                     min={0}
@@ -323,10 +331,14 @@ const Pic = ({
                                     id="number"
                                     aria-describedby="number-help"
                                 />
+                                <InputError
+                                    message={errorPIC.number}
+                                    className="mt-2"
+                                />
                             </div>
 
                             <div className="flex flex-col">
-                                <label htmlFor="position">Jabatan</label>
+                                <label htmlFor="position">Jabatan *</label>
                                 <InputText
                                     value={dataPIC.position}
                                     onChange={(e) =>
@@ -335,6 +347,10 @@ const Pic = ({
                                     className="dark:bg-gray-300"
                                     id="position"
                                     aria-describedby="position-help"
+                                />
+                                <InputError
+                                    message={errorPIC.position}
+                                    className="mt-2"
                                 />
                             </div>
                         </div>
@@ -362,7 +378,7 @@ const Pic = ({
                     <form onSubmit={(e) => handleSubmitFormPIC(e, "update")}>
                         <div className="flex flex-col justify-around gap-4 mt-4">
                             <div className="flex flex-col">
-                                <label htmlFor="name">Nama</label>
+                                <label htmlFor="name">Nama *</label>
                                 <InputText
                                     value={dataPIC.name}
                                     onChange={(e) =>
@@ -372,10 +388,14 @@ const Pic = ({
                                     id="name"
                                     aria-describedby="name-help"
                                 />
+                                <InputError
+                                    message={errorPIC.name}
+                                    className="mt-2"
+                                />
                             </div>
 
                             <div className="flex flex-col">
-                                <label htmlFor="pic_partner">Partner</label>
+                                <label htmlFor="pic_partner">Partner *</label>
 
                                 <Dropdown
                                     dataKey="name"
@@ -391,10 +411,14 @@ const Pic = ({
                                     itemTemplate={optionTemplate}
                                     className="w-full md:w-14rem"
                                 />
+                                <InputError
+                                    message={errorPIC.partner}
+                                    className="mt-2"
+                                />
                             </div>
 
                             <div className="flex flex-col">
-                                <label htmlFor="number">Email *</label>
+                                <label htmlFor="number">Email </label>
                                 <InputText
                                     value={dataPIC.email}
                                     onChange={(e) =>
@@ -407,7 +431,7 @@ const Pic = ({
                             </div>
 
                             <div className="flex flex-col">
-                                <label htmlFor="number">No.Hp</label>
+                                <label htmlFor="number">No.Hp *</label>
                                 <InputText
                                     keyfilter="int"
                                     min={0}
@@ -419,10 +443,14 @@ const Pic = ({
                                     id="number"
                                     aria-describedby="number-help"
                                 />
+                                <InputError
+                                    message={errorPIC.number}
+                                    className="mt-2"
+                                />
                             </div>
 
                             <div className="flex flex-col">
-                                <label htmlFor="position">Jabatan</label>
+                                <label htmlFor="position">Jabatan *</label>
                                 <InputText
                                     value={dataPIC.position}
                                     onChange={(e) =>
@@ -431,6 +459,10 @@ const Pic = ({
                                     className="dark:bg-gray-300"
                                     id="position"
                                     aria-describedby="position-help"
+                                />
+                                <InputError
+                                    message={errorPIC.position}
+                                    className="mt-2"
                                 />
                             </div>
                         </div>

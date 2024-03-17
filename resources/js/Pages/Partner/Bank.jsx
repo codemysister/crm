@@ -8,6 +8,7 @@ import { Dropdown } from "primereact/dropdown";
 import { useForm } from "@inertiajs/react";
 import { FilterMatchMode } from "primereact/api";
 import { ConfirmDialog, confirmDialog } from "primereact/confirmdialog";
+import InputError from "@/Components/InputError";
 
 const Bank = ({
     partners,
@@ -260,6 +261,10 @@ const Bank = ({
                                     itemTemplate={optionTemplate}
                                     className="w-full md:w-14rem"
                                 />
+                                <InputError
+                                    message={errorBank.partner}
+                                    className="mt-2"
+                                />
                             </div>
 
                             <div className="flex flex-col">
@@ -272,6 +277,10 @@ const Bank = ({
                                     className="dark:bg-gray-300"
                                     id="bank"
                                     aria-describedby="bank-help"
+                                />
+                                <InputError
+                                    message={errorBank.bank}
+                                    className="mt-2"
                                 />
                             </div>
 
@@ -291,6 +300,10 @@ const Bank = ({
                                     id="account_bank_number"
                                     aria-describedby="account_bank_number-help"
                                 />
+                                <InputError
+                                    message={errorBank.account_bank_number}
+                                    className="mt-2"
+                                />
                             </div>
 
                             <div className="flex flex-col">
@@ -308,6 +321,10 @@ const Bank = ({
                                     className="dark:bg-gray-300"
                                     id="account_bank_name"
                                     aria-describedby="account_bank_name-help"
+                                />
+                                <InputError
+                                    message={errorBank.account_bank_name}
+                                    className="mt-2"
                                 />
                             </div>
                         </div>
@@ -352,6 +369,10 @@ const Bank = ({
                                     itemTemplate={optionTemplate}
                                     className="w-full md:w-14rem"
                                 />
+                                <InputError
+                                    message={errorBank.partner}
+                                    className="mt-2"
+                                />
                             </div>
 
                             <div className="flex flex-col">
@@ -364,6 +385,10 @@ const Bank = ({
                                     className="dark:bg-gray-300"
                                     id="bank"
                                     aria-describedby="bank-help"
+                                />
+                                <InputError
+                                    message={errorBank.bank}
+                                    className="mt-2"
                                 />
                             </div>
 
@@ -383,6 +408,10 @@ const Bank = ({
                                     id="account_bank_number"
                                     aria-describedby="account_bank_number-help"
                                 />
+                                <InputError
+                                    message={errorBank.account_bank_number}
+                                    className="mt-2"
+                                />
                             </div>
 
                             <div className="flex flex-col">
@@ -400,6 +429,10 @@ const Bank = ({
                                     className="dark:bg-gray-300"
                                     id="account_bank_name"
                                     aria-describedby="account_bank_name-help"
+                                />
+                                <InputError
+                                    message={errorBank.account_bank_name}
+                                    className="mt-2"
                                 />
                             </div>
                         </div>

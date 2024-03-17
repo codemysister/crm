@@ -26,6 +26,7 @@ import { Tooltip } from "primereact/tooltip";
 import { Card } from "primereact/card";
 import { OverlayPanel } from "primereact/overlaypanel";
 import { MultiSelect } from "primereact/multiselect";
+import InputError from "@/Components/InputError";
 
 const Account = ({
     partners,
@@ -80,6 +81,7 @@ const Account = ({
         reset: resetAccount,
         processing: processingAccount,
         errors: errorAccount,
+        clearErrors: clearErrorsAccount,
     } = useForm({
         uuid: "",
         partner: {},
@@ -203,6 +205,7 @@ const Account = ({
     };
 
     const handleEditAccount = (account) => {
+        clearErrorsAccount();
         setDataAccount((data) => ({
             ...data,
             uuid: account.uuid,
@@ -273,6 +276,10 @@ const Account = ({
                                     itemTemplate={optionTemplate}
                                     className="w-full md:w-14rem"
                                 />
+                                <InputError
+                                    message={errorAccount.partner}
+                                    className="mt-2"
+                                />
                             </div>
 
                             <div className="flex flex-col">
@@ -288,6 +295,10 @@ const Account = ({
                                     className="dark:bg-gray-300"
                                     id="subdomain"
                                     aria-describedby="subdomain-help"
+                                />
+                                <InputError
+                                    message={errorAccount.subdomain}
+                                    className="mt-2"
                                 />
                             </div>
 
@@ -307,6 +318,10 @@ const Account = ({
                                     id="email_super_admin"
                                     aria-describedby="email_super_admin-help"
                                 />
+                                <InputError
+                                    message={errorAccount.email_super_admin}
+                                    className="mt-2"
+                                />
                             </div>
 
                             <div className="flex flex-col">
@@ -325,6 +340,10 @@ const Account = ({
                                     id="cars_link_partner"
                                     aria-describedby="cars_link_partner-help"
                                 />
+                                <InputError
+                                    message={errorAccount.cas_link_partner}
+                                    className="mt-2"
+                                />
                             </div>
                             <div className="flex flex-col">
                                 <label htmlFor="card_number">
@@ -342,6 +361,10 @@ const Account = ({
                                     className="dark:bg-gray-300"
                                     id="card_number"
                                     aria-describedby="card_number-help"
+                                />
+                                <InputError
+                                    message={errorAccount.card_number}
+                                    className="mt-2"
                                 />
                             </div>
                         </div>
@@ -391,6 +414,10 @@ const Account = ({
                                     itemTemplate={optionTemplate}
                                     className="w-full md:w-14rem"
                                 />
+                                <InputError
+                                    message={errorAccount.partner}
+                                    className="mt-2"
+                                />
                             </div>
 
                             <div className="flex flex-col">
@@ -406,6 +433,10 @@ const Account = ({
                                     className="dark:bg-gray-300"
                                     id="subdomain"
                                     aria-describedby="subdomain-help"
+                                />
+                                <InputError
+                                    message={errorAccount.subdomain}
+                                    className="mt-2"
                                 />
                             </div>
 
@@ -425,6 +456,10 @@ const Account = ({
                                     id="email_super_admin"
                                     aria-describedby="email_super_admin-help"
                                 />
+                                <InputError
+                                    message={errorAccount.email_super_admin}
+                                    className="mt-2"
+                                />
                             </div>
 
                             <div className="flex flex-col">
@@ -443,6 +478,10 @@ const Account = ({
                                     id="cars_link_partner"
                                     aria-describedby="cars_link_partner-help"
                                 />
+                                <InputError
+                                    message={errorAccount.cas_link_partner}
+                                    className="mt-2"
+                                />
                             </div>
                             <div className="flex flex-col">
                                 <label htmlFor="card_number">
@@ -460,6 +499,10 @@ const Account = ({
                                     className="dark:bg-gray-300"
                                     id="card_number"
                                     aria-describedby="card_number-help"
+                                />
+                                <InputError
+                                    message={errorAccount.card_number}
+                                    className="mt-2"
                                 />
                             </div>
                         </div>

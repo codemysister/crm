@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\PartnerBankRequest;
 use App\Models\PartnerBank;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -11,11 +12,11 @@ class PartnerBankController extends Controller
     public function apiGetPIC()
     {
         $partnerBanks = PartnerBank::with('partner')
-            ->get();
+            ->latest()->get();
         return response()->json($partnerBanks);
     }
 
-    public function store(Request $request)
+    public function store(PartnerBankRequest $request)
     {
         PartnerBank::create([
             'uuid' => Str::uuid(),
@@ -26,7 +27,7 @@ class PartnerBankController extends Controller
         ]);
     }
 
-    public function update(Request $request, $uuid)
+    public function update(PartnerBankRequest $request, $uuid)
     {
         PartnerBank::where('uuid', $uuid)->first()->update([
             'partner_id' => $request["partner"]["id"],

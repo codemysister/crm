@@ -11,7 +11,7 @@ class PartnerAccountSettingRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -22,7 +22,23 @@ class PartnerAccountSettingRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
+            'partner' => 'required',
+            'subdomain' => 'required',
+            'email_super_admin' => 'required',
+            'cas_link_partner' => 'required',
+            'card_number' => 'required'
+        ];
+    }
+
+
+    public function messages(): array
+    {
+        return [
+            'partner.required' => 'Lembaga harus diiisi',
+            'subdomain.required' => 'Subdomain harus diiisi',
+            'email_super_admin.required' => 'Email super admin harus diiisi',
+            'cas_link_partner.required' => 'CAS link partner harus diiisi',
+            'card_number.required' => 'Nomor kartu harus diiisi'
         ];
     }
 }

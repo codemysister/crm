@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\PartnerPICRequest;
 use App\Models\PartnerPIC;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -22,25 +23,25 @@ class PartnerPicController extends Controller
         return response()->json($pics);
     }
 
-    public function store(Request $request)
+    public function store(PartnerPICRequest $request)
     {
         PartnerPIC::create([
             'uuid' => Str::uuid(),
             'partner_id' => $request["partner"]["id"],
             'name' => $request->name,
             'number' => $request->number,
-            'email' => $request->email,
+            'email' => $request->email ?? null,
             'position' => $request->position,
         ]);
     }
 
-    public function update(Request $request, $uuid)
+    public function update(PartnerPICRequest $request, $uuid)
     {
         PartnerPIC::where('uuid', $uuid)->first()->update([
             'partner_id' => $request["partner"]["id"],
             'name' => $request->name,
             'number' => $request->number,
-            'email' => $request->email,
+            'email' => $request->email ?? null,
             'position' => $request->position,
         ]);
     }

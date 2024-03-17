@@ -11,7 +11,7 @@ class PartnerPICRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -22,7 +22,20 @@ class PartnerPICRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
+            'partner' => 'required',
+            'name' => 'required',
+            'number' => 'required',
+            'position' => 'required'
+        ];
+    }
+
+    public function messages(): array
+    {
+        return [
+            'partner.required' => 'Lembaga PIC harus diiisi',
+            'name.required' => 'Nama PIC harus diiisi',
+            'number.required' => 'Nomor PIC harus diiisi',
+            'position.required' => 'Jabatan PIC harus diiisi'
         ];
     }
 }

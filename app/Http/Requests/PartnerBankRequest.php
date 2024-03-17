@@ -11,7 +11,7 @@ class PartnerBankRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -22,7 +22,21 @@ class PartnerBankRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
+            'partner' => 'required',
+            'bank' => 'required',
+            'account_bank_number' => 'required',
+            'account_bank_name' => 'required'
+        ];
+    }
+
+
+    public function messages(): array
+    {
+        return [
+            'partner.required' => 'Lembaga harus diiisi',
+            'bank.required' => 'Bank harus diiisi',
+            'account_bank_number.required' => 'Nomor rekening harus diiisi',
+            'account_bank_name.required' => 'Atas nama bank harus diiisi'
         ];
     }
 }

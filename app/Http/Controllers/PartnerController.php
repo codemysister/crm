@@ -145,22 +145,49 @@ class PartnerController extends Controller
         ]);
     }
 
-    public function update(Request $request, $uuid)
+    public function update(PartnerGeneralRequest $request, $uuid)
     {
-        Partner::where('uuid', $uuid)->first()->update([
+        $partner = Partner::where('uuid', $uuid)->first();
+        $pathLogo = null;
+
+        if ($request->hasFile('partner.logo')) {
+            $file = $request->file('partner.logo');
+            if ($file->getClientOriginalName() == 'blob') {
+                $pathLogo = $partner->logo;
+            } else {
+                if ($partner->logo) {
+                    Storage::delete('public/' . $partner->logo);
+                    $filename = time() . '_' . rand() . '_' . $partner->id . '.' . $file->getClientOriginalExtension();
+                    $pathLogo = "images/logo/" . $filename;
+                    Storage::putFileAs('public/images/logo', $file, $filename);
+                } else {
+                    $filename = time() . '_' . rand() . '_' . $partner->id . '.' . $file->getClientOriginalExtension();
+                    $pathLogo = "images/logo/" . $filename;
+                    Storage::putFileAs('public/images/logo', $file, $filename);
+                }
+            }
+        } else {
+            if ($partner->logo) {
+                Storage::delete('public/' . $partner->logo);
+                $pathLogo = null;
+            }
+        }
+
+        $partner->update([
             'name' => $request['partner']['name'],
-            'phone_number' => $request['partner']['phone_number'],
-            'sales_id' => $request['partner']['sales']['id'],
+            'logo' => $pathLogo,
+            'phone_number' => $request['partner']['phone_number'] ?? null,
+            'sales_id' => $request['partner']['sales']['id'] ?? null,
             'account_manager_id' => $request['partner']['account_manager']['id'] ?? null,
-            'onboarding_date' => Carbon::parse($request['partner']['onboarding_date'])->setTimezone('GMT+7')->format('Y-m-d H:i:s'),
-            'live_date' => Carbon::parse($request['partner']['live_date'])->setTimezone('GMT+7')->format('Y-m-d H:i:s'),
-            'onboarding_age' => $request['partner']['onboarding_age'],
-            'live_age' => $request['partner']['live_age'],
+            'onboarding_date' => Carbon::parse($request['partner']['onboarding_date'])->setTimezone('GMT+7')->format('Y-m-d H:i:s') ?? null,
+            'live_date' => Carbon::parse($request['partner']['live_date'])->setTimezone('GMT+7')->format('Y-m-d H:i:s') ?? null,
+            'onboarding_age' => $request['partner']['onboarding_age'] ?? null,
+            'live_age' => $request['partner']['live_age'] ?? null,
             'monitoring_date_after_3_month_live' => $request['partner']['monitoring_date_after_3_month_live'] !== null ? Carbon::parse($request['partner']['monitoring_date_after_3_month_live'])->setTimezone('GMT+7')->format('Y-m-d H:i:s') : null,
             'province' => $request['partner']['province'],
             'regency' => $request['partner']['regency'],
-            'subdistrict' => $request['partner']['subdistrict'],
-            'address' => $request['partner']['address'],
+            'subdistrict' => $request['partner']['subdistrict'] ?? null,
+            'address' => $request['partner']['address'] ?? null,
             'status' => $request['partner']['status']
         ]);
     }

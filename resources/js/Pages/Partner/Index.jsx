@@ -28,6 +28,7 @@ import PriceList from "./PriceList.jsx";
 import { FilePond, registerPlugin } from "react-filepond";
 import FilePondPluginFileValidateSize from "filepond-plugin-file-validate-size";
 import "filepond/dist/filepond.min.css";
+import InputError from "@/Components/InputError.jsx";
 registerPlugin(FilePondPluginFileValidateSize);
 
 const BASE_URL = import.meta.env.VITE_BASE_URL;
@@ -113,7 +114,6 @@ export default function Index({ auth, partner }) {
         } else if (activeIndex == 3) {
             triggerInputFocus(stepAccountRef);
         } else if (activeIndex == 4) {
-            console.log("oke");
             triggerInputFocus(stepSubscriptionRef);
         } else {
             triggerInputFocus(stepPriceListRef);
@@ -250,6 +250,7 @@ export default function Index({ auth, partner }) {
         reset,
         processing,
         errors,
+        clearErrors,
     } = useForm({
         partner: {
             uuid: "",
@@ -560,12 +561,14 @@ export default function Index({ auth, partner }) {
     };
 
     const handleEditPartner = (partner) => {
+        clearErrors();
         setData((prevData) => ({
             ...prevData,
             partner: {
                 ...prevData.partner,
                 uuid: partner.uuid,
                 name: partner.name,
+                logo: partner.logo,
                 phone_number: partner.phone_number,
                 sales: partner.sales,
                 account_manager: partner.account_manager,
@@ -578,12 +581,15 @@ export default function Index({ auth, partner }) {
                 province: partner.province,
                 regency: partner.regency,
                 subdistrict: partner.subdistrict,
+                period: partner.period,
+                payment_metode: partner.payment_metode,
                 address: partner.address,
                 status: partner.status,
             },
         }));
         setcodeRegency(JSON.parse(partner.regency).code);
         setcodeProvince(JSON.parse(partner.province).code);
+
         setModalEditPartnersIsVisible(true);
     };
 
@@ -685,7 +691,7 @@ export default function Index({ auth, partner }) {
                 <Button
                     type="submit"
                     label="Submit"
-                    disabled={processing || activeIndex !== 5}
+                    disabled={processing}
                     className="bg-purple-600 text-sm shadow-md rounded-lg"
                     onClick={() => btnSubmit.current.click()}
                 />
@@ -723,10 +729,11 @@ export default function Index({ auth, partner }) {
                 },
                 onError: () => {
                     showError("Tambah");
+                    setActiveIndex((prev) => (prev = 0));
                 },
             });
         } else {
-            put("/partners/" + data.partner.uuid, {
+            post("/partners/" + data.partner.uuid, {
                 onSuccess: () => {
                     showSuccess("Update");
                     setModalEditPartnersIsVisible((prev) => false);
@@ -737,6 +744,7 @@ export default function Index({ auth, partner }) {
                 },
                 onError: () => {
                     showError("Update");
+                    setActiveIndex((prev) => (prev = 0));
                 },
             });
         }
@@ -869,6 +877,14 @@ export default function Index({ auth, partner }) {
                                                     className="dark:bg-gray-300"
                                                     id="name"
                                                     aria-describedby="name-help"
+                                                    required
+                                                />
+
+                                                <InputError
+                                                    message={
+                                                        errors["partner.name"]
+                                                    }
+                                                    className="mt-2"
                                                 />
                                             </div>
 
@@ -893,12 +909,20 @@ export default function Index({ auth, partner }) {
                                                         name="files" /* sets the file input name, it's filepond by default */
                                                         labelIdle='Drag & Drop your files or <span class="filepond--label-action">Browse</span>'
                                                     />
+                                                    <InputError
+                                                        message={
+                                                            errors[
+                                                                "partner.logo"
+                                                            ]
+                                                        }
+                                                        className="mt-2"
+                                                    />
                                                 </div>
                                             </div>
 
                                             <div className="flex flex-col">
                                                 <label htmlFor="name">
-                                                    Nomor Telepon *
+                                                    Nomor Telepon
                                                 </label>
                                                 <InputText
                                                     keyfilter="int"
@@ -921,7 +945,7 @@ export default function Index({ auth, partner }) {
 
                                             <div className="flex flex-col">
                                                 <label htmlFor="sales">
-                                                    Sales *
+                                                    Sales
                                                 </label>
                                                 <Dropdown
                                                     value={data.partner.sales}
@@ -1019,6 +1043,14 @@ export default function Index({ auth, partner }) {
                                                     }
                                                     className="w-full md:w-14rem"
                                                 />
+                                                <InputError
+                                                    message={
+                                                        errors[
+                                                            "partner.province"
+                                                        ]
+                                                    }
+                                                    className="mt-2"
+                                                />
                                             </div>
 
                                             <div className="flex flex-col">
@@ -1063,11 +1095,19 @@ export default function Index({ auth, partner }) {
                                                     }
                                                     className="w-full md:w-14rem"
                                                 />
+                                                <InputError
+                                                    message={
+                                                        errors[
+                                                            "partner.regency"
+                                                        ]
+                                                    }
+                                                    className="mt-2"
+                                                />
                                             </div>
 
                                             <div className="flex flex-col">
                                                 <label htmlFor="subdistrict">
-                                                    Kecamatan *
+                                                    Kecamatan
                                                 </label>
                                                 <Dropdown
                                                     value={
@@ -1122,7 +1162,7 @@ export default function Index({ auth, partner }) {
 
                                             <div className="flex flex-col">
                                                 <label htmlFor="register_date">
-                                                    Tanggal Onboarding *
+                                                    Tanggal Onboarding
                                                 </label>
                                                 <Calendar
                                                     value={
@@ -1298,7 +1338,7 @@ export default function Index({ auth, partner }) {
 
                                             <div className="flex flex-col">
                                                 <label htmlFor="period">
-                                                    Periode Langganan*
+                                                    Periode Langganan *
                                                 </label>
                                                 <Dropdown
                                                     dataKey="name"
@@ -1361,6 +1401,14 @@ export default function Index({ auth, partner }) {
                                                     className="w-full md:w-14rem"
                                                     editable
                                                 />
+                                                <InputError
+                                                    message={
+                                                        errors[
+                                                            "partner.payment_metode"
+                                                        ]
+                                                    }
+                                                    className="mt-2"
+                                                />
                                             </div>
 
                                             <div className="flex flex-col">
@@ -1383,6 +1431,12 @@ export default function Index({ auth, partner }) {
                                                     placeholder="Pilih Status"
                                                     className="w-full md:w-14rem"
                                                 />
+                                                <InputError
+                                                    message={
+                                                        errors["partner.status"]
+                                                    }
+                                                    className="mt-2"
+                                                />
                                             </div>
                                         </div>
                                     </>
@@ -1397,7 +1451,7 @@ export default function Index({ auth, partner }) {
                                                 className="flex flex-col"
                                             >
                                                 <label htmlFor="name">
-                                                    Nama *
+                                                    Nama
                                                 </label>
                                                 <InputText
                                                     value={data.pic.name}
@@ -1416,7 +1470,7 @@ export default function Index({ auth, partner }) {
 
                                             <div className="flex flex-col">
                                                 <label htmlFor="number">
-                                                    Email *
+                                                    Email
                                                 </label>
                                                 <InputText
                                                     value={data.pic.email}
@@ -1434,7 +1488,7 @@ export default function Index({ auth, partner }) {
                                             </div>
                                             <div className="flex flex-col">
                                                 <label htmlFor="number">
-                                                    No.Hp *
+                                                    No.Hp
                                                 </label>
                                                 <InputText
                                                     value={data.pic.number}
@@ -1455,7 +1509,7 @@ export default function Index({ auth, partner }) {
 
                                             <div className="flex flex-col">
                                                 <label htmlFor="position">
-                                                    Jabatan *
+                                                    Jabatan
                                                 </label>
                                                 <InputText
                                                     value={data.pic.position}
@@ -1481,7 +1535,7 @@ export default function Index({ auth, partner }) {
                                         <div className="flex flex-col justify-around gap-4 mt-4">
                                             <div className="flex flex-col">
                                                 <label htmlFor="bank">
-                                                    Bank *
+                                                    Bank
                                                 </label>
                                                 <InputText
                                                     value={data.bank.bank}
@@ -1500,7 +1554,7 @@ export default function Index({ auth, partner }) {
 
                                             <div className="flex flex-col">
                                                 <label htmlFor="account_bank_number">
-                                                    Nomor Rekening *
+                                                    Nomor Rekening
                                                 </label>
                                                 <InputText
                                                     value={
@@ -1523,7 +1577,7 @@ export default function Index({ auth, partner }) {
 
                                             <div className="flex flex-col">
                                                 <label htmlFor="account_bank_name">
-                                                    Atas Nama *
+                                                    Atas Nama
                                                 </label>
                                                 <InputText
                                                     value={
@@ -1662,7 +1716,7 @@ export default function Index({ auth, partner }) {
                                     <div className="flex flex-col justify-around gap-4 mt-1">
                                         <div className="flex flex-col">
                                             <label htmlFor="bill">
-                                                Tagihan *
+                                                Tagihan
                                             </label>
 
                                             <InputText
@@ -1680,7 +1734,7 @@ export default function Index({ auth, partner }) {
                                         </div>
                                         <div className="flex flex-col">
                                             <label htmlFor="nominal">
-                                                Nominal Langganan *
+                                                Nominal Langganan
                                             </label>
                                             <InputNumber
                                                 value={
@@ -1750,7 +1804,7 @@ export default function Index({ auth, partner }) {
                                         </div>
                                         <div className="flex flex-col">
                                             <label htmlFor="ppn">
-                                                Total Tagihan(nominal + ppn) *
+                                                Total Tagihan(nominal + ppn)
                                             </label>
                                             <InputNumber
                                                 value={
@@ -2578,7 +2632,75 @@ export default function Index({ auth, partner }) {
                                             }
                                             className="dark:bg-gray-300"
                                             id="name"
+                                            required
                                             aria-describedby="name-help"
+                                        />
+                                        <InputError
+                                            message={errors["partner.name"]}
+                                            className="mt-2"
+                                        />
+                                    </div>
+
+                                    <div className="flex flex-col">
+                                        <label htmlFor="name">Logo</label>
+                                        <div className="App">
+                                            {data.partner.logo !== null &&
+                                            typeof data.partner.logo ==
+                                                "string" ? (
+                                                <>
+                                                    <FilePond
+                                                        files={
+                                                            "storage/" +
+                                                            data.partner.logo
+                                                        }
+                                                        onaddfile={(
+                                                            error,
+                                                            fileItems
+                                                        ) => {
+                                                            setData("partner", {
+                                                                ...data.partner,
+                                                                logo: fileItems.file,
+                                                            });
+                                                        }}
+                                                        onremovefile={() => {
+                                                            setData("partner", {
+                                                                ...data.partner,
+                                                                logo: null,
+                                                            });
+                                                        }}
+                                                        maxFileSize="2mb"
+                                                        labelMaxFileSizeExceeded="File terlalu besar"
+                                                        labelIdle='Drag & Drop your files or <span class="filepond--label-action">Browse</span>'
+                                                    />
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <FilePond
+                                                        onaddfile={(
+                                                            error,
+                                                            fileItems
+                                                        ) => {
+                                                            setData("partner", {
+                                                                ...data.partner,
+                                                                logo: fileItems.file,
+                                                            });
+                                                        }}
+                                                        onremovefile={() => {
+                                                            setData("partner", {
+                                                                ...data.partner,
+                                                                logo: null,
+                                                            });
+                                                        }}
+                                                        maxFileSize="2mb"
+                                                        labelMaxFileSizeExceeded="File terlalu besar"
+                                                        labelIdle='Drag & Drop your files or <span class="filepond--label-action">Browse</span>'
+                                                    />
+                                                </>
+                                            )}
+                                        </div>
+                                        <InputError
+                                            message={errors["partner.logo"]}
+                                            className="mt-2"
                                         />
                                     </div>
 
@@ -2685,6 +2807,10 @@ export default function Index({ auth, partner }) {
                                             itemTemplate={optionTemplate}
                                             className="w-full md:w-14rem"
                                         />
+                                        <InputError
+                                            message={errors["partner.province"]}
+                                            className="mt-2"
+                                        />
                                     </div>
 
                                     <div className="flex flex-col">
@@ -2722,6 +2848,10 @@ export default function Index({ auth, partner }) {
                                             }
                                             itemTemplate={optionTemplate}
                                             className="w-full md:w-14rem"
+                                        />
+                                        <InputError
+                                            message={errors["partner.regency"]}
+                                            className="mt-2"
                                         />
                                     </div>
 
@@ -2936,6 +3066,69 @@ export default function Index({ auth, partner }) {
                                     </div>
 
                                     <div className="flex flex-col">
+                                        <label htmlFor="period">
+                                            Periode Langganan*
+                                        </label>
+                                        <Dropdown
+                                            dataKey="name"
+                                            value={data.partner.period}
+                                            onChange={(e) => {
+                                                setData("partner", {
+                                                    ...data.partner,
+                                                    period: e.target.value,
+                                                });
+                                            }}
+                                            options={option_period_subscription}
+                                            optionLabel="name"
+                                            placeholder="Langganan Per-"
+                                            valueTemplate={
+                                                selectedOptionTemplate
+                                            }
+                                            itemTemplate={optionTemplate}
+                                            editable
+                                            className={`w-full md:w-14rem 
+                                        `}
+                                        />
+                                    </div>
+
+                                    <div className="flex flex-col">
+                                        <label htmlFor="payment_metode">
+                                            Metode Pembayaran *
+                                        </label>
+                                        <Dropdown
+                                            value={data.partner.payment_metode}
+                                            onChange={(e) => {
+                                                setData("partner", {
+                                                    ...data.partner,
+                                                    payment_metode:
+                                                        e.target.value,
+                                                });
+                                            }}
+                                            options={[
+                                                { name: "cazhbox" },
+                                                {
+                                                    name: "payment link",
+                                                },
+                                            ]}
+                                            optionLabel="name"
+                                            optionValue="name"
+                                            placeholder="Pilih Metode Pembayaran"
+                                            valueTemplate={
+                                                selectedOptionTemplate
+                                            }
+                                            itemTemplate={optionTemplate}
+                                            className="w-full md:w-14rem"
+                                            editable
+                                        />
+                                        <InputError
+                                            message={
+                                                errors["partner.payment_metode"]
+                                            }
+                                            className="mt-2"
+                                        />
+                                    </div>
+
+                                    <div className="flex flex-col">
                                         <label htmlFor="status">Status *</label>
                                         <Dropdown
                                             value={data.partner.status}
@@ -2951,6 +3144,10 @@ export default function Index({ auth, partner }) {
                                             editable
                                             placeholder="Pilih Status"
                                             className="w-full md:w-14rem"
+                                        />
+                                        <InputError
+                                            message={errors["partner.status"]}
+                                            className="mt-2"
                                         />
                                     </div>
                                 </div>
