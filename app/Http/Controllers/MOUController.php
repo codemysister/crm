@@ -141,14 +141,11 @@ class MOUController extends Controller
         //     $phpWord->setImageValue('referral_signature', array('path' => public_path("/storage/$mou->referral_signature")));
         // }
 
-        if (!Storage::exists('mou')) {
-            Storage::makeDirectory('mou');
-        }
-
         $fileName = $mou->uuid . '.docx';
-        $phpWord->saveAs(storage_path('app/public/mou/' . $fileName));
         $mou->update(['mou_doc_word' => 'mou/' . $fileName]);
-
+        $file = $phpWord->save();
+        Storage::put('/public/mou/' . $fileName, file_get_contents($file));
+        // $phpWord->saveAs(storage_path('app/public/mou/' . $fileName));
     }
 
     public function store(MOURequest $request)

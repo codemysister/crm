@@ -624,9 +624,14 @@ const Edit = ({ usersProp, partnersProp, mou, signaturesProp }) => {
                                                         pic: e.target.value
                                                             .pics[0]?.name,
                                                         pic_position:
-                                                            e.target.value
-                                                                .pics[0]
-                                                                ?.position,
+                                                            data.partner
+                                                                .pic_position !==
+                                                            null
+                                                                ? data.partner
+                                                                      .pic_position
+                                                                : e.target.value
+                                                                      .pics[0]
+                                                                      ?.position,
                                                     },
                                                     url_subdomain:
                                                         e.target.value

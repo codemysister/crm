@@ -20,6 +20,12 @@ const BASE_URL = import.meta.env.VITE_BASE_URL;
 
 export default function Index({ auth }) {
     const [mous, setMous] = useState();
+    const [pathMou, setPathMou] = useState({
+        partner_name: null,
+        code: null,
+        word: null,
+        pdf: null,
+    });
     const [isLoadingData, setIsLoadingData] = useState(false);
     const dummyArray = Array.from({ length: 5 }, (v, i) => i);
     const [preRenderLoad, setPreRenderLoad] = useState(true);
@@ -571,11 +577,19 @@ export default function Index({ auth }) {
                                         <Button
                                             icon="pi pi-download                                            "
                                             className="rounded-lg bg-transparent text-black text-xs"
-                                            onClick={(e) =>
-                                                op.current.toggle(e)
-                                            }
+                                            onClick={(e) => {
+                                                setPathMou({
+                                                    ...pathMou,
+                                                    partner_name:
+                                                        rowData.partner_name,
+                                                    code: rowData.code,
+                                                    word: rowData.mou_doc_word,
+                                                    pdf: rowData.mou_doc,
+                                                });
+                                                op.current.toggle(e);
+                                            }}
                                         />
-                                        <OverlayPanel
+                                        {/* <OverlayPanel
                                             ref={op}
                                             className="shadow-md"
                                         >
@@ -584,9 +598,9 @@ export default function Index({ auth }) {
                                                     <a
                                                         href={
                                                             "/storage/" +
-                                                            rowData.mou_doc_word
+                                                            mou_doc_word
                                                         }
-                                                        download={`MOU_${rowData.partner_name}`}
+                                                        download={`MOU_${partner_name}`}
                                                         class="font-bold flex items-center gap-1 w-full h-full text-center rounded-full "
                                                     >
                                                         <i
@@ -602,11 +616,8 @@ export default function Index({ auth }) {
                                                 <hr className="my-1" />
                                                 <span>
                                                     <a
-                                                        href={
-                                                            "/" +
-                                                            rowData.mou_doc
-                                                        }
-                                                        download={`MOU_${rowData.partner_name}`}
+                                                        href={"/" + mou_doc}
+                                                        download={`MOU_${partner_name}`}
                                                         class="font-bold flex gap-1 items-center w-full h-full text-center rounded-full "
                                                     >
                                                         <i
@@ -620,7 +631,7 @@ export default function Index({ auth }) {
                                                     </a>
                                                 </span>
                                             </div>
-                                        </OverlayPanel>
+                                        </OverlayPanel> */}
                                     </>
                                 );
                             }}
@@ -645,6 +656,42 @@ export default function Index({ auth }) {
                             headerClassName="dark:border-none  bg-transparent dark:bg-transparent dark:text-gray-300"
                         ></Column>
                     </DataTable>
+
+                    <OverlayPanel ref={op} className="shadow-md">
+                        <div className="flex flex-col text-left">
+                            <span>
+                                <a
+                                    href={"/storage/" + pathMou.word}
+                                    download={`${pathMou.code}_${pathMou.partner_name}`}
+                                    class="font-bold flex items-center gap-1 w-full h-full text-center rounded-full "
+                                >
+                                    <i
+                                        className="pi pi-file-word"
+                                        style={{
+                                            fontSize: "1rem",
+                                        }}
+                                    ></i>
+                                    word
+                                </a>
+                            </span>
+                            <hr className="my-1" />
+                            <span>
+                                <a
+                                    href={"/" + pathMou.pdf}
+                                    download={`${pathMou.code}_${pathMou.partner_name}`}
+                                    class="font-bold flex gap-1 items-center w-full h-full text-center rounded-full "
+                                >
+                                    <i
+                                        className="pi pi-file-pdf"
+                                        style={{
+                                            fontSize: "1rem",
+                                        }}
+                                    ></i>
+                                    pdf
+                                </a>
+                            </span>
+                        </div>
+                    </OverlayPanel>
                 </div>
             </div>
         </DashboardLayout>
