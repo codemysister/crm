@@ -177,7 +177,7 @@ class MOUController extends Controller
                     'province' => $request['partner']['province'],
                     'regency' => $request['partner']['regency'],
                     'period' => $request->period_subscription,
-                    'status' => "Proses",
+                    'status' => "Prospek",
                 ]);
                 PartnerPIC::create([
                     'uuid' => Str::uuid(),
@@ -338,7 +338,7 @@ class MOUController extends Controller
                     'province' => $request['partner']['province'],
                     'regency' => $request['partner']['regency'],
                     'period' => $request->period_subscription,
-                    'status' => "Proses",
+                    'status' => "Prospek",
                 ]);
                 PartnerPIC::create([
                     'uuid' => Str::uuid(),

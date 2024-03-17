@@ -724,13 +724,18 @@ const Edit = ({ usersProp, partnersProp, mou, signaturesProp }) => {
                                                               .account_bank_number
                                                         : null,
                                                 }));
-                                                setcodeProvince(
-                                                    (prev) =>
-                                                        (prev = JSON.parse(
-                                                            e.target.value
-                                                                .province
-                                                        ).code)
-                                                );
+                                                if (
+                                                    e.target.value.province !=
+                                                    null
+                                                ) {
+                                                    setcodeProvince(
+                                                        (prev) =>
+                                                            (prev = JSON.parse(
+                                                                e.target.value
+                                                                    .province
+                                                            ).code)
+                                                    );
+                                                }
                                             }}
                                             options={partners}
                                             filter
@@ -3709,14 +3714,14 @@ const Edit = ({ usersProp, partnersProp, mou, signaturesProp }) => {
                                     ref={animateSignatureName}
                                 >
                                     <p>Pihak Pertama</p>
-                                    <div className="h-[130px] w-[130px] py-2">
+                                    <div className="h-[100px] w-[170px] py-2">
                                         <img
                                             src={
                                                 "/storage/" +
                                                 data.signature.image
                                             }
                                             alt=""
-                                            className="w-full h-full object-cover"
+                                            className="w-full h-full object-fill"
                                         />
                                     </div>
                                     <p>
@@ -3730,7 +3735,7 @@ const Edit = ({ usersProp, partnersProp, mou, signaturesProp }) => {
                                 <div className="w-[30%]">
                                     <p>Pihak Kedua</p>
                                     {data.pic_signature && isSignatureBlob ? (
-                                        <div className="h-[130px] w-[130px] py-2">
+                                        <div className="h-[100px] w-[170px] py-2">
                                             <img
                                                 src={
                                                     typeof data.pic_signature ===
@@ -3740,7 +3745,7 @@ const Edit = ({ usersProp, partnersProp, mou, signaturesProp }) => {
                                                               data.pic_signature
                                                           )
                                                 }
-                                                className="w-full h-full object-cover"
+                                                className="w-full h-full object-fill"
                                             />
                                         </div>
                                     ) : (

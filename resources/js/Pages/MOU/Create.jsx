@@ -732,13 +732,18 @@ const Create = ({ usersProp, partnersProp, signaturesProp, referralsProp }) => {
                                                               .account_bank_number
                                                         : null,
                                                 }));
-                                                setcodeProvince(
-                                                    (prev) =>
-                                                        (prev = JSON.parse(
-                                                            e.target.value
-                                                                .province
-                                                        ).code)
-                                                );
+                                                if (
+                                                    e.target.value.province !=
+                                                    null
+                                                ) {
+                                                    setcodeProvince(
+                                                        (prev) =>
+                                                            (prev = JSON.parse(
+                                                                e.target.value
+                                                                    .province
+                                                            ).code)
+                                                    );
+                                                }
                                             }}
                                             options={partners}
                                             filter
@@ -3582,14 +3587,14 @@ const Create = ({ usersProp, partnersProp, signaturesProp, referralsProp }) => {
                                     ref={animateSignatureName}
                                 >
                                     <p>Pihak Pertama</p>
-                                    <div className="h-[130px] w-[130px] py-2">
+                                    <div className="h-[100px] w-[170px] py-2">
                                         <img
                                             src={
                                                 "/storage/" +
                                                 data.signature.image
                                             }
                                             alt=""
-                                            className="h-full w-full object-cover"
+                                            className="h-full w-full object-fill"
                                         />
                                     </div>
                                     <p>
@@ -3603,12 +3608,12 @@ const Create = ({ usersProp, partnersProp, signaturesProp, referralsProp }) => {
                                 <div className="w-[30%]">
                                     <p>Pihak Kedua</p>
                                     {data.partner.pic_signature ? (
-                                        <div className="h-[130px] w-[130px] py-2">
+                                        <div className="h-[100px] w-[170px] py-2">
                                             <img
                                                 src={URL.createObjectURL(
                                                     data.partner.pic_signature
                                                 )}
-                                                className="h-full w-full object-cover"
+                                                className="h-full w-full object-fill"
                                             />
                                         </div>
                                     ) : (

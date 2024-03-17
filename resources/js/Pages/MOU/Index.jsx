@@ -199,7 +199,7 @@ export default function Index({ auth }) {
             field: "expired_date",
             header: "Tanggal Kadaluarsa",
             width: "10rem",
-            type: "regular",
+            type: "date",
         },
         {
             field: "profit_sharing",
