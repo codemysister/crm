@@ -484,14 +484,17 @@ const Edit = ({
                                                 number: e.target.value
                                                     .phone_number,
                                                 pic: e.target.value.pics[0]
-                                                    .name,
+                                                    ?.name,
                                             });
-                                            setcodeProvince(
-                                                (prev) =>
-                                                    (prev = JSON.parse(
-                                                        e.target.value.province
-                                                    ).code)
-                                            );
+                                            if (e.target.value.province) {
+                                                setcodeProvince(
+                                                    (prev) =>
+                                                        (prev = JSON.parse(
+                                                            e.target.value
+                                                                .province
+                                                        ).code)
+                                                );
+                                            }
                                         }}
                                         onFocus={() => {
                                             triggerInputFocus(

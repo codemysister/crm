@@ -163,6 +163,10 @@ class InvoiceGeneralController extends Controller
         $currentMonth = date('n');
         $currentYear = date('Y');
 
+        $totalDataPerMonth = InvoiceGeneral::whereYear('created_at', $currentYear)
+            ->whereMonth('created_at', $currentMonth)
+            ->count();
+
         function intToRoman($number)
         {
             $map = array('I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII');
@@ -170,9 +174,9 @@ class InvoiceGeneralController extends Controller
         }
 
         $romanMonth = intToRoman($currentMonth);
-        $latestData = InvoiceGeneral::latest()->first() ?? "#INV/000/$romanMonth/$currentYear";
-        $lastCode = $latestData ? explode('/', $latestData->code ?? $latestData)[1] : 0;
-        $newCode = str_pad((int) $lastCode + 1, 3, '0', STR_PAD_LEFT);
+        $latestData = "#INV/000/$romanMonth/$currentYear";
+        $lastCode = $latestData ? explode('/', $latestData)[1] : 0;
+        $newCode = str_pad((int) $lastCode + $totalDataPerMonth + 1, 3, '0', STR_PAD_LEFT);
         $newCode = "#INV/$newCode/$romanMonth/$currentYear";
         return $newCode;
     }
