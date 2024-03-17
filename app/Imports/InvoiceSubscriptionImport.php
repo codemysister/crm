@@ -254,7 +254,13 @@ class InvoiceSubscriptionImport implements ToCollection, WithStartRow, WithHeadi
         foreach ($rows as $key => $row) {
 
             // $partnerExist = Partner::where('name', 'like', '%' . $row["partner"] . '%')->first();
-            $partnerExist = Partner::whereRaw("SUBSTRING_INDEX(name, ',', 1) LIKE ?", ['%' . explode(',', $row['partner'])[0] . '%'])->first();
+            $databaseType = config('database.default');
+            dd($databaseType);
+            if ($databaseType == 'pgsql') {
+                $partnerExist = Partner::whereRaw("substring(name from '^[^,]*') LIKE ?", ['%' . explode(',', $row['partner'])[0] . '%'])->first();
+            } else {
+                $partnerExist = Partner::whereRaw("SUBSTRING_INDEX(name, ',', 1) LIKE ?", ['%' . explode(',', $row['partner'])[0] . '%'])->first();
+            }
 
             $date_now = Carbon::now()->setTimezone('GMT+7');
             $invoice_age = $date_now->diffInDays($this->convertDate($row['tanggal']), false) + 1;
