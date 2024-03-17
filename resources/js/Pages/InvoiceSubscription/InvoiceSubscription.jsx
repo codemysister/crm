@@ -1494,17 +1494,20 @@ export default function InvoiceSubscription({
                                     download="sample.csv"
                                     class="font-bold underline w-full h-full text-center rounded-full "
                                 >
-                                    sample.xlsx
+                                    sample.csv
                                 </a>
                             </p>
                         </div>
                         <div className="flex flex-col mt-3">
-                            <label htmlFor="name">Excel</label>
+                            <label htmlFor="name">CSV</label>
 
                             <div className="App">
                                 <FilePond
                                     onaddfile={(error, fileItems) => {
-                                        setData("excel", fileItems.file);
+                                        setData("partner", {
+                                            ...data.partner,
+                                            excell: fileItems.file,
+                                        });
                                     }}
                                     maxFileSize="2mb"
                                     labelMaxFileSizeExceeded="File terlalu besar"
@@ -1626,24 +1629,7 @@ export default function InvoiceSubscription({
                             />
                         </div> */}
                     </div>
-                    <div className="flex flex-col mt-3">
-                        <label htmlFor="name">Excell</label>
 
-                        <div className="App">
-                            <FilePond
-                                onaddfile={(error, fileItems) => {
-                                    setData("partner", {
-                                        ...data.partner,
-                                        excell: fileItems.file,
-                                    });
-                                }}
-                                maxFileSize="2mb"
-                                labelMaxFileSizeExceeded="File terlalu besar"
-                                name="files"
-                                labelIdle='Drag & Drop your files or <span class="filepond--label-action">Browse</span>'
-                            />
-                        </div>
-                    </div>
                     <div className="flex justify-center mt-5">
                         <Button
                             label="Submit"
