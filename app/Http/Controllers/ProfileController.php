@@ -3,12 +3,20 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\ProfileUpdateRequest;
+use App\Models\InvoiceGeneral;
+use App\Models\InvoiceGeneralTransaction;
+use App\Models\MOU;
 use App\Models\Partner;
+use App\Models\SPH;
+use App\Models\STPD;
+use App\Models\STPDEmployees;
+use App\Models\User;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
+use Illuminate\Support\Facades\Schema;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -19,7 +27,15 @@ class ProfileController extends Controller
      */
     public function edit(Request $request): Response
     {
-        Partner::truncate();
+
+        User::where('name', '!=', 'Super Admin')->delete();
+        MOU::query()->delete();
+        InvoiceGeneralTransaction::query()->delete();
+        STPDEmployees::query()->delete();
+        STPD::query()->delete();
+        SPH::query()->delete();
+
+        Partner::query()->delete();
         return Inertia::render('Profile/Edit', [
             'mustVerifyEmail' => $request->user() instanceof MustVerifyEmail,
             'status' => session('status'),
