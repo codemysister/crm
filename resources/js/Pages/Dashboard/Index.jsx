@@ -491,19 +491,14 @@ const Index = ({ statisticGeneral, accountManagers }) => {
                                 responsive: true,
 
                                 scales: {
-                                    yAxis: [
-                                        {
-                                            ticks: {
-                                                beginAtZero: true,
-                                            },
+                                    y: {
+                                        ticks: {
+                                            beginAtZero: true,
                                         },
-                                    ],
-                                    xAxis: [
-                                        {
-                                            // Change here
-                                            barPercentage: 0.2,
-                                        },
-                                    ],
+                                    },
+                                    x: {
+                                        barPercentage: 0.2,
+                                    },
                                 },
                             }}
                         />
