@@ -8,7 +8,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SURAT KETERANGAN PERJALANAN DINAS</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-    <!-- @vite('resources/css/app.css') -->
+    {{--@vite('resources/css/app.css')--}}
     <style>
         @page {
             margin-left: 2.5cm;
@@ -123,7 +123,7 @@
             @endif
         </div>
         <div class="text-center" style="width: 33%">
-       
+
             @if($memo->signature_second_name)
             <p>Mengetahui</p>
             <div style="width: 130px; height: 130px; overflow: hidden;" class="py-2">
@@ -136,7 +136,7 @@
             @endif
         </div>
         <div class="text-center" style="width: 33%">
- 
+
             @if($memo->signature_third_name)
             <p>Menyetujui</p>
             <div style="width: 130px; height: 130px; overflow: hidden;" class="py-2">
@@ -149,7 +149,7 @@
             @endif
         </div>
     </div>
-   
+
 </body>
 
 </html>

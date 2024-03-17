@@ -45,8 +45,8 @@ class GenerateSPHJob implements ShouldQueue
             ->showBackground()
             ->showBackground()
                 ->showBrowserHeaderAndFooter()
-                ->headerHtml('<div></div>')
-                ->footerHtml('<div style="text-align: left; font-size: 10px; width:100%; margin-left: 2.5cm; margin-bottom: 1cm;">*) Tarif produk/layanan tidak termasuk biaya admin transaksi <span style="font-style:italic;">user</span> aplikasi <span style="font-style:italic;">mobile</span>.</div>')
+                ->headerHtml('<div class="header"></div>')
+                ->footerHtml('<div class="footer">*) Tarif produk/layanan tidak termasuk biaya admin transaksi <span style="font-style:italic;">user</span> aplikasi <span style="font-style:italic;">mobile</span>.</div>')
             ->pdf();
 
 
