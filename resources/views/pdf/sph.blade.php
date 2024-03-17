@@ -20,26 +20,6 @@
 
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap');
 
-
-        .header, .header-space,
-        .footer, .footer-space {
-            height: 100px;
-        }
-        .header {
-            position: fixed;
-            top: 0;
-        }
-        .footer {
-            position: fixed;
-            bottom: 0;
-            text-align: right;
-            font-style: italic;
-            font-size: 10px;
-            width:100%;
-            margin-right: 2.5cm;
-            margin-bottom: 1cm;
-        }
-
         body {
             margin: 0px;
             padding: 0px;
