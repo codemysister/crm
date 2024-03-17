@@ -140,7 +140,7 @@ class PartnerImport implements ToCollection, WithStartRow, WithHeadingRow, WithC
                 $salesExist->assignRole("account executive");
 
             }
-            $email = strtolower(str_replace(' ', '_', $row["sales"]) . "@gmail.com");
+            $email = strtolower(str_replace(' ', '_', $row["after_sales"]) . "@gmail.com");
             $amExist = User::where('email', $email)->orWhere('name', 'like', '%' . $row["after_sales"] . '%')->first();
             if ($amExist == null) {
                 $amExist = User::create([
