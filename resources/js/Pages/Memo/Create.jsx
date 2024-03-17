@@ -12,6 +12,7 @@ import { InputTextarea } from "primereact/inputtextarea";
 import OptionSignatureTemplate from "@/Components/OptionSignatureTemplate";
 import OptionTemplate from "@/Components/OptionTemplate";
 import { useEffect } from "react";
+import InputError from "@/Components/InputError";
 
 const BASE_URL = import.meta.env.VITE_BASE_URL;
 
@@ -281,6 +282,10 @@ const Create = ({ partnersProp, signaturesProp }) => {
                                             className="w-[10%] dropdown-group border-l-0"
                                         />
                                     </div>
+                                    <InputError
+                                        message={errors["partner.name"]}
+                                        className="mt-2"
+                                    />
                                 </div>
 
                                 <div className="flex flex-col mt-3">
@@ -308,6 +313,10 @@ const Create = ({ partnersProp, signaturesProp }) => {
                                         className="dark:bg-gray-300"
                                         id="price_card"
                                         aria-describedby="price_card-help"
+                                    />
+                                    <InputError
+                                        message={errors["price_card"]}
+                                        className="mt-2"
                                     />
                                 </div>
 
@@ -337,6 +346,10 @@ const Create = ({ partnersProp, signaturesProp }) => {
                                         id="price_e_card"
                                         aria-describedby="price_e_card-help"
                                     />
+                                    <InputError
+                                        message={errors["price_e_card"]}
+                                        className="mt-2"
+                                    />
                                 </div>
 
                                 <div className="flex flex-col mt-3">
@@ -365,6 +378,10 @@ const Create = ({ partnersProp, signaturesProp }) => {
                                         id="price_subscription"
                                         aria-describedby="price_subscription-help"
                                     />
+                                    <InputError
+                                        message={errors["price_subscription"]}
+                                        className="mt-2"
+                                    />
                                 </div>
 
                                 <div className="flex flex-col mt-3">
@@ -391,6 +408,10 @@ const Create = ({ partnersProp, signaturesProp }) => {
                                         }}
                                         rows={5}
                                         cols={30}
+                                    />
+                                    <InputError
+                                        message={errors["consideration"]}
+                                        className="mt-2"
                                     />
                                 </div>
 
@@ -431,6 +452,12 @@ const Create = ({ partnersProp, signaturesProp }) => {
                                             />
                                         )}
                                         className="w-full md:w-14rem"
+                                    />
+                                    <InputError
+                                        message={
+                                            errors["signature_first.image"]
+                                        }
+                                        className="mt-2"
                                     />
                                 </div>
 
@@ -475,6 +502,12 @@ const Create = ({ partnersProp, signaturesProp }) => {
                                         )}
                                         className="w-full md:w-14rem"
                                     />
+                                    <InputError
+                                        message={
+                                            errors["signature_second.image"]
+                                        }
+                                        className="mt-2"
+                                    />
                                 </div>
 
                                 <div className="flex flex-col mt-3">
@@ -514,6 +547,12 @@ const Create = ({ partnersProp, signaturesProp }) => {
                                             />
                                         )}
                                         className="w-full md:w-14rem"
+                                    />
+                                    <InputError
+                                        message={
+                                            errors["signature_third.image"]
+                                        }
+                                        className="mt-2"
                                     />
                                 </div>
 
@@ -653,11 +692,11 @@ const Create = ({ partnersProp, signaturesProp }) => {
                                 <p>Yang Mengajukan</p>
                                 {data.signature_first.image ? (
                                     <>
-                                        <div className="h-[130px] w-[130px] mx-auto py-2">
+                                        <div className="h-[100px] w-[170px] mx-auto py-2">
                                             <img
                                                 src={`/storage/${data.signature_first.image}`}
                                                 alt=""
-                                                className="min-h-20 h-full w-full object-cover"
+                                                className="min-h-20 h-full w-full object-fill"
                                             />
                                         </div>
                                     </>
@@ -674,16 +713,16 @@ const Create = ({ partnersProp, signaturesProp }) => {
 
                                 {data.signature_second.image ? (
                                     <>
-                                        <div className="h-[130px] w-[130px] mx-auto py-2">
+                                        <div className="h-[100px] w-[170px] mx-auto py-2">
                                             <img
                                                 src={`/storage/${data.signature_second.image}`}
                                                 alt=""
-                                                className="min-h-20 h-full w-full object-cover"
+                                                className="min-h-20 h-full w-full object-fill"
                                             />
                                         </div>
                                     </>
                                 ) : (
-                                    <div style={{ minHeight: "80px" }}></div>
+                                    <div style={{ minHeight: "100px" }}></div>
                                 )}
                                 <p>{data.signature_second.name}</p>
                             </div>
@@ -694,16 +733,16 @@ const Create = ({ partnersProp, signaturesProp }) => {
                                 <p>Menyetujui</p>
                                 {data.signature_third.image ? (
                                     <>
-                                        <div className="h-[130px] w-[130px] mx-auto py-2">
+                                        <div className="h-[100px] w-[170px] mx-auto py-2">
                                             <img
                                                 src={`/storage/${data.signature_third.image}`}
                                                 alt=""
-                                                className="min-h-20 w-full h-full object-cover"
+                                                className="min-h-20 w-full h-full object-fill"
                                             />
                                         </div>
                                     </>
                                 ) : (
-                                    <div style={{ minHeight: "80px" }}></div>
+                                    <div style={{ minHeight: "100px" }}></div>
                                 )}
                                 <p>{data.signature_third.name}</p>
                             </div>

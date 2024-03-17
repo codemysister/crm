@@ -15,6 +15,7 @@ import { Column } from "primereact/column";
 import { useEffect } from "react";
 import { InputNumber } from "primereact/inputnumber";
 import { InputTextarea } from "primereact/inputtextarea";
+import InputError from "@/Components/InputError";
 
 const BASE_URL = import.meta.env.VITE_BASE_URL;
 
@@ -314,6 +315,10 @@ const Edit = ({ partnersProp, signaturesProp, memo }) => {
                                             className="w-[10%] dropdown-group border-l-0"
                                         />
                                     </div>
+                                    <InputError
+                                        message={errors["partner.name"]}
+                                        className="mt-2"
+                                    />
                                 </div>
 
                                 <div className="flex flex-col mt-3">
@@ -341,6 +346,10 @@ const Edit = ({ partnersProp, signaturesProp, memo }) => {
                                         className="dark:bg-gray-300"
                                         id="price_card"
                                         aria-describedby="price_card-help"
+                                    />
+                                    <InputError
+                                        message={errors["price_card"]}
+                                        className="mt-2"
                                     />
                                 </div>
 
@@ -370,6 +379,10 @@ const Edit = ({ partnersProp, signaturesProp, memo }) => {
                                         id="price_e_card"
                                         aria-describedby="price_e_card-help"
                                     />
+                                    <InputError
+                                        message={errors["price_e_card"]}
+                                        className="mt-2"
+                                    />
                                 </div>
 
                                 <div className="flex flex-col mt-3">
@@ -398,6 +411,10 @@ const Edit = ({ partnersProp, signaturesProp, memo }) => {
                                         id="price_subscription"
                                         aria-describedby="price_subscription-help"
                                     />
+                                    <InputError
+                                        message={errors["price_subscription"]}
+                                        className="mt-2"
+                                    />
                                 </div>
 
                                 <div className="flex flex-col mt-3">
@@ -424,6 +441,10 @@ const Edit = ({ partnersProp, signaturesProp, memo }) => {
                                         }}
                                         rows={5}
                                         cols={30}
+                                    />
+                                    <InputError
+                                        message={errors["consideration"]}
+                                        className="mt-2"
                                     />
                                 </div>
 
@@ -461,6 +482,12 @@ const Edit = ({ partnersProp, signaturesProp, memo }) => {
                                         itemTemplate={optionSignatureTemplate}
                                         className="w-full md:w-14rem"
                                     />
+                                    <InputError
+                                        message={
+                                            errors["signature_first.image"]
+                                        }
+                                        className="mt-2"
+                                    />
                                 </div>
 
                                 <div className="flex flex-col mt-3">
@@ -497,6 +524,12 @@ const Edit = ({ partnersProp, signaturesProp, memo }) => {
                                         itemTemplate={optionSignatureTemplate}
                                         className="w-full md:w-14rem"
                                     />
+                                    <InputError
+                                        message={
+                                            errors["signature_second.image"]
+                                        }
+                                        className="mt-2"
+                                    />
                                 </div>
 
                                 <div className="flex flex-col mt-3">
@@ -532,6 +565,12 @@ const Edit = ({ partnersProp, signaturesProp, memo }) => {
                                         valueTemplate={selectedOptionTemplate}
                                         itemTemplate={optionSignatureTemplate}
                                         className="w-full md:w-14rem"
+                                    />
+                                    <InputError
+                                        message={
+                                            errors["signature_third.image"]
+                                        }
+                                        className="mt-2"
                                     />
                                 </div>
 
@@ -671,16 +710,16 @@ const Edit = ({ partnersProp, signaturesProp, memo }) => {
                                 <p>Yang Mengajukan</p>
                                 {data.signature_first.image ? (
                                     <>
-                                        <div className="h-[130px] w-[130px] mx-auto py-2">
+                                        <div className="h-[100px] w-[170px] mx-auto py-2">
                                             <img
                                                 src={`/storage/${data.signature_first.image}`}
                                                 alt=""
-                                                className="min-h-20 w-full h-full object-cover"
+                                                className="min-h-20 w-full h-full object-fill"
                                             />
                                         </div>
                                     </>
                                 ) : (
-                                    <div style={{ minHeight: "80px" }}></div>
+                                    <div style={{ minHeight: "100px" }}></div>
                                 )}
                                 <p>{data.signature_first.name}</p>
                             </div>
@@ -691,16 +730,16 @@ const Edit = ({ partnersProp, signaturesProp, memo }) => {
                                 <p>Mengetahui</p>
                                 {data.signature_second.image ? (
                                     <>
-                                        <div className="h-[130px] w-[130px] mx-auto py-2">
+                                        <div className="h-[100px] w-[170px] mx-auto py-2">
                                             <img
                                                 src={`/storage/${data.signature_second.image}`}
                                                 alt=""
-                                                className="min-h-20 w-full h-full object-cover"
+                                                className="min-h-20 w-full h-full object-fill"
                                             />
                                         </div>
                                     </>
                                 ) : (
-                                    <div style={{ minHeight: "80px" }}></div>
+                                    <div style={{ minHeight: "100px" }}></div>
                                 )}
                                 <p>{data.signature_second.name}</p>
                             </div>
@@ -711,16 +750,16 @@ const Edit = ({ partnersProp, signaturesProp, memo }) => {
                                 <p>Menyetujui</p>
                                 {data.signature_third.image ? (
                                     <>
-                                        <div className="h-[130px] w-[130px] mx-auto py-2">
+                                        <div className="h-[100px] w-[170px] mx-auto py-2">
                                             <img
                                                 src={`/storage/${data.signature_third.image}`}
                                                 alt=""
-                                                className="min-h-20 w-full h-full object-cover"
+                                                className="min-h-20 w-full h-full object-fill"
                                             />
                                         </div>
                                     </>
                                 ) : (
-                                    <div style={{ minHeight: "80px" }}></div>
+                                    <div style={{ minHeight: "100px" }}></div>
                                 )}
                                 <p>{data.signature_third.name}</p>
                             </div>

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\MemoRequest;
 use App\Jobs\GenerateMemoJob;
 use App\Models\Memo;
 use App\Models\Partner;
@@ -34,7 +35,7 @@ class MemoController extends Controller
         return Inertia::render('Memo/Edit', compact('signaturesProp', 'partnersProp', 'memo'));
     }
 
-    public function update(Request $request, $uuid)
+    public function update(MemoRequest $request, $uuid)
     {
         $memo = Memo::where('uuid', '=', $uuid)->first();
         $id_partner = $request->partner['id'];
@@ -94,23 +95,23 @@ class MemoController extends Controller
         return $newCode;
     }
 
-    public function store(Request $request)
+    public function store(MemoRequest $request)
     {
         $id_partner = $request['partner']['id'];
 
-        // if (!$id_partner) {
-        //     $partnerExists = Partner::where('name', 'like', '%' . $request['partner']["name"] . '%')->first();
-        //     if (!$partnerExists) {
-        //         $partner = Partner::create([
-        //             'uuid' => Str::uuid(),
-        //             'name' => $request['partner']['name'],
-        //             'status' => "Proses",
-        //         ]);
-        //         $id_partner = $partner->id;
-        //     } else {
-        //         $id_partner = $partnerExists->id;
-        //     }
-        // }
+        if (!$id_partner) {
+            $partnerExists = Partner::where('name', 'like', '%' . $request['partner']["name"] . '%')->first();
+            if (!$partnerExists) {
+                $partner = Partner::create([
+                    'uuid' => Str::uuid(),
+                    'name' => $request['partner']['name'],
+                    'status' => "Prospek",
+                ]);
+                $id_partner = $partner->id;
+            } else {
+                $id_partner = $partnerExists->id;
+            }
+        }
         $memo = Memo::create([
             'uuid' => Str::uuid(),
             'code' => $this->generateCode(),

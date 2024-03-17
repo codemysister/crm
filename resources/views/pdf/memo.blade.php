@@ -113,39 +113,39 @@
 
             @if($memo->signature_first_name)
             <p>Yang Mengajukan</p>
-            <div style="width: 130px; height: 130px; overflow: hidden;" class="py-2">
+            <div style="width: 170px; height: 100px; overflow: hidden;" class="py-2 mx-auto">
             <img src="{{ public_path("storage/$memo->signature_first_image") }}" alt="" class="min-h-20 w-full"
-            style="width: 100%; height: 100%; object-fit:cover;" />
+            style="width: 100%; height: 100%; object-fit:fill;" />
             </div>
             <p>{{$memo->signature_first_name}}</p>
             @else
-            <div style="height: 80px"></div>
+            <div style="height: 100px"></div>
             @endif
         </div>
         <div class="text-center" style="width: 33%">
 
             @if($memo->signature_second_name)
             <p>Mengetahui</p>
-            <div style="width: 130px; height: 130px; overflow: hidden;" class="py-2">
+            <div style="width: 170px; height: 100px; overflow: hidden;" class="py-2 mx-auto">
             <img src="{{ public_path("storage/$memo->signature_second_image") }}" alt="" class="min-h-20 w-full"
-            style="width: 100%; height: 100%; object-fit:cover;" />
+            style="width: 100%; height: 100%; object-fit:fill;" />
             </div>
             <p>{{$memo->signature_second_name}}</p>
             @else
-            <div style="height: 80px"></div>
+            <div style="height: 100px"></div>
             @endif
         </div>
         <div class="text-center" style="width: 33%">
 
             @if($memo->signature_third_name)
             <p>Menyetujui</p>
-            <div style="width: 130px; height: 130px; overflow: hidden;" class="py-2">
+            <div style="width: 170px; height: 100px; overflow: hidden;" class="py-2 mx-auto">
             <img src="{{ public_path("storage/$memo->signature_third_image") }}" alt="" class="min-h-20 w-full"
-            style="width: 100%; height: 100%; object-fit:cover;" />
+            style="width: 100%; height: 100%; object-fit:fill;" />
             </div>
             <p>{{$memo->signature_third_name}}</p>
             @else
-            <div style="height: 80px"></div>
+            <div style="height: 100px"></div>
             @endif
         </div>
     </div>
