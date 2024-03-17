@@ -8,7 +8,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SURAT KETERANGAN PERJALANAN DINAS</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-    <!-- @vite('resources/css/app.css') -->
+    {{--@vite('resources/css/app.css')--}}
+
     <style>
         @page {
             margin-left: 2.5cm;
