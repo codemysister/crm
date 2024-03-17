@@ -288,49 +288,58 @@ export default function Index({
     const actionTransactionBodyTemplate = (rowData) => {
         return (
             <React.Fragment>
-                <Button
-                    icon="pi pi-pencil"
-                    rounded
-                    outlined
-                    className="mr-2"
-                    onClick={() => {
-                        setModalEditTransactionIsVisible(true);
-                        handleEditTransaction(rowData);
-                    }}
-                />
-                <Button
-                    icon="pi pi-trash"
-                    rounded
-                    outlined
-                    severity="danger"
-                    onClick={() => {
-                        handleDeleteTransaction(rowData);
-                    }}
-                />
+                {permissions.includes("edit transaksi") && (
+                    <Button
+                        icon="pi pi-pencil"
+                        rounded
+                        outlined
+                        className="mr-2"
+                        onClick={() => {
+                            setModalEditTransactionIsVisible(true);
+                            handleEditTransaction(rowData);
+                        }}
+                    />
+                )}
+                {permissions.includes("hapus transaksi") && (
+                    <Button
+                        icon="pi pi-trash"
+                        rounded
+                        outlined
+                        severity="danger"
+                        onClick={() => {
+                            handleDeleteTransaction(rowData);
+                        }}
+                    />
+                )}
             </React.Fragment>
         );
     };
     const actionBodyTemplate = (rowData) => {
         return (
             <React.Fragment>
-                <Button
-                    icon="pi pi-pencil"
-                    rounded
-                    outlined
-                    className="mr-2"
-                    onClick={() =>
-                        (window.location = "/invoice_generals/" + rowData.uuid)
-                    }
-                />
-                <Button
-                    icon="pi pi-trash"
-                    rounded
-                    outlined
-                    severity="danger"
-                    onClick={() => {
-                        handleDeleteInvoiceGeneral(rowData);
-                    }}
-                />
+                {permissions.includes("edit invoice umum") && (
+                    <Button
+                        icon="pi pi-pencil"
+                        rounded
+                        outlined
+                        className="mr-2"
+                        onClick={() =>
+                            (window.location =
+                                "/invoice_generals/" + rowData.uuid)
+                        }
+                    />
+                )}
+                {permissions.includes("hapus invoice umum") && (
+                    <Button
+                        icon="pi pi-trash"
+                        rounded
+                        outlined
+                        severity="danger"
+                        onClick={() => {
+                            handleDeleteInvoiceGeneral(rowData);
+                        }}
+                    />
+                )}
             </React.Fragment>
         );
     };
@@ -499,7 +508,7 @@ export default function Index({
         return (
             <div className="flex flex-wrap p-2 align-items-center gap-3">
                 <img
-                    className="w-[6rem] bg-red-500 shadow-2 flex-shrink-0 border-round"
+                    className="w-[6rem] shadow-2 flex-shrink-0 border-round"
                     src={"/storage/" + item.image}
                     alt={item.name}
                 />
@@ -618,23 +627,27 @@ export default function Index({
     const headerTransaction = (
         <div className="flex flex-row gap-2 bg-gray-50 dark:bg-transparent p-2 rounded-lg align-items-center items-center justify-between justify-content-between">
             <div className="w-[30%]">
-                <Button
-                    label="Input Pembayaran"
-                    className="bg-purple-600 w-full text-xs shadow-md rounded-lg mr-2"
-                    icon={addButtonIcon}
-                    onClick={() => {
-                        setModalTransactionIsVisible((prev) => (prev = true));
-                        reset(
-                            "nominal",
-                            "date",
-                            "money",
-                            "payment_for",
-                            "signature"
-                        );
-                    }}
-                    aria-controls="popup_menu_right"
-                    aria-haspopup
-                />
+                {permissions.includes("tambah transaksi") && (
+                    <Button
+                        label="Input Pembayaran"
+                        className="bg-purple-600 max-w-[146px] w-full text-xs shadow-md rounded-lg mr-2"
+                        icon={addButtonIcon}
+                        onClick={() => {
+                            setModalTransactionIsVisible(
+                                (prev) => (prev = true)
+                            );
+                            reset(
+                                "nominal",
+                                "date",
+                                "money",
+                                "payment_for",
+                                "signature"
+                            );
+                        }}
+                        aria-controls="popup_menu_right"
+                        aria-haspopup
+                    />
+                )}
             </div>
         </div>
     );

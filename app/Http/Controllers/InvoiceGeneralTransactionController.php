@@ -81,7 +81,7 @@ class InvoiceGeneralTransactionController extends Controller
         ]);
 
 
-        $invoice_general->update(['rest_of_bill' => $rest_of_bill, 'status' => $status, 'bill_date' => Carbon::now()->format('Y-m-d H:i:s')]);
+        $invoice_general->update(['rest_of_bill' => $rest_of_bill, 'status' => $status, 'bill_date' => Carbon::parse($request->date)->setTimezone('GMT+7')->format('Y-m-d H:i:s')]);
 
         GenerateReceiptJob::dispatch($transaction);
         return response()->json(['rest_of_bill' => $rest_of_bill]);

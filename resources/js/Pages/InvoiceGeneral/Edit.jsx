@@ -1411,11 +1411,11 @@ const Edit = ({
                                 ref={animateSignatureNameRef}
                             >
                                 <p>{formatDateSignature()}</p>
-                                <div className="h-[130px] w-[130px] self-center py-2">
+                                <div className="h-[100px] w-[170px] self-center py-2">
                                     <img
                                         src={"/storage/" + data.signature.image}
                                         alt=""
-                                        className="object-fit w-full h-full"
+                                        className="object-fill w-full h-full"
                                     />
                                     <p>{data.signature.name}</p>
                                 </div>

@@ -186,10 +186,10 @@ use Carbon\Carbon;
     'D MMMM YYYY',
     'Do MMMM YYYY'
 ) }}</p>
-            <div style="width: 130px; height: 130px; overflow: hidden;" class="py-2">
+            <div style="width: 170px; height: 100px; overflow: hidden;" class="py-2">
 
             <img src="{{ public_path("storage/$invoice_general->signature_image") }}" alt="" class="min-h-20 w-full"
-            style="object-fit: cover; width:100%; height:100%;" />
+            style="object-fit: fill; width:100%; height:100%;" />
             </div>
             <!-- <div style="min-height: 80px"></div> -->
             <p class="font-bold">{{$invoice_general->signature_name}}</p>
