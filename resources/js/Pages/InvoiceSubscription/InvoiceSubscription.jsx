@@ -85,16 +85,21 @@ export default function InvoiceSubscription({
         processing,
         errors,
     } = useForm({
-        partner: { excell: null },
-        date: null,
-        due_date: null,
-        period_subscription: null,
-        partners: partnersProp,
-        selectedPartners: null,
+        partner: {
+            excell: null,
+            signature: {
+                name: null,
+                image: null,
+            },
+        },
         signature: {
             name: null,
             image: null,
         },
+        date: null,
+        due_date: null,
+        period_subscription: null,
+        selectedPartners: null,
         excel: null,
     });
 
@@ -1519,12 +1524,15 @@ export default function InvoiceSubscription({
                         <div className="flex flex-col mt-3">
                             <label htmlFor="signature">Tanda Tangan *</label>
                             <Dropdown
-                                value={data.signature}
+                                value={data.partner.signature}
                                 onChange={(e) => {
-                                    setData("signature", {
-                                        ...data.signature,
-                                        name: e.target.value.name,
-                                        image: e.target.value.image,
+                                    setData("partner", {
+                                        ...data.partner,
+                                        signature: {
+                                            ...data.partner.signature,
+                                            name: e.target.value.name,
+                                            image: e.target.value.image,
+                                        },
                                     });
                                 }}
                                 dataKey="name"
