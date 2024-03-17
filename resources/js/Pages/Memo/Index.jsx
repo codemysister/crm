@@ -423,19 +423,19 @@ export default function Index({ auth, memosDefault }) {
                                 whiteSpace: "nowrap",
                             }}
                         ></Column>
-                        {permissions.includes("hapus memo") &&
-                            permissions.includes("edit memo") && (
-                                <Column
-                                    header="Action"
-                                    body={actionBodyTemplate}
-                                    style={{
-                                        width: "max-content",
-                                        whiteSpace: "nowrap",
-                                    }}
-                                    className="dark:border-none"
-                                    headerClassName="dark:border-none  bg-transparent dark:bg-transparent dark:text-gray-300"
-                                ></Column>
-                            )}
+                        {/* {permissions.includes("hapus memo") &&
+                            permissions.includes("edit memo") && ( */}
+                        <Column
+                            header="Action"
+                            body={actionBodyTemplate}
+                            style={{
+                                width: "max-content",
+                                whiteSpace: "nowrap",
+                            }}
+                            className="dark:border-none"
+                            headerClassName="dark:border-none  bg-transparent dark:bg-transparent dark:text-gray-300"
+                        ></Column>
+                        {/* )} */}
                     </DataTable>
                 </div>
             </div>
