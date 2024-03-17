@@ -46,7 +46,7 @@ class PermissionController extends Controller
     {
         Permission::create([
             'name' => $request->name,
-            'group_name' => $request->group_name
+            'group_name' => $request->group_name['name']
         ]);
     }
 
