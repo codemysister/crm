@@ -255,7 +255,6 @@ class InvoiceSubscriptionImport implements ToCollection, WithStartRow, WithHeadi
 
             // $partnerExist = Partner::where('name', 'like', '%' . $row["partner"] . '%')->first();
             $databaseType = config('database.default');
-            dd($databaseType);
             if ($databaseType == 'pgsql') {
                 $partnerExist = Partner::whereRaw("substring(name from '^[^,]*') LIKE ?", ['%' . explode(',', $row['partner'])[0] . '%'])->first();
             } else {
