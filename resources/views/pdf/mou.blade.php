@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SURAT PENAWARAN HARGA</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-    <!-- @vite('resources/css/app.css') -->
+    {{--@vite('resources/css/app.css')--}}
 
     <style>
         @page {
@@ -16,6 +16,24 @@
             margin-bottom: 2cm;
         }
 
+        .header, .header-space,
+        .footer, .footer-space {
+            height: 100px;
+        }
+        .header {
+            position: fixed;
+            top: 0;
+        }
+        .footer {
+            position: fixed;
+            bottom: 0;
+            text-align: right;
+            font-style: italic;
+            font-size: 10px;
+            width:100%;
+            margin-right: 2.5cm;
+            margin-bottom: 1cm;
+        }
 
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap');
 
@@ -1172,7 +1190,7 @@
 </div>
 
 
-            
+
         </div>
 
     </div>

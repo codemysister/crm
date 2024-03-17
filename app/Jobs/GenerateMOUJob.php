@@ -47,8 +47,8 @@ class GenerateMOUJob implements ShouldQueue
                 ->setIncludedPath(config('services.browsershot.included_path'))
                 ->showBackground()
                 ->showBrowserHeaderAndFooter()
-                ->headerHtml('<div></div>')
-                ->footerHtml('<div style="text-align: right; font-style: italic; font-size: 10px; width:100%; margin-right: 2.5cm; margin-bottom: 1cm;">Perjanjian Kerjasama CAZH | <span class="pageNumber"></span>  </div>')
+                ->headerHtml('<div class="header"></div>')
+                ->footerHtml('<div class="footer">Perjanjian Kerjasama CAZH | <span class="pageNumber"></span>  </div>')
                 ->pdf();
 
 
