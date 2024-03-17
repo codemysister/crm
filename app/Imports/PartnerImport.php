@@ -127,7 +127,9 @@ class PartnerImport implements ToCollection, WithStartRow, WithHeadingRow, WithC
             if ($partnerExist) {
                 return null;
             }
-            $salesExist = User::where('name', 'like', '%' . $row["sales"] . '%')->first();
+            $email = strtolower(str_replace(' ', '_', $row["sales"]) . "@gmail.com");
+
+            $salesExist = User::where('email', $email)->orwhere('name', 'like', '%' . $row["sales"] . '%')->first();
 
             if ($salesExist == null) {
                 $salesExist = User::create([
@@ -138,7 +140,8 @@ class PartnerImport implements ToCollection, WithStartRow, WithHeadingRow, WithC
                 $salesExist->assignRole("account executive");
 
             }
-            $amExist = User::where('name', 'like', '%' . $row["after_sales"] . '%')->first();
+            $email = strtolower(str_replace(' ', '_', $row["sales"]) . "@gmail.com");
+            $amExist = User::where('email', $email)->orWhere('name', 'like', '%' . $row["after_sales"] . '%')->first();
             if ($amExist == null) {
                 $amExist = User::create([
                     'name' => $row["after_sales"],
