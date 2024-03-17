@@ -20,11 +20,11 @@ class DashboardController extends Controller
             ->get();
 
         $totalPartner = Partner::count();
-        $totalProses = Partner::where('status', 'proses')->count();
-        $totalAktif = Partner::where('status', 'aktif')->count();
-        $totalCLBK = Partner::where('status', 'clbk')->count();
-        $totalCancel = Partner::where('status', 'cancel')->count();
-        $totalNonaktif = Partner::where('status', 'non aktif')->count();
+        $totalProses = Partner::where('status', 'Proses')->count();
+        $totalAktif = Partner::where('status', 'Aktif')->count();
+        $totalCLBK = Partner::where('status', 'CLBK')->count();
+        $totalCancel = Partner::where('status', 'Cancel')->count();
+        $totalNonaktif = Partner::where('status', 'Non Aktif')->count();
         $accountManagers = User::role('account manager')->get();
 
         $statisticGeneral = [
@@ -49,11 +49,11 @@ class DashboardController extends Controller
             ->groupBy('province_name')->where('account_manager_id', $id)
             ->get();
         $totalPartner = Partner::where('account_manager_id', $id)->count();
-        $totalProses = Partner::where('account_manager_id', $id)->where('status', 'proses')->count();
-        $totalAktif = Partner::where('account_manager_id', $id)->where('status', 'aktif')->count();
-        $totalCLBK = Partner::where('account_manager_id', $id)->where('status', 'clbk')->count();
-        $totalCancel = Partner::where('account_manager_id', $id)->where('status', 'cancel')->count();
-        $totalNonaktif = Partner::where('account_manager_id', $id)->where('status', 'non aktif')->count();
+        $totalProses = Partner::where('account_manager_id', $id)->where('status', 'Proses')->count();
+        $totalAktif = Partner::where('account_manager_id', $id)->where('status', 'Aktif')->count();
+        $totalCLBK = Partner::where('account_manager_id', $id)->where('status', 'CLBK')->count();
+        $totalCancel = Partner::where('account_manager_id', $id)->where('status', 'Cancel')->count();
+        $totalNonaktif = Partner::where('account_manager_id', $id)->where('status', 'Non Aktif')->count();
         $statisticAM = [
             "partners" => $partners,
             "totalPartner" => $totalPartner,

@@ -197,7 +197,6 @@ const Index = ({ statisticGeneral, accountManagers }) => {
                     className="w-[30%] flex justify-center dark:bg-slate-900 dark:text-gray-400 dark:border-b-slate-600 focus: rounded-none border-t-0 border-r-0 border-l-0 border-b-[1px] border-b-slate-200"
                 />
             </HeaderModule>
-            {console.log(statisticGeneral)};
             <div className="flex mx-auto flex-col justify-center gap-5 mt-5">
                 <div className="grid gap-6 mb-8 grid-cols-2 md:grid-cols-3 xl:grid-cols-3">
                     <div className="flex items-center p-4 bg-white rounded-lg shadow-md dark:bg-slate-900">
