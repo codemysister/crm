@@ -46,9 +46,9 @@ class GenerateMOUJob implements ShouldQueue
             $pdf = Browsershot::html($html)
                 ->setIncludedPath(config('services.browsershot.included_path'))
                 ->showBackground()
-                ->showBrowserHeaderAndFooter()
                 ->headerHtml('<div></div>')
                 ->footerHtml('<div style="text-align: right; font-style: italic; font-size: 10px; width:100%; margin-right: 2.5cm; margin-bottom: 1cm;">Perjanjian Kerjasama CAZH | <span class="pageNumber"></span>  </div>')
+                ->showBrowserHeaderAndFooter()
                 ->pdf();
 
 

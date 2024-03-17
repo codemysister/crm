@@ -2,8 +2,8 @@
 
 namespace App\Jobs;
 
+use Exception;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
@@ -19,6 +19,7 @@ class GenerateMemoJob implements ShouldQueue
      * Create a new job instance.
      */
     protected $memo;
+
     public function __construct($memo)
     {
         $this->memo = $memo;
@@ -29,21 +30,27 @@ class GenerateMemoJob implements ShouldQueue
      */
     public function handle(): void
     {
-        $path = "memo/memo-" . $this->memo->uuid . ".pdf";
+        try {
 
 
-        $html = view('pdf.memo', ["memo" => $this->memo])->render();
+            $path = "memo/memo-" . $this->memo->uuid . ".pdf";
 
-        $pdf = Browsershot::html($html)
-            ->setIncludedPath(config('services.browsershot.included_path'))
-            ->showBackground()
-            ->pdf();
 
-        $this->memo->update([
-            "memo_doc" => "storage/$path"
-        ]);
+            $html = view('pdf.memo', ["memo" => $this->memo])->render();
 
-        Storage::put("public/$path", $pdf);
+            $pdf = Browsershot::html($html)
+                ->setIncludedPath(config('services.browsershot.included_path'))
+                ->showBackground()
+                ->pdf();
 
+            $this->memo->update([
+                "memo_doc" => "storage/$path"
+            ]);
+
+            Storage::put("public/$path", $pdf);
+
+        } catch (Exception $exception) {
+            info($exception->getMessage());
+        }
     }
 }

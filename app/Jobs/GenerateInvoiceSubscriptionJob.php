@@ -2,15 +2,13 @@
 
 namespace App\Jobs;
 
+use Exception;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Storage;
-use PhpOffice\PhpWord\Element\Table;
-use PhpOffice\PhpWord\SimpleType\TblWidth;
 use Spatie\Browsershot\Browsershot;
 
 class GenerateInvoiceSubscriptionJob implements ShouldQueue
@@ -19,6 +17,7 @@ class GenerateInvoiceSubscriptionJob implements ShouldQueue
 
     protected $invoice_subscription;
     protected $bills;
+
     /**
      * Create a new job instance.
      */
@@ -33,20 +32,23 @@ class GenerateInvoiceSubscriptionJob implements ShouldQueue
      */
     public function handle(): void
     {
-        $path = "invoice_langganan/invoice_langganan-" . $this->invoice_subscription->uuid . ".pdf";
+        try {
+            $path = "invoice_langganan/invoice_langganan-" . $this->invoice_subscription->uuid . ".pdf";
 
-        $this->invoice_subscription->update([
-            "invoice_subscription_doc" => $path
-        ]);
+            $this->invoice_subscription->update([
+                "invoice_subscription_doc" => $path
+            ]);
 
-        $html = view('pdf.invoice_subscription', ["invoice_subscription" => $this->invoice_subscription, "bills" => $this->bills])->render();
+            $html = view('pdf.invoice_subscription', ["invoice_subscription" => $this->invoice_subscription, "bills" => $this->bills])->render();
 
-        $pdf = Browsershot::html($html)
-            ->setIncludedPath(config('services.browsershot.included_path'))
-            ->showBackground()
-            ->pdf();
+            $pdf = Browsershot::html($html)
+                ->setIncludedPath(config('services.browsershot.included_path'))
+                ->showBackground()
+                ->pdf();
 
-        Storage::put("public/$path", $pdf);
-
+            Storage::put("public/$path", $pdf);
+        } catch (Exception $exception) {
+            info($exception->getMessage());
+        }
     }
 }

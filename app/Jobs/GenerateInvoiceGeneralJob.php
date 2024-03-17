@@ -2,15 +2,13 @@
 
 namespace App\Jobs;
 
+use Exception;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Storage;
-use PhpOffice\PhpWord\Element\Table;
-use PhpOffice\PhpWord\SimpleType\TblWidth;
 use Spatie\Browsershot\Browsershot;
 
 class GenerateInvoiceGeneralJob implements ShouldQueue
@@ -19,6 +17,7 @@ class GenerateInvoiceGeneralJob implements ShouldQueue
 
     protected $invoice_general;
     protected $products;
+
     /**
      * Create a new job instance.
      */
@@ -50,8 +49,9 @@ class GenerateInvoiceGeneralJob implements ShouldQueue
 
             Storage::put("public/$path", $pdf);
 
-        } catch (\Exception $exception) {
-            $this->report($exception);
+        } catch (Exception $exception) {
+            info($exception->getMessage());
+//            $this->report($exception);
         }
     }
 }

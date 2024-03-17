@@ -3,12 +3,10 @@
 namespace App\Jobs;
 
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
-use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\Storage;
 use Spatie\Browsershot\Browsershot;
 
@@ -18,6 +16,7 @@ class GenerateSPHJob implements ShouldQueue
 
     protected $sph;
     protected $products;
+
     /**
      * Create a new job instance.
      */
@@ -44,9 +43,9 @@ class GenerateSPHJob implements ShouldQueue
             ->setIncludedPath(config('services.browsershot.included_path'))
             ->showBackground()
             ->showBackground()
-                ->showBrowserHeaderAndFooter()
-                ->headerHtml('<div></div>')
-                ->footerHtml('<div style="text-align: left; font-size: 10px; width:100%; margin-left: 2.5cm; margin-bottom: 1cm;">*) Tarif produk/layanan tidak termasuk biaya admin transaksi <span style="font-style:italic;">user</span> aplikasi <span style="font-style:italic;">mobile</span>.</div>')
+            ->headerHtml('<div></div>')
+            ->footerHtml('<div style="text-align: left; font-size: 10px; width:100%; margin-left: 2.5cm; margin-bottom: 1cm;">*) Tarif produk/layanan tidak termasuk biaya admin transaksi <span style="font-style:italic;">user</span> aplikasi <span style="font-style:italic;">mobile</span>.</div>')
+            ->showBrowserHeaderAndFooter()
             ->pdf();
 
 
