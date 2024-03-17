@@ -248,9 +248,6 @@ class InvoiceSubscriptionImport implements ToCollection, WithStartRow, WithHeadi
 
     public function collection(Collection $rows)
     {
-
-
-        dd($this->signature);
         foreach ($rows as $key => $row) {
 
             // $partnerExist = Partner::where('name', 'like', '%' . $row["partner"] . '%')->first();
