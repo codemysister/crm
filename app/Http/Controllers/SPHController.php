@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\SPHRequest;
 use App\Jobs\GenerateSPHJob;
 use App\Models\Partner;
 use App\Models\PartnerPIC;
@@ -73,12 +74,12 @@ class SPHController extends Controller
 
         SPHProduct::destroy($delete->pluck('id')->toArray());
         foreach ($update as $product) {
-            $product = SPHProduct::find($product['id'])->first();
+            $product = SPHProduct::where('id', $product['id'])->first();
             $product->update([
                 "name" => $product['name'],
                 "qty" => $product['qty'],
                 "price" => $product['price'],
-                "detail" => isset($product['detail']) ? $product['detail'] : null,
+                "detail" => isset ($product['detail']) ? $product['detail'] : null,
                 "total" => $product['total']
             ]);
         }
@@ -88,7 +89,7 @@ class SPHController extends Controller
                 "name" => $product['name'],
                 "qty" => $product['qty'],
                 "price" => $product['price'],
-                "detail" => isset($product['detail']) ? $product['detail'] : null,
+                "detail" => isset ($product['detail']) ? $product['detail'] : null,
                 "total" => $product['total']
             ]);
         }
@@ -121,31 +122,30 @@ class SPHController extends Controller
         return $newCode;
     }
 
-    public function store(Request $request)
+    public function store(SPHRequest $request)
     {
         $id_partner = $request['partner']['id'];
 
-        // if (!$id_partner) {
-
-        //     $partnerExists = Partner::where('name', 'like', '%' . $request['partner']["name"] . '%')->first();
-        //     if (!$partnerExists) {
-        //         $partner = Partner::create([
-        //             'uuid' => Str::uuid(),
-        //             'name' => $request['partner']['name'],
-        //             'province' => $request['partner']['province'],
-        //             'regency' => $request['partner']['regency'],
-        //             'status' => "Proses",
-        //         ]);
-        //         PartnerPIC::create([
-        //             'uuid' => Str::uuid(),
-        //             'partner_id' => $partner->id,
-        //             'name' => $request->partner['pic'],
-        //         ]);
-        //         $id_partner = $partner->id;
-        //     } else {
-        //         $id_partner = $partnerExists->id;
-        //     }
-        // }
+        if (!$id_partner) {
+            $partnerExists = Partner::where('name', 'like', '%' . $request['partner']["name"] . '%')->first();
+            if (!$partnerExists) {
+                $partner = Partner::create([
+                    'uuid' => Str::uuid(),
+                    'name' => $request['partner']['name'],
+                    'province' => $request['partner']['province'],
+                    'regency' => $request['partner']['regency'],
+                    'status' => "Prospek",
+                ]);
+                PartnerPIC::create([
+                    'uuid' => Str::uuid(),
+                    'partner_id' => $partner->id,
+                    'name' => $request->partner['pic'],
+                ]);
+                $id_partner = $partner->id;
+            } else {
+                $id_partner = $partnerExists->id;
+            }
+        }
 
         $code = $this->generateCode();
         $sph = SPH::create([
@@ -173,7 +173,7 @@ class SPHController extends Controller
                 "name" => $product['name'],
                 "qty" => $product['qty'],
                 "price" => $product['price'],
-                "detail" => isset($product['detail']) ? $product['detail'] : null,
+                "detail" => isset ($product['detail']) ? $product['detail'] : null,
                 "total" => $product['total']
             ]);
         }
@@ -201,35 +201,35 @@ class SPHController extends Controller
         $salesProp = User::role('account executive')->get();
 
         $sph = SPH::with('products')->where('uuid', '=', $uuid)->first();
-
-        return Inertia::render('SPH/Edit', compact('usersProp', 'partnersProp', 'productsProp', 'salesProp', 'sph'));
+        $signaturesProp = Signature::all();
+        return Inertia::render('SPH/Edit', compact('usersProp', 'partnersProp', 'productsProp', 'salesProp', 'sph', 'signaturesProp'));
     }
 
-    public function update(Request $request, $uuid)
+    public function update(SPHRequest $request, $uuid)
     {
         $id_partner = $request['partner']['id'];
 
-        // if (!$id_partner) {
+        if (!$id_partner) {
 
-        //     $partnerExists = Partner::where('name', 'like', '%' . $request['partner']["name"] . '%')->first();
-        //     if (!$partnerExists) {
-        //         $partner = Partner::create([
-        //             'uuid' => Str::uuid(),
-        //             'name' => $request['partner']['name'],
-        //             'province' => $request['partner']['province'],
-        //             'regency' => $request['partner']['regency'],
-        //             'status' => "Proses",
-        //         ]);
-        //         PartnerPIC::create([
-        //             'uuid' => Str::uuid(),
-        //             'partner_id' => $partner->id,
-        //             'name' => $request->partner['pic'],
-        //         ]);
-        //         $id_partner = $partner->id;
-        //     } else {
-        //         $id_partner = $partnerExists->id;
-        //     }
-        // }
+            $partnerExists = Partner::where('name', 'like', '%' . $request['partner']["name"] . '%')->first();
+            if (!$partnerExists) {
+                $partner = Partner::create([
+                    'uuid' => Str::uuid(),
+                    'name' => $request['partner']['name'],
+                    'province' => $request['partner']['province'],
+                    'regency' => $request['partner']['regency'],
+                    'status' => "Prospek",
+                ]);
+                PartnerPIC::create([
+                    'uuid' => Str::uuid(),
+                    'partner_id' => $partner->id,
+                    'name' => $request->partner['pic'],
+                ]);
+                $id_partner = $partner->id;
+            } else {
+                $id_partner = $partnerExists->id;
+            }
+        }
 
         $sph = SPH::where('uuid', '=', $uuid)->update([
             "partner_id" => $id_partner,

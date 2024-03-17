@@ -14,13 +14,22 @@ import { Toast } from "primereact/toast";
 import { Badge } from "primereact/badge";
 import { useEffect } from "react";
 import { InputNumber } from "primereact/inputnumber";
+import InputError from "@/Components/InputError";
 
 const BASE_URL = import.meta.env.VITE_BASE_URL;
 
-const Edit = ({ usersProp, partnersProp, salesProp, productsProp, sph }) => {
+const Edit = ({
+    usersProp,
+    partnersProp,
+    salesProp,
+    productsProp,
+    sph,
+    signaturesProp,
+}) => {
     const [users, setUsers] = useState(usersProp);
     const [partners, setPartners] = useState(partnersProp);
     const [sales, setSales] = useState(salesProp);
+    const [signatures, setSignatures] = useState(signaturesProp);
     const [products, setProducts] = useState(productsProp);
     const [dialogVisible, setDialogVisible] = useState(false);
     const [dialogProductVisible, setDialogProductVisible] = useState(false);
@@ -170,13 +179,13 @@ const Edit = ({ usersProp, partnersProp, salesProp, productsProp, sph }) => {
         }
     };
 
-    const signatures = [
-        {
-            name: "Muh Arif Mahfudin",
-            position: "CEO",
-            image: "/assets/img/signatures/ttd.png",
-        },
-    ];
+    // const signatures = [
+    //     {
+    //         name: "Muh Arif Mahfudin",
+    //         position: "CEO",
+    //         image: "/assets/img/signatures/ttd.png",
+    //     },
+    // ];
     const [filters, setFilters] = useState({
         global: { value: null, matchMode: FilterMatchMode.CONTAINS },
     });
@@ -245,8 +254,8 @@ const Edit = ({ usersProp, partnersProp, salesProp, productsProp, sph }) => {
         return (
             <div className="flex flex-wrap p-2 align-items-center items-center gap-3">
                 <img
-                    className="w-3rem shadow-2 flex-shrink-0 border-round"
-                    src={item.image}
+                    className="w-[6rem] shadow-2 flex-shrink-0 border-round"
+                    src={"/storage/" + item.image}
                     alt={item.name}
                 />
                 <div className="flex-1 flex flex-col gap-2 xl:mr-8">
@@ -375,6 +384,10 @@ const Edit = ({ usersProp, partnersProp, salesProp, productsProp, sph }) => {
                                     label="Tambah Produk"
                                     icon="pi pi-external-link"
                                     onClick={() => setDialogVisible(true)}
+                                />
+                                <InputError
+                                    message={errors["products"]}
+                                    className="mt-2"
                                 />
 
                                 <div className="flex flex-col mt-3">
@@ -549,6 +562,10 @@ const Edit = ({ usersProp, partnersProp, salesProp, productsProp, sph }) => {
                                             className="w-[10%] dropdown-group border-l-0"
                                         />
                                     </div>
+                                    <InputError
+                                        message={errors["partner.name"]}
+                                        className="mt-2"
+                                    />
                                 </div>
 
                                 <div className="flex flex-col mt-3">
@@ -598,6 +615,10 @@ const Edit = ({ usersProp, partnersProp, salesProp, productsProp, sph }) => {
                                             );
                                         }}
                                     />
+                                    <InputError
+                                        message={errors["partner.province"]}
+                                        className="mt-2"
+                                    />
                                 </div>
 
                                 <div className="flex flex-col mt-3">
@@ -626,6 +647,10 @@ const Edit = ({ usersProp, partnersProp, salesProp, productsProp, sph }) => {
                                         valueTemplate={selectedOptionTemplate}
                                         itemTemplate={optionTemplate}
                                         className="w-full md:w-14rem"
+                                    />
+                                    <InputError
+                                        message={errors["partner.regency"]}
+                                        className="mt-2"
                                     />
                                 </div>
 
@@ -665,6 +690,10 @@ const Edit = ({ usersProp, partnersProp, salesProp, productsProp, sph }) => {
                                             );
                                         }}
                                     />
+                                    <InputError
+                                        message={errors["sales.name"]}
+                                        className="mt-2"
+                                    />
                                 </div>
                                 <div className="flex flex-col mt-3">
                                     <label htmlFor="sales-whatsapp">
@@ -693,6 +722,10 @@ const Edit = ({ usersProp, partnersProp, salesProp, productsProp, sph }) => {
                                             );
                                         }}
                                     />
+                                    <InputError
+                                        message={errors["sales.wa"]}
+                                        className="mt-2"
+                                    />
                                 </div>
                                 <div className="flex flex-col mt-3">
                                     <label htmlFor="sales-email">
@@ -719,6 +752,10 @@ const Edit = ({ usersProp, partnersProp, salesProp, productsProp, sph }) => {
                                                 animateSalesEmailRef
                                             );
                                         }}
+                                    />
+                                    <InputError
+                                        message={errors["sales.email"]}
+                                        className="mt-2"
                                     />
                                 </div>
                                 <div className="flex flex-col mt-3">
@@ -759,6 +796,10 @@ const Edit = ({ usersProp, partnersProp, salesProp, productsProp, sph }) => {
                                                 animateSignatureNameRef
                                             );
                                         }}
+                                    />
+                                    <InputError
+                                        message={errors["signature.image"]}
+                                        className="mt-2"
                                     />
                                 </div>
 
@@ -1165,11 +1206,11 @@ const Edit = ({ usersProp, partnersProp, salesProp, productsProp, sph }) => {
                                     year: "numeric",
                                 })}
                             </p>
-                            <div className="h-[130px] w-[130px] self-start py-2">
+                            <div className="h-[100px] w-[170px] self-start py-2">
                                 <img
                                     src={"/storage/" + data.signature.image}
                                     alt=""
-                                    className="object-cover w-full h-full"
+                                    className="object-fill w-full h-full"
                                 />
                                 <p>{data.signature.name}</p>
                             </div>

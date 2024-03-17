@@ -13,6 +13,7 @@ import React from "react";
 import { Toast } from "primereact/toast";
 import { Badge } from "primereact/badge";
 import { InputNumber } from "primereact/inputnumber";
+import InputError from "@/Components/InputError";
 
 const BASE_URL = import.meta.env.VITE_BASE_URL;
 
@@ -374,6 +375,10 @@ const Create = ({
                                     icon="pi pi-external-link"
                                     onClick={() => setDialogVisible(true)}
                                 />
+                                <InputError
+                                    message={errors["products"]}
+                                    className="mt-2"
+                                />
 
                                 <div className="flex flex-col mt-3">
                                     <InputText
@@ -411,6 +416,10 @@ const Create = ({
                                         className="dark:bg-gray-300"
                                         id="partner_pic"
                                         aria-describedby="partner_pic-help"
+                                    />
+                                    <InputError
+                                        message={errors["partner.pic"]}
+                                        className="mt-2"
                                     />
                                 </div>
 
@@ -494,6 +503,10 @@ const Create = ({
                                             className="w-[10%] dropdown-group border-l-0"
                                         />
                                     </div>
+                                    <InputError
+                                        message={errors["partner.name"]}
+                                        className="mt-2"
+                                    />
                                 </div>
 
                                 <div className="flex flex-col mt-3">
@@ -543,6 +556,10 @@ const Create = ({
                                             );
                                         }}
                                     />
+                                    <InputError
+                                        message={errors["partner.province"]}
+                                        className="mt-2"
+                                    />
                                 </div>
 
                                 <div className="flex flex-col mt-3">
@@ -587,6 +604,10 @@ const Create = ({
                                         itemTemplate={optionTemplate}
                                         className="w-full md:w-14rem"
                                     />
+                                    <InputError
+                                        message={errors["partner.regency"]}
+                                        className="mt-2"
+                                    />
                                 </div>
 
                                 <div className="flex flex-col mt-3">
@@ -625,6 +646,10 @@ const Create = ({
                                             );
                                         }}
                                     />
+                                    <InputError
+                                        message={errors["sales.name"]}
+                                        className="mt-2"
+                                    />
                                 </div>
                                 <div className="flex flex-col mt-3">
                                     <label htmlFor="sales-whatsapp">
@@ -653,6 +678,10 @@ const Create = ({
                                             );
                                         }}
                                     />
+                                    <InputError
+                                        message={errors["sales.wa"]}
+                                        className="mt-2"
+                                    />
                                 </div>
                                 <div className="flex flex-col mt-3">
                                     <label htmlFor="sales-email">
@@ -679,6 +708,10 @@ const Create = ({
                                                 animateSalesEmailRef
                                             );
                                         }}
+                                    />
+                                    <InputError
+                                        message={errors["sales.email"]}
+                                        className="mt-2"
                                     />
                                 </div>
                                 <div className="flex flex-col mt-3">
@@ -719,6 +752,10 @@ const Create = ({
                                                 animateSignatureNameRef
                                             );
                                         }}
+                                    />
+                                    <InputError
+                                        message={errors["signature.image"]}
+                                        className="mt-2"
                                     />
                                 </div>
 
@@ -1126,11 +1163,11 @@ const Create = ({
                                     year: "numeric",
                                 })}
                             </p>
-                            <div className="h-[130px] w-[130px] self-start py-2">
+                            <div className="h-[100px] w-[170px] self-start py-2">
                                 <img
                                     src={"/storage/" + data.signature.image}
                                     alt=""
-                                    className="object-cover w-full h-full"
+                                    className="object-fill  w-full h-full"
                                 />
                             </div>
                             <p>{data.signature.name}</p>

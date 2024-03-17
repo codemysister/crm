@@ -95,7 +95,7 @@ export default function Index({ auth, sphsDefault }) {
                         }
                     />
                 )}
-                {permissions.includes("edit sph") && (
+                {permissions.includes("hapus sph") && (
                     <Button
                         icon="pi pi-trash"
                         rounded
