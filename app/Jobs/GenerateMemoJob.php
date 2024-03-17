@@ -30,9 +30,7 @@ class GenerateMemoJob implements ShouldQueue
     public function handle(): void
     {
         $path = "memo/memo-" . $this->memo->uuid . ".pdf";
-        $this->memo->update([
-            "memo_doc" => "storage/$path"
-        ]);
+
 
         $html = view('pdf.memo', ["memo" => $this->memo])->render();
 
@@ -41,6 +39,9 @@ class GenerateMemoJob implements ShouldQueue
             ->showBackground()
             ->pdf();
 
+        $this->memo->update([
+            "memo_doc" => "storage/$path"
+        ]);
 
         Storage::put("public/$path", $pdf);
 

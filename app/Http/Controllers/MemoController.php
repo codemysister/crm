@@ -127,6 +127,7 @@ class MemoController extends Controller
             'signature_second_image' => $request['signature_second']['image'],
             'signature_third_name' => $request['signature_third']['name'],
             'signature_third_image' => $request['signature_third']['image'],
+            'memo_doc' => null,
             'created_by' => Auth::user()->id,
         ]);
 
