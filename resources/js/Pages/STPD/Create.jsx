@@ -405,13 +405,15 @@ const Create = ({ usersDefault, partnersDefault, signaturesProp }) => {
                                                                 .regency,
                                                     },
                                                 }));
-                                                setcodeProvince(
-                                                    (prev) =>
-                                                        (prev = JSON.parse(
-                                                            e.target.value
-                                                                .province
-                                                        ).code)
-                                                );
+                                                if (e.target.value.province) {
+                                                    setcodeProvince(
+                                                        (prev) =>
+                                                            (prev = JSON.parse(
+                                                                e.target.value
+                                                                    .province
+                                                            ).code)
+                                                    );
+                                                }
                                             }}
                                             options={partners}
                                             filter
@@ -716,7 +718,6 @@ const Create = ({ usersDefault, partnersDefault, signaturesProp }) => {
                             selectionMode={rowClick ? null : "checkbox"}
                             selection={data.employees}
                             onSelectionChange={(e) => {
-                                console.log(e.value);
                                 setData("employees", e.value);
                             }}
                             dataKey="id"
@@ -939,11 +940,11 @@ const Create = ({ usersDefault, partnersDefault, signaturesProp }) => {
 
                         <div className="flex flex-col mt-5 justify-start w-[30%]">
                             <p>Purwokerto, {new Date().getFullYear()}</p>
-                            <div className="h-[130px] w-[130px] py-2">
+                            <div className="h-[100px] w-[170px] py-2">
                                 <img
                                     src={"/storage/" + data.signature.image}
                                     alt=""
-                                    className="w-full h-full object-cover"
+                                    className="w-full h-full object-fill"
                                 />
                             </div>
                             <p>{data.signature.name}</p>

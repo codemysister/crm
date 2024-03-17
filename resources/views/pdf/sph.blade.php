@@ -20,6 +20,7 @@
 
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap');
 
+
         body {
             margin: 0px;
             padding: 0px;
@@ -94,7 +95,7 @@
                 <tr>
                     <td class="p-1" style=" width: 10%; text-align: center;">{{$loop->index + 1}}</td>
                     <td class="p-1" style="width: 40%;">{{$product['name']}}</td>
-                    <td class="p-1" style="width: 20%;">{{isset($product['detail']) ? $product['detail'] : null}}</td>
+                    <td class="p-1" style="width: 20%;">{{isset ($product['detail']) ? $product['detail'] : null}}</td>
                     <td class="p-1" style="text-align: right;">Rp{{number_format($product['total'], 0, ',', '.')}}</td>
                 </tr>
                 @endforeach
@@ -125,8 +126,8 @@
     'D MMMM YYYY',
     'Do MMMM YYYY'
 ) }}</p>
-        <div style="width: 130px; height: 130px; overflow: hidden;" class="py-2">
-            <img class="h-20 w-[15%]" style="width: 100%; height: 100%; object-fit:cover;" src="{{ public_path("/storage/$sph->signature_image") }}" alt="Signature">
+        <div style="width: 170px; height: 100px; overflow: hidden;" class="py-2">
+            <img class="h-20 w-[15%]" style="width: 100%; height: 100%; object-fit:fill;" src="{{ public_path("/storage/$sph->signature_image") }}" alt="Signature">
         </div>
         <div class="text-sm">{{ $sph->signature_name }}</div>
     </div>

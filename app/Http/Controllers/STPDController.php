@@ -21,7 +21,7 @@ class STPDController extends Controller
     public function index()
     {
 
-        $STPDsDefault = STPD::all();
+        $STPDsDefault = STPD::latest()->get();
         return Inertia::render('STPD/Index', compact('STPDsDefault'));
     }
 
@@ -133,6 +133,24 @@ class STPDController extends Controller
     public function store(Request $request)
     {
 
+        $id_partner = $request['partner']['id'];
+
+        if (!$id_partner) {
+            $partnerExists = Partner::where('name', 'like', '%' . $request['partner']["name"] . '%')->first();
+            if (!$partnerExists) {
+                $partner = Partner::create([
+                    'uuid' => Str::uuid(),
+                    'name' => $request['partner']['name'],
+                    'province' => $request['partner']['province'],
+                    'regency' => $request['partner']['regency'],
+                    'status' => "Prospek",
+                ]);
+                $id_partner = $partner->id;
+            } else {
+                $id_partner = $partnerExists->id;
+            }
+        }
+
         $stpd = STPD::create([
             "uuid" => Str::uuid(),
             "code" => $this->generateCode(),
@@ -161,6 +179,24 @@ class STPDController extends Controller
     }
     public function update(Request $request, $uuid)
     {
+
+        $id_partner = $request['partner']['id'] ?? null;
+
+        if (!$id_partner) {
+            $partnerExists = Partner::where('name', 'like', '%' . $request['partner']["name"] . '%')->first();
+            if (!$partnerExists) {
+                $partner = Partner::create([
+                    'uuid' => Str::uuid(),
+                    'name' => $request['partner']['name'],
+                    'province' => $request['partner']['province'],
+                    'regency' => $request['partner']['regency'],
+                    'status' => "Prospek",
+                ]);
+                $id_partner = $partner->id;
+            } else {
+                $id_partner = $partnerExists->id;
+            }
+        }
 
         $stpd = STPD::where('uuid', '=', $uuid)->update([
             // "uuid" => Str::uuid(),
@@ -195,7 +231,7 @@ class STPDController extends Controller
 
     public function apiGetSTPD()
     {
-        $stpd = STPD::all();
+        $stpd = STPD::latest()->get();
         return response()->json($stpd);
     }
 }
