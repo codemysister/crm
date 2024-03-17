@@ -1473,7 +1473,7 @@ export default function InvoiceSubscription({
                     ></Column>
                 </DataTable>
             </OverlayPanel>
-
+            {console.log(data)}
             <Dialog
                 header="Invoice Massal"
                 headerClassName="dark:glass shadow-md dark:text-white"
