@@ -85,6 +85,7 @@ export default function InvoiceSubscription({
         processing,
         errors,
     } = useForm({
+        partner: { excell: null },
         date: null,
         due_date: null,
         period_subscription: null,
@@ -1481,11 +1482,7 @@ export default function InvoiceSubscription({
                 visible={modalBundleIsVisible}
                 onHide={() => setModalBundleIsVisible(false)}
             >
-                {console.log(data)}
-                <form
-                    onSubmit={(e) => handleSubmitFormMassal(e, "tambah")}
-                    encType="multipart/form-data"
-                >
+                <form onSubmit={(e) => handleSubmitFormMassal(e, "tambah")}>
                     <div className="flex flex-col justify-around gap-4 mt-4">
                         <div className="flex bg-green-600 text-white text-xs p-3 rounded-lg justify-between w-full h-full">
                             <p>Template</p>
@@ -1628,6 +1625,24 @@ export default function InvoiceSubscription({
                                 className="w-full md:w-14rem"
                             />
                         </div> */}
+                    </div>
+                    <div className="flex flex-col mt-3">
+                        <label htmlFor="name">Excell</label>
+
+                        <div className="App">
+                            <FilePond
+                                onaddfile={(error, fileItems) => {
+                                    setData("partner", {
+                                        ...data.partner,
+                                        excell: fileItems.file,
+                                    });
+                                }}
+                                maxFileSize="2mb"
+                                labelMaxFileSizeExceeded="File terlalu besar"
+                                name="files"
+                                labelIdle='Drag & Drop your files or <span class="filepond--label-action">Browse</span>'
+                            />
+                        </div>
                     </div>
                     <div className="flex justify-center mt-5">
                         <Button
