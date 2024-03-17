@@ -88,8 +88,6 @@
         <div>Untuk melaksanakan tugas melakukan perjalanan dinas dengan ketentuan sebagai berikut:</div>
     </div>
 
-   
-
     <div class="mt-4">
         <div class="flex w-full">
             <table style="width:100%">
@@ -128,7 +126,6 @@
             </table>
         </div>
 
-
         <div class="mt-4 text-justify">
             <div>
                 Semua biaya dalam perjalanan dinas, konsumsi, serta akomodasi dalam rangka perjalanan
@@ -144,8 +141,6 @@
                 lancar.
             </div>
         </div>
-
-
 
         <div class="flex flex-col justify-start mt-8 float-left">
             <div>Purwokerto, {{date("d/m/Y")}}</div>
@@ -164,9 +159,7 @@
                 <div style="font-size: 8px;">*)Tanda Tangan dan stempel lembaga tujuan</div>
             </div>
         </div>
-
-
-
+    </div>
 
 
 </body>
