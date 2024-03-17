@@ -115,7 +115,7 @@ Route::get('/tes', function () {
 // });
 
 Route::get('migrate', function () {
-    Artisan::call('migrate:fresh --seed');
+    Artisan::call('migrate:fresh --seed --force');
 });
 
 Route::middleware('auth')->group(function () {
