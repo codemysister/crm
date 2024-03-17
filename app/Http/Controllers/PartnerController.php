@@ -73,9 +73,9 @@ class PartnerController extends Controller
             'uuid' => Str::uuid(),
             'name' => $request['partner']['name'],
             'logo' => $pathLogo,
-            'phone_number' => $request['partner']['phone_number'],
-            'sales_id' => $request['partner']['sales']['id'],
-            'account_manager_id' => $request['partner']['account_manager']['id'],
+            'phone_number' => $request['partner']['phone_number'] ?? null,
+            'sales_id' => $request['partner']['sales']['id'] ?? null,
+            'account_manager_id' => $request['partner']['account_manager']['id'] ?? null,
             'onboarding_date' => Carbon::parse($request['partner']['onboarding_date'])->setTimezone('GMT+7')->format('Y-m-d H:i:s'),
             'live_date' => $request['partner']['live_date'] !== null ? Carbon::parse($request['partner']['live_date'])->setTimezone('GMT+7')->format('Y-m-d H:i:s') : null,
             'onboarding_age' => $request['partner']['onboarding_age'],
@@ -90,60 +90,104 @@ class PartnerController extends Controller
             'period' => $request['partner']['period']['name'] ?? $request['partner']['period'],
         ]);
 
-        $pic = PartnerPIC::create([
-            'uuid' => Str::uuid(),
-            'partner_id' => $partner->id,
-            'name' => $request['pic']['name'],
-            'number' => $request['pic']['number'],
-            'email' => $request['pic']['email'],
-            'position' => $request['pic']['position'],
-        ]);
+        if (
+            $request['pic']['name'] !== null ||
+            $request['pic']['number'] !== null ||
+            $request['pic']['email'] !== null ||
+            $request['pic']['position'] !== null
+        ) {
+            $pic = PartnerPIC::create([
+                'uuid' => Str::uuid(),
+                'partner_id' => $partner->id,
+                'name' => $request['pic']['name'],
+                'number' => $request['pic']['number'],
+                'email' => $request['pic']['email'],
+                'position' => $request['pic']['position'],
+            ]);
+        }
 
-        $bank = PartnerBank::create([
-            'uuid' => Str::uuid(),
-            'partner_id' => $partner->id,
-            'bank' => $request['bank']['bank'],
-            'account_bank_number' => $request['bank']['account_bank_number'],
-            'account_bank_name' => $request['bank']['account_bank_name']
-        ]);
+        if (
+            $request['bank']['bank'] !== null ||
+            $request['bank']['account_bank_number'] !== null ||
+            $request['bank']['account_bank_name'] !== null
+        ) {
+            $bank = PartnerBank::create([
+                'uuid' => Str::uuid(),
+                'partner_id' => $partner->id,
+                'bank' => $request['bank']['bank'],
+                'account_bank_number' => $request['bank']['account_bank_number'],
+                'account_bank_name' => $request['bank']['account_bank_name']
+            ]);
+        }
 
-        $account = PartnerAccountSetting::create([
-            'uuid' => Str::uuid(),
-            'partner_id' => $partner->id,
-            'subdomain' => $request['account_setting']['subdomain'],
-            'email_super_admin' => $request['account_setting']['email_super_admin'],
-            'cas_link_partner' => $request['account_setting']['cas_link_partner'],
-            'card_number' => $request['account_setting']['card_number']
-        ]);
+        if (
+            $request['account_setting']['subdomain'] !== null ||
+            $request['account_setting']['email_super_admin'] !== null ||
+            $request['account_setting']['cas_link_partner'] !== null ||
+            $request['account_setting']['card_number'] !== null
+        ) {
+            $account = PartnerAccountSetting::create([
+                'uuid' => Str::uuid(),
+                'partner_id' => $partner->id,
+                'subdomain' => $request['account_setting']['subdomain'],
+                'email_super_admin' => $request['account_setting']['email_super_admin'],
+                'cas_link_partner' => $request['account_setting']['cas_link_partner'],
+                'card_number' => $request['account_setting']['card_number']
+            ]);
+        }
 
-        $subscription = PartnerSubscription::create([
-            'uuid' => Str::uuid(),
-            'partner_id' => $partner->id,
-            'bill' => $request['subscription']['bill'],
-            'nominal' => $request['subscription']['nominal'],
-            'ppn' => $request['subscription']['ppn'],
-            'total_ppn' => $request['subscription']['total_ppn'],
-            'total_bill' => $request['subscription']['total_bill'],
-        ]);
+        if (
+            $request['subscription']['bill'] !== null ||
+            $request['subscription']['nominal'] !== null ||
+            $request['subscription']['ppn'] !== null ||
+            $request['subscription']['total_ppn'] !== null ||
+            $request['subscription']['total_bill'] !== null
+        ) {
+            $subscription = PartnerSubscription::create([
+                'uuid' => Str::uuid(),
+                'partner_id' => $partner->id,
+                'bill' => $request['subscription']['bill'],
+                'nominal' => $request['subscription']['nominal'],
+                'ppn' => $request['subscription']['ppn'],
+                'total_ppn' => $request['subscription']['total_ppn'],
+                'total_bill' => $request['subscription']['total_bill'],
+            ]);
+        }
 
-        $price_list = PartnerPriceList::create([
-            'uuid' => Str::uuid(),
-            'partner_id' => $partner->id,
-            'price_card' => json_encode([
-                'price' => $request['price_list']['price_card']['price'] !== 0 ? $request['price_list']['price_card']['price'] : null,
-                'type' => $request['price_list']['price_card']['price'] !== 0 ? $request['price_list']['price_card']['type']['name'] : null,
-            ]),
-            'price_lanyard' => $request['price_list']['price_lanyard'],
-            'price_subscription_system' => $request['price_list']['price_subscription_system'],
-            'price_training_offline' => $request['price_list']['price_training_offline'],
-            'price_training_online' => $request['price_list']['price_training_online'],
-            'fee_purchase_cazhpoin' => $request['price_list']['fee_purchase_cazhpoin'],
-            'fee_bill_cazhpoin' => $request['price_list']['fee_bill_cazhpoin'],
-            'fee_topup_cazhpos' => $request['price_list']['fee_topup_cazhpos'],
-            'fee_withdraw_cazhpos' => $request['price_list']['fee_withdraw_cazhpos'],
-            'fee_bill_saldokartu' => $request['price_list']['fee_bill_saldokartu'],
-        ]);
+        if (
+            $request['price_list']['price_card']['price'] !== null ||
+            $request['price_list']['price_card']['type'] !== null ||
+            $request['price_list']['price_lanyard'] !== null ||
+            $request['price_list']['price_subscription_system'] !== null ||
+            $request['price_list']['price_training_offline'] !== null ||
+            $request['price_list']['price_training_online'] !== null ||
+            $request['price_list']['fee_purchase_cazhpoin'] !== null ||
+            $request['price_list']['fee_bill_cazhpoin'] !== null ||
+            $request['price_list']['fee_topup_cazhpos'] !== null ||
+            $request['price_list']['fee_withdraw_cazhpos'] !== null ||
+            $request['price_list']['fee_bill_saldokartu'] !== null
+        ) {
+
+            $price_list = PartnerPriceList::create([
+                'uuid' => Str::uuid(),
+                'partner_id' => $partner->id,
+                'price_card' => json_encode([
+                    'price' => $request['price_list']['price_card']['price'] !== 0 ? $request['price_list']['price_card']['price'] : null,
+                    'type' => $request['price_list']['price_card']['price'] !== 0 ? $request['price_list']['price_card']['type']['name'] : null,
+                ]),
+                'price_lanyard' => $request['price_list']['price_lanyard'],
+                'price_subscription_system' => $request['price_list']['price_subscription_system'],
+                'price_training_offline' => $request['price_list']['price_training_offline'],
+                'price_training_online' => $request['price_list']['price_training_online'],
+                'fee_purchase_cazhpoin' => $request['price_list']['fee_purchase_cazhpoin'],
+                'fee_bill_cazhpoin' => $request['price_list']['fee_bill_cazhpoin'],
+                'fee_topup_cazhpos' => $request['price_list']['fee_topup_cazhpos'],
+                'fee_withdraw_cazhpos' => $request['price_list']['fee_withdraw_cazhpos'],
+                'fee_bill_saldokartu' => $request['price_list']['fee_bill_saldokartu'],
+            ]);
+        }
     }
+
 
     public function update(PartnerGeneralRequest $request, $uuid)
     {

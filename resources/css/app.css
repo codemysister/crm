@@ -392,9 +392,9 @@
       z-index: 9;
     }
 
-    .dark .p-highlight:hover{
+    /* .dark .p-tabview .p-highlight:hover{
       background-color: white;
-    }
+    } */
 
     .dark #birthday{
       background-color: rgb(209 213 219 / 1);

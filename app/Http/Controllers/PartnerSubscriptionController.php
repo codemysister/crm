@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\PartnerSubscriptionRequest;
 use App\Models\PartnerSubscription;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -15,7 +16,7 @@ class PartnerSubscriptionController extends Controller
         return response()->json($subscriptions);
     }
 
-    public function store(Request $request)
+    public function store(PartnerSubscriptionRequest $request)
     {
         PartnerSubscription::create([
             'uuid' => Str::uuid(),
@@ -28,7 +29,7 @@ class PartnerSubscriptionController extends Controller
         ]);
     }
 
-    public function update(Request $request, $uuid)
+    public function update(PartnerSubscriptionRequest $request, $uuid)
     {
         PartnerSubscription::where('uuid', $uuid)->first()->update([
             'uuid' => Str::uuid(),

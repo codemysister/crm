@@ -11,18 +11,31 @@ class PartnerSubscriptionRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
-     */
     public function rules(): array
     {
         return [
-            //
+            'partner' => 'required',
+            'bill' => 'required',
+            'nominal' => 'required',
+            'ppn' => 'required',
+            'total_ppn' => 'required',
+            'total_bill' => 'required',
+        ];
+    }
+
+
+    public function messages(): array
+    {
+        return [
+            'partner.required' => 'Lembaga harus diiisi',
+            'bill.required' => 'Tagihan harus diiisi',
+            'nominal.required' => 'Nominal tagihan harus diiisi',
+            'ppn.required' => 'Pajak harus diiisi',
+            'total_ppn.required' => 'Total pajak harus diiisi',
+            'total_bill.required' => 'Total tagihan harus diiisi',
         ];
     }
 }

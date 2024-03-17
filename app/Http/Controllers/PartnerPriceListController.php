@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\PartnerPriceListRequest;
 use App\Models\PartnerPriceList;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -15,14 +16,14 @@ class PartnerPriceListController extends Controller
         return response()->json($priceLists);
     }
 
-    public function store(Request $request)
+    public function store(PartnerPriceListRequest $request)
     {
         PartnerPriceList::create([
             'uuid' => Str::uuid(),
             'partner_id' => $request["partner"]["id"],
             'price_card' => json_encode([
                 'price' => $request['price_card']['price'],
-                'type' => $request['price_card']['price'] !== null ? $request['price_card']['type'] : '',
+                'type' => $request['price_card']['price'] !== null ? $request['price_card']['type']['name'] : '',
             ]),
             'price_lanyard' => $request['price_lanyard'],
             'price_subscription_system' => $request['price_subscription_system'],
@@ -36,7 +37,7 @@ class PartnerPriceListController extends Controller
         ]);
     }
 
-    public function update(Request $request, $uuid)
+    public function update(PartnerPriceListRequest $request, $uuid)
     {
         PartnerPriceList::where('uuid', $uuid)->first()->update([
             'uuid' => Str::uuid(),
