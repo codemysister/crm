@@ -75,7 +75,7 @@ const Pic = ({
     const getPics = async () => {
         setIsLoadingData(true);
 
-        let response = await fetch("/api/partners/pics");
+        let response = await fetch("/api/pics");
         let data = await response.json();
 
         setPics((prev) => data);
@@ -146,7 +146,7 @@ const Pic = ({
             icon: "pi pi-info-circle",
             acceptClassName: "p-button-danger",
             accept: async () => {
-                destroyPIC("partners/pics/" + pic.uuid, {
+                destroyPIC("/pics/" + pic.uuid, {
                     onSuccess: () => {
                         getPics();
                         showSuccess("Hapus");
@@ -217,7 +217,7 @@ const Pic = ({
         e.preventDefault();
 
         if (type === "tambah") {
-            postPIC("/partners/pics", {
+            postPIC("/pics", {
                 onSuccess: () => {
                     showSuccess("Tambah");
                     setModalPicIsVisible((prev) => false);
@@ -235,7 +235,7 @@ const Pic = ({
                 },
             });
         } else {
-            putPIC("/partners/pics/" + dataPIC.uuid, {
+            putPIC("/pics/" + dataPIC.uuid, {
                 onSuccess: () => {
                     showSuccess("Update");
                     setModalEditPicIsVisible((prev) => false);
@@ -280,6 +280,10 @@ const Pic = ({
                                     id="name"
                                     aria-describedby="name-help"
                                 />
+                                <InputError
+                                    message={errorPIC.name}
+                                    className="mt-2"
+                                />
                             </div>
 
                             <div className="flex flex-col">
@@ -315,6 +319,10 @@ const Pic = ({
                                     className="dark:bg-gray-300"
                                     id="email"
                                     aria-describedby="email-help"
+                                />
+                                <InputError
+                                    message={errorPIC.email}
+                                    className="mt-2"
                                 />
                             </div>
 

@@ -137,7 +137,7 @@ const DetailSubscription = ({
     const handleSubmitFormSubscription = (e, type) => {
         e.preventDefault();
 
-        putSubscription("/partners/subscriptions/" + dataSubscription.uuid, {
+        putSubscription("/subscriptions/" + dataSubscription.uuid, {
             onSuccess: () => {
                 showSuccess("Update");
                 setModalEditSubscriptionIsVisible((prev) => (prev = false));

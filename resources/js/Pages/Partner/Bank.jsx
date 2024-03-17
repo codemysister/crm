@@ -60,7 +60,7 @@ const Bank = ({
     const getBanks = async () => {
         setIsLoadingData(true);
 
-        let response = await fetch("/api/partners/banks");
+        let response = await fetch("/api/banks");
         let data = await response.json();
 
         setBanks((prev) => data);
@@ -173,7 +173,7 @@ const Bank = ({
         e.preventDefault();
 
         if (type === "tambah") {
-            postBank("/partners/banks", {
+            postBank("/banks", {
                 onSuccess: () => {
                     showSuccess("Tambah");
                     setModalBankIsVisible((prev) => false);
@@ -190,7 +190,7 @@ const Bank = ({
                 },
             });
         } else {
-            putBank("/partners/banks/" + dataBank.uuid, {
+            putBank("/banks/" + dataBank.uuid, {
                 onSuccess: () => {
                     showSuccess("Update");
                     setModalEditBankIsVisible((prev) => false);
@@ -216,7 +216,7 @@ const Bank = ({
             icon: "pi pi-info-circle",
             acceptClassName: "p-button-danger",
             accept: async () => {
-                destroyBank("partners/banks/" + bank.uuid, {
+                destroyBank("/banks/" + bank.uuid, {
                     onSuccess: () => {
                         getBanks();
                         showSuccess("Hapus");

@@ -46,7 +46,7 @@ const DetailBank = ({
     const handleSubmitFormBank = (e) => {
         e.preventDefault();
 
-        putBank("/partners/banks/" + dataBank.uuid, {
+        putBank("/banks/" + dataBank.uuid, {
             onSuccess: () => {
                 showSuccess("Update");
                 setModalEditBankIsVisible((prev) => false);

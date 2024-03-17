@@ -69,7 +69,7 @@ const DetailPIC = ({
     const handleSubmitFormPIC = (e) => {
         e.preventDefault();
 
-        putPIC("/partners/pics/" + dataPIC.uuid, {
+        putPIC("/pics/" + dataPIC.uuid, {
             onSuccess: () => {
                 showSuccess("Update");
                 setModalEditPicIsVisible((prev) => false);

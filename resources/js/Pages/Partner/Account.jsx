@@ -56,7 +56,7 @@ const Account = ({
     const getAccounts = async () => {
         setIsLoadingData(true);
 
-        let response = await fetch("/api/partners/accounts");
+        let response = await fetch("/api/accounts");
         let data = await response.json();
 
         setAccounts((prev) => data);
@@ -178,7 +178,7 @@ const Account = ({
         e.preventDefault();
 
         if (type === "tambah") {
-            postAccount("/partners/accounts", {
+            postAccount("/accounts", {
                 onSuccess: () => {
                     showSuccess("Tambah");
                     setModalAccountIsVisible((prev) => false);
@@ -190,7 +190,7 @@ const Account = ({
                 },
             });
         } else {
-            putAccount("/partners/accounts/" + dataAccount.uuid, {
+            putAccount("/accounts/" + dataAccount.uuid, {
                 onSuccess: () => {
                     showSuccess("Update");
                     setModalEditAccountIsVisible((prev) => false);
@@ -226,7 +226,7 @@ const Account = ({
             icon: "pi pi-info-circle",
             acceptClassName: "p-button-danger",
             accept: async () => {
-                destroyAccount("partners/accounts/" + account.uuid, {
+                destroyAccount("/accounts/" + account.uuid, {
                     onSuccess: () => {
                         getAccounts();
                         showSuccess("Hapus");

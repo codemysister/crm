@@ -26,6 +26,7 @@ import { Tooltip } from "primereact/tooltip";
 import { Card } from "primereact/card";
 import { OverlayPanel } from "primereact/overlaypanel";
 import { MultiSelect } from "primereact/multiselect";
+import InputError from "@/Components/InputError";
 
 const Subscription = ({
     partners,
@@ -77,7 +78,7 @@ const Subscription = ({
     const getSubscriptions = async () => {
         setIsLoadingData(true);
 
-        let response = await fetch("/api/partners/subscriptions");
+        let response = await fetch("/api/subscriptions");
         let data = await response.json();
 
         setSubscriptions((prev) => data);
@@ -227,7 +228,7 @@ const Subscription = ({
         e.preventDefault();
 
         if (type === "tambah") {
-            postSubscription("/partners/subscriptions", {
+            postSubscription("/subscriptions", {
                 onSuccess: () => {
                     showSuccess("Tambah");
                     setModalSubscriptionIsVisible((prev) => (prev = false));
@@ -239,22 +240,17 @@ const Subscription = ({
                 },
             });
         } else {
-            putSubscription(
-                "/partners/subscriptions/" + dataSubscription.uuid,
-                {
-                    onSuccess: () => {
-                        showSuccess("Update");
-                        setModalEditSubscriptionIsVisible(
-                            (prev) => (prev = false)
-                        );
-                        getSubscriptions();
-                        resetSubscription();
-                    },
-                    onError: () => {
-                        showError("Update");
-                    },
-                }
-            );
+            putSubscription("/subscriptions/" + dataSubscription.uuid, {
+                onSuccess: () => {
+                    showSuccess("Update");
+                    setModalEditSubscriptionIsVisible((prev) => (prev = false));
+                    getSubscriptions();
+                    resetSubscription();
+                },
+                onError: () => {
+                    showError("Update");
+                },
+            });
         }
     };
 
@@ -280,18 +276,15 @@ const Subscription = ({
             icon: "pi pi-info-circle",
             acceptClassName: "p-button-danger",
             accept: async () => {
-                destroySubscription(
-                    "partners/subscriptions/" + subscription.uuid,
-                    {
-                        onSuccess: () => {
-                            getSubscriptions();
-                            showSuccess("Hapus");
-                        },
-                        onError: () => {
-                            showError("Hapus");
-                        },
-                    }
-                );
+                destroySubscription("/subscriptions/" + subscription.uuid, {
+                    onSuccess: () => {
+                        getSubscriptions();
+                        showSuccess("Hapus");
+                    },
+                    onError: () => {
+                        showError("Hapus");
+                    },
+                });
             },
         });
     };
@@ -334,6 +327,10 @@ const Subscription = ({
                                     itemTemplate={optionTemplate}
                                     className="w-full md:w-14rem"
                                 />
+                                <InputError
+                                    message={errorSubscription.partner}
+                                    className="mt-2"
+                                />
                             </div>
                             <div className="flex flex-col">
                                 <label htmlFor="bill">Tagihan *</label>
@@ -349,6 +346,10 @@ const Subscription = ({
                                     className="dark:bg-gray-300"
                                     id="bill"
                                     aria-describedby="bill-help"
+                                />
+                                <InputError
+                                    message={errorSubscription.bill}
+                                    className="mt-2"
                                 />
                             </div>
                             <div className="flex flex-col">
@@ -373,6 +374,10 @@ const Subscription = ({
                                     }}
                                     locale="id-ID"
                                 />
+                                <InputError
+                                    message={errorSubscription.nominal}
+                                    className="mt-2"
+                                />
                             </div>
 
                             <div className="flex flex-col">
@@ -395,6 +400,10 @@ const Subscription = ({
                                     }}
                                     locale="id-ID"
                                 />
+                                <InputError
+                                    message={errorSubscription.ppn}
+                                    className="mt-2"
+                                />
                             </div>
 
                             <div className="flex flex-col">
@@ -408,6 +417,10 @@ const Subscription = ({
                                         });
                                     }}
                                     locale="id-ID"
+                                />
+                                <InputError
+                                    message={errorSubscription.total_ppn}
+                                    className="mt-2"
                                 />
                             </div>
                             <div className="flex flex-col">
@@ -423,6 +436,10 @@ const Subscription = ({
                                         });
                                     }}
                                     locale="id-ID"
+                                />
+                                <InputError
+                                    message={errorSubscription.total_bill}
+                                    className="mt-2"
                                 />
                             </div>
                         </div>

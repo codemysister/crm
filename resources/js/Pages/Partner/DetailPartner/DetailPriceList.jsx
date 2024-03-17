@@ -135,7 +135,7 @@ const DetailPriceList = ({
     const handleSubmitFormPriceList = (e, type) => {
         e.preventDefault();
 
-        putPriceList("/partners/prices/" + dataPriceList.uuid, {
+        putPriceList("/prices/" + dataPriceList.uuid, {
             onSuccess: () => {
                 showSuccess("Update");
                 setModalEditPriceList((prev) => (prev = false));

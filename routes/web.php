@@ -171,46 +171,48 @@ Route::middleware('auth')->group(function () {
     Route::resource('signature', SignatureController::class);
     Route::get('/api/signature', [SignatureController::class, 'apiGetSignature'])->name('api.signature');
 
+
+
     // Partner
     Route::get('/partners', [PartnerController::class, 'index'])->name('partners.view')->middleware(['can:lihat partner']);
     Route::post('/partners', [PartnerController::class, 'store'])->name('partners.store')->middleware(['can:tambah partner']);
     Route::post('/partners/import', [PartnerController::class, 'import'])->name('partners.import')->middleware(['can:tambah partner']);
     Route::get('/partners/{partner:uuid}', [PartnerController::class, 'show'])->name('partners.show')->middleware(['can:edit partner']);
-    Route::put('/partners/{partner:uuid}', [PartnerController::class, 'update'])->name('partners.update')->middleware(['can:edit partner']);
+    Route::post('/partners/{partner}', [PartnerController::class, 'update'])->name('partners.update')->middleware(['can:edit partner']);
     Route::delete('/partners/{partner:uuid}', [PartnerController::class, 'destroy'])->name('partners.destroy')->middleware(['can:hapus partner']);
     Route::get('/api/partner/detail/{partner:uuid}', [PartnerController::class, 'apiGetPartner'])->name('api.partner');
     Route::post('/api/partner/detail/{partner:uuid}', [PartnerController::class, 'updateDetailPartner'])->name('api.update.partner');
     Route::get('/api/partners', [PartnerController::class, 'apiGetPartners'])->name('api.partners');
 
+    // Partner Langganan
+    Route::get('/api/subscriptions', [PartnerSubscriptionController::class, 'apiGetSubscription'])->name('api.partners.subscriptions');
+    Route::post('/subscriptions', [PartnerSubscriptionController::class, 'store'])->name('partners.subscriptions.store');
+    Route::put('/subscriptions/{uuid}', [PartnerSubscriptionController::class, 'update'])->name('partners.subscriptions.update');
+    Route::delete('/subscriptions/{uuid}', [PartnerSubscriptionController::class, 'destroy'])->name('partners.subscriptions.destroy');
+
     // Partner PIC
-    Route::post('/partners/pics', [PartnerPicController::class, 'store'])->name('partners.pics.store');
-    Route::get('/api/partners/pics', [PartnerPicController::class, 'apiGetPIC'])->name('api.partners.pics');
-    Route::put('/partners/pics/{uuid}', [PartnerPicController::class, 'update'])->name('partners.pics.update');
-    Route::delete('/partners/pics/{uuid}', [PartnerPicController::class, 'destroy'])->name('partners.pics.destroy');
+    Route::post('/pics', [PartnerPicController::class, 'store'])->name('partners.pics.store');
+    Route::get('/api/pics', [PartnerPicController::class, 'apiGetPIC'])->name('api.partners.pics');
+    Route::put('/pics/{uuid}', [PartnerPicController::class, 'update'])->name('partners.pics.update');
+    Route::delete('/pics/{uuid}', [PartnerPicController::class, 'destroy'])->name('partners.pics.destroy');
 
     // Partner Bank
-    Route::post('/partners/banks', [PartnerBankController::class, 'store'])->name('partners.banks.store');
-    Route::get('/api/partners/banks', [PartnerBankController::class, 'apiGetPIC'])->name('api.partners.banks');
-    Route::put('/partners/banks/{uuid}', [PartnerBankController::class, 'update'])->name('partners.banks.update');
-    Route::delete('/partners/banks/{uuid}', [PartnerBankController::class, 'destroy'])->name('partners.banks.destroy');
+    Route::post('/banks', [PartnerBankController::class, 'store'])->name('partners.banks.store');
+    Route::get('/api/banks', [PartnerBankController::class, 'apiGetPIC'])->name('api.partners.banks');
+    Route::put('/banks/{uuid}', [PartnerBankController::class, 'update'])->name('partners.banks.update');
+    Route::delete('/banks/{uuid}', [PartnerBankController::class, 'destroy'])->name('partners.banks.destroy');
 
     // Partner Akun
-    Route::post('/partners/accounts', [PartnerAccountSettingController::class, 'store'])->name('partners.accounts.store');
-    Route::get('/api/partners/accounts', [PartnerAccountSettingController::class, 'apiGetAccounts'])->name('api.partners.accounts');
-    Route::put('/partners/accounts/{uuid}', [PartnerAccountSettingController::class, 'update'])->name('partners.accounts.update');
-    Route::delete('/partners/accounts/{uuid}', [PartnerAccountSettingController::class, 'destroy'])->name('partners.accounts.destroy');
-
-    // Partner Langganan
-    Route::post('/partners/subscriptions', [PartnerSubscriptionController::class, 'store'])->name('partners.subscriptions.store');
-    Route::get('/api/partners/subscriptions', [PartnerSubscriptionController::class, 'apiGetSubscription'])->name('api.partners.subscriptions');
-    Route::put('/partners/subscriptions/{uuid}', [PartnerSubscriptionController::class, 'update'])->name('partners.subscriptions.update');
-    Route::delete('/partners/subscriptions/{uuid}', [PartnerSubscriptionController::class, 'destroy'])->name('partners.subscriptions.destroy');
+    Route::post('/accounts', [PartnerAccountSettingController::class, 'store'])->name('partners.accounts.store');
+    Route::get('/api/accounts', [PartnerAccountSettingController::class, 'apiGetAccounts'])->name('api.partners.accounts');
+    Route::put('/accounts/{uuid}', [PartnerAccountSettingController::class, 'update'])->name('partners.accounts.update');
+    Route::delete('/accounts/{uuid}', [PartnerAccountSettingController::class, 'destroy'])->name('partners.accounts.destroy');
 
     // Partner Tarif
-    Route::post('/partners/prices', [PartnerPriceListController::class, 'store'])->name('partners.prices.store');
-    Route::get('/api/partners/prices', [PartnerPriceListController::class, 'apiGetPriceLists'])->name('api.partners.prices');
-    Route::put('/partners/prices/{uuid}', [PartnerPriceListController::class, 'update'])->name('partners.prices.update');
-    Route::delete('/partners/prices/{uuid}', [PartnerPriceListController::class, 'destroy'])->name('partners.prices.destroy');
+    Route::post('/prices', [PartnerPriceListController::class, 'store'])->name('partners.prices.store');
+    Route::get('/api/prices', [PartnerPriceListController::class, 'apiGetPriceLists'])->name('api.partners.prices');
+    Route::put('/prices/{uuid}', [PartnerPriceListController::class, 'update'])->name('partners.prices.update');
+    Route::delete('/prices/{uuid}', [PartnerPriceListController::class, 'destroy'])->name('partners.prices.destroy');
 
     // STPD
     Route::get('/stpd', [STPDController::class, 'index'])->name('stpd.view')->middleware(['can:lihat stpd']);

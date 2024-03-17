@@ -26,6 +26,7 @@ import { Tooltip } from "primereact/tooltip";
 import { Card } from "primereact/card";
 import { OverlayPanel } from "primereact/overlaypanel";
 import { MultiSelect } from "primereact/multiselect";
+import InputError from "@/Components/InputError";
 
 const PriceList = ({
     partners,
@@ -144,7 +145,7 @@ const PriceList = ({
     const getPriceLists = async () => {
         setIsLoadingData(true);
 
-        let response = await fetch("/api/partners/prices");
+        let response = await fetch("/api/prices");
         let data = await response.json();
 
         setPriceLists((prev) => (prev = data));
@@ -341,7 +342,7 @@ const PriceList = ({
         e.preventDefault();
 
         if (type === "tambah") {
-            postPriceList("/partners/prices", {
+            postPriceList("/prices", {
                 onSuccess: () => {
                     showSuccess("Tambah");
                     setModalSubscriptionIsVisible((prev) => (prev = false));
@@ -353,7 +354,7 @@ const PriceList = ({
                 },
             });
         } else {
-            putPriceList("/partners/prices/" + dataPriceList.uuid, {
+            putPriceList("/prices/" + dataPriceList.uuid, {
                 onSuccess: () => {
                     showSuccess("Update");
                     setModalEditSubscriptionIsVisible((prev) => (prev = false));
@@ -395,7 +396,7 @@ const PriceList = ({
             icon: "pi pi-info-circle",
             acceptClassName: "p-button-danger",
             accept: async () => {
-                destroyPriceList("partners/prices/" + subscription.uuid, {
+                destroyPriceList("/prices/" + subscription.uuid, {
                     onSuccess: () => {
                         getPriceLists();
                         showSuccess("Hapus");
@@ -446,6 +447,10 @@ const PriceList = ({
                                     itemTemplate={optionTemplate}
                                     className="w-full md:w-14rem"
                                 />
+                                <InputError
+                                    message={errorPriceList.partner}
+                                    className="mt-2"
+                                />
                             </div>
 
                             <div className="flex flex-col">
@@ -494,7 +499,14 @@ const PriceList = ({
                                         />
                                     </div>
                                 </div>
+                                <InputError
+                                    message={errorPriceList.price_card}
+                                    className="mt-2"
+                                />
                             </div>
+
+                            {console.log(priceLists)}
+                            {console.log(dataPriceList)}
 
                             <div className="flex flex-col">
                                 <label htmlFor="price_card">
@@ -521,6 +533,10 @@ const PriceList = ({
                                         />
                                     </div>
                                 </div>
+                                <InputError
+                                    message={errorPriceList.price_lanyard}
+                                    className="mt-2"
+                                />
                             </div>
 
                             <div className="flex flex-col">
@@ -549,6 +565,12 @@ const PriceList = ({
                                         />
                                     </div>
                                 </div>
+                                <InputError
+                                    message={
+                                        errorPriceList.price_subscription_system
+                                    }
+                                    className="mt-2"
+                                />
                             </div>
 
                             <div className="flex flex-col">
@@ -610,8 +632,13 @@ const PriceList = ({
                                         </div>
                                     </div>
                                 </div>
+                                <InputError
+                                    message={
+                                        errorPriceList.price_training_offline
+                                    }
+                                    className="mt-2"
+                                />
                             </div>
-
                             <div className="flex flex-col">
                                 <label htmlFor="price_card">
                                     Tarif Pelatihan Online
@@ -668,6 +695,12 @@ const PriceList = ({
                                         </div>
                                     </div>
                                 </div>
+                                <InputError
+                                    message={
+                                        errorPriceList.price_training_online
+                                    }
+                                    className="mt-2"
+                                />
                             </div>
 
                             <div className="flex flex-col">
@@ -696,6 +729,12 @@ const PriceList = ({
                                         />
                                     </div>
                                 </div>
+                                <InputError
+                                    message={
+                                        errorPriceList.fee_purchase_cazhpoin
+                                    }
+                                    className="mt-2"
+                                />
                             </div>
 
                             <div className="flex flex-col">
@@ -725,6 +764,10 @@ const PriceList = ({
                                         />
                                     </div>
                                 </div>
+                                <InputError
+                                    message={errorPriceList.fee_bill_cazhpoin}
+                                    className="mt-2"
+                                />
                             </div>
 
                             <div className="flex flex-col">
@@ -754,6 +797,10 @@ const PriceList = ({
                                         />
                                     </div>
                                 </div>
+                                <InputError
+                                    message={errorPriceList.fee_topup_cazhpos}
+                                    className="mt-2"
+                                />
                             </div>
 
                             <div className="flex flex-col">
@@ -782,6 +829,12 @@ const PriceList = ({
                                         />
                                     </div>
                                 </div>
+                                <InputError
+                                    message={
+                                        errorPriceList.fee_withdraw_cazhpos
+                                    }
+                                    className="mt-2"
+                                />
                             </div>
 
                             <div className="flex flex-col">
@@ -811,6 +864,10 @@ const PriceList = ({
                                         />
                                     </div>
                                 </div>
+                                <InputError
+                                    message={errorPriceList.fee_bill_saldokartu}
+                                    className="mt-2"
+                                />
                             </div>
                         </div>
                         <div className="flex justify-center mt-5">

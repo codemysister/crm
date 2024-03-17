@@ -4,8 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class extends Migration {
     /**
      * Run the migrations.
      */
@@ -15,9 +14,9 @@ return new class extends Migration
             $table->id();
             $table->uuid('uuid');
             $table->foreignId('partner_id')->constrained('partners', 'id')->onDelete('cascade');
-            $table->string('bank');
-            $table->bigInteger('account_bank_number');
-            $table->string('account_bank_name');
+            $table->string('bank')->nullable();
+            $table->bigInteger('account_bank_number')->nullable();
+            $table->string('account_bank_name')->nullable();
             $table->timestamps();
         });
     }

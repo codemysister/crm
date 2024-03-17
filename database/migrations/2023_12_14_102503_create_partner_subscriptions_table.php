@@ -14,8 +14,8 @@ return new class extends Migration {
             $table->id();
             $table->uuid('uuid');
             $table->foreignId('partner_id')->constrained('partners', 'id')->onDelete('cascade');
-            $table->string('bill');
-            $table->bigInteger('nominal');
+            $table->string('bill')->nullable();
+            $table->bigInteger('nominal')->nullable()->default(0);
             $table->integer('ppn')->nullable()->default(0);
             $table->integer('total_ppn')->nullable()->default(0);
             $table->bigInteger('total_bill');
