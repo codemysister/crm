@@ -554,15 +554,13 @@ export default function InvoiceSubscription({
 
     const optionSignatureTemplate = (item) => {
         return (
-            <div className="flex flex-row max-w-full p-2 align-items-center items-center gap-3">
-                <div className=" w-1/2">
-                    <img
-                        className="w-full h-full shadow-2 flex-shrink-0 border-round"
-                        src={"/storage/" + item.image}
-                        alt={item.name}
-                    />
-                </div>
-                <div className="flex w-1/2 flex-col items-center">
+            <div className="flex flex-wrap p-2 align-items-center items-center gap-3">
+                <img
+                    className="w-[6rem] shadow-2 flex-shrink-0 border-round"
+                    src={"/storage/" + item.image}
+                    alt={item.name}
+                />
+                <div className="flex-1 flex flex-col gap-2 xl:mr-8">
                     <span className="font-bold">{item.name}</span>
                     <div className="flex align-items-center gap-2">
                         <span>{item.position}</span>
@@ -690,7 +688,7 @@ export default function InvoiceSubscription({
                 {permissions.includes("tambah transaksi") && (
                     <Button
                         label="Input Pembayaran"
-                        className="bg-purple-600 w-full text-xs shadow-md rounded-lg mr-2"
+                        className="bg-purple-600 max-w-[146px] w-full text-xs shadow-md rounded-lg mr-2"
                         icon={addButtonIcon}
                         onClick={() => {
                             setModalTransactionIsVisible(
