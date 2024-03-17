@@ -158,6 +158,15 @@ const Edit = ({
         }));
     };
 
+    function isValidURL(url) {
+        try {
+            new URL(url);
+            return true;
+        } catch (error) {
+            return false;
+        }
+    }
+
     const triggerInputFocus = (ref) => {
         if (ref.current) {
             ref.current.classList.add("twinkle");
@@ -1079,10 +1088,15 @@ const Edit = ({
                                         <p ref={animateXenditLinkRef}>
                                             <Link
                                                 className="text-blue-600"
-                                                href={data.xendit_link}
+                                                href={
+                                                    isValidURL(data.xendit_link)
+                                                        ? data.xendit_link
+                                                        : null
+                                                }
                                             >
-                                                {data.xendit_link ??
-                                                    "{{link_xendit}}"}
+                                                {data.xendit_link
+                                                    ? data.xendit_link
+                                                    : "{{link_xendit}}"}
                                             </Link>
                                         </p>
                                     </>

@@ -62,7 +62,8 @@ class InvoiceSubscriptionController extends Controller
     public function create()
     {
         $partnersProp = Partner::with('subscriptions')->whereHas('subscriptions', function ($query) {
-            $query->where('period', 'lembaga/bulan')->orWhere('period', 'kartu/bulan');
+            $query->where('period', 'lembaga/bulan')->orWhere('period', 'kartu/bulan')->orWhere('period', 'LIKE', '%bulan%');
+            ;
         })->where('status', '=', 'Aktif')->orWhere('status', '=', 'Proses')->get();
         $signaturesProp = Signature::all();
         return Inertia::render('InvoiceSubscription/Create', compact('partnersProp', 'signaturesProp'));
@@ -267,13 +268,20 @@ class InvoiceSubscriptionController extends Controller
         $totalDataPerMonth = InvoiceSubscription::whereYear('created_at', $currentYear)
             ->whereMonth('created_at', $currentMonth)
             ->count();
+
+        function intToRoman($number)
+        {
+            $map = array('I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII');
+            return $map[$number - 1];
+        }
         $romanMonth = intToRoman($currentMonth);
         $latestData = "$currentYear/$romanMonth/INV/0000";
         $lastCode = $latestData ? explode('/', $latestData)[3] : 0;
         $newCode = str_pad((int) $lastCode + $totalDataPerMonth + 1, 4, '0', STR_PAD_LEFT);
+
         $newCode = "$currentYear/$romanMonth/INV/$newCode";
 
-        return $lastCode;
+        return $newCode;
     }
 
 
@@ -284,8 +292,7 @@ class InvoiceSubscriptionController extends Controller
         $currentYear = date('Y');
         $romanMonth = $this->intToRoman($currentMonth);
 
-        $newCode = str_pad((int) $lastCode + 1, 4, '0', STR_PAD_LEFT);
-        $newCode = "$currentYear/$romanMonth/INV/$newCode";
+
         $date = Carbon::parse($request->date)->setTimezone('GMT+7')->format('Y-m-d H:i:s');
         $due_date = Carbon::parse($request->due_date)->setTimezone('GMT+7')->format('Y-m-d H:i:s');
         $date_now = Carbon::now()->setTimezone('GMT+7');
@@ -296,7 +303,7 @@ class InvoiceSubscriptionController extends Controller
         $invoice_subscription = InvoiceSubscription::create([
             'uuid' => Str::uuid(),
             'partner_id' => $request->partner['id'],
-            'code' => $newCode,
+            'code' => $lastCode,
             'date' => $date,
             'period' => Carbon::parse($date)->locale('id')->isoFormat('DD MMMM YYYY'),
             'due_date' => $due_date,
@@ -386,8 +393,9 @@ class InvoiceSubscriptionController extends Controller
 
         InvoiceSubscriptionBill::destroy($delete->pluck('id')->toArray());
         foreach ($update as $bill) {
-            $bill = InvoiceSubscriptionBill::where('id', $bill['id'])->first();
-            $bill->update([
+            $oldBill = InvoiceSubscriptionBill::where('id', $bill['id'])->first();
+
+            $oldBill->update([
                 'bill' => $bill['bill'],
                 'nominal' => $bill['nominal'],
                 'total_ppn' => $bill['total_ppn'],
@@ -412,7 +420,6 @@ class InvoiceSubscriptionController extends Controller
 
     public function update(InvoiceSubscriptionRequest $request, $uuid)
     {
-
         $date = Carbon::parse($request->date)->setTimezone('GMT+7')->format('Y-m-d H:i:s');
         $due_date = Carbon::parse($request->due_date)->setTimezone('GMT+7')->format('Y-m-d H:i:s');
         $date_now = Carbon::now()->setTimezone('GMT+7');
@@ -476,11 +483,8 @@ class InvoiceSubscriptionController extends Controller
         if ($invoice_subscription->invoice_subscription_doc !== null) {
             Storage::delete('public/' . $invoice_subscription->invoice_subscription_doc);
         }
-        if ($invoice_subscription->payment_metode === 'payment link') {
-            $this->generateInvoiceSubscription($invoice_subscription);
-        } else {
-            $this->generateInvoiceSubscriptionPdf($invoice_subscription);
-        }
+        GenerateInvoiceSubscriptionJob::dispatch($invoice_subscription, $request->bills);
+
     }
 
     public function storeBatch(Request $request)

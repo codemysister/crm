@@ -87,7 +87,7 @@ const Create = ({ usersProp, partnersProp, salesProp, signaturesProp }) => {
         rest_of_bill_lock: 0,
         paid_off: 0,
         payment_metode: "payment link",
-        xendit_link: null,
+        xendit_link: "https://checkout.xendit.co/web/",
         created_by: null,
         signature: {
             name: null,
@@ -127,6 +127,15 @@ const Create = ({ usersProp, partnersProp, salesProp, signaturesProp }) => {
 
         return `${day}/${month}/${year}`;
     };
+
+    function isValidURL(url) {
+        try {
+            new URL(url);
+            return true;
+        } catch (error) {
+            return false;
+        }
+    }
 
     const dialogFooterTemplate = (type) => {
         return (
@@ -429,8 +438,6 @@ const Create = ({ usersProp, partnersProp, salesProp, signaturesProp }) => {
                                     />
                                 </div>
 
-                                {console.log(data.bills)}
-
                                 <div className="flex flex-col mt-3">
                                     <label htmlFor="date">Tanggal *</label>
                                     <Calendar
@@ -588,8 +595,8 @@ const Create = ({ usersProp, partnersProp, salesProp, signaturesProp }) => {
                                                 )
                                             }
                                             className="dark:bg-gray-300"
-                                            id="partner_address"
-                                            aria-describedby="partner_address-help"
+                                            id="xendit"
+                                            aria-describedby="xendit-help"
                                         />
                                     </div>
                                 )}
@@ -1140,10 +1147,15 @@ const Create = ({ usersProp, partnersProp, salesProp, signaturesProp }) => {
                                         <p ref={animateXenditLinkRef}>
                                             <Link
                                                 className="text-blue-600"
-                                                href={data.xendit_link}
+                                                href={
+                                                    isValidURL(data.xendit_link)
+                                                        ? data.xendit_link
+                                                        : null
+                                                }
                                             >
-                                                {data.xendit_link ??
-                                                    "{{link_xendit}}"}
+                                                {data.xendit_link
+                                                    ? data.xendit_link
+                                                    : "{{link_xendit}}"}
                                             </Link>
                                         </p>
                                     </>
@@ -1167,15 +1179,15 @@ const Create = ({ usersProp, partnersProp, salesProp, signaturesProp }) => {
                             >
                                 <p>Hormat Kami,</p>
                                 {data.signature.image ? (
-                                    <div className="h-[130px] w-[130px] self-center py-2">
+                                    <div className="h-[100px] w-[170px] self-center py-2">
                                         <img
                                             src={`/storage/${data.signature.image}`}
                                             alt=""
-                                            className="min-h-20 w-full h-full object-cover"
+                                            className="min-h-20 w-full h-full object-fill"
                                         />
                                     </div>
                                 ) : (
-                                    <div style={{ minHeight: "80px" }}></div>
+                                    <div style={{ minHeight: "100px" }}></div>
                                 )}
                                 <p className="font-bold">
                                     {data.signature.name}

@@ -149,9 +149,9 @@ use Carbon\Carbon;
 
     </div>
 
-    <div class="flex flex-row mt-10 justify-between items-center">
+    <div class="flex flex-col mt-10 justify-between items-center">
         @if($invoice_subscription->total_ppn == 0)
-            <div class="flex flex-col mt-5">
+            <div class="flex text-left self-start flex-col mt-5">
                 <p class="font-bold underline">Catatan</p>
                 <p>Catatan Pajak akan ditanggung dan dibayarkan oleh lembaga</p>
                 <p>secara mandiri.</p>
@@ -178,10 +178,10 @@ use Carbon\Carbon;
 
         <div class="w-[30%]" style="width: 30%; height: 30%">
             <p>Hormat Kami,</p>
-            <div style="width: 130px; height: 130px; overflow: hidden;" class="py-2">
+            <div style="width: 170px; height: 100px; overflow: hidden;" class="py-2">
                 <img src="{{ public_path("/storage/$invoice_subscription->signature_image") }}" alt="" class="min-h-20
                 w-full"
-                style="object-fit: cover; width:100%; height:100%;" />
+                style="object-fit: fill; width:100%; height:100%;" />
             </div>
             <!-- <div style="min-height: 80px"></div> -->
             <p class="font-bold">{{$invoice_subscription->signature_name}}</p>
