@@ -323,6 +323,7 @@ export default function Index({ auth, partner }) {
         { name: "Aktif" },
         { name: "CLBK" },
         { name: "Non Aktif" },
+        { name: "Prospek" },
     ];
 
     const option_training_offline = [
