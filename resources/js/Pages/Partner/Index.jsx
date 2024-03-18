@@ -588,8 +588,8 @@ export default function Index({ auth, partner }) {
                 status: partner.status,
             },
         }));
-        setcodeRegency(JSON.parse(partner.regency).code);
-        setcodeProvince(JSON.parse(partner.province).code);
+        partner.regency ?? setcodeRegency(JSON.parse(partner.regency).code);
+        partner.province ?? setcodeProvince(JSON.parse(partner.province).code);
 
         setModalEditPartnersIsVisible(true);
     };
