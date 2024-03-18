@@ -278,7 +278,7 @@ const Create = ({ usersProp, partnersProp, salesProp, signaturesProp }) => {
         post("/invoice_subscriptions", {
             onSuccess: () => {
                 showSuccess("Tambah");
-                window.location = BASE_URL + "/invoice_subscriptions";
+                window.location = "/invoice_subscriptions";
             },
 
             onError: () => {
