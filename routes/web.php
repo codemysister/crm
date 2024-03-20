@@ -21,6 +21,7 @@ use App\Http\Controllers\RoleController;
 use App\Http\Controllers\SignatureController;
 use App\Http\Controllers\SLAController;
 use App\Http\Controllers\SPHController;
+use App\Http\Controllers\StatusController;
 use App\Http\Controllers\STPDController;
 use App\Http\Controllers\UserController;
 use App\Models\InvoiceSubscriptionTransaction;
@@ -125,6 +126,14 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+
+    // Status
+    Route::get('/status', [StatusController::class, 'index'])->name('status.index');
+    Route::post('/status', [StatusController::class, 'store'])->name('status.store');
+    Route::put('/status/{status:uuid}', [StatusController::class, 'update'])->name('status.update');
+    Route::delete('/status/{status:uuid}', [StatusController::class, 'destroy'])->name('status.destroy');
+    Route::get('/api/status', [StatusController::class, 'apiGetStatus'])->name('api.status');
+    Route::get('/api/status/arsip', [StatusController::class, 'apiGetStatusArsip'])->name('api.status.arsip');
 
 
     // Role
