@@ -42,9 +42,21 @@ class StatusController extends Controller
         $status->delete();
     }
 
+    public function destroyForce($uuid)
+    {
+        $status = Status::withTrashed()->where('uuid', '=', $uuid)->first();
+        $status->forceDelete();
+    }
+
+    public function restore($uuid)
+    {
+        $status = Status::withTrashed()->where('uuid', '=', $uuid)->first();
+        $status->restore();
+    }
+
     public function apiGetStatus()
     {
-        $statuses = Status::latest()->get();
+        $statuses = Status::withoutTrashed()->latest()->get();
         return response()->json($statuses);
     }
 
