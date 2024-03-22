@@ -131,11 +131,12 @@ Route::middleware('auth')->group(function () {
     Route::get('/status', [StatusController::class, 'index'])->name('status.index');
     Route::post('/status', [StatusController::class, 'store'])->name('status.store');
     Route::put('/status/{status:uuid}/restore', [StatusController::class, 'restore'])->name('status.restore');
-    Route::put('/status/{status:uuid}', [StatusController::class, 'update'])->name('status.update');
+    Route::patch('/status/{status:uuid}', [StatusController::class, 'update'])->name('status.update');
     Route::delete('/status/{status:uuid}/force', [StatusController::class, 'destroyForce'])->name('status.destroy.force');
     Route::delete('/status/{status:uuid}', [StatusController::class, 'destroy'])->name('status.destroy');
-    Route::get('/api/status', [StatusController::class, 'apiGetStatus'])->name('api.status');
     Route::get('/api/status/arsip', [StatusController::class, 'apiGetStatusArsip'])->name('api.status.arsip');
+    Route::get('/api/status/log', [StatusController::class, 'apiGetStatusLog'])->name('api.status.log');
+    Route::get('/api/status', [StatusController::class, 'apiGetStatus'])->name('api.status');
 
 
     // Role
