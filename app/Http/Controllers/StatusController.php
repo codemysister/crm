@@ -7,6 +7,7 @@ use App\Models\Status;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
+use Spatie\Activitylog\Models\Activity;
 
 class StatusController extends Controller
 {
@@ -29,11 +30,7 @@ class StatusController extends Controller
     public function update(StatusRequest $request, $uuid)
     {
         $status = Status::where('uuid', '=', $uuid)->first();
-        $status->update([
-            'name' => strtolower($request->name),
-            'category' => strtolower($request->category),
-            'color' => $request->color
-        ]);
+        $status->fill($request->except('id'))->save();
     }
 
     public function destroy($uuid)
@@ -60,9 +57,16 @@ class StatusController extends Controller
         return response()->json($statuses);
     }
 
+    public function apiGetStatusLog()
+    {
+        $logs = Activity::with('causer', 'subject')->latest()->get();
+
+        return response()->json($logs);
+    }
+
     public function apiGetStatusArsip()
     {
-        $statuses = Status::withTrashed()->whereNotNull('deleted_at')->get();
+        $statuses = Status::withTrashed()->whereNotNull('deleted_at')->latest()->get();
         return response()->json($statuses);
     }
 }
