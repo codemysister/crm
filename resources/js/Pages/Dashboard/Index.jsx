@@ -23,6 +23,7 @@ import { Column } from "primereact/column";
 import { Badge } from "primereact/badge";
 import { FilterMatchMode } from "primereact/api";
 import { InputText } from "primereact/inputtext";
+import HeaderDatatable from "@/Components/HeaderDatatable";
 
 ChartJS.register(
     ArcElement,
@@ -34,7 +35,7 @@ ChartJS.register(
     BarElement
 );
 
-const Index = ({ statisticGeneral, accountManagers }) => {
+const Index = ({ statisticGeneralProp, usersProp }) => {
     const [statiscticAM, setStatisticAM] = useState({
         data: [0, 0, 0, 0, 0],
     });
@@ -133,7 +134,7 @@ const Index = ({ statisticGeneral, accountManagers }) => {
         0,
         statiscticAM.partnersByProvince?.length > 0
             ? statiscticAM.partnersByProvince.length
-            : statisticGeneral.partnersByProvince.length
+            : statisticGeneralProp.partnersByProvince.length
     );
 
     const handleSelectedDetailPartner = (partner) => {
@@ -141,25 +142,14 @@ const Index = ({ statisticGeneral, accountManagers }) => {
         window.location = newUrl;
     };
 
-    const renderHeader = () => {
+    const header = () => {
         return (
-            <div className="flex flex-row justify-left gap-2 align-items-center items-end">
-                <div className="w-[30%]">
-                    <span className="p-input-icon-left">
-                        <i className="pi pi-search dark:text-white" />
-                        <InputText
-                            className="dark:bg-transparent dark:placeholder-white"
-                            value={globalFilterValue}
-                            onChange={onGlobalFilterChange}
-                            placeholder="Keyword Search"
-                        />
-                    </span>
-                </div>
-            </div>
+            <HeaderDatatable
+                globalFilterValue={globalFilterValue}
+                onGlobalFilterChange={onGlobalFilterChange}
+            ></HeaderDatatable>
         );
     };
-
-    const header = renderHeader();
 
     const options = {
         plugins: {
@@ -189,8 +179,8 @@ const Index = ({ statisticGeneral, accountManagers }) => {
                     dataKey="id"
                     value={selectedAM}
                     onChange={(e) => setSelectedAM(e.target.value)}
-                    options={accountManagers}
-                    placeholder="Pilih Account Manager"
+                    options={usersProp}
+                    placeholder="Pilih User"
                     filter
                     valueTemplate={selectedOptionTemplate}
                     itemTemplate={optionTemplate}
@@ -216,7 +206,7 @@ const Index = ({ statisticGeneral, accountManagers }) => {
                             <p className="text-lg font-semibold text-gray-700 dark:text-gray-200">
                                 {selectedAM
                                     ? statiscticAM.totalPartner
-                                    : statisticGeneral.totalPartner}
+                                    : statisticGeneralProp.totalPartner}
                             </p>
                         </div>
                     </div>
@@ -245,7 +235,7 @@ const Index = ({ statisticGeneral, accountManagers }) => {
                             <p className="text-lg font-semibold text-gray-700 dark:text-gray-200">
                                 {selectedAM
                                     ? statiscticAM.totalProses
-                                    : statisticGeneral.totalProses}
+                                    : statisticGeneralProp.totalProses}
                             </p>
                         </div>
                     </div>
@@ -274,7 +264,7 @@ const Index = ({ statisticGeneral, accountManagers }) => {
                             <p className="text-lg font-semibold text-gray-700 dark:text-gray-200">
                                 {selectedAM
                                     ? statiscticAM.totalAktif
-                                    : statisticGeneral.totalAktif}
+                                    : statisticGeneralProp.totalAktif}
                             </p>
                         </div>
                     </div>
@@ -303,7 +293,7 @@ const Index = ({ statisticGeneral, accountManagers }) => {
                             <p className="text-lg font-semibold text-gray-700 dark:text-gray-200">
                                 {selectedAM
                                     ? statiscticAM.totalNonaktif
-                                    : statisticGeneral.totalNonaktif}
+                                    : statisticGeneralProp.totalNonaktif}
                             </p>
                         </div>
                     </div>
@@ -331,7 +321,7 @@ const Index = ({ statisticGeneral, accountManagers }) => {
                             <p className="text-lg font-semibold text-gray-700 dark:text-gray-200">
                                 {selectedAM
                                     ? statiscticAM.totalCancel
-                                    : statisticGeneral.totalCancel}
+                                    : statisticGeneralProp.totalCancel}
                             </p>
                         </div>
                     </div>
@@ -361,7 +351,7 @@ const Index = ({ statisticGeneral, accountManagers }) => {
                             <p className="text-lg font-semibold text-gray-700 dark:text-gray-200">
                                 {selectedAM
                                     ? statiscticAM.totalCLBK
-                                    : statisticGeneral.totalCLBK}
+                                    : statisticGeneralProp.totalCLBK}
                             </p>
                         </div>
                     </div>
@@ -417,20 +407,20 @@ const Index = ({ statisticGeneral, accountManagers }) => {
                                     {
                                         label: "Persentase",
                                         data: [
-                                            (statisticGeneral.totalProses /
-                                                statisticGeneral.totalPartner) *
+                                            (statisticGeneralProp.totalProses /
+                                                statisticGeneralProp.totalPartner) *
                                                 100,
-                                            (statisticGeneral.totalAktif /
-                                                statisticGeneral.totalPartner) *
+                                            (statisticGeneralProp.totalAktif /
+                                                statisticGeneralProp.totalPartner) *
                                                 100,
-                                            (statisticGeneral.totalNonaktif /
-                                                statisticGeneral.totalPartner) *
+                                            (statisticGeneralProp.totalNonaktif /
+                                                statisticGeneralProp.totalPartner) *
                                                 100,
-                                            (statisticGeneral.totalCLBK /
-                                                statisticGeneral.totalPartner) *
+                                            (statisticGeneralProp.totalCLBK /
+                                                statisticGeneralProp.totalPartner) *
                                                 100,
-                                            (statisticGeneral.totalCancel /
-                                                statisticGeneral.totalPartner) *
+                                            (statisticGeneralProp.totalCancel /
+                                                statisticGeneralProp.totalPartner) *
                                                 100,
                                         ],
                                         backgroundColor: [
@@ -458,7 +448,7 @@ const Index = ({ statisticGeneral, accountManagers }) => {
                                               (province) =>
                                                   province.province_name
                                           )
-                                        : statisticGeneral.partnersByProvince.map(
+                                        : statisticGeneralProp.partnersByProvince.map(
                                               (province) =>
                                                   province.province_name
                                           ),
@@ -476,7 +466,7 @@ const Index = ({ statisticGeneral, accountManagers }) => {
                                                       (province) =>
                                                           province.total
                                                   )
-                                                : statisticGeneral.partnersByProvince.map(
+                                                : statisticGeneralProp.partnersByProvince.map(
                                                       (province) =>
                                                           province.total
                                                   ),
@@ -518,7 +508,10 @@ const Index = ({ statisticGeneral, accountManagers }) => {
                                 "dark:bg-slate-900 dark:text-gray-400",
                         }}
                         paginator
-                        rows={5}
+                        rowsPerPageOptions={[5, 10, 25, 50]}
+                        paginatorTemplate="RowsPerPageDropdown FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink"
+                        currentPageReportTemplate="{first} - {last} dari {totalRecords}"
+                        rows={10}
                         filters={filters}
                         globalFilterFields={[
                             "name",
@@ -531,7 +524,8 @@ const Index = ({ statisticGeneral, accountManagers }) => {
                         paginatorClassName="dark:bg-transparent paginator-custome dark:text-gray-300 rounded-b-lg"
                         header={header}
                         value={
-                            statiscticAM.partners ?? statisticGeneral.partners
+                            statiscticAM.partners ??
+                            statisticGeneralProp.partners
                         }
                         dataKey="id"
                     >
@@ -567,22 +561,12 @@ const Index = ({ statisticGeneral, accountManagers }) => {
                             body={(rowData) => {
                                 return (
                                     <Badge
-                                        value={rowData.status}
+                                        value={rowData.status.name}
                                         className="text-white"
-                                        severity={
-                                            rowData.status == "Aktif"
-                                                ? "success"
-                                                : null ||
-                                                  rowData.status == "CLBK"
-                                                ? "info"
-                                                : null ||
-                                                  rowData.status == "Proses"
-                                                ? "warning"
-                                                : null ||
-                                                  rowData.status == "Non Aktif"
-                                                ? "danger"
-                                                : null
-                                        }
+                                        style={{
+                                            backgroundColor:
+                                                "#" + rowData.status.color,
+                                        }}
                                     ></Badge>
                                 );
                             }}

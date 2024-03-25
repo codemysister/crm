@@ -20,15 +20,15 @@
 
 
     /* Paginator */
-    .dark .p-paginator .p-paginator-pages .p-paginator-page {
-      color: white;
+    .dark .p-paginator .p-paginator-pages .p-paginator-page, .dark .p-paginator .p-paginator-current {
+      color: #D1D5DB
     }
 
     .dark .p-paginator .p-paginator-first,
     .dark .p-paginator .p-paginator-prev,
     .dark .p-paginator .p-paginator-next,
     .dark .p-paginator .p-paginator-last {
-      color: white;
+      color: #D1D5DB
     }
 
     .dark .paginator-custome{
@@ -44,6 +44,10 @@
       border-top-right-radius: 0.5rem;
     }
 
+    .p-datatable .p-datatable-header{
+      padding: 0.75rem 1rem;
+    }
+    
     .dark .p-datatable .p-datatable-tbody > tr{
       background: transparent;
       color: rgb(209 213 219 / 1);
@@ -107,11 +111,22 @@
     /* Input Text */
     .dark .p-fluid .p-inputtext {
       width: 100%;
-      color:rgb(175, 175, 175);
+      /* color:rgb(175, 175, 175); */
       border: none;
     }
 
-   
+    
+
+    .p-datatable .p-datatable-tbody > tr > td, .p-datatable .p-datatable-thead > tr > th {
+      padding: 0.4rem 1rem;
+     }
+
+     .p-datatable.p-datatable-sm .p-datatable-header{
+        padding: 0.2rem 0.75rem;
+     }
+   .table-log tr > td {
+    border: none;
+   }
 
     .p-input-icon-left{
       border-radius: 4px;
@@ -198,7 +213,7 @@
       background-color: transparent;
     }
 
-    .dark .p-dropdown,  .dark .p-inputwrapper, .dark textarea, .dark .filepond--drop-label{
+    .dark .p-dropdown,  .dark .p-inputwrapper, .dark textarea, .dark .filepond--drop-label, .dark .p-dropdown .p-component .p-inputwrapper .p-dropdown-clearable{
       border-radius: 4px;
       background-color: #D1D5DB;
     }
@@ -324,9 +339,9 @@
       font-size: 0.9rem;
     }
 
-    .dark .p-dropdown .p-dropdown-label.p-placeholder{
+    /* .dark .p-dropdown .p-dropdown-label.p-placeholder{
       color: rgb(209 213 219 / 1);
-    }
+    } */
     
 
    
@@ -428,6 +443,11 @@
       color: white;
     }
 
+    /* Overlay panel */
+    .p-overlaypanel .p-overlaypanel-content{
+      padding: 0.2rem;
+    }
+
    
 
     .dark .p-menu{
@@ -468,6 +488,18 @@
     width: 50%;
    }
 
+   .p-confirm-dialog-accept{
+    background-color: #D32F2F;
+   }
+
+   .p-button.p-button-icon-only.p-button-rounded{
+    height: 100%;
+   }
+
+   .p-button-icon-left ~ .p-button-label{
+    flex: none;
+   }
+
    /* message */
    .p-inline-message {
     gap: 5px;
@@ -486,6 +518,11 @@
     
 }
 
+/* Inline */
+.p-inline-message {
+  padding: 0.3rem 0.75rem;
+}
+
 .dark .p-card-content a svg{
   color: white;
 }
@@ -497,12 +534,14 @@ label{
 
 body{
   font-family: 'Inter', sans-serif;
+  box-sizing: border-box;
+  
 }
 
 .dark body{
   background-color: rgb(2 6 23 / 1);
   color: rgb(209 213 219 / 1);
-;
+
 }
 
 

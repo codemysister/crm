@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Partner;
+use App\Models\Status;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -12,22 +13,31 @@ class DashboardController extends Controller
 {
     public function index()
     {
-        $partners = Partner::with('sales', 'account_manager')->get();
 
+        $partners = Partner::with('sales', 'account_manager', 'status')->get();
+        $usersProp = User::all();
         $partnersByProvince = DB::table('partners')
             ->select('province->name as province_name', DB::raw('count(*) as total'))
             ->groupBy('province_name')
             ->get();
 
-        $totalPartner = Partner::count();
-        $totalProses = Partner::where('status', 'Proses')->count();
-        $totalAktif = Partner::where('status', 'Aktif')->count();
-        $totalCLBK = Partner::where('status', 'CLBK')->count();
-        $totalCancel = Partner::where('status', 'Cancel')->count();
-        $totalNonaktif = Partner::where('status', 'Non Aktif')->count();
-        $accountManagers = User::role('account manager')->get();
+        $statusNames = ['proses', 'aktif', 'clbk', 'cancel', 'non aktif'];
+        $statuses = Status::whereIn('name', $statusNames)->get()->keyBy('name');
 
-        $statisticGeneral = [
+        $totalPartner = Partner::count();
+        $counts = Partner::select('status_id', DB::raw('count(*) as total'))
+            ->groupBy('status_id')
+            ->get()
+            ->pluck('total', 'status_id')
+            ->toArray();
+
+        $totalProses = $counts[$statuses['proses']->id] ?? 0;
+        $totalAktif = $counts[$statuses['aktif']->id] ?? 0;
+        $totalCLBK = $counts[$statuses['clbk']->id] ?? 0;
+        $totalCancel = $counts[$statuses['cancel']->id] ?? 0;
+        $totalNonaktif = $counts[$statuses['non aktif']->id] ?? 0;
+
+        $statisticGeneralProp = [
             "partners" => $partners,
             "totalPartner" => $totalPartner,
             "totalProses" => $totalProses,
@@ -38,22 +48,35 @@ class DashboardController extends Controller
             "partnersByProvince" => $partnersByProvince
         ];
 
-        return Inertia::render('Dashboard/Index', compact('statisticGeneral', 'accountManagers'));
+        return Inertia::render('Dashboard/Index', compact('statisticGeneralProp', 'usersProp'));
     }
 
     public function getPartnerByUser($id)
     {
-        $partners = Partner::with('sales', 'account_manager')->where('account_manager_id', $id)->get();
+        $partners = Partner::with('sales', 'account_manager', 'createdBy', 'status')->where('created_by', $id)->get();
         $partnersByProvince = DB::table('partners')
             ->select('province->name as province_name', DB::raw('count(*) as total'))
-            ->groupBy('province_name')->where('account_manager_id', $id)
+            ->groupBy('province_name')->where('created_by', $id)
             ->get();
-        $totalPartner = Partner::where('account_manager_id', $id)->count();
-        $totalProses = Partner::where('account_manager_id', $id)->where('status', 'Proses')->count();
-        $totalAktif = Partner::where('account_manager_id', $id)->where('status', 'Aktif')->count();
-        $totalCLBK = Partner::where('account_manager_id', $id)->where('status', 'CLBK')->count();
-        $totalCancel = Partner::where('account_manager_id', $id)->where('status', 'Cancel')->count();
-        $totalNonaktif = Partner::where('account_manager_id', $id)->where('status', 'Non Aktif')->count();
+
+        $statusNames = ['proses', 'aktif', 'clbk', 'cancel', 'non aktif'];
+        $statuses = Status::whereIn('name', $statusNames)->get()->keyBy('name');
+
+        $counts = Partner::where('created_by', $id)
+            ->select('status_id', DB::raw('count(*) as total'))
+            ->groupBy('status_id')
+            ->get()
+            ->pluck('total', 'status_id')
+            ->toArray();
+
+        $totalPartner = array_sum($counts);
+
+        $totalProses = $counts[$statuses['proses']->id] ?? 0;
+        $totalAktif = $counts[$statuses['aktif']->id] ?? 0;
+        $totalCLBK = $counts[$statuses['clbk']->id] ?? 0;
+        $totalCancel = $counts[$statuses['cancel']->id] ?? 0;
+        $totalNonaktif = $counts[$statuses['non aktif']->id] ?? 0;
+
         $statisticAM = [
             "partners" => $partners,
             "totalPartner" => $totalPartner,

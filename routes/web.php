@@ -183,9 +183,8 @@ Route::middleware('auth')->group(function () {
     Route::resource('signature', SignatureController::class);
     Route::get('/api/signature', [SignatureController::class, 'apiGetSignature'])->name('api.signature');
 
-
-
     // Partner
+    Route::post('/partners/filter', [PartnerController::class, 'filter'])->name('partners.filter')->middleware(['can:lihat partner']);
     Route::get('/partners', [PartnerController::class, 'index'])->name('partners.view')->middleware(['can:lihat partner']);
     Route::post('/partners', [PartnerController::class, 'store'])->name('partners.store')->middleware(['can:tambah partner']);
     Route::post('/partners/import', [PartnerController::class, 'import'])->name('partners.import')->middleware(['can:tambah partner']);
