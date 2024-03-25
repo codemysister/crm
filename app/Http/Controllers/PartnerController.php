@@ -11,11 +11,14 @@ use App\Models\PartnerBank;
 use App\Models\PartnerPIC;
 use App\Models\PartnerPriceList;
 use App\Models\PartnerSubscription;
+use App\Models\Status;
 use App\Models\User;
 use Carbon\Carbon;
 use DateTime;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
@@ -26,10 +29,13 @@ class PartnerController extends Controller
     public function index(Request $request)
     {
         $uuid = $request->query('uuid');
+        $usersProp = User::with('roles')->get();
         $partner = null;
         if ($uuid) {
             $partner = Partner::with([
                 'sales',
+                'referral',
+                'status',
                 'account_manager',
                 'pics' => function ($query) {
                     $query->latest();
@@ -46,8 +52,61 @@ class PartnerController extends Controller
             ])->where('uuid', '=', $uuid)->first();
         }
 
+        $statusProp = Status::all();
+        return Inertia::render("Partner/Index", compact('partner', 'usersProp', 'statusProp'));
+    }
 
-        return Inertia::render("Partner/Index", compact('partner'));
+    public function filter(Request $request)
+    {
+        $partners = Partner::with([
+            'sales',
+            'referral',
+            'status',
+            'account_manager',
+            'pics' => function ($query) {
+                $query->latest();
+            },
+            'subscriptions' => function ($query) {
+                $query->latest();
+            },
+            'banks' => function ($query) {
+                $query->latest();
+            },
+            'price_list',
+        ]);
+
+        if ($request->user) {
+            $partners->where('created_by', $request->user['id']);
+        }
+
+        if ($request->account_manager) {
+            $partners->where('account_manager_id', $request->account_manager['id']);
+        }
+
+        if ($request->sales) {
+            $partners->where('sales_id', $request->sales['id']);
+        }
+
+        if ($request->referral) {
+            $partners->where('referral_id', $request->referral['id']);
+        }
+
+        if ($request->onboarding_date['start'] && $request->onboarding_date['end']) {
+            $partners->whereBetween('onboarding_date', [$request->onboarding_date['start'], $request->onboarding_date['end']]);
+        }
+
+        if ($request->live_date['start'] && $request->live_date['end']) {
+            $partners->whereBetween('live_date', [$request->live_date['start'], $request->live_date['end']]);
+        }
+
+        if ($request->province) {
+            $partners->whereJsonContains('province->name', json_decode($request->province)->name);
+        }
+
+
+        $partners = $partners->get();
+
+        return response()->json($partners);
     }
 
     public function import()
@@ -69,12 +128,16 @@ class PartnerController extends Controller
 
         }
 
-        $partner = Partner::create([
+        Partner::create([
             'uuid' => Str::uuid(),
             'name' => $request['partner']['name'],
             'logo' => $pathLogo,
+            'npwp' => $request['partner']['npwp'] ?? null,
+            'password' => $request['partner']['password'] ?? null,
             'phone_number' => $request['partner']['phone_number'] ?? null,
+            'status_id' => $request['partner']['status']['id'],
             'sales_id' => $request['partner']['sales']['id'] ?? null,
+            'referral_id' => $request['partner']['referral']['id'] ?? null,
             'account_manager_id' => $request['partner']['account_manager']['id'] ?? null,
             'onboarding_date' => Carbon::parse($request['partner']['onboarding_date'])->setTimezone('GMT+7')->format('Y-m-d H:i:s'),
             'live_date' => $request['partner']['live_date'] !== null ? Carbon::parse($request['partner']['live_date'])->setTimezone('GMT+7')->format('Y-m-d H:i:s') : null,
@@ -85,107 +148,11 @@ class PartnerController extends Controller
             'regency' => $request['partner']['regency'],
             'subdistrict' => $request['partner']['subdistrict'],
             'address' => $request['partner']['address'],
-            'status' => $request['partner']['status'],
             'payment_metode' => $request['partner']['payment_metode'],
             'period' => $request['partner']['period']['name'] ?? $request['partner']['period'],
+            'created_by' => Auth::user()->id
         ]);
 
-        if (
-            $request['pic']['name'] !== null ||
-            $request['pic']['number'] !== null ||
-            $request['pic']['email'] !== null ||
-            $request['pic']['position'] !== null
-        ) {
-            $pic = PartnerPIC::create([
-                'uuid' => Str::uuid(),
-                'partner_id' => $partner->id,
-                'name' => $request['pic']['name'],
-                'number' => $request['pic']['number'],
-                'email' => $request['pic']['email'],
-                'position' => $request['pic']['position'],
-            ]);
-        }
-
-        if (
-            $request['bank']['bank'] !== null ||
-            $request['bank']['account_bank_number'] !== null ||
-            $request['bank']['account_bank_name'] !== null
-        ) {
-            $bank = PartnerBank::create([
-                'uuid' => Str::uuid(),
-                'partner_id' => $partner->id,
-                'bank' => $request['bank']['bank'],
-                'account_bank_number' => $request['bank']['account_bank_number'],
-                'account_bank_name' => $request['bank']['account_bank_name']
-            ]);
-        }
-
-        if (
-            $request['account_setting']['subdomain'] !== null ||
-            $request['account_setting']['email_super_admin'] !== null ||
-            $request['account_setting']['cas_link_partner'] !== null ||
-            $request['account_setting']['card_number'] !== null
-        ) {
-            $account = PartnerAccountSetting::create([
-                'uuid' => Str::uuid(),
-                'partner_id' => $partner->id,
-                'subdomain' => $request['account_setting']['subdomain'],
-                'email_super_admin' => $request['account_setting']['email_super_admin'],
-                'cas_link_partner' => $request['account_setting']['cas_link_partner'],
-                'card_number' => $request['account_setting']['card_number']
-            ]);
-        }
-
-        if (
-            $request['subscription']['bill'] !== null ||
-            $request['subscription']['nominal'] !== null ||
-            $request['subscription']['ppn'] !== null ||
-            $request['subscription']['total_ppn'] !== null ||
-            $request['subscription']['total_bill'] !== null
-        ) {
-            $subscription = PartnerSubscription::create([
-                'uuid' => Str::uuid(),
-                'partner_id' => $partner->id,
-                'bill' => $request['subscription']['bill'],
-                'nominal' => $request['subscription']['nominal'],
-                'ppn' => $request['subscription']['ppn'],
-                'total_ppn' => $request['subscription']['total_ppn'],
-                'total_bill' => $request['subscription']['total_bill'],
-            ]);
-        }
-
-        if (
-            $request['price_list']['price_card']['price'] !== null ||
-            $request['price_list']['price_card']['type'] !== null ||
-            $request['price_list']['price_lanyard'] !== null ||
-            $request['price_list']['price_subscription_system'] !== null ||
-            $request['price_list']['price_training_offline'] !== null ||
-            $request['price_list']['price_training_online'] !== null ||
-            $request['price_list']['fee_purchase_cazhpoin'] !== null ||
-            $request['price_list']['fee_bill_cazhpoin'] !== null ||
-            $request['price_list']['fee_topup_cazhpos'] !== null ||
-            $request['price_list']['fee_withdraw_cazhpos'] !== null ||
-            $request['price_list']['fee_bill_saldokartu'] !== null
-        ) {
-
-            $price_list = PartnerPriceList::create([
-                'uuid' => Str::uuid(),
-                'partner_id' => $partner->id,
-                'price_card' => json_encode([
-                    'price' => $request['price_list']['price_card']['price'] !== 0 ? $request['price_list']['price_card']['price'] : null,
-                    'type' => $request['price_list']['price_card']['price'] !== 0 ? $request['price_list']['price_card']['type']['name'] : null,
-                ]),
-                'price_lanyard' => $request['price_list']['price_lanyard'],
-                'price_subscription_system' => $request['price_list']['price_subscription_system'],
-                'price_training_offline' => $request['price_list']['price_training_offline'],
-                'price_training_online' => $request['price_list']['price_training_online'],
-                'fee_purchase_cazhpoin' => $request['price_list']['fee_purchase_cazhpoin'],
-                'fee_bill_cazhpoin' => $request['price_list']['fee_bill_cazhpoin'],
-                'fee_topup_cazhpos' => $request['price_list']['fee_topup_cazhpos'],
-                'fee_withdraw_cazhpos' => $request['price_list']['fee_withdraw_cazhpos'],
-                'fee_bill_saldokartu' => $request['price_list']['fee_bill_saldokartu'],
-            ]);
-        }
     }
 
 
@@ -220,19 +187,24 @@ class PartnerController extends Controller
         $partner->update([
             'name' => $request['partner']['name'],
             'logo' => $pathLogo,
+            'npwp' => $request['partner']['npwp'] ?? null,
+            'password' => $request['partner']['password'] ?? null,
             'phone_number' => $request['partner']['phone_number'] ?? null,
+            'status_id' => $request['partner']['status']['id'],
             'sales_id' => $request['partner']['sales']['id'] ?? null,
+            'referral_id' => $request['partner']['referral']['id'] ?? null,
             'account_manager_id' => $request['partner']['account_manager']['id'] ?? null,
-            'onboarding_date' => Carbon::parse($request['partner']['onboarding_date'])->setTimezone('GMT+7')->format('Y-m-d H:i:s') ?? null,
-            'live_date' => Carbon::parse($request['partner']['live_date'])->setTimezone('GMT+7')->format('Y-m-d H:i:s') ?? null,
-            'onboarding_age' => $request['partner']['onboarding_age'] ?? null,
-            'live_age' => $request['partner']['live_age'] ?? null,
+            'onboarding_date' => Carbon::parse($request['partner']['onboarding_date'])->setTimezone('GMT+7')->format('Y-m-d H:i:s'),
+            'live_date' => $request['partner']['live_date'] !== null ? Carbon::parse($request['partner']['live_date'])->setTimezone('GMT+7')->format('Y-m-d H:i:s') : null,
+            'onboarding_age' => $request['partner']['onboarding_age'],
+            'live_age' => $request['partner']['live_age'],
             'monitoring_date_after_3_month_live' => $request['partner']['monitoring_date_after_3_month_live'] !== null ? Carbon::parse($request['partner']['monitoring_date_after_3_month_live'])->setTimezone('GMT+7')->format('Y-m-d H:i:s') : null,
             'province' => $request['partner']['province'],
             'regency' => $request['partner']['regency'],
-            'subdistrict' => $request['partner']['subdistrict'] ?? null,
-            'address' => $request['partner']['address'] ?? null,
-            'status' => $request['partner']['status']
+            'subdistrict' => $request['partner']['subdistrict'],
+            'address' => $request['partner']['address'],
+            'payment_metode' => $request['partner']['payment_metode'],
+            'period' => $request['partner']['period']['name'] ?? $request['partner']['period'],
         ]);
     }
 
@@ -294,6 +266,8 @@ class PartnerController extends Controller
     {
         $partnersDefault = Partner::with([
             'sales',
+            'referral',
+            'status',
             'account_manager',
             'pics' => function ($query) {
                 $query->latest();
@@ -304,9 +278,9 @@ class PartnerController extends Controller
             'banks' => function ($query) {
                 $query->latest();
             },
-            'price_list'
+            'price_list',
 
-        ])->get();
+        ])->latest()->get();
         $salesDefault = User::role('account executive')->get();
         $accountManagerDefault = User::role('account manager')->get();
 

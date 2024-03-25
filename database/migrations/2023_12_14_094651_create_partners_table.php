@@ -13,9 +13,14 @@ return new class extends Migration {
         Schema::create('partners', function (Blueprint $table) {
             $table->id();
             $table->uuid('uuid');
+            $table->foreignId('created_by')->nullable()->constrained('users', 'id')->onDelete('cascade');
+            $table->foreignId('status_id')->constrained('statuses', 'id')->onDelete('cascade');
             $table->foreignId('sales_id')->nullable()->constrained('users', 'id')->onDelete('cascade');
             $table->foreignId('account_manager_id')->nullable()->constrained('users', 'id')->onDelete('cascade');
+            $table->foreignId('referral_id')->nullable()->constrained('users', 'id')->onDelete('cascade');
             $table->string('name');
+            $table->string('npwp')->nullable();
+            $table->string('password')->nullable();
             $table->string('logo')->nullable();
             $table->string('phone_number')->nullable();
             $table->json('province')->nullable();
@@ -29,7 +34,7 @@ return new class extends Migration {
             $table->date('monitoring_date_after_3_month_live')->nullable();
             $table->string('period')->nullable();
             $table->string('payment_metode')->default('payment link');
-            $table->enum('status', ['Proses', 'Aktif', 'Non Aktif', 'Cancel', 'CLBK', 'Prospek']);
+
             $table->timestamps();
         });
     }

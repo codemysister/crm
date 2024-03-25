@@ -8,8 +8,7 @@ const HeaderDatatable = ({
 }) => {
     return (
         <div className="flex flex-row justify-between gap-2 align-items-center items-end">
-            <div className="flex gap-2">{children}</div>
-            <div className="w-[30%] ">
+            <div>
                 <span className="p-input-icon-left border-none">
                     <i className="pi pi-search dark:text-white" />
                     <InputText
@@ -20,6 +19,7 @@ const HeaderDatatable = ({
                     />
                 </span>
             </div>
+            <div className="flex gap-2">{children}</div>
         </div>
     );
 };

@@ -15,9 +15,17 @@ class Partner extends Authenticatable
 
     protected $guarded = [];
 
+    public function createdBy()
+    {
+        return $this->belongsTo(User::class, 'created_by', 'id');
+    }
     public function sales()
     {
         return $this->belongsTo(User::class, 'sales_id', 'id');
+    }
+    public function referral()
+    {
+        return $this->belongsTo(User::class, 'referral_id', 'id');
     }
     public function account_manager()
     {
@@ -52,6 +60,11 @@ class Partner extends Authenticatable
     public function sph()
     {
         return $this->hasOne(SPH::class, 'partner_id', 'id');
+    }
+
+    public function status()
+    {
+        return $this->belongsTo(Status::class);
     }
 
     public function invoice_generals()

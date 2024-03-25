@@ -4,7 +4,7 @@ import { DataTable } from "primereact/datatable";
 import { Skeleton } from "primereact/skeleton";
 
 const SkeletonDatatable = ({ auth }) => {
-    const dummyArray = Array.from({ length: 10 }, (v, i) => i);
+    const dummyArray = Array.from({ length: 15 }, (v, i) => i);
 
     return (
         <DashboardLayout auth={auth.user} className="">
@@ -18,6 +18,7 @@ const SkeletonDatatable = ({ auth }) => {
                         table: "dark:bg-transparent bg-white dark:text-gray-300",
                         header: "dark:bg-transparent",
                     }}
+                    size="small"
                 >
                     <Column
                         style={{ width: "25%" }}
