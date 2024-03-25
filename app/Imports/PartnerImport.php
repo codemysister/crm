@@ -7,6 +7,7 @@ use App\Models\PartnerAccountSetting;
 use App\Models\PartnerBank;
 use App\Models\PartnerPIC;
 use App\Models\PartnerSubscription;
+use App\Models\Status;
 use App\Models\User;
 use Carbon\Carbon;
 use GuzzleHttp\Client;
@@ -39,6 +40,7 @@ class PartnerImport implements ToCollection, WithStartRow, WithHeadingRow, WithC
     private $partner;
     private $sales;
     private $account_managers;
+    private $status;
     private $provinsi;
     private $kabupaten;
 
@@ -46,6 +48,7 @@ class PartnerImport implements ToCollection, WithStartRow, WithHeadingRow, WithC
     {
         $this->sales = User::role('account executive')->get();
         $this->account_managers = User::role('account manager')->get();
+        $this->status = collect(Status::where('category', 'partner')->get(['id', 'name']));
         $this->provinsi = collect($this->provinsi());
         $this->kabupaten = collect($this->kabupaten());
     }
@@ -111,12 +114,24 @@ class PartnerImport implements ToCollection, WithStartRow, WithHeadingRow, WithC
 
     public function batchSize(): int
     {
-        return 50;
+        return 300;
     }
 
     public function chunkSize(): int
     {
-        return 50;
+        return 300;
+    }
+
+    function calculateOnboardingAge($liveDate, $onboardingDate)
+    {
+        $onboardingAge = ceil((strtotime($liveDate)) - strtotime($onboardingDate)) / (60 * 60 * 24);
+        return $onboardingAge;
+    }
+
+    function calculateLiveAge($liveDate)
+    {
+        $liveAge = ceil((strtotime(date("Y-m-d")) - strtotime($liveDate)) / (60 * 60 * 24));
+        return $liveAge;
     }
 
 
@@ -127,29 +142,29 @@ class PartnerImport implements ToCollection, WithStartRow, WithHeadingRow, WithC
             if ($partnerExist) {
                 return null;
             }
-            $email = strtolower(str_replace(' ', '_', $row["sales"]) . "@gmail.com");
+            // $email = strtolower(str_replace(' ', '_', $row["sales"]) . "@gmail.com");
 
-            $salesExist = User::where('email', $email)->orwhere('name', 'like', '%' . $row["sales"] . '%')->first();
+            // $salesExist = User::where('email', $email)->orwhere('name', 'like', '%' . $row["sales"] . '%')->first();
 
-            if ($salesExist == null) {
-                $salesExist = User::create([
-                    'name' => $row["sales"],
-                    'email' => strtolower(str_replace(' ', '_', $row["sales"]) . "@gmail.com"),
-                    'password' => Hash::make('user123')
-                ]);
-                $salesExist->assignRole("account executive");
+            // if ($salesExist == null) {
+            //     $salesExist = User::create([
+            //         'name' => $row["sales"],
+            //         'email' => strtolower(str_replace(' ', '_', $row["sales"]) . "@gmail.com"),
+            //         'password' => Hash::make('user123')
+            //     ]);
+            //     $salesExist->assignRole("account executive");
 
-            }
-            $email = strtolower(str_replace(' ', '_', $row["after_sales"]) . "@gmail.com");
-            $amExist = User::where('email', $email)->orWhere('name', 'like', '%' . $row["after_sales"] . '%')->first();
-            if ($amExist == null) {
-                $amExist = User::create([
-                    'name' => $row["after_sales"],
-                    'email' => strtolower(str_replace(' ', '_', $row["after_sales"]) . "@gmail.com"),
-                    'password' => Hash::make('user123')
-                ]);
-                $amExist->assignRole("account manager");
-            }
+            // }
+            // $email = strtolower(str_replace(' ', '_', $row["after_sales"]) . "@gmail.com");
+            // $amExist = User::where('email', $email)->orWhere('name', 'like', '%' . $row["after_sales"] . '%')->first();
+            // if ($amExist == null) {
+            //     $amExist = User::create([
+            //         'name' => $row["after_sales"],
+            //         'email' => strtolower(str_replace(' ', '_', $row["after_sales"]) . "@gmail.com"),
+            //         'password' => Hash::make('user123')
+            //     ]);
+            //     $amExist->assignRole("account manager");
+            // }
 
             $regency = $this->kabupaten->filter(function ($kabupaten) use ($row) {
                 if ($row['kabkota'] === 'Kab. OKU Timur') {
@@ -163,12 +178,20 @@ class PartnerImport implements ToCollection, WithStartRow, WithHeadingRow, WithC
                 }
                 return stripos(str_replace(' ', '', $kabupaten), str_replace(' ', '', $row['kabkota'])) !== false;
             });
+
             $province = $this->provinsi->filter(function ($provinsi) use ($row) {
                 if ($row['provinsi'] == 'NTB') {
                     $row['provinsi'] = 'Nusa Tenggara Barat';
                 }
                 return stripos(str_replace(' ', '', $provinsi), str_replace(' ', '', $row['provinsi'])) !== false;
             });
+
+
+            $status = $this->status->filter(function ($status) use ($row) {
+                return strtolower($row['status']) === strtolower($status['name']);
+            });
+
+
 
             foreach ($regency as $code => $name) {
                 $regency = ["code" => $code, "name" => ucwords(strtolower($name))];
@@ -182,26 +205,25 @@ class PartnerImport implements ToCollection, WithStartRow, WithHeadingRow, WithC
                 'uuid' => Str::uuid(),
                 'name' => $row["nama_partner"],
                 'phone_number' => $row["nomor_telepon_lembaga"],
-                'sales_id' => $salesExist->id,
-                'account_manager_id' => $amExist->id,
+                'npwp' => $row['npwp'],
+                'password' => $row['password'],
                 'onboarding_date' => Carbon::parse(Date::excelToDateTimeObject($row["tanggal_onboarding"]))->format('Y-m-d H:i:s'),
                 'live_date' => $row["tanggal_live"] ? Carbon::parse(Date::excelToDateTimeObject($row["tanggal_live"]))->format('Y-m-d H:i:s') : null,
-                'onboarding_age' => $row["umur_onboarding_hari"] ? explode(' ', $row["umur_onboarding_hari"])[0] : 0,
-                'live_age' => $row["umur_onboarding_hari"] ? explode(' ', $row["umur_live_hari"])[0] : 0,
+                'onboarding_age' => $row["tanggal_onboarding"] !== null ? $this->calculateOnboardingAge($row["tanggal_live"], $row["tanggal_onboarding"]) : null,
+                'live_age' => $row["tanggal_live"] !== null ? $this->calculateLiveAge($row["tanggal_live"]) : null,
                 'monitoring_date_after_3_month_live' => $row["tanggal_monitoring_3_bulan_after_live"] ? Carbon::parse(Date::excelToDateTimeObject($row["tanggal_monitoring_3_bulan_after_live"]))->format('Y-m-d H:i:s') : null,
                 'regency' => json_encode($regency),
                 'province' => json_encode($province),
-                'period' => $row["per"],
-                'status' => $row['status'] == 'CLBK' ? $row['status'] : ucwords(strtolower($row["status"]))
+                'status_id' => $status->first()->id
             ]);
 
 
-            if ($row['bank'] && $row['nomor_rekening'] && $row['atas_nama']) {
-                PartnerBank::create(['uuid' => Str::uuid(), 'partner_id' => $partner->id, 'bank' => $row["bank"], 'account_bank_number' => $row["nomor_rekening"], 'account_bank_name' => $row['atas_nama']]);
-            }
+            // if ($row['bank'] && $row['nomor_rekening'] && $row['atas_nama']) {
+            //     PartnerBank::create(['uuid' => Str::uuid(), 'partner_id' => $partner->id, 'bank' => $row["bank"], 'account_bank_number' => $row["nomor_rekening"], 'account_bank_name' => $row['atas_nama']]);
+            // }
             PartnerPIC::create(['uuid' => Str::uuid(), 'partner_id' => $partner->id, 'name' => $row["pic_partner"], 'number' => $row["no_hp_pic_partner"]]);
-            partnerAccountSetting::create(['uuid' => Str::uuid(), 'partner_id' => $partner->id, 'subdomain' => $row["sub_domain"], 'email_super_admin' => $row["email_super_admin"], 'cas_link_partner' => $row["cas_link_partner"], 'card_number' => $row["no_kartu_8_digit"]]);
-            PartnerSubscription::create(['uuid' => Str::uuid(), 'partner_id' => $partner->id, 'bill' => $row['tagihan'], 'nominal' => $row["nominal"], 'ppn' => $row["ppn"] / $row["nominal"] * 100, 'total_ppn' => $row["ppn"], 'total_bill' => $row["tagihan_ppn"]]);
+            // partnerAccountSetting::create(['uuid' => Str::uuid(), 'partner_id' => $partner->id, 'subdomain' => $row["sub_domain"], 'email_super_admin' => $row["email_super_admin"], 'cas_link_partner' => $row["cas_link_partner"], 'card_number' => $row["no_kartu_8_digit"]]);
+            // PartnerSubscription::create(['uuid' => Str::uuid(), 'partner_id' => $partner->id, 'bill' => $row['tagihan'], 'nominal' => $row["nominal"], 'ppn' => $row["ppn"] / $row["nominal"] * 100, 'total_ppn' => $row["ppn"], 'total_bill' => $row["tagihan_ppn"]]);
 
         }
     }
