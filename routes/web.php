@@ -119,6 +119,10 @@ Route::get('migrate', function () {
     Artisan::call('migrate:fresh --seed --force');
 });
 
+Route::get('clear', function () {
+    Artisan::call('cache:clear');
+});
+
 Route::middleware('auth')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('api/dashboard/{account_manager:id}', [DashboardController::class, 'getPartnerByUser'])->name('getByUser');
