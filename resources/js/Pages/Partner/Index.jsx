@@ -36,6 +36,7 @@ import HeaderDatatable from "@/Components/HeaderDatatable.jsx";
 import HeaderModule from "@/Components/HeaderModule.jsx";
 import { Menu } from "primereact/menu";
 import { Sidebar } from "primereact/sidebar";
+import axios from "axios";
 registerPlugin(FilePondPluginFileValidateSize);
 
 export default function Index({ auth, partner, usersProp, statusProp }) {
@@ -699,16 +700,14 @@ export default function Index({ auth, partner, usersProp, statusProp }) {
             .querySelector('meta[name="csrf-token"]')
             .getAttribute("content");
 
-        const response = await fetch("/partners/filter", {
-            method: "POST",
+        const response = await axios.post("/partners/filter", formData, {
             headers: {
                 "Content-Type": "application/json",
                 "X-CSRF-TOKEN": csrfToken,
             },
-            body: JSON.stringify(formData),
         });
-        const data = await response.json();
-        setPartners((prev) => (prev = data));
+        const data = response.data;
+        setPartners(data);
         setSidebarFilter(false);
         setIsLoadingData(false);
     };
