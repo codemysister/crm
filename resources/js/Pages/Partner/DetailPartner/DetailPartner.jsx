@@ -501,26 +501,16 @@ const DetailPartner = ({
                                                         <Badge
                                                             value={
                                                                 partner.status
+                                                                    .name
                                                             }
                                                             className="text-white"
-                                                            severity={
-                                                                partner.status ==
-                                                                "Aktif"
-                                                                    ? "success"
-                                                                    : null ||
-                                                                      partner.status ==
-                                                                          "CLBK"
-                                                                    ? "info"
-                                                                    : null ||
-                                                                      partner.status ==
-                                                                          "Proses"
-                                                                    ? "warning"
-                                                                    : null ||
-                                                                      partner.status ==
-                                                                          "Non Aktif"
-                                                                    ? "danger"
-                                                                    : null
-                                                            }
+                                                            style={{
+                                                                backgroundColor:
+                                                                    "#" +
+                                                                    partner
+                                                                        .status
+                                                                        .color,
+                                                            }}
                                                         ></Badge>
                                                     </td>
                                                 </tr>

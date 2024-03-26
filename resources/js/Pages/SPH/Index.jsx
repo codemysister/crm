@@ -12,6 +12,7 @@ import { Skeleton } from "primereact/skeleton";
 import { Link } from "@inertiajs/react";
 import { FilterMatchMode } from "primereact/api";
 import { ProgressSpinner } from "primereact/progressspinner";
+import { router } from "@inertiajs/react";
 
 const BASE_URL = import.meta.env.VITE_BASE_URL;
 
@@ -150,8 +151,7 @@ export default function Index({ auth, sphsDefault }) {
     };
 
     const handleSelectedDetailPartner = (partner) => {
-        const newUrl = `/partners?uuid=${partner.uuid}`;
-        window.location = newUrl;
+        router.get(`/partners?uuid=${partner.uuid}`);
     };
 
     const renderHeader = () => {
