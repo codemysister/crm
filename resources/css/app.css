@@ -35,6 +35,13 @@
       box-shadow: 0px -2px 3px rgba(0, 0, 0, 0.267);
       border: none;
     }
+
+    .paginator-status-log{
+      position: absolute;
+      bottom: 0;
+      width: 100%;
+      border: none;
+    }
     /* End Paginator */
 
 
@@ -51,7 +58,10 @@
     .dark .p-datatable .p-datatable-tbody > tr{
       background: transparent;
       color: rgb(209 213 219 / 1);
-;
+    }
+
+    .dark .p-frozen-column{
+      background-color: #0F172A;
     }
 
     .dark .p-datatable .p-datatable-tbody > tr > td{
@@ -83,7 +93,6 @@
 
     .dark .p-datatable .p-datatable-thead > tr > th{
       color: rgb(209 213 219 / 1);
-;
     }
     
     .dark .p-paginator{
@@ -91,6 +100,17 @@
       background-color: transparent;
     }
 
+    .dark .paginator-custome .p-dropdown{
+      background-color: #334155;
+    } 
+
+    .dark .p-dropdown-label.p-inputtext {
+      color: #CBD5E1 !important;
+    }
+
+    .dark .paginator-custome .p-dropdown-trigger svg{
+      color: #CBD5E1 !important;
+    }
     .dark .p-datatable-thead tr{
       box-shadow: 0px 2px 3px rgba(0, 0, 0, 0.267);
     }
@@ -111,7 +131,6 @@
     /* Input Text */
     .dark .p-fluid .p-inputtext {
       width: 100%;
-      /* color:rgb(175, 175, 175); */
       border: none;
     }
 
@@ -436,6 +455,14 @@
       background-color: #f5f5f5;
       color:white;
     }
+    .dark .p-menuitem-active{
+      background-color: transparent;
+     
+    }
+
+    .dark .p-menu .p-menuitem > .p-menuitem-content .p-menuitem-link .p-menuitem-text{
+      color: #CBD5E1;
+    }
 
     .dark .p-menuitem-active .p-menuitem-link{
       background-color: #7e7e7e;
@@ -451,12 +478,34 @@
    
 
     .dark .p-menu{
-      background-color: #D1D5DB;
+      border: none;
+    }
+
+    .p-datatable-wrapper{
+      max-height: max-content;
     }
     @media screen and (max-width: 992px) {
 
     .dark .p-menu ul{
       display: flex;
+      flex-wrap: wrap;
+    }
+
+    .dark .p-menu {
+      padding: 5px;
+    }
+
+    .p-paginator {
+      padding: 0.375rem 0px;
+    }
+
+    .p-paginator .p-paginator-current {
+      font-size: 12px;
+    }
+
+    .p-datatable-wrapper{
+      height: 100%;
+      max-height: 100%;
     }
 
    

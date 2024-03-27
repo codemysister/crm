@@ -7,6 +7,7 @@ export default function DashboardLayout({ user, children }) {
     const [theme, setTheme] = useState(localStorage.theme);
     const [isSideMenuOpen, setIsSideMenuOpen] = useState(true);
     const [isPagesMenuOpen, setIsPagesMenuOpen] = useState(false);
+    const [isPartnerMenuOpen, setIsPartnerMenuOpen] = useState(false);
     const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
     const profileMenuRef = useRef(null);
     const profileMenuBtnRef = useRef(null);
@@ -165,63 +166,283 @@ export default function DashboardLayout({ user, children }) {
                                 </li>
                             </ul>
                             <ul>
-                                {/* )} */}
-                                <li className="relative px-6 py-3">
+                                <li className="relative flex flex-col px-6 py-3 w-full">
                                     {currentPath == "/partners" && (
                                         <span className="absolute inset-y-0 left-0 w-1 bg-purple-600 rounded-tr-lg rounded-br-lg"></span>
                                     )}
-                                    <Link
-                                        className={`inline-flex items-center ${
-                                            currentPath == "/partners"
-                                                ? "text-gray-800 dark:text-gray-100"
-                                                : ""
-                                        } w-full text-sm font-semibold transition-colors duration-150 hover:text-gray-800 dark:hover:text-gray-200 `}
-                                        href={route("partners.view")}
-                                    >
-                                        <svg
-                                            className="w-5 h-5"
-                                            fill="none"
-                                            strokeLinecap="round"
-                                            strokeLinejoin="round"
-                                            strokeWidth="2"
-                                            viewBox="0 0 24 24"
-                                            stroke="currentColor"
+                                    <div className="flex flex-row justify-between">
+                                        <Link
+                                            className={`inline-flex items-center ${
+                                                currentPath == "/partners"
+                                                    ? "text-gray-800 dark:text-gray-100"
+                                                    : ""
+                                            } w-full text-sm font-semibold transition-colors duration-150 hover:text-gray-800 dark:hover:text-gray-200 `}
+                                            href={route("partners.view")}
                                         >
-                                            <path
+                                            <svg
+                                                className="w-5 h-5"
+                                                fill="none"
                                                 strokeLinecap="round"
                                                 strokeLinejoin="round"
-                                                d="M15 9h3.75M15 12h3.75M15 15h3.75M4.5 19.5h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5zm6-10.125a1.875 1.875 0 11-3.75 0 1.875 1.875 0 013.75 0zm1.294 6.336a6.721 6.721 0 01-3.17.789 6.721 6.721 0 01-3.168-.789 3.376 3.376 0 016.338 0z"
-                                            ></path>
-                                        </svg>
-                                        <span className="ml-4">Partner</span>
-                                    </Link>
-                                </li>
-                                {/* <li className="relative px-6 py-3">
-                                    {currentPath == "/products" && (
-                                        <span className="absolute inset-y-0 left-0 w-1 bg-purple-600 rounded-tr-lg rounded-br-lg"></span>
-                                    )}
-                                    <Link
-                                        className={`inline-flex items-center ${
-                                            currentPath == "/products"
-                                                ? "text-gray-800 dark:text-gray-100"
-                                                : ""
-                                        } w-full text-sm font-semibold transition-colors duration-150 hover:text-gray-800 dark:hover:text-gray-200 `}
-                                        href={route("products.view")}
-                                    >
-                                        <svg
-                                            className="w-5 h-5"
-                                            fill="none"
-                                            strokeLinecap="round"
-                                            strokeLinejoin="round"
-                                            strokeWidth="2"
-                                            viewBox="0 0 24 24"
-                                            stroke="currentColor"
+                                                strokeWidth="2"
+                                                viewBox="0 0 24 24"
+                                                stroke="currentColor"
+                                            >
+                                                <path
+                                                    strokeLinecap="round"
+                                                    strokeLinejoin="round"
+                                                    d="M15 9h3.75M15 12h3.75M15 15h3.75M4.5 19.5h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5zm6-10.125a1.875 1.875 0 11-3.75 0 1.875 1.875 0 013.75 0zm1.294 6.336a6.721 6.721 0 01-3.17.789 6.721 6.721 0 01-3.168-.789 3.376 3.376 0 016.338 0z"
+                                                ></path>
+                                            </svg>
+                                            <span className="ml-4">
+                                                Partner
+                                            </span>
+                                        </Link>
+                                        <button
+                                            className="flex items-center justify-end w-[20%] text-left transition-colors duration-150  border border-transparent rounded-lg  focus:outline-none focus:shadow-outline-purple"
+                                            onClick={() => {
+                                                setIsPartnerMenuOpen(
+                                                    (prev) => !prev
+                                                );
+                                            }}
+                                            aria-haspopup="true"
                                         >
-                                            <path d="M21 7.5l-9-5.25L3 7.5m18 0l-9 5.25m9-5.25v9l-9 5.25M3 7.5l9 5.25M3 7.5v9l9 5.25m0-9v9"></path>
-                                        </svg>
-                                        <span className="ml-4">Produk</span>
-                                    </Link>
-                                </li> */}
+                                            {isPartnerMenuOpen ? (
+                                                <svg
+                                                    xmlns="http://www.w3.org/2000/svg"
+                                                    fill="none"
+                                                    viewBox="0 0 24 24"
+                                                    strokeWidth="1.5"
+                                                    stroke="currentColor"
+                                                    className="w-5 h-5"
+                                                >
+                                                    <path
+                                                        strokeLinecap="round"
+                                                        strokeLinejoin="round"
+                                                        d="m19.5 8.25-7.5 7.5-7.5-7.5"
+                                                    />
+                                                </svg>
+                                            ) : (
+                                                <svg
+                                                    xmlns="http://www.w3.org/2000/svg"
+                                                    fill="none"
+                                                    viewBox="0 0 24 24"
+                                                    strokeWidth="1.5"
+                                                    stroke="currentColor"
+                                                    className="w-5 h-5"
+                                                >
+                                                    <path
+                                                        strokeLinecap="round"
+                                                        strokeLinejoin="round"
+                                                        d="m8.25 4.5 7.5 7.5-7.5 7.5"
+                                                    />
+                                                </svg>
+                                            )}
+                                        </button>
+                                    </div>
+                                </li>
+                                {isPartnerMenuOpen && (
+                                    <ul
+                                        className="mx-3 py-2 mb-2 overflow-hidden text-sm font-medium text-gray-500 rounded-md shadow-inner bg-gray-50 dark:text-gray-400 dark:bg-gray-900"
+                                        aria-label="submenu"
+                                    >
+                                        <li className="relative mt-3 px-3">
+                                            {currentPath == "/users" && (
+                                                <span className="absolute inset-y-0 left-0 w-1 bg-purple-600 rounded-tr-lg rounded-br-lg"></span>
+                                            )}
+                                            <Link
+                                                className={`inline-flex items-center ${
+                                                    currentPath == "/users"
+                                                        ? "text-gray-800 dark:text-gray-100"
+                                                        : ""
+                                                } w-full text-sm font-semibold transition-colors duration-150 hover:text-gray-800 dark:hover:text-gray-200 `}
+                                                href={route("users.view")}
+                                            >
+                                                <svg
+                                                    xmlns="http://www.w3.org/2000/svg"
+                                                    fill="none"
+                                                    viewBox="0 0 24 24"
+                                                    strokeWidth={1.5}
+                                                    stroke="currentColor"
+                                                    className="w-5 h-5"
+                                                >
+                                                    <path
+                                                        strokeLinecap="round"
+                                                        strokeLinejoin="round"
+                                                        d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z"
+                                                    />
+                                                </svg>
+
+                                                <span className="ml-4">
+                                                    User
+                                                </span>
+                                            </Link>
+                                        </li>
+
+                                        <li className="relative mt-3 px-3">
+                                            {currentPath == "/referral" && (
+                                                <span className="absolute inset-y-0 left-0 w-1 bg-purple-600 rounded-tr-lg rounded-br-lg"></span>
+                                            )}
+                                            <Link
+                                                className={`inline-flex items-center ${
+                                                    currentPath == "/referral"
+                                                        ? "text-gray-800 dark:text-gray-100"
+                                                        : ""
+                                                } w-full text-sm font-semibold transition-colors duration-150 hover:text-gray-800 dark:hover:text-gray-200 `}
+                                                href={"/referral"}
+                                            >
+                                                <svg
+                                                    className="w-5 h-5"
+                                                    fill="none"
+                                                    strokeLinecap="round"
+                                                    strokeLinejoin="round"
+                                                    strokeWidth="2"
+                                                    viewBox="0 0 24 24"
+                                                    stroke="currentColor"
+                                                >
+                                                    <path
+                                                        strokeLinecap="round"
+                                                        strokeLinejoin="round"
+                                                        d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z"
+                                                    ></path>
+                                                </svg>
+                                                <span className="ml-4">
+                                                    Referral
+                                                </span>
+                                            </Link>
+                                        </li>
+
+                                        <li className="relative mt-3 px-3">
+                                            {currentPath == "/status" && (
+                                                <span className="absolute inset-y-0 left-0 w-1 bg-purple-600 rounded-tr-lg rounded-br-lg"></span>
+                                            )}
+                                            <Link
+                                                className={`inline-flex items-center ${
+                                                    currentPath == "/status"
+                                                        ? "text-gray-800 dark:text-gray-100"
+                                                        : ""
+                                                } w-full text-sm font-semibold transition-colors duration-150 hover:text-gray-800 dark:hover:text-gray-200 `}
+                                                href={"/status"}
+                                            >
+                                                <svg
+                                                    className="w-5 h-5"
+                                                    fill="none"
+                                                    strokeLinecap="round"
+                                                    strokeLinejoin="round"
+                                                    strokeWidth="2"
+                                                    viewBox="0 0 24 24"
+                                                    stroke="currentColor"
+                                                >
+                                                    <path
+                                                        stroke-linecap="round"
+                                                        stroke-linejoin="round"
+                                                        d="M3.75 3v11.25A2.25 2.25 0 0 0 6 16.5h2.25M3.75 3h-1.5m1.5 0h16.5m0 0h1.5m-1.5 0v11.25A2.25 2.25 0 0 1 18 16.5h-2.25m-7.5 0h7.5m-7.5 0-1 3m8.5-3 1 3m0 0 .5 1.5m-.5-1.5h-9.5m0 0-.5 1.5m.75-9 3-3 2.148 2.148A12.061 12.061 0 0 1 16.5 7.605"
+                                                    />
+                                                </svg>
+
+                                                <span className="ml-4">
+                                                    Status
+                                                </span>
+                                            </Link>
+                                        </li>
+
+                                        {/* {roles[0] === 'super admin' && ( */}
+                                        <li className="relative mt-3 px-3">
+                                            {currentPath ==
+                                                "/role-permission" && (
+                                                <span className="absolute inset-y-0 left-0 w-1 bg-purple-600 rounded-tr-lg rounded-br-lg"></span>
+                                            )}
+                                            <Link
+                                                className={`inline-flex items-center ${
+                                                    currentPath ==
+                                                    "/role-permission"
+                                                        ? "text-gray-800 dark:text-gray-100"
+                                                        : ""
+                                                } w-full text-sm font-semibold transition-colors duration-150 hover:text-gray-800 dark:hover:text-gray-200 `}
+                                                href={route(
+                                                    "role-permission.view"
+                                                )}
+                                            >
+                                                <svg
+                                                    className="w-5 h-5"
+                                                    fill="none"
+                                                    strokeLinecap="round"
+                                                    strokeLinejoin="round"
+                                                    strokeWidth="2"
+                                                    viewBox="0 0 24 24"
+                                                    stroke="currentColor"
+                                                >
+                                                    <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path>
+                                                </svg>
+                                                <span className="ml-4">
+                                                    Role dan Perizinan
+                                                </span>
+                                            </Link>
+                                        </li>
+
+                                        <li className="relative mt-3 px-3">
+                                            {currentPath == "/products" && (
+                                                <span className="absolute inset-y-0 left-0 w-1 bg-purple-600 rounded-tr-lg rounded-br-lg"></span>
+                                            )}
+                                            <Link
+                                                className={`inline-flex items-center ${
+                                                    currentPath == "/products"
+                                                        ? "text-gray-800 dark:text-gray-100"
+                                                        : ""
+                                                } w-full text-sm font-semibold transition-colors duration-150 hover:text-gray-800 dark:hover:text-gray-200 `}
+                                                href={route("products.view")}
+                                            >
+                                                <svg
+                                                    className="w-5 h-5"
+                                                    fill="none"
+                                                    strokeLinecap="round"
+                                                    strokeLinejoin="round"
+                                                    strokeWidth="2"
+                                                    viewBox="0 0 24 24"
+                                                    stroke="currentColor"
+                                                >
+                                                    <path d="M21 7.5l-9-5.25L3 7.5m18 0l-9 5.25m9-5.25v9l-9 5.25M3 7.5l9 5.25M3 7.5v9l9 5.25m0-9v9"></path>
+                                                </svg>
+                                                <span className="ml-4">
+                                                    Produk
+                                                </span>
+                                            </Link>
+                                        </li>
+
+                                        <li className="relative mt-3 px-3">
+                                            {currentPath == "/signature" && (
+                                                <span className="absolute inset-y-0 left-0 w-1 bg-purple-600 rounded-tr-lg rounded-br-lg"></span>
+                                            )}
+                                            <Link
+                                                className={`inline-flex items-center ${
+                                                    currentPath == "/signatures"
+                                                        ? "text-gray-800 dark:text-gray-100"
+                                                        : ""
+                                                } w-full text-sm font-semibold transition-colors duration-150 hover:text-gray-800 dark:hover:text-gray-200 `}
+                                                href={"/signatures"}
+                                            >
+                                                <svg
+                                                    className="w-5 h-5"
+                                                    fill="none"
+                                                    strokeLinecap="round"
+                                                    strokeLinejoin="round"
+                                                    strokeWidth="2"
+                                                    viewBox="0 0 24 24"
+                                                    stroke="currentColor"
+                                                >
+                                                    <path
+                                                        stroke-linecap="round"
+                                                        stroke-linejoin="round"
+                                                        d="m15 11.25 1.5 1.5.75-.75V8.758l2.276-.61a3 3 0 1 0-3.675-3.675l-.61 2.277H12l-.75.75 1.5 1.5M15 11.25l-8.47 8.47c-.34.34-.8.53-1.28.53s-.94.19-1.28.53l-.97.97-.75-.75.97-.97c.34-.34.53-.8.53-1.28s.19-.94.53-1.28L12.75 9M15 11.25 12.75 9"
+                                                    ></path>
+                                                </svg>
+                                                <span className="ml-4">
+                                                    Tanda Tangan
+                                                </span>
+                                            </Link>
+                                        </li>
+                                    </ul>
+                                )}
 
                                 <li className="relative px-6 py-3">
                                     {currentPath == "/sph" && (
@@ -433,7 +654,7 @@ export default function DashboardLayout({ user, children }) {
                             </ul>
                             <div className="px-6 my-6">
                                 <button
-                                    className="flex items-center justify-between w-full px-4 py-2 text-sm font-medium leading-5 text-white transition-colors duration-150 bg-purple-600 border border-transparent rounded-lg active:bg-purple-600 hover:bg-purple-700 focus:outline-none focus:shadow-outline-purple"
+                                    className="flex items-center justify-between w-full px-3 py-2 text-sm font-medium leading-5 text-white transition-colors duration-150 bg-purple-600 border border-transparent rounded-lg active:bg-purple-600 hover:bg-purple-700 focus:outline-none focus:shadow-outline-purple"
                                     onClick={togglePagesMenu}
                                     aria-haspopup="true"
                                 >
@@ -1134,7 +1355,7 @@ export default function DashboardLayout({ user, children }) {
                             </ul>
                         </div>
                     </header>
-                    <main className="h-full overflow-y-auto w-full p-5">
+                    <main className="h-full overflow-y-auto w-full py-5 px-1 lg:p-5">
                         {children}
                     </main>
                 </div>

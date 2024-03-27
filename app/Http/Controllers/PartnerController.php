@@ -23,6 +23,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Maatwebsite\Excel\Facades\Excel;
+use Spatie\Activitylog\Models\Activity;
 
 class PartnerController extends Controller
 {
@@ -205,7 +206,9 @@ class PartnerController extends Controller
             'address' => $request['partner']['address'],
             'payment_metode' => $request['partner']['payment_metode'],
             'period' => $request['partner']['period']['name'] ?? $request['partner']['period'],
+            'note_status' => $request['partner']['note_status']
         ]);
+
     }
 
     public function updateDetailPartner(Request $request, $uuid)
@@ -240,12 +243,16 @@ class PartnerController extends Controller
 
         $partner->update([
             'name' => $request['name'],
-            'phone_number' => $request['phone_number'],
             'logo' => $pathLogo,
-            'sales_id' => $request['sales']['id'],
-            'account_manager_id' => $request['account_manager'] ? $request['account_manager']['id'] : null,
+            'npwp' => $request['npwp'] ?? null,
+            'password' => $request['password'] ?? null,
+            'phone_number' => $request['phone_number'] ?? null,
+            'status_id' => $request['status']['id'],
+            'sales_id' => $request['sales']['id'] ?? null,
+            'referral_id' => $request['referral']['id'] ?? null,
+            'account_manager_id' => $request['account_manager']['id'] ?? null,
             'onboarding_date' => Carbon::parse($request['onboarding_date'])->setTimezone('GMT+7')->format('Y-m-d H:i:s'),
-            'live_date' => Carbon::parse($request['live_date'])->setTimezone('GMT+7')->format('Y-m-d H:i:s'),
+            'live_date' => $request['live_date'] !== null ? Carbon::parse($request['live_date'])->setTimezone('GMT+7')->format('Y-m-d H:i:s') : null,
             'onboarding_age' => $request['onboarding_age'],
             'live_age' => $request['live_age'],
             'monitoring_date_after_3_month_live' => $request['monitoring_date_after_3_month_live'] !== null ? Carbon::parse($request['monitoring_date_after_3_month_live'])->setTimezone('GMT+7')->format('Y-m-d H:i:s') : null,
@@ -253,7 +260,9 @@ class PartnerController extends Controller
             'regency' => $request['regency'],
             'subdistrict' => $request['subdistrict'],
             'address' => $request['address'],
-            'status' => $request['status']
+            'payment_metode' => $request['payment_metode'],
+            'period' => $request['period']['name'] ?? $request['period'],
+            'note_status' => $request['note_status']
         ]);
     }
 
@@ -295,6 +304,8 @@ class PartnerController extends Controller
     {
         $partner = Partner::with([
             'sales',
+            'referral',
+            'status',
             'account_manager',
             'pics' => function ($query) {
                 $query->latest();
@@ -314,28 +325,16 @@ class PartnerController extends Controller
         return response()->json($partner);
     }
 
-    // public function apiGetPartner($uuid)
-    // {
-    //     dd('oke');
-    //     $partner = Partner::with([
-    //         'sales',
-    //         'account_manager',
-    //         'pics' => function ($query) {
-    //             $query->latest();
-    //         },
-    //         'subscription' => function ($query) {
-    //             $query->latest();
-    //         },
-    //         'banks' => function ($query) {
-    //             $query->latest();
-    //         },
-    //         'accounts' => function ($query) {
-    //             $query->latest();
-    //         }
-    //     ])->where('uuid', $uuid)->get();
+    public function apiGetStatusLogs()
+    {
+        $logs = Activity::with(['causer', 'subject', 'subject.status']) // Menambahkan 'subject.status' untuk mengambil data status
+            ->where('subject_type', 'App\Models\Partner')
+            ->where('event', 'updated')
+            ->where('note_status', '!=', null)
+            ->latest()
+            ->get();
+        return response()->json($logs);
+    }
 
-    //     return response()->json([
-    //         'partner' => $partner
-    //     ]);
-    // }
+
 }

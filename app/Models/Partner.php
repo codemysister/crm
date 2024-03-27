@@ -7,13 +7,43 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
+use Spatie\Activitylog\LogOptions;
+use Spatie\Activitylog\Models\Activity;
+use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Permission\Traits\HasRoles;
 
 class Partner extends Authenticatable
 {
-    use HasApiTokens, HasFactory, Notifiable, HasRoles;
+    use HasApiTokens, HasFactory, Notifiable, HasRoles, LogsActivity;
 
     protected $guarded = [];
+
+    public function tapActivity(Activity $activity, string $eventName)
+    {
+        $activity->note_status = $this->note_status;
+    }
+
+
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logOnly(['name', 'npwp', 'password', 'phone_number', 'status.name', 'status.color', 'sales_id', 'referral_id', 'account_manager_id', 'onboarding_date', 'live_date', 'monitoring_date_after_3_month_live', 'province', 'regency', 'address', 'payment_metode', 'period'])
+            ->dontLogIfAttributesChangedOnly(['onboarding_age', 'live_age'])
+            ->setDescriptionForEvent(function (string $eventName) {
+                $modelName = class_basename($this);
+                if ($eventName === 'created') {
+                    return "menambah data {$modelName} baru";
+                } elseif ($eventName === 'updated') {
+                    return "memperbarui data {$modelName}";
+                } elseif ($eventName === 'deleted') {
+                    return "menghapus data {$modelName}";
+                } elseif ($eventName === 'restored') {
+                    return "memulihkan data {$modelName}";
+                } else {
+                    return "melakukan aksi {$eventName} pada data {$modelName}";
+                }
+            });
+    }
 
     public function createdBy()
     {

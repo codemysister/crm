@@ -152,15 +152,13 @@ const DetailPriceList = ({
         <>
             {partner.price_list !== null ? (
                 <>
-                    <table class="w-full">
+                    <table class="w-full dark:text-slate-300 dark:bg-slate-700">
                         <tr class="border-b">
-                            <td class="pt-2 pb-1 text-gray-900 text-base font-bold w-1/5">
+                            <td class="pt-2 pb-1  text-base font-bold w-1/5">
                                 Tarif Kartu
                             </td>
-                            <td class="pt-2 pb-1 text-gray-900 text-base w-[2%]">
-                                :
-                            </td>
-                            <td class="pt-2 pb-1 text-gray-900 text-base w-7/12">
+                            <td class="pt-2 pb-1  text-base w-[2%]">:</td>
+                            <td class="pt-2 pb-1  text-base w-7/12">
                                 {partner.price_list.price_card
                                     ? JSON.parse(partner.price_list.price_card)
                                           .price
@@ -174,13 +172,11 @@ const DetailPriceList = ({
                             </td>
                         </tr>
                         <tr class="border-b">
-                            <td class="pt-2 pb-1 text-gray-900 text-base font-bold w-1/5">
+                            <td class="pt-2 pb-1  text-base font-bold w-1/5">
                                 Tarif Lanyard
                             </td>
-                            <td class="pt-2 pb-1 text-gray-900 text-base w-[2%]">
-                                :
-                            </td>
-                            <td class="pt-2 pb-1 text-gray-900 text-base w-7/12">
+                            <td class="pt-2 pb-1  text-base w-[2%]">:</td>
+                            <td class="pt-2 pb-1  text-base w-7/12">
                                 {partner.price_list.price_lanyard
                                     ? partner.price_list.price_lanyard.toLocaleString(
                                           "id-ID"
@@ -189,13 +185,11 @@ const DetailPriceList = ({
                             </td>
                         </tr>
                         <tr class="border-b">
-                            <td class="pt-2 pb-1 text-gray-900 text-base font-bold w-1/5">
+                            <td class="pt-2 pb-1  text-base font-bold w-1/5">
                                 Tarif Langganan Sistem
                             </td>
-                            <td class="pt-2 pb-1 text-gray-900 text-base w-[2%]">
-                                :
-                            </td>
-                            <td class="pt-2 pb-1 text-gray-900 text-base w-7/12">
+                            <td class="pt-2 pb-1  text-base w-[2%]">:</td>
+                            <td class="pt-2 pb-1  text-base w-7/12">
                                 {partner.price_list.price_subscription_system
                                     ? partner.price_list.price_subscription_system.toLocaleString(
                                           "id-ID"
@@ -204,13 +198,11 @@ const DetailPriceList = ({
                             </td>
                         </tr>
                         <tr class="border-b">
-                            <td class="pt-2 pb-1 text-gray-900 text-base font-bold w-1/5">
+                            <td class="pt-2 pb-1  text-base font-bold w-1/5">
                                 Tarif Training Offline
                             </td>
-                            <td class="pt-2 pb-1 text-gray-900 text-base w-[2%]">
-                                :
-                            </td>
-                            <td class="pt-2 pb-1 text-gray-900 text-base w-7/12">
+                            <td class="pt-2 pb-1  text-base w-[2%]">:</td>
+                            <td class="pt-2 pb-1  text-base w-7/12">
                                 {partner.price_list.price_training_offline
                                     ? partner.price_list.price_training_offline.toLocaleString(
                                           "id-ID"
@@ -219,13 +211,11 @@ const DetailPriceList = ({
                             </td>
                         </tr>
                         <tr class="border-b">
-                            <td class="pt-2 pb-1 text-gray-900 text-base font-bold w-1/5">
+                            <td class="pt-2 pb-1  text-base font-bold w-1/5">
                                 Tarif Training Online
                             </td>
-                            <td class="pt-2 pb-1 text-gray-900 text-base w-[2%]">
-                                :
-                            </td>
-                            <td class="pt-2 pb-1 text-gray-900 text-base w-7/12">
+                            <td class="pt-2 pb-1  text-base w-[2%]">:</td>
+                            <td class="pt-2 pb-1  text-base w-7/12">
                                 {partner.price_list.price_training_online
                                     ? partner.price_list.price_training_online.toLocaleString(
                                           "id-ID"
@@ -234,13 +224,11 @@ const DetailPriceList = ({
                             </td>
                         </tr>
                         <tr class="border-b">
-                            <td class="pt-2 pb-1 text-gray-900 text-base font-bold w-1/5">
+                            <td class="pt-2 pb-1  text-base font-bold w-1/5">
                                 Fee Isi Kartu via CazhPOIN
                             </td>
-                            <td class="pt-2 pb-1 text-gray-900 text-base w-[2%]">
-                                :
-                            </td>
-                            <td class="pt-2 pb-1 text-gray-900 text-base w-7/12">
+                            <td class="pt-2 pb-1  text-base w-[2%]">:</td>
+                            <td class="pt-2 pb-1  text-base w-7/12">
                                 {partner.price_list.fee_purchase_cazhpoin
                                     ? partner.price_list.fee_purchase_cazhpoin.toLocaleString(
                                           "id-ID"
@@ -249,13 +237,11 @@ const DetailPriceList = ({
                             </td>
                         </tr>
                         <tr class="border-b">
-                            <td class="pt-2 pb-1 text-gray-900 text-base font-bold w-1/5">
+                            <td class="pt-2 pb-1  text-base font-bold w-1/5">
                                 Fee Bayar Tagihan via CazhPOIN
                             </td>
-                            <td class="pt-2 pb-1 text-gray-900 text-base w-[2%]">
-                                :
-                            </td>
-                            <td class="pt-2 pb-1 text-gray-900 text-base w-7/12">
+                            <td class="pt-2 pb-1  text-base w-[2%]">:</td>
+                            <td class="pt-2 pb-1  text-base w-7/12">
                                 {partner.price_list.fee_bill_cazhpoin
                                     ? partner.price_list.fee_bill_cazhpoin.toLocaleString(
                                           "id-ID"
@@ -264,13 +250,11 @@ const DetailPriceList = ({
                             </td>
                         </tr>
                         <tr class="border-b">
-                            <td class="pt-2 pb-1 text-gray-900 text-base font-bold w-1/5">
+                            <td class="pt-2 pb-1  text-base font-bold w-1/5">
                                 Fee Topup Kartu via CazhPos
                             </td>
-                            <td class="pt-2 pb-1 text-gray-900 text-base w-[2%]">
-                                :
-                            </td>
-                            <td class="pt-2 pb-1 text-gray-900 text-base w-7/12">
+                            <td class="pt-2 pb-1  text-base w-[2%]">:</td>
+                            <td class="pt-2 pb-1  text-base w-7/12">
                                 {partner.price_list.fee_topup_cazhpos
                                     ? partner.price_list.fee_topup_cazhpos.toLocaleString(
                                           "id-ID"
@@ -279,13 +263,11 @@ const DetailPriceList = ({
                             </td>
                         </tr>
                         <tr class="border-b">
-                            <td class="pt-2 pb-1 text-gray-900 text-base font-bold w-1/5">
+                            <td class="pt-2 pb-1  text-base font-bold w-1/5">
                                 Fee Withdraw Kartu via Cazh POS
                             </td>
-                            <td class="pt-2 pb-1 text-gray-900 text-base w-[2%]">
-                                :
-                            </td>
-                            <td class="pt-2 pb-1 text-gray-900 text-base w-7/12">
+                            <td class="pt-2 pb-1  text-base w-[2%]">:</td>
+                            <td class="pt-2 pb-1  text-base w-7/12">
                                 {partner.price_list.fee_withdraw_cazhpos
                                     ? partner.price_list.fee_withdraw_cazhpos.toLocaleString(
                                           "id-ID"
@@ -294,13 +276,11 @@ const DetailPriceList = ({
                             </td>
                         </tr>
                         <tr class="border-b">
-                            <td class="pt-2 pb-1 text-gray-900 text-base font-bold w-1/5">
+                            <td class="pt-2 pb-1  text-base font-bold w-1/5">
                                 Fee Bayar Tagihan via Saldo Kartu
                             </td>
-                            <td class="pt-2 pb-1 text-gray-900 text-base w-[2%]">
-                                :
-                            </td>
-                            <td class="pt-2 pb-1 text-gray-900 text-base w-7/12">
+                            <td class="pt-2 pb-1  text-base w-[2%]">:</td>
+                            <td class="pt-2 pb-1  text-base w-7/12">
                                 {partner.price_list.fee_bill_saldokartu
                                     ? partner.price_list.fee_bill_saldokartu.toLocaleString(
                                           "id-ID"
@@ -310,13 +290,11 @@ const DetailPriceList = ({
                         </tr>
 
                         <tr class="border-b">
-                            <td class="pt-2 pb-1 text-gray-900 text-base font-bold w-1/5">
+                            <td class="pt-2 pb-1  text-base font-bold w-1/5">
                                 Aksi
                             </td>
-                            <td class="pt-2 pb-1 text-gray-900 text-base w-[2%]">
-                                :
-                            </td>
-                            <td class="pt-2 pb-1 text-gray-900 text-base w-7/12">
+                            <td class="pt-2 pb-1  text-base w-[2%]">:</td>
+                            <td class="pt-2 pb-1  text-base w-7/12">
                                 <Button
                                     label="edit"
                                     className="p-0 underline bg-transparent text-blue-700 text-left"

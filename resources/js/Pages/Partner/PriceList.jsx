@@ -505,9 +505,6 @@ const PriceList = ({
                                 />
                             </div>
 
-                            {console.log(priceLists)}
-                            {console.log(dataPriceList)}
-
                             <div className="flex flex-col">
                                 <label htmlFor="price_card">
                                     Tarif Lanyard

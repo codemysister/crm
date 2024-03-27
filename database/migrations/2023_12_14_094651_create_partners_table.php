@@ -34,6 +34,7 @@ return new class extends Migration {
             $table->date('monitoring_date_after_3_month_live')->nullable();
             $table->string('period')->nullable();
             $table->string('payment_metode')->default('payment link');
+            $table->string('note_status')->nullable();
 
             $table->timestamps();
         });

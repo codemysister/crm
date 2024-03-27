@@ -19,12 +19,17 @@ import FilePondPluginFileValidateSize from "filepond-plugin-file-validate-size";
 import "filepond/dist/filepond.min.css";
 registerPlugin(FilePondPluginFileValidateSize);
 import DetailPriceList from "./DetailPriceList";
+import InputError from "@/Components/InputError";
+import { InputMask } from "primereact/inputmask";
+import DetailStatusLog from "./DetailStatusLog";
 
 const DetailPartner = ({
     partners,
     detailPartner,
     handleSelectedDetailPartner,
     sales,
+    referrals,
+    status,
     account_managers,
     showSuccess,
     showError,
@@ -37,6 +42,7 @@ const DetailPartner = ({
 }) => {
     const [partner, setPartner] = useState(detailPartner);
     const [activeMenu, setActiveMenu] = useState("lembaga");
+    const [modalStatusIsVisible, setModalStatusIsVisible] = useState(false);
     const [modalEditPartnersIsVisible, setModalEditPartnersIsVisible] =
         useState(false);
 
@@ -60,19 +66,26 @@ const DetailPartner = ({
             name: null,
             id: null,
         },
+        referral: {},
         name: "",
         logo: null,
-        phone_number: "",
-        onboarding_date: new Date(),
-        onboarding_age: null,
-        live_date: null,
-        live_age: null,
-        monitoring_date_after_3_month_live: null,
+        npwp: null,
+        password: null,
+        phone_number: null,
         province: null,
         regency: null,
         subdistrict: null,
         address: null,
+        onboarding_date: null,
+        onboarding_age: null,
+        live_date: null,
+        live_age: null,
+        monitoring_date_after_3_month_live: null,
+        period: null,
+        payment_metode: null,
         status: "",
+        note_status: null,
+        excell: null,
     });
 
     let menuDetailPartnerItems = [
@@ -106,6 +119,7 @@ const DetailPartner = ({
                 setActiveMenu((prev) => (prev = "langganan"));
             },
         },
+
         {
             label: "Tarif",
             className: `${
@@ -113,6 +127,15 @@ const DetailPartner = ({
             }`,
             command: () => {
                 setActiveMenu((prev) => (prev = "price_list"));
+            },
+        },
+        {
+            label: "Status Log",
+            className: `${
+                activeMenu == "log_status" ? "p-menuitem-active" : ""
+            }`,
+            command: () => {
+                setActiveMenu((prev) => (prev = "log_status"));
             },
         },
     ];
@@ -128,6 +151,13 @@ const DetailPartner = ({
 
         return <span>{props.placeholder}</span>;
     };
+
+    const option_period_subscription = [
+        { name: "kartu/bulan" },
+        { name: "kartu/tahun" },
+        { name: "lembaga/bulan" },
+        { name: "lembaga/tahun" },
+    ];
 
     const optionTemplate = (option) => {
         return (
@@ -153,7 +183,8 @@ const DetailPartner = ({
                         filter
                         valueTemplate={selectedOptionTemplate}
                         itemTemplate={optionTemplate}
-                        className="w-full lg:w-[40%] flex justify-center rounded-lg shadow-md border-none"
+                        style={{ color: "#CBD5E1" }}
+                        className="w-full md:min-w-[28%] md:w-[28%] md:max-w-[28%] flex justify-center rounded-lg shadow-md border-none dark:text-slate-300 dark:bg-slate-700"
                     />
                     <div className="text-center w-full flex items-center gap-2 justify-center">
                         {partner?.logo ? (
@@ -176,9 +207,12 @@ const DetailPartner = ({
             ...prevData,
             uuid: partner.uuid,
             name: partner.name,
+            npwp: partner.npwp,
+            password: partner.password,
             logo: partner.logo,
             phone_number: partner.phone_number,
             sales: partner.sales,
+            referral: partner.referral,
             account_manager: partner.account_manager,
             onboarding_date: partner.onboarding_date,
             onboarding_age: partner.onboarding_age,
@@ -193,18 +227,20 @@ const DetailPartner = ({
             status: partner.status,
         }));
 
-        setcodeRegency(JSON.parse(partner.regency).code);
-        setcodeProvince(JSON.parse(partner.province).code);
+        partner.regency
+            ? setcodeRegency(
+                  (prev) => (prev = JSON.parse(partner.regency).code)
+              )
+            : null;
+
+        partner.regency
+            ? setcodeProvince(
+                  (prev) => (prev = JSON.parse(partner.province).code)
+              )
+            : null;
 
         setModalEditPartnersIsVisible(true);
     };
-
-    const status = [
-        { name: "Proses" },
-        { name: "Aktif" },
-        { name: "CLBK" },
-        { name: "Non Aktif" },
-    ];
 
     const handleSubmitForm = (e) => {
         e.preventDefault();
@@ -271,18 +307,15 @@ const DetailPartner = ({
 
     return (
         <>
-            <Card
-                title={title}
-                className="mt-5 mx-auto dark:glass p-3 rounded-lg"
-            >
+            <Card title={title} className="mt-5 mx-auto p-3 rounded-lg">
                 <div className="flex flex-col lg:flex-row gap-5 min-h-[300px]">
                     <div className="w-full lg:w-[40%]">
                         <Menu
                             model={menuDetailPartnerItems}
-                            className="w-full rounded-lg"
+                            className="w-full rounded-lg dark:text-slate-300 dark:bg-slate-700"
                         />
                     </div>
-                    <div class="w-full rounded-lg bg-gray-50/50 dark:bg-[#D1D5DB] border overflow-y-auto min-h-[300px] max-h-[300px] h-full  p-4">
+                    <div class="w-full rounded-lg bg-gray-50/50 dark:text-slate-300 dark:bg-slate-700 overflow-y-auto min-h-[300px] max-h-[300px] h-full  p-4">
                         {partner ? (
                             <>
                                 {isLoading ? (
@@ -302,37 +335,50 @@ const DetailPartner = ({
                                         {activeMenu === "lembaga" && (
                                             <table class="w-full">
                                                 <tr class="border-b">
-                                                    <td class="pt-2 pb-1 text-gray-900 text-base font-bold w-1/5">
+                                                    <td class="pt-2 pb-1  text-base font-bold w-1/5">
                                                         Nama
                                                     </td>
-                                                    <td class="pt-2 pb-1 text-gray-900 text-base w-[2%]">
+                                                    <td class="pt-2 pb-1  text-base w-[2%]">
                                                         :
                                                     </td>
-                                                    <td class="pt-2 pb-1 text-gray-900 text-base w-7/12">
+                                                    <td class="pt-2 pb-1  text-base w-7/12">
                                                         {partner.name}
                                                     </td>
                                                 </tr>
                                                 <tr class="border-b">
-                                                    <td class="pt-2 pb-1 text-gray-900 text-base font-bold w-1/5">
-                                                        Nomor Telepon
+                                                    <td class="pt-2 pb-1  text-base font-bold w-1/5">
+                                                        NPWP
                                                     </td>
-                                                    <td class="pt-2 pb-1 text-gray-900 text-base w-[2%]">
+                                                    <td class="pt-2 pb-1  text-base w-[2%]">
                                                         :
                                                     </td>
-                                                    <td class="pt-2 pb-1 text-gray-900 text-base w-7/12">
+                                                    <td class="pt-2 pb-1  text-base w-7/12">
+                                                        {partner.npwp
+                                                            ? partner.npwp
+                                                            : "-"}
+                                                    </td>
+                                                </tr>
+                                                <tr class="border-b">
+                                                    <td class="pt-2 pb-1  text-base font-bold w-1/5">
+                                                        Nomor Telepon
+                                                    </td>
+                                                    <td class="pt-2 pb-1  text-base w-[2%]">
+                                                        :
+                                                    </td>
+                                                    <td class="pt-2 pb-1  text-base w-7/12">
                                                         {partner.phone_number
                                                             ? partner.phone_number
                                                             : "-"}
                                                     </td>
                                                 </tr>
                                                 <tr class="border-b">
-                                                    <td class="pt-2 pb-1 text-gray-900 text-base font-bold w-1/5">
+                                                    <td class="pt-2 pb-1  text-base font-bold w-1/5">
                                                         Provinsi
                                                     </td>
-                                                    <td class="pt-2 pb-1 text-gray-900 text-base w-[2%]">
+                                                    <td class="pt-2 pb-1  text-base w-[2%]">
                                                         :
                                                     </td>
-                                                    <td class="pt-2 pb-1 text-gray-900 text-base w-7/12">
+                                                    <td class="pt-2 pb-1  text-base w-7/12">
                                                         {partner.province
                                                             ? JSON.parse(
                                                                   partner.province
@@ -341,13 +387,13 @@ const DetailPartner = ({
                                                     </td>
                                                 </tr>
                                                 <tr class="border-b">
-                                                    <td class="pt-2 pb-1 text-gray-900 text-base font-bold w-1/5">
+                                                    <td class="pt-2 pb-1  text-base font-bold w-1/5">
                                                         Kabupaten
                                                     </td>
-                                                    <td class="pt-2 pb-1 text-gray-900 text-base w-[2%]">
+                                                    <td class="pt-2 pb-1  text-base w-[2%]">
                                                         :
                                                     </td>
-                                                    <td class="pt-2 pb-1 text-gray-900 text-base w-7/12">
+                                                    <td class="pt-2 pb-1  text-base w-7/12">
                                                         {partner.regency
                                                             ? JSON.parse(
                                                                   partner.regency
@@ -356,13 +402,13 @@ const DetailPartner = ({
                                                     </td>
                                                 </tr>
                                                 <tr class="border-b">
-                                                    <td class="pt-2 pb-1 text-gray-900 text-base font-bold w-1/5">
+                                                    <td class="pt-2 pb-1  text-base font-bold w-1/5">
                                                         Kecamatan
                                                     </td>
-                                                    <td class="pt-2 pb-1 text-gray-900 text-base w-[2%]">
+                                                    <td class="pt-2 pb-1  text-base w-[2%]">
                                                         :
                                                     </td>
-                                                    <td class="pt-2 pb-1 text-gray-900 text-base w-7/12">
+                                                    <td class="pt-2 pb-1  text-base w-7/12">
                                                         {partner.subdistrict
                                                             ? JSON.parse(
                                                                   partner.subdistrict
@@ -371,39 +417,39 @@ const DetailPartner = ({
                                                     </td>
                                                 </tr>
                                                 <tr class="border-b">
-                                                    <td class="pt-2 pb-1 text-gray-900 text-base font-bold w-1/5">
+                                                    <td class="pt-2 pb-1  text-base font-bold w-1/5">
                                                         Alamat
                                                     </td>
-                                                    <td class="pt-2 pb-1 text-gray-900 text-base w-[2%]">
+                                                    <td class="pt-2 pb-1  text-base w-[2%]">
                                                         :
                                                     </td>
-                                                    <td class="pt-2 pb-1 text-gray-900 text-base w-7/12">
+                                                    <td class="pt-2 pb-1  text-base w-7/12">
                                                         {partner.address
                                                             ? partner.address
                                                             : "-"}
                                                     </td>
                                                 </tr>
                                                 <tr class="border-b">
-                                                    <td class="pt-2 pb-1 text-gray-900 text-base font-bold w-1/5">
+                                                    <td class="pt-2 pb-1  text-base font-bold w-1/5">
                                                         Sales
                                                     </td>
-                                                    <td class="pt-2 pb-1 text-gray-900 text-base w-[2%]">
+                                                    <td class="pt-2 pb-1  text-base w-[2%]">
                                                         :
                                                     </td>
-                                                    <td class="pt-2 pb-1 text-gray-900 text-base w-7/12">
+                                                    <td class="pt-2 pb-1  text-base w-7/12">
                                                         {partner.sales?.name
                                                             ? partner.sales.name
                                                             : "-"}
                                                     </td>
                                                 </tr>
                                                 <tr class="border-b">
-                                                    <td class="pt-2 pb-1 text-gray-900 text-base font-bold w-1/5">
+                                                    <td class="pt-2 pb-1  text-base font-bold w-1/5">
                                                         Account Manager
                                                     </td>
-                                                    <td class="pt-2 pb-1 text-gray-900 text-base w-[2%]">
+                                                    <td class="pt-2 pb-1  text-base w-[2%]">
                                                         :
                                                     </td>
-                                                    <td class="pt-2 pb-1 text-gray-900 text-base w-7/12">
+                                                    <td class="pt-2 pb-1  text-base w-7/12">
                                                         {partner.account_manager !==
                                                         null
                                                             ? partner
@@ -413,13 +459,28 @@ const DetailPartner = ({
                                                     </td>
                                                 </tr>
                                                 <tr class="border-b">
-                                                    <td class="pt-2 pb-1 text-gray-900 text-base font-bold w-1/5">
-                                                        Tanggal Onboarding
+                                                    <td class="pt-2 pb-1  text-base font-bold w-1/5">
+                                                        Referral
                                                     </td>
-                                                    <td class="pt-2 pb-1 text-gray-900 text-base w-[2%]">
+                                                    <td class="pt-2 pb-1  text-base w-[2%]">
                                                         :
                                                     </td>
-                                                    <td class="pt-2 pb-1 text-gray-900 text-base w-7/12">
+                                                    <td class="pt-2 pb-1  text-base w-7/12">
+                                                        {partner.referral !==
+                                                        null
+                                                            ? partner.referral
+                                                                  .name
+                                                            : "-"}
+                                                    </td>
+                                                </tr>
+                                                <tr class="border-b">
+                                                    <td class="pt-2 pb-1  text-base font-bold w-1/5">
+                                                        Tanggal Onboarding
+                                                    </td>
+                                                    <td class="pt-2 pb-1  text-base w-[2%]">
+                                                        :
+                                                    </td>
+                                                    <td class="pt-2 pb-1  text-base w-7/12">
                                                         {partner.onboarding_date
                                                             ? new Date(
                                                                   partner.onboarding_date
@@ -430,26 +491,26 @@ const DetailPartner = ({
                                                     </td>
                                                 </tr>
                                                 <tr class="border-b">
-                                                    <td class="pt-2 pb-1 text-gray-900 text-base font-bold w-1/5">
+                                                    <td class="pt-2 pb-1  text-base font-bold w-1/5">
                                                         Umur Onboarding
                                                     </td>
-                                                    <td class="pt-2 pb-1 text-gray-900 text-base w-[2%]">
+                                                    <td class="pt-2 pb-1  text-base w-[2%]">
                                                         :
                                                     </td>
-                                                    <td class="pt-2 pb-1 text-gray-900 text-base w-7/12">
+                                                    <td class="pt-2 pb-1  text-base w-7/12">
                                                         {partner.onboarding_age
                                                             ? partner.onboarding_age
                                                             : "-"}
                                                     </td>
                                                 </tr>
                                                 <tr class="border-b">
-                                                    <td class="pt-2 pb-1 text-gray-900 text-base font-bold w-1/5">
+                                                    <td class="pt-2 pb-1  text-base font-bold w-1/5">
                                                         Tanggal Live
                                                     </td>
-                                                    <td class="pt-2 pb-1 text-gray-900 text-base w-[2%]">
+                                                    <td class="pt-2 pb-1  text-base w-[2%]">
                                                         :
                                                     </td>
-                                                    <td class="pt-2 pb-1 text-gray-900 text-base w-7/12">
+                                                    <td class="pt-2 pb-1  text-base w-7/12">
                                                         {partner.live_date
                                                             ? new Date(
                                                                   partner.live_date
@@ -460,27 +521,27 @@ const DetailPartner = ({
                                                     </td>
                                                 </tr>
                                                 <tr class="border-b">
-                                                    <td class="pt-2 pb-1 text-gray-900 text-base font-bold w-1/5">
+                                                    <td class="pt-2 pb-1  text-base font-bold w-1/5">
                                                         Umur Live
                                                     </td>
-                                                    <td class="pt-2 pb-1 text-gray-900 text-base w-[2%]">
+                                                    <td class="pt-2 pb-1  text-base w-[2%]">
                                                         :
                                                     </td>
-                                                    <td class="pt-2 pb-1 text-gray-900 text-base w-7/12">
+                                                    <td class="pt-2 pb-1  text-base w-7/12">
                                                         {partner.live_age
                                                             ? partner.live_age
                                                             : "-"}
                                                     </td>
                                                 </tr>
                                                 <tr class="border-b">
-                                                    <td class="pt-2 pb-1 text-gray-900 text-base font-bold w-1/5">
+                                                    <td class="pt-2 pb-1  text-base font-bold w-1/5">
                                                         Tanggal Monitoring
                                                         setelah 3 bulan live
                                                     </td>
-                                                    <td class="pt-2 pb-1 text-gray-900 text-base w-[2%]">
+                                                    <td class="pt-2 pb-1  text-base w-[2%]">
                                                         :
                                                     </td>
-                                                    <td class="pt-2 pb-1 text-gray-900 text-base w-7/12">
+                                                    <td class="pt-2 pb-1  text-base w-7/12">
                                                         {partner.monitoring_date_after_3_month_live
                                                             ? new Date(
                                                                   partner.monitoring_date_after_3_month_live
@@ -491,13 +552,13 @@ const DetailPartner = ({
                                                     </td>
                                                 </tr>
                                                 <tr class="border-b">
-                                                    <td class="pt-2 pb-1 text-gray-900 text-base font-bold w-1/5">
+                                                    <td class="pt-2 pb-1  text-base font-bold w-1/5">
                                                         Status
                                                     </td>
-                                                    <td class="pt-2 pb-1 text-gray-900 text-base w-[2%]">
+                                                    <td class="pt-2 pb-1  text-base w-[2%]">
                                                         :
                                                     </td>
-                                                    <td class="pt-2 pb-1 text-gray-900 text-base w-7/12">
+                                                    <td class="pt-2 pb-1  text-base w-7/12">
                                                         <Badge
                                                             value={
                                                                 partner.status
@@ -515,13 +576,13 @@ const DetailPartner = ({
                                                     </td>
                                                 </tr>
                                                 <tr class="border-b">
-                                                    <td class="pt-2 pb-1 text-gray-900 text-base font-bold w-1/5">
+                                                    <td class="pt-2 pb-1  text-base font-bold w-1/5">
                                                         Aksi
                                                     </td>
-                                                    <td class="pt-2 pb-1 text-gray-900 text-base w-[2%]">
+                                                    <td class="pt-2 pb-1  text-base w-[2%]">
                                                         :
                                                     </td>
-                                                    <td class="pt-2 pb-1 text-gray-900 text-base w-7/12">
+                                                    <td class="pt-2 pb-1  text-base w-7/12">
                                                         <Button
                                                             label="edit"
                                                             className="p-0 underline bg-transparent text-blue-700 text-left"
@@ -582,6 +643,14 @@ const DetailPartner = ({
                                                 showError={showError}
                                             />
                                         )}
+                                        {activeMenu === "log_status" && (
+                                            <DetailStatusLog
+                                                partner={partner}
+                                                handleSelectedDetailPartner={
+                                                    handleSelectedDetailPartner
+                                                }
+                                            />
+                                        )}
                                     </>
                                 )}
                             </>
@@ -611,7 +680,7 @@ const DetailPartner = ({
                         enctype="multipart/form-data"
                     >
                         <div className="flex flex-col justify-around gap-4 mt-1">
-                            <div className="flex flex-col mt-2">
+                            <div className="flex flex-col">
                                 <label htmlFor="name">Nama *</label>
                                 <InputText
                                     value={data.name}
@@ -620,9 +689,15 @@ const DetailPartner = ({
                                     }
                                     className="dark:bg-gray-300"
                                     id="name"
+                                    required
                                     aria-describedby="name-help"
                                 />
+                                <InputError
+                                    message={errors["name"]}
+                                    className="mt-2"
+                                />
                             </div>
+
                             <div className="flex flex-col">
                                 <label htmlFor="name">Logo</label>
                                 <div className="App">
@@ -641,7 +716,7 @@ const DetailPartner = ({
                                                     );
                                                 }}
                                                 onremovefile={() => {
-                                                    reset("logo");
+                                                    setData("logo", null);
                                                 }}
                                                 maxFileSize="2mb"
                                                 labelMaxFileSizeExceeded="File terlalu besar"
@@ -661,7 +736,7 @@ const DetailPartner = ({
                                                     );
                                                 }}
                                                 onremovefile={() => {
-                                                    reset("logo");
+                                                    setData("logo", null);
                                                 }}
                                                 maxFileSize="2mb"
                                                 labelMaxFileSizeExceeded="File terlalu besar"
@@ -670,9 +745,42 @@ const DetailPartner = ({
                                         </>
                                     )}
                                 </div>
+                                <InputError
+                                    message={errors["logo"]}
+                                    className="mt-2"
+                                />
+                            </div>
+
+                            <div className="flex flex-col">
+                                <label htmlFor="name">NPWP</label>
+                                <InputMask
+                                    keyfilter="int"
+                                    value={data.npwp}
+                                    onChange={(e) =>
+                                        setData("npwp", e.target.value)
+                                    }
+                                    placeholder="99.999.999.9-999.999"
+                                    mask="99.999.999.9-999.999"
+                                    className="dark:bg-gray-300"
+                                    id="npwp"
+                                    aria-describedby="npwp-help"
+                                />
+                            </div>
+
+                            <div className="flex flex-col">
+                                <label htmlFor="name">Password</label>
+                                <InputText
+                                    value={data.password}
+                                    onChange={(e) =>
+                                        setData("password", e.target.value)
+                                    }
+                                    className="dark:bg-gray-300"
+                                    id="password"
+                                    aria-describedby="password-help"
+                                />
                             </div>
                             <div className="flex flex-col">
-                                <label htmlFor="name">Nomor Telepon *</label>
+                                <label htmlFor="name">Nomor Telepon</label>
                                 <InputText
                                     keyfilter="int"
                                     value={data.phone_number}
@@ -686,7 +794,7 @@ const DetailPartner = ({
                             </div>
 
                             <div className="flex flex-col">
-                                <label htmlFor="sales">Sales *</label>
+                                <label htmlFor="sales">Sales</label>
                                 <Dropdown
                                     value={data.sales}
                                     onChange={(e) =>
@@ -725,8 +833,27 @@ const DetailPartner = ({
                             </div>
 
                             <div className="flex flex-col">
-                                <label htmlFor="province">Provinsi *</label>
+                                <label htmlFor="referral">Referral</label>
                                 <Dropdown
+                                    dataKey="id"
+                                    value={data.referral}
+                                    onChange={(e) =>
+                                        setData("referral", e.target.value)
+                                    }
+                                    options={referrals}
+                                    optionLabel="name"
+                                    placeholder="Pilih Referral"
+                                    filter
+                                    valueTemplate={selectedOptionTemplate}
+                                    itemTemplate={optionTemplate}
+                                    className="w-full md:w-14rem"
+                                />
+                            </div>
+
+                            <div className="flex flex-col">
+                                <label htmlFor="province">Provinsi</label>
+                                <Dropdown
+                                    dataKey="name"
                                     value={
                                         data.province
                                             ? JSON.parse(data.province)
@@ -750,11 +877,16 @@ const DetailPartner = ({
                                     itemTemplate={optionTemplate}
                                     className="w-full md:w-14rem"
                                 />
+                                <InputError
+                                    message={errors["province"]}
+                                    className="mt-2"
+                                />
                             </div>
 
                             <div className="flex flex-col">
-                                <label htmlFor="regency">Kabupaten *</label>
+                                <label htmlFor="regency">Kabupaten</label>
                                 <Dropdown
+                                    dataKey="name"
                                     value={
                                         data.regency
                                             ? JSON.parse(data.regency)
@@ -777,6 +909,10 @@ const DetailPartner = ({
                                     valueTemplate={selectedOptionTemplate}
                                     itemTemplate={optionTemplate}
                                     className="w-full md:w-14rem"
+                                />
+                                <InputError
+                                    message={errors["regency"]}
+                                    className="mt-2"
                                 />
                             </div>
 
@@ -805,20 +941,8 @@ const DetailPartner = ({
                             </div>
 
                             <div className="flex flex-col">
-                                <label htmlFor="address">Alamat</label>
-                                <InputTextarea
-                                    value={data.address}
-                                    onChange={(e) =>
-                                        setData("address", e.target.value)
-                                    }
-                                    rows={5}
-                                    cols={30}
-                                />
-                            </div>
-
-                            <div className="flex flex-col">
                                 <label htmlFor="register_date">
-                                    Tanggal Onboarding *
+                                    Tanggal Onboarding
                                 </label>
                                 <Calendar
                                     value={
@@ -881,7 +1005,7 @@ const DetailPartner = ({
                                                 ).getDate() + workDayCount
                                             );
 
-                                        setData((data) => ({
+                                        setData({
                                             ...data,
                                             live_date: e.target.value,
                                             onboarding_age: onboarding_age,
@@ -890,7 +1014,7 @@ const DetailPartner = ({
                                                 new Date(
                                                     monitoring_date_after_3_month_live
                                                 ),
-                                        }));
+                                        });
                                     }}
                                     showIcon
                                     dateFormat="dd/mm/yy"
@@ -902,7 +1026,6 @@ const DetailPartner = ({
                                     Umur Onboarding (hari)
                                 </label>
                                 <InputText
-                                    keyfilter="int"
                                     value={data.onboarding_age}
                                     onChange={(e) =>
                                         setData(
@@ -954,17 +1077,96 @@ const DetailPartner = ({
                             </div>
 
                             <div className="flex flex-col">
+                                <label htmlFor="address">Alamat</label>
+                                <InputTextarea
+                                    value={data.address}
+                                    onChange={(e) =>
+                                        setData("address", e.target.value)
+                                    }
+                                    rows={5}
+                                    cols={30}
+                                />
+                            </div>
+
+                            <div className="flex flex-col">
+                                <label htmlFor="period">
+                                    Periode Langganan
+                                </label>
+                                <Dropdown
+                                    dataKey="name"
+                                    value={data.period}
+                                    onChange={(e) => {
+                                        setData("period", e.target.value);
+                                    }}
+                                    options={option_period_subscription}
+                                    optionLabel="name"
+                                    placeholder="Langganan Per-"
+                                    valueTemplate={selectedOptionTemplate}
+                                    itemTemplate={optionTemplate}
+                                    editable
+                                    className={`w-full md:w-14rem 
+                                        `}
+                                />
+                                <InputError
+                                    message={errors["partner.period"]}
+                                    className="mt-2"
+                                />
+                            </div>
+
+                            <div className="flex flex-col">
+                                <label htmlFor="payment_metode">
+                                    Metode Pembayaran
+                                </label>
+                                <Dropdown
+                                    value={data.payment_metode}
+                                    onChange={(e) => {
+                                        setData(
+                                            "payment_metode",
+                                            e.target.value
+                                        );
+                                    }}
+                                    options={[
+                                        { name: "cazhbox" },
+                                        {
+                                            name: "payment link",
+                                        },
+                                    ]}
+                                    optionLabel="name"
+                                    optionValue="name"
+                                    placeholder="Pilih Metode Pembayaran"
+                                    valueTemplate={selectedOptionTemplate}
+                                    itemTemplate={optionTemplate}
+                                    className="w-full md:w-14rem"
+                                    editable
+                                />
+                                <InputError
+                                    message={errors["payment_metode"]}
+                                    className="mt-2"
+                                />
+                            </div>
+
+                            <div className="flex flex-col">
                                 <label htmlFor="status">Status *</label>
                                 <Dropdown
                                     value={data.status}
-                                    onChange={(e) =>
-                                        setData("status", e.target.value)
-                                    }
+                                    onChange={(e) => {
+                                        setData({
+                                            ...data,
+                                            status: e.target.value,
+                                            note_status: null,
+                                        });
+                                        setModalStatusIsVisible(
+                                            (prev) => (prev = true)
+                                        );
+                                    }}
                                     options={status}
                                     optionLabel="name"
-                                    optionValue="name"
                                     placeholder="Pilih Status"
                                     className="w-full md:w-14rem"
+                                />
+                                <InputError
+                                    message={errors["status"]}
+                                    className="mt-2"
                                 />
                             </div>
                         </div>
@@ -979,6 +1181,44 @@ const DetailPartner = ({
                     </form>
                 </Dialog>
             </div>
+
+            {/* Modal edit status */}
+            <Dialog
+                header="Edit status"
+                headerClassName="dark:bg-slate-900 dark:text-white"
+                className="bg-white h-[250px] max-h-[80%] w-[80%] md:w-[60%] lg:w-[35%] dark:glass dark:text-white"
+                contentClassName="dark:bg-slate-900 dark:text-white"
+                visible={modalStatusIsVisible}
+                modal={false}
+                closable={false}
+                onHide={() => setModalStatusIsVisible(false)}
+            >
+                <div className="flex flex-col justify-around gap-4 mt-3">
+                    <div className="flex flex-col">
+                        <label htmlFor="note_status">Keterangan</label>
+                        <InputTextarea
+                            value={data.note_status}
+                            onChange={(e) =>
+                                setData("note_status", e.target.value)
+                            }
+                            rows={5}
+                            cols={30}
+                        />
+                    </div>
+                    <div className="flex justify-center mt-3">
+                        <Button
+                            type="button"
+                            label="oke"
+                            disabled={
+                                data.note_status == null ||
+                                data.note_status == ""
+                            }
+                            onClick={() => setModalStatusIsVisible(false)}
+                            className="bg-purple-600 text-sm shadow-md rounded-lg"
+                        />
+                    </div>
+                </div>
+            </Dialog>
         </>
     );
 };

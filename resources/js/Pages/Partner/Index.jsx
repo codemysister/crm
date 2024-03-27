@@ -37,6 +37,7 @@ import HeaderModule from "@/Components/HeaderModule.jsx";
 import { Menu } from "primereact/menu";
 import { Sidebar } from "primereact/sidebar";
 import axios from "axios";
+import DetailStatusLog from "./DetailPartner/DetailStatusLog.jsx";
 registerPlugin(FilePondPluginFileValidateSize);
 
 export default function Index({ auth, partner, usersProp, statusProp }) {
@@ -65,16 +66,11 @@ export default function Index({ auth, partner, usersProp, statusProp }) {
     const [modalImportPartnerIsVisible, setModalImportPartnerIsVisible] =
         useState(false);
     const [modalPartnersIsVisible, setModalPartnersIsVisible] = useState(false);
+    const [modalStatusIsVisible, setModalStatusIsVisible] = useState(false);
     const [modalEditPartnersIsVisible, setModalEditPartnersIsVisible] =
         useState(false);
     const toast = useRef(null);
     const modalPartner = useRef(null);
-    const stepPartnerRef = useRef(null);
-    const stepPicRef = useRef(null);
-    const stepBankRef = useRef(null);
-    const stepAccountRef = useRef(null);
-    const stepSubscriptionRef = useRef(null);
-    const stepPriceListRef = useRef(null);
     const scrollForm = useRef(null);
     const { roles, permissions } = auth.user;
     const [activeIndex, setActiveIndex] = useState(0);
@@ -131,32 +127,6 @@ export default function Index({ auth, partner, usersProp, statusProp }) {
             getSubdistricts(codeProvince, codeRegency);
         }
     }, [codeProvince, codeRegency]);
-
-    useEffect(() => {
-        if (activeIndex == 0) {
-            triggerInputFocus(stepPartnerRef);
-        } else if (activeIndex == 1) {
-            triggerInputFocus(stepPicRef);
-        } else if (activeIndex == 2) {
-            triggerInputFocus(stepBankRef);
-        } else if (activeIndex == 3) {
-            triggerInputFocus(stepAccountRef);
-        } else if (activeIndex == 4) {
-            triggerInputFocus(stepSubscriptionRef);
-        } else {
-            triggerInputFocus(stepPriceListRef);
-        }
-    }, [activeIndex]);
-
-    const triggerInputFocus = (ref) => {
-        if (ref.current) {
-            ref.current.scrollIntoView({
-                behavior: "smooth",
-                block: "center",
-            });
-        }
-        return null;
-    };
 
     const getProvince = async () => {
         const options = {
@@ -305,6 +275,7 @@ export default function Index({ auth, partner, usersProp, statusProp }) {
             period: null,
             payment_metode: null,
             status: "",
+            note_status: null,
             excell: null,
         },
     });
@@ -392,50 +363,6 @@ export default function Index({ auth, partner, usersProp, statusProp }) {
                     ></i>
                 </div>
             </React.Fragment>
-        );
-    };
-
-    const itemRenderer = (item, itemIndex, ref) => {
-        const isActiveItem = activeIndex === itemIndex;
-        const backgroundColor = isActiveItem ? "#673AB7" : "#9e9d9e";
-        const textColor = isActiveItem
-            ? "var(--surface-b)"
-            : "var(--text-color-secondary)";
-
-        return (
-            <li
-                id="pr_id_376_4"
-                class="p-steps-item p-highlight p-steps-current"
-                data-pc-section="menuitem"
-                ref={ref}
-            >
-                <a
-                    href="#"
-                    class="p-menuitem-link"
-                    tabindex="-1"
-                    data-pc-section="action"
-                >
-                    <span
-                        class="p-steps-number"
-                        data-pc-section="step"
-                        style={{
-                            backgroundColor: backgroundColor,
-                            color: "white",
-                        }}
-                    >
-                        {itemIndex + 1}
-                    </span>
-                    <span
-                        class="p-steps-title"
-                        className={`${
-                            isActiveItem ? "font-bold" : "font-medium"
-                        }`}
-                        data-pc-section="label"
-                    >
-                        {item.label}
-                    </span>
-                </a>
-            </li>
         );
     };
 
@@ -560,21 +487,6 @@ export default function Index({ auth, partner, usersProp, statusProp }) {
         );
     };
 
-    const itemsAddButton = [
-        permissions.includes("tambah partner") && {
-            label: "satuan",
-            command: () => {
-                setModalPartnersIsVisible(true);
-            },
-        },
-        permissions.includes("tambah partner") && {
-            label: "import",
-            command: () => {
-                setModalImportPartnerIsVisible(true);
-            },
-        },
-    ];
-
     function formatNPWP(input) {
         let digitsOnly = input.replace(/\D/g, "");
 
@@ -668,7 +580,7 @@ export default function Index({ auth, partner, usersProp, statusProp }) {
             >
                 <Button
                     icon={filterButtonIcon}
-                    className="shadow-md border border-slate-600 bg-transparent  text-slate-600 dark:bg-slate-700 dark:text-slate-300 rounded-lg"
+                    className="shadow-md border border-slate-600 bg-transparent text-slate-600 dark:bg-slate-700 dark:text-slate-300 rounded-lg"
                     label="filter"
                     onClick={() => setSidebarFilter(true)}
                 />
@@ -790,33 +702,39 @@ export default function Index({ auth, partner, usersProp, statusProp }) {
                 ref={action}
             >
                 <div className="flex flex-col flex-wrap w-full">
-                    <Button
-                        icon="pi pi-pencil"
-                        label="edit"
-                        className="bg-transparent hover:bg-slate-200 w-full text-slate-500 dark:hover:text-slate-900 dark:text-white border-b-2 border-slate-400"
-                        onClick={() => {
-                            handleEditPartner(selectedPartner);
-                        }}
-                    />
-                    <Button
-                        icon="pi pi-trash"
-                        label="hapus"
-                        className="bg-transparent hover:bg-slate-200 w-full text-slate-500 dark:hover:text-slate-900 dark:text-white border-b-2 border-slate-400"
-                        onClick={() => {
-                            confirmDeletePartner();
-                        }}
-                    />
+                    {permissions.includes("edit partner") && (
+                        <Button
+                            icon="pi pi-pencil"
+                            label="edit"
+                            className="bg-transparent hover:bg-slate-200 w-full text-slate-500 dark:hover:text-slate-900 dark:text-white border-b-2 border-slate-400"
+                            onClick={() => {
+                                handleEditPartner(selectedPartner);
+                            }}
+                        />
+                    )}
+                    {permissions.includes("hapus partner") && (
+                        <Button
+                            icon="pi pi-trash"
+                            label="hapus"
+                            className="bg-transparent hover:bg-slate-200 w-full text-slate-500 dark:hover:text-slate-900 dark:text-white border-b-2 border-slate-400"
+                            onClick={() => {
+                                confirmDeletePartner();
+                            }}
+                        />
+                    )}
                 </div>
             </OverlayPanel>
 
             <HeaderModule title="Partner">
-                <Button
-                    label="Tambah"
-                    className="bg-purple-600 text-sm shadow-md rounded-lg mr-2"
-                    icon={addButtonIcon}
-                    onClick={(event) => menuRight.current.toggle(event)}
-                    aria-haspopup
-                />
+                {permissions.includes("tambah partner") && (
+                    <Button
+                        label="Tambah"
+                        className="bg-purple-600 text-sm shadow-md rounded-lg mr-2"
+                        icon={addButtonIcon}
+                        onClick={(event) => menuRight.current.toggle(event)}
+                        aria-haspopup
+                    />
+                )}
 
                 <OverlayPanel
                     ref={menuRight}
@@ -2300,6 +2218,10 @@ export default function Index({ auth, partner, usersProp, statusProp }) {
                                             className={`w-full md:w-14rem 
                                         `}
                                         />
+                                        <InputError
+                                            message={errors["partner.period"]}
+                                            className="mt-2"
+                                        />
                                     </div>
 
                                     <div className="flex flex-col">
@@ -2347,7 +2269,11 @@ export default function Index({ auth, partner, usersProp, statusProp }) {
                                                 setData("partner", {
                                                     ...data.partner,
                                                     status: e.target.value,
+                                                    note_status: null,
                                                 });
+                                                setModalStatusIsVisible(
+                                                    (prev) => (prev = true)
+                                                );
                                             }}
                                             options={status}
                                             optionLabel="name"
@@ -2372,7 +2298,50 @@ export default function Index({ auth, partner, usersProp, statusProp }) {
                         </Dialog>
                     </div>
 
-                    <div className="flex mx-auto flex-col justify-center mt-5 gap-5">
+                    {/* Modal edit status */}
+                    <Dialog
+                        header="Edit status"
+                        headerClassName="dark:bg-slate-900 dark:text-white"
+                        className="bg-white h-[250px] max-h-[80%] w-[80%] md:w-[60%] lg:w-[35%] dark:glass dark:text-white"
+                        contentClassName="dark:bg-slate-900 dark:text-white"
+                        visible={modalStatusIsVisible}
+                        modal={false}
+                        closable={false}
+                        onHide={() => setModalStatusIsVisible(false)}
+                    >
+                        <div className="flex flex-col justify-around gap-4 mt-3">
+                            <div className="flex flex-col">
+                                <label htmlFor="note_status">Keterangan</label>
+                                <InputTextarea
+                                    value={data.partner.note_status}
+                                    onChange={(e) =>
+                                        setData("partner", {
+                                            ...data.partner,
+                                            note_status: e.target.value,
+                                        })
+                                    }
+                                    rows={5}
+                                    cols={30}
+                                />
+                            </div>
+                            <div className="flex justify-center mt-3">
+                                <Button
+                                    type="button"
+                                    label="oke"
+                                    disabled={
+                                        data.partner.note_status == null ||
+                                        data.partner.note_status == ""
+                                    }
+                                    onClick={() =>
+                                        setModalStatusIsVisible(false)
+                                    }
+                                    className="bg-purple-600 text-sm shadow-md rounded-lg"
+                                />
+                            </div>
+                        </div>
+                    </Dialog>
+
+                    <div className="flex w-full mx-auto flex-col justify-center mt-5 gap-5">
                         <div className="card p-fluid w-full h-full flex justify-center rounded-lg">
                             <DataTable
                                 loading={isLoadingData}
@@ -2391,6 +2360,7 @@ export default function Index({ auth, partner, usersProp, statusProp }) {
                                 filters={filters}
                                 ref={dt}
                                 scrollable
+                                scrollHeight="400px"
                                 globalFilterFields={[
                                     "name",
                                     "status",
@@ -2412,11 +2382,7 @@ export default function Index({ auth, partner, usersProp, statusProp }) {
                                     header="Aksi"
                                     frozen
                                     body={actionBodyTemplate}
-                                    style={{
-                                        width: "max-content",
-                                        whiteSpace: "nowrap",
-                                    }}
-                                    className="dark:border-none"
+                                    className="dark:border-none lg:w-max lg:whitespace-nowrap"
                                     headerClassName="dark:border-none dark:bg-slate-900 dark:text-gray-300"
                                 ></Column>
                                 <Column
@@ -2434,13 +2400,9 @@ export default function Index({ auth, partner, usersProp, statusProp }) {
                                             {rowData.name}
                                         </button>
                                     )}
-                                    className="dark:border-none"
+                                    className="dark:border-none lg:whitespace-nowrap lg:w-max"
                                     headerClassName="dark:border-none  dark:bg-slate-900 dark:text-gray-300"
                                     align="left"
-                                    style={{
-                                        width: "max-content",
-                                        whiteSpace: "nowrap",
-                                    }}
                                 ></Column>
                                 <Column
                                     header="Status"
@@ -2458,13 +2420,9 @@ export default function Index({ auth, partner, usersProp, statusProp }) {
                                             ></Badge>
                                         );
                                     }}
-                                    className="dark:border-none"
+                                    className="dark:border-none lg:w-max lg:whitespace-nowrap"
                                     headerClassName="dark:border-none  dark:bg-slate-900 dark:text-gray-300"
                                     align="left"
-                                    style={{
-                                        width: "max-content",
-                                        whiteSpace: "nowrap",
-                                    }}
                                 ></Column>
                                 <Column
                                     header="NPWP"
@@ -2489,6 +2447,7 @@ export default function Index({ auth, partner, usersProp, statusProp }) {
                                         whiteSpace: "nowrap",
                                     }}
                                 ></Column>
+
                                 <Column
                                     field="phone_number"
                                     body={(rowData) => {
@@ -2735,6 +2694,7 @@ export default function Index({ auth, partner, usersProp, statusProp }) {
                         }
                         sales={sales}
                         account_managers={account_managers}
+                        referrals={referrals}
                         status={status}
                         isLoading={isLoading}
                         provinces={provinces}
