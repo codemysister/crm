@@ -124,13 +124,19 @@ class PartnerImport implements ToCollection, WithStartRow, WithHeadingRow, WithC
 
     function calculateOnboardingAge($liveDate, $onboardingDate)
     {
-        $onboardingAge = ceil((strtotime($liveDate)) - strtotime($onboardingDate)) / (60 * 60 * 24);
+        if ($liveDate == 0) {
+            return 0;
+        }
+        $onboardingAge = abs(ceil((strtotime($onboardingDate)) - strtotime($liveDate)) / (60 * 60 * 24));
         return $onboardingAge;
     }
 
     function calculateLiveAge($liveDate)
     {
-        $liveAge = ceil((strtotime(date("Y-m-d")) - strtotime($liveDate)) / (60 * 60 * 24));
+        if ($liveDate == 0) {
+            return 0;
+        }
+        $liveAge = abs(ceil((strtotime($liveDate) - strtotime(date("Y-m-d"))) / (60 * 60 * 24)));
         return $liveAge;
     }
 
@@ -200,17 +206,18 @@ class PartnerImport implements ToCollection, WithStartRow, WithHeadingRow, WithC
                 $province = ["code" => $code, "name" => ucwords(strtolower($name))];
             }
 
-            // dd(Carbon::parse(Date::excelToDateTimeObject($row[0]))->format('Y-m-d H:i:s'));
+            $tanggal_live = $row["tanggal_live"] ? Carbon::parse(Date::excelToDateTimeObject($row["tanggal_live"]))->format('Y-m-d H:i:s') : null;
+            $tanggal_onboarding = $row["tanggal_onboarding"] ? Carbon::parse(Date::excelToDateTimeObject($row["tanggal_onboarding"]))->format('Y-m-d H:i:s') : null;
             $partner = Partner::create([
                 'uuid' => Str::uuid(),
                 'name' => $row["nama_partner"],
                 'phone_number' => $row["nomor_telepon_lembaga"],
                 'npwp' => $row['npwp'],
                 'password' => $row['password'],
-                'onboarding_date' => Carbon::parse(Date::excelToDateTimeObject($row["tanggal_onboarding"]))->format('Y-m-d H:i:s'),
-                'live_date' => $row["tanggal_live"] ? Carbon::parse(Date::excelToDateTimeObject($row["tanggal_live"]))->format('Y-m-d H:i:s') : null,
-                'onboarding_age' => $row["tanggal_onboarding"] !== null ? $this->calculateOnboardingAge($row["tanggal_live"], $row["tanggal_onboarding"]) : null,
-                'live_age' => $row["tanggal_live"] !== null ? $this->calculateLiveAge($row["tanggal_live"]) : null,
+                'onboarding_date' => $tanggal_onboarding,
+                'live_date' => $tanggal_live,
+                'onboarding_age' => $this->calculateOnboardingAge($tanggal_live, $tanggal_onboarding),
+                'live_age' => $this->calculateLiveAge($tanggal_live),
                 'monitoring_date_after_3_month_live' => $row["tanggal_monitoring_3_bulan_after_live"] ? Carbon::parse(Date::excelToDateTimeObject($row["tanggal_monitoring_3_bulan_after_live"]))->format('Y-m-d H:i:s') : null,
                 'regency' => json_encode($regency),
                 'province' => json_encode($province),
