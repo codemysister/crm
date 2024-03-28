@@ -248,19 +248,19 @@ export default function Index({ auth }) {
             >
                 <div className="flex flex-col flex-wrap w-full">
                     <Button
-                        icon="pi pi-trash"
-                        label="hapus"
-                        className="bg-transparent hover:bg-slate-200 w-full text-slate-500 border-b-2 border-slate-400"
-                        onClick={() => {
-                            confirmDeleteStatus();
-                        }}
-                    />
-                    <Button
                         icon="pi pi-pencil"
                         label="edit"
                         className="bg-transparent hover:bg-slate-200 w-full text-slate-500 border-b-2 border-slate-400"
                         onClick={() => {
                             handleEditStatus(selectedStatus);
+                        }}
+                    />
+                    <Button
+                        icon="pi pi-trash"
+                        label="hapus"
+                        className="bg-transparent hover:bg-slate-200 w-full text-slate-500 border-b-2 border-slate-400"
+                        onClick={() => {
+                            confirmDeleteStatus();
                         }}
                     />
                 </div>

@@ -76,8 +76,11 @@ const Log = ({ auth, showSuccess, showError }) => {
                         header: "",
                     }}
                     paginator
-                    filters={filters}
+                    rowsPerPageOptions={[5, 10, 25, 50]}
+                    paginatorTemplate="RowsPerPageDropdown FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink"
+                    currentPageReportTemplate="{first} - {last} dari {totalRecords}"
                     rows={10}
+                    filters={filters}
                     emptyMessage="Status tidak ditemukan."
                     paginatorClassName="dark:bg-transparent paginator-custome dark:text-gray-300 rounded-b-lg"
                     header={headerStatus}
@@ -110,6 +113,7 @@ const Log = ({ auth, showSuccess, showError }) => {
                             whiteSpace: "nowrap",
                         }}
                     ></Column>
+                    {console.log(logs)}
                     <Column
                         className="dark:border-none"
                         headerClassName="dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300"
@@ -120,6 +124,9 @@ const Log = ({ auth, showSuccess, showError }) => {
                             whiteSpace: "nowrap",
                         }}
                         body={(rowData) => {
+                            let causer = rowData.causer
+                                ? rowData.causer.name
+                                : "";
                             let event = "";
                             let color = "";
                             let severity = "";
@@ -141,49 +148,42 @@ const Log = ({ auth, showSuccess, showError }) => {
                                 severity = "info";
                             }
                             return (
-                                <Message
-                                    className={`bg-${color}-300 text-${color}-800 rounded-md w-full`}
-                                    severity={severity}
-                                    content={
-                                        <div className="flex justify-between w-full">
-                                            <div className="flex gap-4">
-                                                <Badge
-                                                    value={event}
-                                                    severity={
-                                                        severity == "error"
-                                                            ? "danger"
-                                                            : severity
-                                                    }
-                                                    className="w-20"
-                                                ></Badge>
-                                                <p>{rowData.description}</p>
-                                            </div>
-                                            {rowData.event !== "deleted" ? (
-                                                <div>
-                                                    <Button
-                                                        label="detail"
-                                                        className="p-0 underline bg-transparent text-blue-700 text-left"
-                                                        onClick={(e) => {
-                                                            op.current.toggle(
-                                                                e
-                                                            );
-                                                            setSelectedStatus(
-                                                                (prev) =>
-                                                                    (prev = {
-                                                                        properties:
-                                                                            rowData.properties,
-                                                                        event: rowData.event,
-                                                                    })
-                                                            );
-                                                        }}
-                                                        aria-controls="popup_menu_right"
-                                                        aria-haspopup
-                                                    />
-                                                </div>
-                                            ) : null}
-                                        </div>
-                                    }
-                                />
+                                <div className="flex justify-between w-full">
+                                    <div className="flex gap-4">
+                                        <Badge
+                                            value={event}
+                                            severity={
+                                                severity == "error"
+                                                    ? "danger"
+                                                    : severity
+                                            }
+                                            className="w-20"
+                                        ></Badge>
+                                        <p>
+                                            {causer + " " + rowData.description}
+                                        </p>
+                                    </div>
+
+                                    <div>
+                                        <Button
+                                            label="detail"
+                                            className="p-0 underline bg-transparent text-blue-700 text-left"
+                                            onClick={(e) => {
+                                                op.current.toggle(e);
+                                                setSelectedStatus(
+                                                    (prev) =>
+                                                        (prev = {
+                                                            properties:
+                                                                rowData.properties,
+                                                            event: rowData.event,
+                                                        })
+                                                );
+                                            }}
+                                            aria-controls="popup_menu_right"
+                                            aria-haspopup
+                                        />
+                                    </div>
+                                </div>
                             );
                         }}
                     ></Column>
@@ -195,66 +195,78 @@ const Log = ({ auth, showSuccess, showError }) => {
                 showCloseIcon
             >
                 <div className="flex flex-wrap gap-2">
-                    <div className="flex-1 w-1/2">
-                        <Message
-                            className={`bg-green-300 text-green-800 rounded-md w-full`}
-                            severity={"success"}
-                            content={
-                                <div className="flex justify-between w-full">
-                                    <div className="flex flex-col gap-2">
-                                        {(selectedStatus?.event === "created" ||
-                                            selectedStatus?.event ===
-                                                "restored") &&
-                                        selectedStatus !== null
-                                            ? Object.keys(
-                                                  selectedStatus.properties
-                                                      .attributes
-                                              ).map((key) => (
-                                                  <p>
-                                                      {key} :{" "}
-                                                      {
-                                                          selectedStatus
-                                                              .properties
-                                                              .attributes[key]
-                                                      }
-                                                  </p>
-                                              ))
-                                            : null}
-
-                                        {selectedStatus?.event == "updated" &&
-                                            (selectedStatus !== null
+                    {selectedStatus?.event == "created" ||
+                    selectedStatus?.event == "updated" ||
+                    selectedStatus?.event == "restored" ? (
+                        <div className="flex-1 w-1/2">
+                            <Message
+                                className={`bg-green-300 text-green-800 rounded-md w-full`}
+                                severity={"success"}
+                                content={
+                                    <div className="flex justify-between w-full">
+                                        <div className="flex flex-col gap-2">
+                                            {(selectedStatus?.event ===
+                                                "created" ||
+                                                selectedStatus?.event ===
+                                                    "restored") &&
+                                            selectedStatus !== null
                                                 ? Object.keys(
                                                       selectedStatus.properties
                                                           .attributes
-                                                  ).map((key) => {
-                                                      return (
-                                                          selectedStatus
-                                                              .properties
-                                                              .attributes[
-                                                              key
-                                                          ] !==
+                                                  ).map((key) => (
+                                                      <p>
+                                                          {key} :{" "}
+                                                          {
                                                               selectedStatus
                                                                   .properties
-                                                                  .old[key] && (
-                                                              <p>
-                                                                  {key} :{" "}
-                                                                  {
-                                                                      selectedStatus
-                                                                          .properties
-                                                                          .attributes[
-                                                                          key
-                                                                      ]
-                                                                  }
-                                                              </p>
-                                                          )
-                                                      );
-                                                  })
-                                                : null)}
+                                                                  .attributes[
+                                                                  key
+                                                              ]
+                                                          }
+                                                      </p>
+                                                  ))
+                                                : null}
+
+                                            {selectedStatus?.event ==
+                                                "updated" &&
+                                                (selectedStatus !== null
+                                                    ? Object.keys(
+                                                          selectedStatus
+                                                              .properties
+                                                              .attributes
+                                                      ).map((key) => {
+                                                          return (
+                                                              selectedStatus
+                                                                  .properties
+                                                                  .attributes[
+                                                                  key
+                                                              ] !==
+                                                                  selectedStatus
+                                                                      .properties
+                                                                      .old[
+                                                                      key
+                                                                  ] && (
+                                                                  <p>
+                                                                      {key} :{" "}
+                                                                      {
+                                                                          selectedStatus
+                                                                              .properties
+                                                                              .attributes[
+                                                                              key
+                                                                          ]
+                                                                      }
+                                                                  </p>
+                                                              )
+                                                          );
+                                                      })
+                                                    : null)}
+                                        </div>
                                     </div>
-                                </div>
-                            }
-                        />
-                    </div>
+                                }
+                            />
+                        </div>
+                    ) : null}
+
                     {selectedStatus?.event == "updated" ? (
                         <div className="flex-1 w-1/2">
                             <Message
@@ -291,6 +303,31 @@ const Log = ({ auth, showSuccess, showError }) => {
                                                       );
                                                   })
                                                 : null}
+                                        </div>
+                                    </div>
+                                }
+                            />
+                        </div>
+                    ) : null}
+                    {selectedStatus?.event == "deleted" ? (
+                        <div className="flex-1 ">
+                            <Message
+                                className={`bg-red-300 text-red-800 rounded-md w-full`}
+                                severity={"success"}
+                                content={
+                                    <div className="flex justify-between w-full">
+                                        <div className="flex flex-col gap-2">
+                                            {Object.keys(
+                                                selectedStatus.properties.old
+                                            ).map((key) => (
+                                                <p>
+                                                    {key} :{" "}
+                                                    {
+                                                        selectedStatus
+                                                            .properties.old[key]
+                                                    }
+                                                </p>
+                                            ))}
                                         </div>
                                     </div>
                                 }

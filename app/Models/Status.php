@@ -20,8 +20,9 @@ class Status extends Model
     {
         return LogOptions::defaults()
             ->logOnly(['name', 'color', 'category'])
+            ->dontLogIfAttributesChangedOnly(['deleted_at', 'updated_at'])
             ->setDescriptionForEvent(function (string $eventName) {
-                $modelName = class_basename($this);
+                $modelName = strtolower(class_basename($this));
                 if ($eventName === 'created') {
                     return "menambah data {$modelName} baru";
                 } elseif ($eventName === 'updated') {

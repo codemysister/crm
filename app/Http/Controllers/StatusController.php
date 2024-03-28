@@ -59,7 +59,10 @@ class StatusController extends Controller
 
     public function apiGetStatusLog()
     {
-        $logs = Activity::with('causer', 'subject')->latest()->get();
+        $logs = Activity::with(['causer', 'subject'])
+            ->where('subject_type', 'App\Models\Status')
+            ->latest()
+            ->get();
 
         return response()->json($logs);
     }
