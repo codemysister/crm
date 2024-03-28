@@ -58,6 +58,19 @@ const DetailStatusLog = ({
         fetchData();
     }, []);
 
+    function formatDate(inputDate) {
+        const date = new Date(inputDate);
+
+        const day = date.getUTCDate();
+        const month = date.getUTCMonth() + 1;
+        const year = date.getUTCFullYear();
+
+        const formattedDay = day < 10 ? `0${day}` : day;
+        const formattedMonth = month < 10 ? `0${month}` : month;
+
+        return `${formattedDay}/${formattedMonth}/${year}`;
+    }
+
     const headerStatus = () => {
         return (
             <HeaderDatatable
@@ -68,7 +81,6 @@ const DetailStatusLog = ({
     };
     return (
         <>
-            {console.log(logs)}
             <div className="flex mx-auto flex-col justify-center gap-5">
                 <div className="card p-fluid w-full h-full flex justify-center rounded-lg">
                     <DataTable
@@ -148,7 +160,11 @@ const DetailStatusLog = ({
                                                 }}
                                             ></Badge>
                                             <p>
-                                                {rowData.causer.name +
+                                                {formatDate(
+                                                    rowData.created_at
+                                                ) +
+                                                    ", " +
+                                                    rowData.causer.name +
                                                     " " +
                                                     "memperbaharui status partner"}
                                             </p>
