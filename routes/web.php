@@ -5,6 +5,7 @@ use App\Http\Controllers\InvoiceGeneralController;
 use App\Http\Controllers\InvoiceGeneralTransactionController;
 use App\Http\Controllers\InvoiceSubscriptionController;
 use App\Http\Controllers\InvoiceSubscriptionTransactionController;
+use App\Http\Controllers\LeadController;
 use App\Http\Controllers\MemoController;
 use App\Http\Controllers\MOUController;
 use App\Http\Controllers\PartnerAccountSettingController;
@@ -186,6 +187,15 @@ Route::middleware('auth')->group(function () {
 
     Route::resource('signature', SignatureController::class);
     Route::get('/api/signature', [SignatureController::class, 'apiGetSignature'])->name('api.signature');
+
+    // Lead
+    Route::get('/leads', [LeadController::class, 'index'])->name('leads.view')->middleware(['can:lihat partner']);
+    Route::post('/leads', [LeadController::class, 'store'])->name('leads.store')->middleware(['can:tambah partner']);
+    Route::put('/leads/{lead:uuid}', [LeadController::class, 'update'])->name('leads.update')->middleware(['can:edit partner']);
+    Route::delete('/leads/{lead:uuid}', [LeadController::class, 'destroy'])->name('leads.destroy')->middleware(['can:hapus partner']);
+    Route::get('api/leads', [LeadController::class, 'apiGetLeads'])->name('api.leads')->middleware(['can:lihat partner']);
+    Route::post('/leads/import', [LeadController::class, 'import'])->name('leads.import')->middleware(['can:tambah partner']);
+    Route::post('/leads/filter', [LeadController::class, 'filter'])->name('leads.filter')->middleware(['can:tambah partner']);
 
     // Partner
     Route::post('/partners/filter', [PartnerController::class, 'filter'])->name('partners.filter')->middleware(['can:lihat partner']);

@@ -167,6 +167,39 @@ export default function DashboardLayout({ user, children }) {
                             </ul>
                             <ul>
                                 <li className="relative flex flex-col px-6 py-3 w-full">
+                                    {currentPath == "/leads" && (
+                                        <span className="absolute inset-y-0 left-0 w-1 bg-purple-600 rounded-tr-lg rounded-br-lg"></span>
+                                    )}
+                                    <div className="flex flex-row justify-between">
+                                        <Link
+                                            className={`inline-flex items-center ${
+                                                currentPath == "/leads"
+                                                    ? "text-gray-800 dark:text-gray-100"
+                                                    : ""
+                                            } w-full text-sm font-semibold transition-colors duration-150 hover:text-gray-800 dark:hover:text-gray-200 `}
+                                            href={route("leads.view")}
+                                        >
+                                            <svg
+                                                className="w-5 h-5"
+                                                fill="none"
+                                                strokeLinecap="round"
+                                                strokeLinejoin="round"
+                                                strokeWidth="2"
+                                                viewBox="0 0 24 24"
+                                                stroke="currentColor"
+                                            >
+                                                <path
+                                                    stroke-linecap="round"
+                                                    stroke-linejoin="round"
+                                                    d="M18 7.5v3m0 0v3m0-3h3m-3 0h-3m-2.25-4.125a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0ZM3 19.235v-.11a6.375 6.375 0 0 1 12.75 0v.109A12.318 12.318 0 0 1 9.374 21c-2.331 0-4.512-.645-6.374-1.766Z"
+                                                />
+                                            </svg>
+
+                                            <span className="ml-4">Lead</span>
+                                        </Link>
+                                    </div>
+                                </li>
+                                <li className="relative flex flex-col px-6 py-3 w-full">
                                     {currentPath == "/partners" && (
                                         <span className="absolute inset-y-0 left-0 w-1 bg-purple-600 rounded-tr-lg rounded-br-lg"></span>
                                     )}
