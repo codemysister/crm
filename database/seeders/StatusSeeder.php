@@ -48,5 +48,19 @@ class StatusSeeder extends Seeder
             'category' => 'partner',
             'color' => 'D946EF'
         ]);
+
+        Status::create([
+            'uuid' => Str::uuid(),
+            'name' => 'prospek',
+            'category' => 'lead',
+            'color' => '00ff48'
+        ]);
+
+        Status::create([
+            'uuid' => Str::uuid(),
+            'name' => 'loss',
+            'category' => 'lead',
+            'color' => '4f4f4f'
+        ]);
     }
 }
