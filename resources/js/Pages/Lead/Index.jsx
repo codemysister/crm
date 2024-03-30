@@ -702,6 +702,20 @@ export default function Index({ auth, usersProp, statusProp }) {
                                                 whiteSpace: "nowrap",
                                             }}
                                         ></Column>
+                                        <Column
+                                            field="created_by"
+                                            className="dark:border-none"
+                                            headerClassName="dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300"
+                                            header="Penginput"
+                                            align="left"
+                                            style={{
+                                                width: "max-content",
+                                                whiteSpace: "nowrap",
+                                            }}
+                                            body={(rowData) => {
+                                                return rowData.created_by.name;
+                                            }}
+                                        ></Column>
                                     </DataTable>
                                 </div>
                             </div>

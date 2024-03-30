@@ -61,6 +61,7 @@ class LeadController extends Controller
     {
         $leadsDefault = Lead::with([
             'status',
+            'createdBy'
         ])->latest()->get();
         return response()->json(
             $leadsDefault
