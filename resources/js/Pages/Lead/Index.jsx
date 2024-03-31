@@ -12,7 +12,6 @@ import {
     ConfirmDialog,
     ConfirmDialog as ConfirmDialog2,
     confirmDialog,
-    confirmDialog as confirmDialog2,
 } from "primereact/confirmdialog";
 import { TabPanel, TabView } from "primereact/tabview";
 import SkeletonDatatable from "@/Components/SkeletonDatatable";
@@ -27,6 +26,7 @@ import { Sidebar } from "primereact/sidebar";
 import { FilePond, registerPlugin } from "react-filepond";
 import FilePondPluginFileValidateSize from "filepond-plugin-file-validate-size";
 import "filepond/dist/filepond.min.css";
+import Log from "./Log";
 registerPlugin(FilePondPluginFileValidateSize);
 
 export default function Index({ auth, usersProp, statusProp }) {
@@ -727,6 +727,7 @@ export default function Index({ auth, usersProp, statusProp }) {
                     {activeIndexTab == 1 && (
                         <Log
                             auth={auth}
+                            users={users}
                             showSuccess={showSuccess}
                             showError={showError}
                         />
@@ -850,6 +851,7 @@ export default function Index({ auth, usersProp, statusProp }) {
                                     onChange={(e) => {
                                         setData("status", e.target.value);
                                     }}
+                                    dataKey="name"
                                     options={status}
                                     optionLabel="name"
                                     placeholder="Pilih Status"
@@ -979,6 +981,7 @@ export default function Index({ auth, usersProp, statusProp }) {
                                     onChange={(e) => {
                                         setData("status", e.target.value);
                                     }}
+                                    dataKey="name"
                                     options={status}
                                     optionLabel="name"
                                     placeholder="Pilih Status"

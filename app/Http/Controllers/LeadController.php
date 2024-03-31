@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Maatwebsite\Excel\Facades\Excel;
+use Spatie\Activitylog\Models\Activity;
 
 class LeadController extends Controller
 {
@@ -56,6 +57,11 @@ class LeadController extends Controller
         $lead = Lead::where('uuid', $uuid)->first();
         $lead->delete();
     }
+    public function destroyLogs(Request $request)
+    {
+        $ids = explode(",", $request->query('ids'));
+        Activity::whereIn('id', $ids)->delete();
+    }
 
     public function apiGetLeads()
     {
@@ -70,9 +76,7 @@ class LeadController extends Controller
 
     public function import()
     {
-
         $imported = Excel::import(new LeadsImport, request()->file('excel'));
-
     }
 
     public function filter(Request $request)
@@ -104,5 +108,33 @@ class LeadController extends Controller
         $leads = $leads->get();
 
         return response()->json($leads);
+    }
+
+    public function logFilter(Request $request)
+    {
+        $logs = Activity::with(['causer', 'subject'])->whereMorphedTo('subject', Lead::class);
+
+        if ($request->user) {
+            $logs->whereMorphRelation('causer', User::class, 'causer_id', '=', $request->user['id']);
+        }
+
+        if ($request->date['start'] && $request->date['end']) {
+            $logs->whereBetween('created_at', [$request->date['start'], $request->date['end']]);
+        }
+
+
+        $logs = $logs->get();
+
+        return response()->json($logs);
+    }
+
+    public function apiGetLeadLogs()
+    {
+        $logs = Activity::with(['causer', 'subject'])
+            ->whereMorphedTo('subject', Lead::class)
+            ->latest()
+            ->get();
+
+        return response()->json($logs);
     }
 }
