@@ -198,7 +198,10 @@ Route::middleware('auth')->group(function () {
     Route::post('/leads/import', [LeadController::class, 'import'])->name('leads.import')->middleware(['can:tambah partner']);
     Route::post('/leads/filter', [LeadController::class, 'filter'])->name('leads.filter')->middleware(['can:tambah partner']);
     Route::post('/leads/logs/filter', [LeadController::class, 'logFilter'])->name('leads.log.filter')->middleware(['can:tambah partner']);
+    Route::put('/leads/{lead:uuid}/restore', [LeadController::class, 'restore'])->name('lead.restore');
+    Route::delete('/leads/{lead:uuid}/force', [LeadController::class, 'destroyForce'])->name('lead.destroy.force');
     Route::get('api/leads/logs', [LeadController::class, 'apiGetLeadLogs'])->name('leads.logs')->middleware(['can:tambah partner']);
+    Route::get('api/leads/arsip', [LeadController::class, 'apiGetLeadArsip'])->name('leads.arsip')->middleware(['can:tambah partner']);
 
     // Partner
     Route::post('/partners/filter', [PartnerController::class, 'filter'])->name('partners.filter')->middleware(['can:lihat partner']);

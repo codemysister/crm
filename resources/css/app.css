@@ -543,6 +543,10 @@
     width: 50%;
    }
 
+   .p-button-success{
+    background-color: #40e731 !important;
+   }
+
    .p-confirm-dialog-accept{
     background-color: #D32F2F;
    }
@@ -550,6 +554,7 @@
    .p-button.p-button-icon-only.p-button-rounded{
     height: 100%;
    }
+
 
    .p-button-icon-left ~ .p-button-label{
     flex: none;
@@ -592,6 +597,11 @@ body{
   box-sizing: border-box;
   
 }
+
+
+.pi{
+  font-size: 0.8rem;
+ }
 
 .dark body{
   background-color: rgb(2 6 23 / 1);

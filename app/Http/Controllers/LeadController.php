@@ -122,10 +122,21 @@ class LeadController extends Controller
             $logs->whereBetween('created_at', [$request->date['start'], $request->date['end']]);
         }
 
-
         $logs = $logs->get();
 
         return response()->json($logs);
+    }
+
+    public function restore($uuid)
+    {
+        $lead = Lead::withTrashed()->where('uuid', '=', $uuid)->first();
+        $lead->restore();
+    }
+
+    public function destroyForce($uuid)
+    {
+        $lead = Lead::withTrashed()->where('uuid', '=', $uuid)->first();
+        $lead->forceDelete();
     }
 
     public function apiGetLeadLogs()
@@ -136,5 +147,11 @@ class LeadController extends Controller
             ->get();
 
         return response()->json($logs);
+    }
+
+    public function apiGetLeadArsip()
+    {
+        $arsip = Lead::withTrashed()->with(['createdBy', 'status'])->whereNotNull('deleted_at')->get();
+        return response()->json($arsip);
     }
 }

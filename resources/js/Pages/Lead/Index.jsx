@@ -27,6 +27,7 @@ import { FilePond, registerPlugin } from "react-filepond";
 import FilePondPluginFileValidateSize from "filepond-plugin-file-validate-size";
 import "filepond/dist/filepond.min.css";
 import Log from "./Log";
+import Arsip from "./Arsip";
 registerPlugin(FilePondPluginFileValidateSize);
 
 export default function Index({ auth, usersProp, statusProp }) {
@@ -706,7 +707,7 @@ export default function Index({ auth, usersProp, statusProp }) {
                                             field="created_by"
                                             className="dark:border-none"
                                             headerClassName="dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300"
-                                            header="Penginput"
+                                            header="Diinput Oleh"
                                             align="left"
                                             style={{
                                                 width: "max-content",

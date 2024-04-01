@@ -329,7 +329,7 @@ const Log = ({ auth, users, showError, showSuccess }) => {
                     currentPageReportTemplate="{first} - {last} dari {totalRecords}"
                     rows={10}
                     filters={filters}
-                    emptyMessage="Status tidak ditemukan."
+                    emptyMessage="Lead tidak ditemukan."
                     paginatorClassName="dark:bg-transparent paginator-custome dark:text-gray-300 rounded-b-lg"
                     header={headerStatus}
                     globalFilterFields={["name", "category", "causer.name"]}
