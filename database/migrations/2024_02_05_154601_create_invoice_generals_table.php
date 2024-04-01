@@ -16,6 +16,7 @@ return new class extends Migration {
             $table->string('code');
             $table->foreignId('partner_id')->constrained('partners', 'id')->onDelete('cascade');
             $table->string('partner_name');
+            $table->string('partner_npwp')->nullable();
             $table->json('partner_province');
             $table->json('partner_regency');
             $table->string('partner_phone_number');

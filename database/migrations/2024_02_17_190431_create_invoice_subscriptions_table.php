@@ -21,6 +21,7 @@ return new class extends Migration {
             $table->date('bill_date')->nullable();
             $table->integer('invoice_age');
             $table->string('partner_name');
+            $table->string('partner_npwp')->nullable();
             $table->string('partner_province');
             $table->string('partner_regency');
             $table->string('signature_name');
