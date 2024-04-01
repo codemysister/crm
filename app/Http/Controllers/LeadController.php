@@ -161,4 +161,16 @@ class LeadController extends Controller
         $arsip = Lead::withTrashed()->with(['createdBy', 'status'])->whereNotNull('deleted_at')->get();
         return response()->json($arsip);
     }
+
+    public function apiGetStatusLogs()
+    {
+        $logs = Activity::with(['causer', 'subject'])
+            ->whereMorphedTo('subject', Lead::class)
+            ->whereMorphRelation('subject', Lead::class, 'subject_id', '=', request()->query('lead'))
+            ->where('event', 'updated')
+            ->where('note_status', '!=', null)
+            ->latest()
+            ->get();
+        return response()->json($logs);
+    }
 }

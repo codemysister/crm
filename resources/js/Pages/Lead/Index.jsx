@@ -420,7 +420,7 @@ export default function Index({ auth, usersProp, statusProp }) {
         <DashboardLayout auth={auth.user} className="">
             {/* Tombol Aksi */}
             <OverlayPanel
-                className=" shadow-md p-1 dark:bg-slate-900 dark:text-gray-300"
+                className=" shadow-md p-1 dark:bg-slate-800 dark:text-gray-300"
                 ref={action}
             >
                 <div className="flex flex-col flex-wrap w-full">

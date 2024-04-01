@@ -10,6 +10,7 @@ import { useForm } from "@inertiajs/react";
 import { InputTextarea } from "primereact/inputtextarea";
 import { ProgressSpinner } from "primereact/progressspinner";
 import InputError from "@/Components/InputError";
+import DetailStatusLog from "./DetailStatusLog";
 
 const DetailLead = ({
     leads,
@@ -57,6 +58,15 @@ const DetailLead = ({
                 setActiveMenu((prev) => (prev = "lembaga"));
             },
         },
+        {
+            label: "Status Log",
+            className: `${
+                activeMenu == "status log" ? "p-menuitem-active" : ""
+            }`,
+            command: () => {
+                setActiveMenu((prev) => (prev = "status log"));
+            },
+        },
     ];
 
     const selectedOptionTemplate = (option, props) => {
@@ -91,6 +101,7 @@ const DetailLead = ({
             <>
                 <div className="flex flex-col lg:flex-row w-full gap-5 items-center ">
                     <Dropdown
+                        id="dropdown-detail"
                         optionLabel="name"
                         dataKey="id"
                         value={lead}
@@ -287,61 +298,14 @@ const DetailLead = ({
                                             </table>
                                         )}
 
-                                        {/* {activeMenu === "bank" && (
-                                            <DetailBank
-                                                lead={lead}
-                                                leads={leads}
-                                                handleSelectedDetailLead={
-                                                    handleSelectedDetailLead
-                                                }
-                                                showSuccess={showSuccess}
-                                                showError={showError}
-                                            />
-                                        )}
-
-                                        {activeMenu === "pic" && (
-                                            <DetailPIC
-                                                lead={lead}
-                                                leads={leads}
-                                                handleSelectedDetailLead={
-                                                    handleSelectedDetailLead
-                                                }
-                                                showSuccess={showSuccess}
-                                                showError={showError}
-                                            />
-                                        )}
-
-                                        {activeMenu === "langganan" && (
-                                            <DetailSubscription
-                                                lead={lead}
-                                                leads={leads}
-                                                handleSelectedDetailLead={
-                                                    handleSelectedDetailLead
-                                                }
-                                                showSuccess={showSuccess}
-                                                showError={showError}
-                                            />
-                                        )}
-
-                                        {activeMenu === "price_list" && (
-                                            <DetailPriceList
-                                                lead={lead}
-                                                handleSelectedDetailLead={
-                                                    handleSelectedDetailLead
-                                                }
-                                                showSuccess={showSuccess}
-                                                showError={showError}
-                                            />
-                                        )}
-
-                                        {activeMenu === "log_status" && (
+                                        {activeMenu === "status log" && (
                                             <DetailStatusLog
                                                 lead={lead}
                                                 handleSelectedDetailLead={
                                                     handleSelectedDetailLead
                                                 }
                                             />
-                                        )} */}
+                                        )}
                                     </>
                                 )}
                             </>

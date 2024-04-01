@@ -23,7 +23,7 @@ class Lead extends Model
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()
-            ->logOnly(['name', 'address', 'pic', 'total_members', 'status.name'])
+            ->logOnly(['name', 'address', 'pic', 'total_members', 'status.name', 'status.color'])
             ->dontLogIfAttributesChangedOnly(['deleted_at', 'updated_at'])
             ->setDescriptionForEvent(function (string $eventName) {
                 $modelName = strtolower(class_basename($this));
