@@ -149,9 +149,13 @@ class LeadController extends Controller
     public function apiGetLeadLogs()
     {
         $logs = Activity::with(['causer', 'subject'])
-            ->whereMorphedTo('subject', Lead::class)
-            ->latest()
-            ->get();
+            ->whereMorphedTo('subject', Lead::class);
+
+        if (request()->query('lead')) {
+            $logs->whereMorphRelation('subject', Lead::class, 'subject_id', '=', request()->query('lead'));
+        }
+
+        $logs = $logs->latest()->get();
 
         return response()->json($logs);
     }

@@ -124,7 +124,6 @@ const DetailStatusLog = ({
                                 whiteSpace: "nowrap",
                             }}
                             body={(rowData) => {
-                                console.log(rowData);
                                 return (
                                     <div className="flex justify-between w-full gap-2">
                                         <div className="flex gap-4">

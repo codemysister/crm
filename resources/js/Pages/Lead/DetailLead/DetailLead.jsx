@@ -11,6 +11,7 @@ import { InputTextarea } from "primereact/inputtextarea";
 import { ProgressSpinner } from "primereact/progressspinner";
 import InputError from "@/Components/InputError";
 import DetailStatusLog from "./DetailStatusLog";
+import DetailLog from "./DetailLog";
 
 const DetailLead = ({
     leads,
@@ -56,6 +57,13 @@ const DetailLead = ({
             className: `${activeMenu == "lembaga" ? "p-menuitem-active" : ""}`,
             command: () => {
                 setActiveMenu((prev) => (prev = "lembaga"));
+            },
+        },
+        {
+            label: "Log",
+            className: `${activeMenu == "log" ? "p-menuitem-active" : ""}`,
+            command: () => {
+                setActiveMenu((prev) => (prev = "log"));
             },
         },
         {
@@ -296,6 +304,15 @@ const DetailLead = ({
                                                     </td>
                                                 </tr>
                                             </table>
+                                        )}
+
+                                        {activeMenu === "log" && (
+                                            <DetailLog
+                                                lead={lead}
+                                                handleSelectedDetailLead={
+                                                    handleSelectedDetailLead
+                                                }
+                                            />
                                         )}
 
                                         {activeMenu === "status log" && (
