@@ -190,6 +190,7 @@ Route::middleware('auth')->group(function () {
 
     // Lead
     Route::get('/leads', [LeadController::class, 'index'])->name('leads.view')->middleware(['can:lihat partner']);
+    Route::get('/leads/{lead:uuid}', [LeadController::class, 'show'])->name('leads.show')->middleware(['can:edit partner']);
     Route::post('/leads', [LeadController::class, 'store'])->name('leads.store')->middleware(['can:tambah partner']);
     Route::put('/leads/{lead:uuid}', [LeadController::class, 'update'])->name('leads.update')->middleware(['can:edit partner']);
     Route::delete('/leads/logs', [LeadController::class, 'destroyLogs'])->name('leads.log.destroy')->middleware(['can:hapus partner']);
@@ -223,6 +224,7 @@ Route::middleware('auth')->group(function () {
     Route::delete('/subscriptions/{uuid}', [PartnerSubscriptionController::class, 'destroy'])->name('partners.subscriptions.destroy');
 
     // Partner PIC
+    Route::get('/pics', [PartnerPicController::class, 'index'])->name('partners.pics.index');
     Route::post('/pics', [PartnerPicController::class, 'store'])->name('partners.pics.store');
     Route::get('/api/pics', [PartnerPicController::class, 'apiGetPIC'])->name('api.partners.pics');
     Route::put('/pics/{uuid}', [PartnerPicController::class, 'update'])->name('partners.pics.update');

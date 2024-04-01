@@ -49,7 +49,14 @@ class LeadController extends Controller
             'address' => $request->address,
             'total_members' => $request->total_members,
             'status_id' => $request->status['id'],
+            'note_status' => $request->note_status
         ]);
+    }
+
+    public function show($uuid)
+    {
+        $lead = Lead::with(['status', 'createdBy'])->where('uuid', $uuid)->first();
+        return response()->json($lead);
     }
 
     public function destroy($uuid)

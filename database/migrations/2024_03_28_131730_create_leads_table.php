@@ -20,6 +20,7 @@ return new class extends Migration {
             $table->string('phone_number');
             $table->string('address');
             $table->string('pic');
+            $table->string('note_status')->nullable();
             $table->softDeletes();
             $table->timestamps();
         });

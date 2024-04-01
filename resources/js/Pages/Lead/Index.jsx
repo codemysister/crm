@@ -28,11 +28,13 @@ import FilePondPluginFileValidateSize from "filepond-plugin-file-validate-size";
 import "filepond/dist/filepond.min.css";
 import Log from "./Log";
 import Arsip from "./Arsip";
+import DetailLead from "./DetailLead/DetailLead";
 registerPlugin(FilePondPluginFileValidateSize);
 
 export default function Index({ auth, usersProp, statusProp }) {
     const [activeIndexTab, setActiveIndexTab] = useState(0);
     const [leads, setLeads] = useState(null);
+    const [detailLead, setDetailLead] = useState(null);
     const [users, setUsers] = useState(usersProp);
     const [status, setStatus] = useState(statusProp);
     const [confirmIsVisible, setConfirmIsVisible] = useState(false);
@@ -45,6 +47,7 @@ export default function Index({ auth, usersProp, statusProp }) {
     const [preRenderLoad, setPreRenderLoad] = useState(true);
     const [modalLeadIsVisible, setModalLeadIsVisible] = useState(false);
     const [modalEditLeadIsVisible, setModalEditLeadIsVisible] = useState(false);
+    const [modalStatusIsVisible, setModalStatusIsVisible] = useState(false);
     const [sidebarFilter, setSidebarFilter] = useState(null);
     const [modalImportLeadIsVisible, setModalImportLeadIsVisible] =
         useState(false);
@@ -323,6 +326,19 @@ export default function Index({ auth, usersProp, statusProp }) {
             detail: `${type} data gagal`,
             life: 3000,
         });
+    };
+
+    const getSelectedDetailLead = async (lead) => {
+        setIsLoadingData((prev) => (prev = true));
+        let response = await fetch("/leads/" + lead.uuid);
+        let data = await response.json();
+        setDetailLead((prev) => (prev = data));
+        setIsLoadingData((prev) => (prev = false));
+    };
+
+    const handleSelectedDetailLead = (lead) => {
+        getSelectedDetailLead(lead);
+        setActiveIndexTab(3);
     };
 
     const handleFilter = async (e) => {
@@ -642,6 +658,20 @@ export default function Index({ auth, usersProp, statusProp }) {
                                                 width: "max-content",
                                                 whiteSpace: "nowrap",
                                             }}
+                                            body={(rowData) => {
+                                                return (
+                                                    <button
+                                                        onClick={() =>
+                                                            handleSelectedDetailLead(
+                                                                rowData
+                                                            )
+                                                        }
+                                                        className="hover:text-blue-700 text-left"
+                                                    >
+                                                        {rowData.name}
+                                                    </button>
+                                                );
+                                            }}
                                         ></Column>
                                         <Column
                                             field="status"
@@ -741,6 +771,21 @@ export default function Index({ auth, usersProp, statusProp }) {
                             auth={auth}
                             showSuccess={showSuccess}
                             showError={showError}
+                        />
+                    )}
+                </TabPanel>
+
+                <TabPanel header="Detail lead">
+                    {activeIndexTab == 3 && (
+                        <DetailLead
+                            auth={auth}
+                            leads={leads}
+                            DetailLead={detailLead}
+                            showSuccess={showSuccess}
+                            showError={showError}
+                            status={status}
+                            isLoading={isLoadingData}
+                            handleSelectedDetailLead={handleSelectedDetailLead}
                         />
                     )}
                 </TabPanel>
@@ -981,6 +1026,7 @@ export default function Index({ auth, usersProp, statusProp }) {
                                     value={data.status}
                                     onChange={(e) => {
                                         setData("status", e.target.value);
+                                        setModalStatusIsVisible(true);
                                     }}
                                     dataKey="name"
                                     options={status}
@@ -1006,7 +1052,7 @@ export default function Index({ auth, usersProp, statusProp }) {
                 </Dialog>
             </div>
 
-            {/* Modal import partner */}
+            {/* Modal import lead */}
             <div className="card flex justify-content-center">
                 <Dialog
                     header="Import Lead"
@@ -1061,6 +1107,44 @@ export default function Index({ auth, usersProp, statusProp }) {
                     </form>
                 </Dialog>
             </div>
+
+            {/* Modal edit status */}
+            <Dialog
+                header="Edit status"
+                headerClassName="dark:bg-slate-900 dark:text-white"
+                className="bg-white h-[250px] max-h-[80%] w-[80%] md:w-[60%] lg:w-[35%] dark:glass dark:text-white"
+                contentClassName="dark:bg-slate-900 dark:text-white"
+                visible={modalStatusIsVisible}
+                modal={false}
+                closable={false}
+                onHide={() => setModalStatusIsVisible(false)}
+            >
+                <div className="flex flex-col justify-around gap-4 mt-3">
+                    <div className="flex flex-col">
+                        <label htmlFor="note_status">Keterangan</label>
+                        <InputTextarea
+                            value={data.note_status}
+                            onChange={(e) =>
+                                setData("note_status", e.target.value)
+                            }
+                            rows={5}
+                            cols={30}
+                        />
+                    </div>
+                    <div className="flex justify-center mt-3">
+                        <Button
+                            type="button"
+                            label="oke"
+                            disabled={
+                                data.note_status == null ||
+                                data.note_status == ""
+                            }
+                            onClick={() => setModalStatusIsVisible(false)}
+                            className="bg-purple-600 text-sm shadow-md rounded-lg"
+                        />
+                    </div>
+                </div>
+            </Dialog>
         </DashboardLayout>
     );
 }
