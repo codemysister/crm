@@ -49,7 +49,8 @@ class SignatureController extends Controller
             'user_id' => $request->user['id'],
             'name' => $request->user['name'],
             'image' => $pathSignature,
-            'position' => $request->position
+            'position' => $request->position,
+            'created_by' => Auth::user()->id
         ]);
     }
 

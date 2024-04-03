@@ -13,6 +13,7 @@ return new class extends Migration {
         Schema::create('partner_price_lists', function (Blueprint $table) {
             $table->id();
             $table->uuid();
+            $table->foreignId('created_by')->nullable()->constrained('users', 'id')->onDelete('cascade');
             $table->foreignId('partner_id')->constrained('partners', 'id')->onDelete('cascade');
             $table->json('price_card')->nullable();
             $table->bigInteger('price_lanyard')->nullable();

@@ -3,12 +3,23 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\PartnerPICRequest;
+use App\Models\Partner;
 use App\Models\PartnerPIC;
+use App\Models\Status;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
+use Inertia\Inertia;
 
 class PartnerPicController extends Controller
 {
+
+    public function index(Request $request)
+    {
+        $partnersProp = Partner::with(['status'])->get();
+        $statusProp = Status::where('category', 'lead')->get();
+        return Inertia::render("Partner/Pic", compact('partnersProp', 'statusProp'));
+    }
     public function apiGetPIC()
     {
         $pics = PartnerPIC::with('partner')
@@ -32,6 +43,7 @@ class PartnerPicController extends Controller
             'number' => $request->number,
             'email' => $request->email ?? null,
             'position' => $request->position,
+            'created_by' => Auth::user()->id
         ]);
     }
 

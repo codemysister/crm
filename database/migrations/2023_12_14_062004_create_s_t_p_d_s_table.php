@@ -13,6 +13,8 @@ return new class extends Migration {
         Schema::create('stpd', function (Blueprint $table) {
             $table->id();
             $table->uuid();
+            $table->foreignId('created_by')->nullable()->constrained('users', 'id')->onDelete('cascade');
+            $table->foreignId('partner_id')->nullable()->constrained('partners', 'id')->onDelete('cascade');
             $table->string('code');
             $table->string('partner_name');
             $table->json('partner_province');

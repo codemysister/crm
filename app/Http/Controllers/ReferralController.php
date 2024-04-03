@@ -40,7 +40,8 @@ class ReferralController extends Controller
             'user_id' => $request->user['id'],
             'institution' => $request->institution,
             'logo' => $pathLogo,
-            'signature' => $pathSignature
+            'signature' => $pathSignature,
+            'created_by' => Auth::user()->id
         ]);
     }
 

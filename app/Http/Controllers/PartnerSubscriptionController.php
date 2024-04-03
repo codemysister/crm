@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\PartnerSubscriptionRequest;
 use App\Models\PartnerSubscription;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 
 class PartnerSubscriptionController extends Controller
@@ -26,6 +27,7 @@ class PartnerSubscriptionController extends Controller
             'total_ppn' => $request['total_ppn'],
             'ppn' => $request['ppn'],
             'total_bill' => $request['total_bill'],
+            'created_by' => Auth::user()->id
         ]);
     }
 

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Product;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 use Str;
 
@@ -24,17 +25,18 @@ class ProductController extends Controller
         return response()->json($products);
     }
 
-    
+
     public function store(Request $request)
     {
-        
+
         Product::create([
             "uuid" => Str::uuid(),
-            "name"=> $request->name,
-            "category"=> $request->category['name'],
-            "price"=> $request->price,
-            "description"=> $request->description,
-            "unit"=> $request->unit,
+            "name" => $request->name,
+            "category" => $request->category['name'],
+            "price" => $request->price,
+            "description" => $request->description,
+            "unit" => $request->unit,
+            'created_by' => Auth::user()->id
         ]);
     }
 
@@ -45,11 +47,11 @@ class ProductController extends Controller
     {
         Product::where('uuid', $uuid)->first()->update([
             "uuid" => Str::uuid(),
-            "name"=> $request->name,
-            "category"=> $request->category,
-            "price"=> $request->price,
-            "description"=> $request->description,
-            "unit"=> $request->unit,
+            "name" => $request->name,
+            "category" => $request->category,
+            "price" => $request->price,
+            "description" => $request->description,
+            "unit" => $request->unit,
         ]);
     }
 

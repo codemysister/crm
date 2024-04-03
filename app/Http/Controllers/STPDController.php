@@ -12,6 +12,7 @@ use Carbon\Carbon;
 use DateTime;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
@@ -165,6 +166,7 @@ class STPDController extends Controller
             "signature_image" => $request->signature['image'],
             "signature_position" => $request->signature['position'],
             "stpd_doc" => "",
+            'created_by' => Auth::user()->id
         ]);
         foreach ($request->employees as $employee) {
             STPDEmployees::create([

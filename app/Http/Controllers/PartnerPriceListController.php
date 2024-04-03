@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\PartnerPriceListRequest;
 use App\Models\PartnerPriceList;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 
 class PartnerPriceListController extends Controller
@@ -34,6 +35,7 @@ class PartnerPriceListController extends Controller
             'fee_topup_cazhpos' => $request['fee_topup_cazhpos'],
             'fee_withdraw_cazhpos' => $request['fee_withdraw_cazhpos'],
             'fee_bill_saldokartu' => $request['fee_bill_saldokartu'],
+            'created_by' => Auth::user()->id
         ]);
     }
 

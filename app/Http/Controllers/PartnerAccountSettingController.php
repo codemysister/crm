@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\PartnerAccountSettingRequest;
 use App\Models\PartnerAccountSetting;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 
 class PartnerAccountSettingController extends Controller
@@ -24,6 +25,7 @@ class PartnerAccountSettingController extends Controller
             'email_super_admin' => $request->email_super_admin,
             'cas_link_partner' => $request->cas_link_partner,
             'card_number' => $request->card_number,
+            'created_by' => Auth::user()->id
         ]);
     }
 

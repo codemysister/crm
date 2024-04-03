@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\PartnerBankRequest;
 use App\Models\PartnerBank;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 
 class PartnerBankController extends Controller
@@ -23,7 +24,8 @@ class PartnerBankController extends Controller
             'partner_id' => $request["partner"]["id"],
             'bank' => $request->bank,
             'account_bank_number' => $request->account_bank_number,
-            'account_bank_name' => $request->account_bank_name
+            'account_bank_name' => $request->account_bank_name,
+            'created_by' => Auth::user()->id
         ]);
     }
 

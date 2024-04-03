@@ -325,7 +325,8 @@ class SLAController extends Controller
             "estimation_date" => $request['estimation_date'] !== null ? Carbon::parse($request['estimation_date'])->format('Y-m-d H:i:s') : null,
             "realization_date" => $request['realization_date'] !== null ? Carbon::parse($request['realization_date'])->format('Y-m-d H:i:s') : null,
             "realization" => $pathRealization,
-            "information" => $request['information']
+            "information" => $request['information'],
+            'created_by' => Auth::user()->id
         ]);
 
         $sla = SLA::where('id', '=', $request['sla_id'])->with('activities')->first();
