@@ -18,7 +18,7 @@ return new class extends Migration {
             $table->foreignId('sales_id')->nullable()->constrained('users', 'id')->onDelete('cascade');
             $table->foreignId('account_manager_id')->nullable()->constrained('users', 'id')->onDelete('cascade');
             $table->foreignId('referral_id')->nullable()->constrained('users', 'id')->onDelete('cascade');
-            $table->string('name');
+            $table->string('name')->unique();
             $table->integer('total_members')->nullable();
             $table->string('npwp')->nullable();
             $table->string('password')->nullable();
