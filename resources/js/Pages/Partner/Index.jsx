@@ -21,7 +21,7 @@ import { Badge } from "primereact/badge";
 import { TabPanel, TabView } from "primereact/tabview";
 import { FilterMatchMode } from "primereact/api";
 import { OverlayPanel } from "primereact/overlaypanel";
-import Pic from "./Pic.jsx";
+import Pic from "./PIC/Pic.jsx";
 import DetailPartner from "./DetailPartner/DetailPartner.jsx";
 import Bank from "./Bank.jsx";
 import Account from "./Account.jsx";

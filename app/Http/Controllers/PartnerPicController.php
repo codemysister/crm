@@ -11,6 +11,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
+use Spatie\Activitylog\Models\Activity;
 
 class PartnerPicController extends Controller
 {
@@ -19,7 +20,7 @@ class PartnerPicController extends Controller
     {
         $usersProp = User::with('roles')->get();
         $partnersProp = Partner::with(['status'])->get();
-        return Inertia::render("Partner/Pic", compact('partnersProp', 'usersProp'));
+        return Inertia::render("Partner/PIC/Pic", compact('partnersProp', 'usersProp'));
     }
     public function apiGetPIC()
     {
@@ -61,7 +62,8 @@ class PartnerPicController extends Controller
 
     public function destroy($uuid)
     {
-        PartnerPIC::where('uuid', $uuid)->delete();
+        $pic = PartnerPIC::where('uuid', $uuid)->first();
+        $pic->delete();
     }
 
     public function filter(Request $request)
@@ -83,6 +85,40 @@ class PartnerPicController extends Controller
         $pics = $pics->latest()->get();
 
         return response()->json($pics);
+    }
+
+
+
+    public function logFilter(Request $request)
+    {
+        $logs = Activity::with(['causer', 'subject'])->whereMorphedTo('subject', PartnerPIC::class);
+
+        if ($request->user) {
+            $logs->whereMorphRelation('causer', User::class, 'causer_id', '=', $request->user['id']);
+        }
+
+        if ($request->date['start'] && $request->date['end']) {
+            $logs->whereBetween('created_at', [$request->date['start'], $request->date['end']]);
+        }
+
+        $logs = $logs->get();
+
+        return response()->json($logs);
+    }
+
+    public function destroyLogs(Request $request)
+    {
+        $ids = explode(",", $request->query('ids'));
+        Activity::whereIn('id', $ids)->delete();
+    }
+
+
+    public function apiGetLogs()
+    {
+        $logs = Activity::with(['causer', 'subject'])
+            ->whereMorphedTo('subject', PartnerPIC::class)->latest()->get();
+
+        return response()->json($logs);
     }
 
 

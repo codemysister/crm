@@ -231,7 +231,10 @@ Route::middleware('auth')->group(function () {
     Route::post('/pics/filter', [PartnerPicController::class, 'filter'])->name('partners.pics.filter');
     Route::get('/api/pics', [PartnerPicController::class, 'apiGetPIC'])->name('api.partners.pics');
     Route::put('/pics/{uuid}', [PartnerPicController::class, 'update'])->name('partners.pics.update');
+    Route::delete('/pics/logs', [PartnerPicController::class, 'destroyLogs'])->name('partners.pics.log.destroy');
     Route::delete('/pics/{uuid}', [PartnerPicController::class, 'destroy'])->name('partners.pics.destroy');
+    Route::post('/pics/logs/filter', [PartnerPicController::class, 'logFilter'])->name('partners.pics.logs.filter');
+    Route::get('/api/pics/logs', [PartnerPicController::class, 'apiGetLogs'])->name('api.partners.pics.logs');
 
     // Partner Bank
     Route::post('/banks', [PartnerBankController::class, 'store'])->name('partners.banks.store');
