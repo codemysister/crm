@@ -51,6 +51,7 @@ return new class extends Migration {
             $table->string('mou_doc');
             $table->string('mou_doc_word')->nullable()->default(null);
             $table->foreignId('created_by')->constrained('users', 'id')->onDelete('cascade');
+            $table->softDeletes();
             $table->timestamps();
         });
     }

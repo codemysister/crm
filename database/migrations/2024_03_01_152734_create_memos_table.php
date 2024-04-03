@@ -29,6 +29,7 @@ return new class extends Migration {
             $table->string('signature_third_image')->nullable();
             $table->string('memo_doc')->nullable();
             $table->foreignId('created_by')->constrained('users', 'id')->onDelete('cascade');
+            $table->softDeletes();
             $table->timestamps();
         });
     }

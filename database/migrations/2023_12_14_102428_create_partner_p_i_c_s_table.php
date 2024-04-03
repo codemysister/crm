@@ -19,6 +19,7 @@ return new class extends Migration {
             $table->string('number')->nullable();
             $table->string('email')->nullable();
             $table->string('position')->nullable();
+            $table->softDeletes();
             $table->timestamps();
         });
     }

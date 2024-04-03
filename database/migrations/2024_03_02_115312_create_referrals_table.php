@@ -18,6 +18,7 @@ return new class extends Migration {
             $table->string('institution');
             $table->string('logo');
             $table->string('signature');
+            $table->softDeletes();
             $table->timestamps();
         });
     }

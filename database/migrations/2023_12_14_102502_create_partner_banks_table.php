@@ -18,6 +18,7 @@ return new class extends Migration {
             $table->string('bank')->nullable();
             $table->bigInteger('account_bank_number')->nullable();
             $table->string('account_bank_name')->nullable();
+            $table->softDeletes();
             $table->timestamps();
         });
     }

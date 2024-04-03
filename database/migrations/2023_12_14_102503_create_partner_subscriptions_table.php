@@ -20,6 +20,7 @@ return new class extends Migration {
             $table->integer('ppn')->nullable()->default(0);
             $table->integer('total_ppn')->nullable()->default(0);
             $table->bigInteger('total_bill');
+            $table->softDeletes();
             $table->timestamps();
         });
     }

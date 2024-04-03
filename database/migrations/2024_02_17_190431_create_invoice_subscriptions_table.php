@@ -38,6 +38,7 @@ return new class extends Migration {
             $table->string('xendit_link')->nullable()->default(null);
             $table->string('invoice_subscription_doc')->nullable()->default(null);
             $table->foreignId('created_by')->constrained('users', 'id')->onDelete('cascade');
+            $table->softDeletes();
             $table->timestamps();
         });
     }

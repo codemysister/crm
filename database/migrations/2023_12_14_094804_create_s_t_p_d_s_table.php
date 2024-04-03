@@ -27,6 +27,7 @@ return new class extends Migration {
             $table->string('signature_image');
             $table->string('signature_position');
             $table->string('stpd_doc');
+            $table->softDeletes();
             $table->timestamps();
         });
     }

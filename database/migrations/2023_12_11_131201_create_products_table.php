@@ -19,6 +19,7 @@ return new class extends Migration {
             $table->bigInteger('price');
             $table->string('unit');
             $table->text('description')->nullable();
+            $table->softDeletes();
             $table->timestamps();
         });
     }

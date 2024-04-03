@@ -28,6 +28,7 @@ return new class extends Migration {
             $table->string('signature_image');
             $table->string('sph_doc');
             $table->foreignId('created_by')->constrained('users', 'id')->onDelete('cascade');
+            $table->softDeletes();
             $table->timestamps();
         });
     }

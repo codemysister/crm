@@ -36,6 +36,7 @@ return new class extends Migration {
             $table->string('period')->nullable();
             $table->string('payment_metode')->default('payment link');
             $table->string('note_status')->nullable();
+            $table->softDeletes();
             $table->timestamps();
         });
     }

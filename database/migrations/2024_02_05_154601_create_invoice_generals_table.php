@@ -38,6 +38,7 @@ return new class extends Migration {
             $table->text('reason_late')->nullable();
             $table->string('invoice_general_doc')->nullable();
             $table->foreignId('created_by')->constrained('users', 'id')->onDelete('cascade');
+            $table->softDeletes();
             $table->timestamps();
         });
     }

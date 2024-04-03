@@ -33,6 +33,7 @@ return new class extends Migration {
             $table->string('referral_signature')->nullable()->default(null);
             $table->foreignId('created_by')->constrained('users', 'id')->onDelete('cascade');
             $table->string('sla_doc');
+            $table->softDeletes();
             $table->timestamps();
         });
     }

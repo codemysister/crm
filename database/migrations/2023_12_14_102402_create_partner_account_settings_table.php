@@ -19,6 +19,7 @@ return new class extends Migration {
             $table->string('email_super_admin')->nullable();
             $table->string('cas_link_partner')->nullable();
             $table->string('card_number')->nullable();
+            $table->softDeletes();
             $table->timestamps();
         });
     }

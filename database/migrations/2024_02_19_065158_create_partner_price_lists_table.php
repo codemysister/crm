@@ -25,6 +25,7 @@ return new class extends Migration {
             $table->bigInteger('fee_topup_cazhpos')->nullable();
             $table->bigInteger('fee_withdraw_cazhpos')->nullable();
             $table->bigInteger('fee_bill_saldokartu')->nullable();
+            $table->softDeletes();
             $table->timestamps();
         });
     }
