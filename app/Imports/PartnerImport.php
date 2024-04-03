@@ -14,6 +14,7 @@ use GuzzleHttp\Client;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Maatwebsite\Excel\Concerns\OnEachRow;
@@ -221,16 +222,11 @@ class PartnerImport implements ToCollection, WithStartRow, WithHeadingRow, WithC
                 'monitoring_date_after_3_month_live' => $row["tanggal_monitoring_3_bulan_after_live"] ? Carbon::parse(Date::excelToDateTimeObject($row["tanggal_monitoring_3_bulan_after_live"]))->format('Y-m-d H:i:s') : null,
                 'regency' => json_encode($regency),
                 'province' => json_encode($province),
-                'status_id' => $status->first()->id
+                'status_id' => $status->first()->id,
+                'created_by' => Auth::user()->id
             ]);
 
-
-            // if ($row['bank'] && $row['nomor_rekening'] && $row['atas_nama']) {
-            //     PartnerBank::create(['uuid' => Str::uuid(), 'partner_id' => $partner->id, 'bank' => $row["bank"], 'account_bank_number' => $row["nomor_rekening"], 'account_bank_name' => $row['atas_nama']]);
-            // }
-            PartnerPIC::create(['uuid' => Str::uuid(), 'partner_id' => $partner->id, 'name' => $row["pic_partner"], 'number' => $row["no_hp_pic_partner"]]);
-            // partnerAccountSetting::create(['uuid' => Str::uuid(), 'partner_id' => $partner->id, 'subdomain' => $row["sub_domain"], 'email_super_admin' => $row["email_super_admin"], 'cas_link_partner' => $row["cas_link_partner"], 'card_number' => $row["no_kartu_8_digit"]]);
-            // PartnerSubscription::create(['uuid' => Str::uuid(), 'partner_id' => $partner->id, 'bill' => $row['tagihan'], 'nominal' => $row["nominal"], 'ppn' => $row["ppn"] / $row["nominal"] * 100, 'total_ppn' => $row["ppn"], 'total_bill' => $row["tagihan_ppn"]]);
+            PartnerPIC::create(['uuid' => Str::uuid(), 'partner_id' => $partner->id, 'name' => $row["pic_partner"], 'number' => $row["no_hp_pic_partner"], 'created_by' => Auth::user()->id]);
 
         }
     }
