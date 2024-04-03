@@ -3,13 +3,23 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\PartnerAccountSettingRequest;
+use App\Models\Partner;
 use App\Models\PartnerAccountSetting;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
+use Inertia\Inertia;
 
 class PartnerAccountSettingController extends Controller
 {
+    public function index(Request $request)
+    {
+        $usersProp = User::with('roles')->get();
+        $partnersProp = Partner::with(['status'])->get();
+        return Inertia::render("Partner/Account/Index", compact('partnersProp', 'usersProp'));
+    }
+
     public function apiGetAccounts()
     {
         $partnerAccount = PartnerAccountSetting::with('partner')->latest()->get();
@@ -39,6 +49,28 @@ class PartnerAccountSettingController extends Controller
             'card_number' => $request->card_number,
         ]);
     }
+
+    public function filter(Request $request)
+    {
+        $accounts = PartnerAccountSetting::with([
+            'partner',
+            'createdBy'
+        ]);
+
+        if ($request->user) {
+            $accounts->where('created_by', $request->user['id']);
+        }
+
+        if ($request->input_date['start'] && $request->input_date['end']) {
+            $accounts->whereBetween('created_at', [$request->input_date['start'], $request->input_date['end']]);
+        }
+
+
+        $accounts = $accounts->latest()->get();
+
+        return response()->json($accounts);
+    }
+
 
     public function destroy($uuid)
     {
