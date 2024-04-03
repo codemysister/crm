@@ -228,6 +228,7 @@ Route::middleware('auth')->group(function () {
     // Partner PIC
     Route::get('/pics', [PartnerPicController::class, 'index'])->name('partners.pics.index');
     Route::post('/pics', [PartnerPicController::class, 'store'])->name('partners.pics.store');
+    Route::post('/pics/filter', [PartnerPicController::class, 'filter'])->name('partners.pics.filter');
     Route::get('/api/pics', [PartnerPicController::class, 'apiGetPIC'])->name('api.partners.pics');
     Route::put('/pics/{uuid}', [PartnerPicController::class, 'update'])->name('partners.pics.update');
     Route::delete('/pics/{uuid}', [PartnerPicController::class, 'destroy'])->name('partners.pics.destroy');

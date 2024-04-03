@@ -280,34 +280,31 @@ export default function DashboardLayout({ user, children }) {
                                         aria-label="submenu"
                                     >
                                         <li className="relative mt-3 px-3">
-                                            {currentPath == "/users" && (
+                                            {currentPath == "/pics" && (
                                                 <span className="absolute inset-y-0 left-0 w-1 bg-purple-600 rounded-tr-lg rounded-br-lg"></span>
                                             )}
                                             <Link
                                                 className={`inline-flex items-center ${
-                                                    currentPath == "/users"
+                                                    currentPath == "/pics"
                                                         ? "text-gray-800 dark:text-gray-100"
                                                         : ""
                                                 } w-full text-sm font-semibold transition-colors duration-150 hover:text-gray-800 dark:hover:text-gray-200 `}
-                                                href={route("users.view")}
+                                                href={route(
+                                                    "partners.pics.index"
+                                                )}
                                             >
                                                 <svg
                                                     xmlns="http://www.w3.org/2000/svg"
-                                                    fill="none"
                                                     viewBox="0 0 24 24"
-                                                    strokeWidth={1.5}
-                                                    stroke="currentColor"
                                                     className="w-5 h-5"
+                                                    fill="currentColor"
                                                 >
-                                                    <path
-                                                        strokeLinecap="round"
-                                                        strokeLinejoin="round"
-                                                        d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z"
-                                                    />
+                                                    <path d="M12 10c1.151 0 2-.848 2-2s-.849-2-2-2c-1.15 0-2 .848-2 2s.85 2 2 2zm0 1c-2.209 0-4 1.612-4 3.6v.386h8V14.6c0-1.988-1.791-3.6-4-3.6z"></path>
+                                                    <path d="M19 2H5c-1.103 0-2 .897-2 2v13c0 1.103.897 2 2 2h4l3 3 3-3h4c1.103 0 2-.897 2-2V4c0-1.103-.897-2-2-2zm-5 15-2 2-2-2H5V4h14l.002 13H14z"></path>
                                                 </svg>
 
                                                 <span className="ml-4">
-                                                    User
+                                                    PIC
                                                 </span>
                                             </Link>
                                         </li>

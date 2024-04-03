@@ -6,6 +6,7 @@ use App\Http\Requests\PartnerPICRequest;
 use App\Models\Partner;
 use App\Models\PartnerPIC;
 use App\Models\Status;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
@@ -16,9 +17,9 @@ class PartnerPicController extends Controller
 
     public function index(Request $request)
     {
+        $usersProp = User::with('roles')->get();
         $partnersProp = Partner::with(['status'])->get();
-        $statusProp = Status::where('category', 'lead')->get();
-        return Inertia::render("Partner/Pic", compact('partnersProp', 'statusProp'));
+        return Inertia::render("Partner/Pic", compact('partnersProp', 'usersProp'));
     }
     public function apiGetPIC()
     {
@@ -62,5 +63,27 @@ class PartnerPicController extends Controller
     {
         PartnerPIC::where('uuid', $uuid)->delete();
     }
+
+    public function filter(Request $request)
+    {
+        $pics = PartnerPIC::with([
+            'partner',
+            'createdBy'
+        ]);
+
+        if ($request->user) {
+            $pics->where('created_by', $request->user['id']);
+        }
+
+        if ($request->input_date['start'] && $request->input_date['end']) {
+            $pics->whereBetween('created_at', [$request->input_date['start'], $request->input_date['end']]);
+        }
+
+
+        $pics = $pics->latest()->get();
+
+        return response()->json($pics);
+    }
+
 
 }
