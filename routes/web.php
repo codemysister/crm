@@ -241,12 +241,16 @@ Route::middleware('auth')->group(function () {
 
 
     // Partner Bank
+    Route::get('/banks', [PartnerBankController::class, 'index'])->name('partners.banks.index');
     Route::post('/banks', [PartnerBankController::class, 'store'])->name('partners.banks.store');
+    Route::post('/banks/filter', [PartnerBankController::class, 'filter'])->name('partners.banks.filter');
     Route::get('/api/banks', [PartnerBankController::class, 'apiGetPIC'])->name('api.partners.banks');
     Route::put('/banks/{uuid}', [PartnerBankController::class, 'update'])->name('partners.banks.update');
     Route::delete('/banks/{uuid}', [PartnerBankController::class, 'destroy'])->name('partners.banks.destroy');
 
     // Partner Akun
+    Route::get('/accounts', [PartnerAccountSettingController::class, 'index'])->name('partners.accounts.index');
+    Route::post('/accounts/filter', [PartnerAccountSettingController::class, 'filter'])->name('partners.accounts.filter');
     Route::post('/accounts', [PartnerAccountSettingController::class, 'store'])->name('partners.accounts.store');
     Route::get('/api/accounts', [PartnerAccountSettingController::class, 'apiGetAccounts'])->name('api.partners.accounts');
     Route::put('/accounts/{uuid}', [PartnerAccountSettingController::class, 'update'])->name('partners.accounts.update');
