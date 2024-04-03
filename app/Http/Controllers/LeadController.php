@@ -108,7 +108,7 @@ class LeadController extends Controller
         }
 
         if ($request->input_date['start'] && $request->input_date['end']) {
-            $leads->whereBetween('input_date', [$request->input_date['start'], $request->input_date['end']]);
+            $leads->whereBetween('created_at', [$request->input_date['start'], $request->input_date['end']]);
         }
 
 
