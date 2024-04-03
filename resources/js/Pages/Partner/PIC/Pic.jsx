@@ -9,7 +9,7 @@ import { Dialog } from "primereact/dialog";
 import { InputText } from "primereact/inputtext";
 import { Dropdown } from "primereact/dropdown";
 import { InputTextarea } from "primereact/inputtextarea";
-import { useForm } from "@inertiajs/react";
+import { router, useForm } from "@inertiajs/react";
 import {
     ConfirmDialog,
     ConfirmDialog as ConfirmDialog2,
@@ -25,13 +25,9 @@ import getViewportSize from "../../Utils/getViewportSize";
 import { Sidebar } from "primereact/sidebar";
 import { Calendar } from "primereact/calendar";
 import Log from "./Log";
+import Arsip from "./Arsip";
 
-const Pic = ({
-    auth,
-    partnersProp,
-    usersProp,
-    handleSelectedDetailPartner,
-}) => {
+const Pic = ({ auth, partnersProp, usersProp }) => {
     const [partners, setPartners] = useState(partnersProp);
     const [users, setUsers] = useState(usersProp);
     const [pics, setPics] = useState(null);
@@ -110,6 +106,12 @@ const Pic = ({
         fetchData();
     }, []);
 
+    useEffect(() => {
+        if (activeIndexTab == 0) {
+            getPics();
+        }
+    }, [activeIndexTab]);
+
     const confirmDeletePIC = () => {
         confirmDialog({
             message: "Apakah Anda yakin untuk menghapus ini?",
@@ -162,6 +164,10 @@ const Pic = ({
         setPics(data);
         setSidebarFilter(false);
         setIsLoadingData(false);
+    };
+
+    const handleSelectedDetailPartner = (partner) => {
+        router.get(`/partners?uuid=${partner.uuid}`);
     };
 
     const optionTemplate = (option) => {
@@ -555,7 +561,7 @@ const Pic = ({
                                                       }
                                                     : null
                                             }
-                                            className="dark:border-none lg:w-max lg:whitespace-nowrap text-center"
+                                            className="dark:border-none lg:w-max bg-white lg:whitespace-nowrap text-center"
                                             headerClassName="dark:border-none bg-white dark:bg-slate-900 dark:text-gray-300"
                                         ></Column>
                                         <Column
@@ -677,6 +683,9 @@ const Pic = ({
                     {activeIndexTab == 2 && (
                         <Arsip
                             auth={auth}
+                            handleSelectedDetailPartner={
+                                handleSelectedDetailPartner
+                            }
                             showSuccess={showSuccess}
                             showError={showError}
                         />

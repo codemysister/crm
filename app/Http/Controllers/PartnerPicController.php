@@ -87,7 +87,17 @@ class PartnerPicController extends Controller
         return response()->json($pics);
     }
 
+    public function restore($uuid)
+    {
+        $pic = PartnerPIC::withTrashed()->where('uuid', '=', $uuid)->first();
+        $pic->restore();
+    }
 
+    public function destroyForce($uuid)
+    {
+        $pic = PartnerPIC::withTrashed()->where('uuid', '=', $uuid)->first();
+        $pic->forceDelete();
+    }
 
     public function logFilter(Request $request)
     {
@@ -121,5 +131,10 @@ class PartnerPicController extends Controller
         return response()->json($logs);
     }
 
+    public function apiGetArsip()
+    {
+        $arsip = PartnerPIC::withTrashed()->with(['createdBy', 'partner'])->whereNotNull('deleted_at')->get();
+        return response()->json($arsip);
+    }
 
 }
