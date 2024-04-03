@@ -34,10 +34,9 @@ import InputError from "@/Components/InputError.jsx";
 import SkeletonDatatable from "@/Components/SkeletonDatatable.jsx";
 import HeaderDatatable from "@/Components/HeaderDatatable.jsx";
 import HeaderModule from "@/Components/HeaderModule.jsx";
-import { Menu } from "primereact/menu";
 import { Sidebar } from "primereact/sidebar";
 import axios from "axios";
-import DetailStatusLog from "./DetailPartner/DetailStatusLog.jsx";
+import getViewportSize from "../Utils/getViewportSize.js";
 registerPlugin(FilePondPluginFileValidateSize);
 
 export default function Index({ auth, partner, usersProp, statusProp }) {
@@ -49,9 +48,11 @@ export default function Index({ auth, partner, usersProp, statusProp }) {
     const [referrals, setReferrals] = useState(null);
     const [sidebarFilter, setSidebarFilter] = useState(false);
     const [detailPartner, setDetailPartner] = useState(partner);
-    const [selectedUser, setSelectedUser] = useState(null);
+    const viewportSize = getViewportSize();
+    const isMobile = viewportSize.width < 992;
     const [selectedPartner, setSelectedPartner] = useState(null);
     const [confirmIsVisible, setConfirmIsVisible] = useState(false);
+    const BtnOp = useRef(null);
     const action = useRef(null);
     const menuRight = useRef(null);
     const dt = useRef(null);
@@ -294,6 +295,7 @@ export default function Index({ auth, partner, usersProp, statusProp }) {
         sales: null,
         referral: null,
         account_manager: null,
+        status: null,
         province: null,
         onboarding_date: { start: null, end: null },
         live_date: { start: null, end: null },
@@ -487,6 +489,25 @@ export default function Index({ auth, partner, usersProp, statusProp }) {
         );
     };
 
+    const onRowSelect = (event) => {
+        setTimeout(() => {
+            const highlightElement = document.querySelector(
+                ".p-radiobutton-box.p-component.p-highlight"
+            );
+
+            setCheckedElement(highlightElement);
+            if (highlightElement) {
+                highlightElement.addEventListener("click", (e) => {
+                    action.current.toggle(e);
+                });
+                highlightElement.click();
+                highlightElement.click();
+                highlightElement.click();
+                highlightElement.click();
+            }
+        }, 100);
+    };
+
     function formatNPWP(input) {
         let digitsOnly = input.replace(/\D/g, "");
 
@@ -606,6 +627,7 @@ export default function Index({ auth, partner, usersProp, statusProp }) {
             province: dataFilter.province,
             onboarding_date: dataFilter.onboarding_date,
             live_date: dataFilter.live_date,
+            status: dataFilter.status,
         };
 
         const csrfToken = document
@@ -857,7 +879,24 @@ export default function Index({ auth, partner, usersProp, statusProp }) {
                             className="flex justify-center  dark:text-gray-400   "
                         />
                     </div>
-
+                    <div className="flex flex-col mt-3">
+                        <label htmlFor="status">Status </label>
+                        <Dropdown
+                            dataKey="name"
+                            value={dataFilter.status}
+                            onChange={(e) => {
+                                setDataFilter("status", e.target.value);
+                            }}
+                            options={status}
+                            optionLabel="name"
+                            placeholder="Pilih Status"
+                            className="w-full md:w-14rem"
+                        />
+                        <InputError
+                            message={errors["status"]}
+                            className="mt-2"
+                        />
+                    </div>
                     <div className="flex flex-col mt-3">
                         <label htmlFor="province">Provinsi</label>
                         <Dropdown
@@ -970,10 +1009,19 @@ export default function Index({ auth, partner, usersProp, statusProp }) {
                         </div>
                     </div>
 
-                    <div className="flex flex-col mt-5">
+                    <div className="flex flex-row mt-5">
                         <Button
                             label="Cari"
                             className="bg-purple-600 text-sm shadow-md rounded-lg mr-2"
+                        />
+                        <Button
+                            type="button"
+                            label="Reset"
+                            onClick={(e) => {
+                                resetFilter();
+                                handleFilter(e);
+                            }}
+                            className="outline-purple-600 outline-1 outline-dotted bg-transparent text-slate-700  text-sm shadow-md rounded-lg mr-2"
                         />
                     </div>
                 </form>
@@ -1583,6 +1631,7 @@ export default function Index({ auth, partner, usersProp, statusProp }) {
                                     <div className="flex flex-col">
                                         <label htmlFor="status">Status *</label>
                                         <Dropdown
+                                            dataKey="name"
                                             value={data.partner.status}
                                             onChange={(e) => {
                                                 setData("partner", {
@@ -1647,7 +1696,7 @@ export default function Index({ auth, partner, usersProp, statusProp }) {
                                     </div>
                                 </div>
                                 <div className="flex flex-col mt-3">
-                                    <label htmlFor="name">Excell</label>
+                                    <label htmlFor="name">Excel</label>
 
                                     <div className="App">
                                         <FilePond
@@ -2264,6 +2313,7 @@ export default function Index({ auth, partner, usersProp, statusProp }) {
                                     <div className="flex flex-col">
                                         <label htmlFor="status">Status *</label>
                                         <Dropdown
+                                            dataKey="name"
                                             value={data.partner.status}
                                             onChange={(e) => {
                                                 setData("partner", {
@@ -2350,7 +2400,6 @@ export default function Index({ auth, partner, usersProp, statusProp }) {
                                     bodyRow:
                                         "dark:bg-transparent  dark:text-gray-300",
                                     table: "dark:bg-transparent bg-white dark:text-gray-300",
-                                    header: "",
                                 }}
                                 paginator
                                 rowsPerPageOptions={[5, 10, 25, 50]}
@@ -2359,8 +2408,13 @@ export default function Index({ auth, partner, usersProp, statusProp }) {
                                 rows={10}
                                 filters={filters}
                                 ref={dt}
+                                // selection={selectedPartner}
+                                // selectionMode="single"
+                                // onSelectionChange={(e) =>
+                                //     setSelectedPartner(e.value)
+                                // }
+                                // onRowSelect={onRowSelect}
                                 scrollable
-                                scrollHeight="400px"
                                 globalFilterFields={[
                                     "name",
                                     "status",
@@ -2378,6 +2432,14 @@ export default function Index({ auth, partner, usersProp, statusProp }) {
                                 value={partners}
                                 dataKey="id"
                             >
+                                {/* <Column
+                                    frozen
+                                    selectionMode="single"
+                                    className="bg-white dark:bg-slate-900"
+                                    headerClassName="bg-white dark:bg-slate-900"
+                                    // body={actionBodyTemplate}
+                                    // exportable={false}
+                                ></Column> */}
                                 <Column
                                     header="Aksi"
                                     frozen
@@ -2387,7 +2449,6 @@ export default function Index({ auth, partner, usersProp, statusProp }) {
                                 ></Column>
                                 <Column
                                     header="Nama"
-                                    frozen
                                     body={(rowData) => (
                                         <button
                                             onClick={() =>
@@ -2400,13 +2461,21 @@ export default function Index({ auth, partner, usersProp, statusProp }) {
                                             {rowData.name}
                                         </button>
                                     )}
-                                    className="dark:border-none lg:whitespace-nowrap lg:w-max"
-                                    headerClassName="dark:border-none  dark:bg-slate-900 dark:text-gray-300"
+                                    className="dark:border-none bg-white lg:whitespace-nowrap lg:w-max"
+                                    headerClassName="dark:border-none bg-white dark:bg-slate-900 dark:text-gray-300"
                                     align="left"
+                                    frozen={!isMobile}
+                                    style={
+                                        !isMobile
+                                            ? {
+                                                  width: "max-content",
+                                                  whiteSpace: "nowrap",
+                                              }
+                                            : null
+                                    }
                                 ></Column>
                                 <Column
                                     header="Status"
-                                    frozen
                                     body={(rowData) => {
                                         return (
                                             <Badge
@@ -2420,9 +2489,18 @@ export default function Index({ auth, partner, usersProp, statusProp }) {
                                             ></Badge>
                                         );
                                     }}
-                                    className="dark:border-none lg:w-max lg:whitespace-nowrap"
-                                    headerClassName="dark:border-none  dark:bg-slate-900 dark:text-gray-300"
+                                    className="dark:border-none bg-white lg:w-max lg:whitespace-nowrap"
+                                    headerClassName="dark:border-none bg-white dark:bg-slate-900 dark:text-gray-300"
                                     align="left"
+                                    frozen={!isMobile}
+                                    style={
+                                        !isMobile
+                                            ? {
+                                                  width: "max-content",
+                                                  whiteSpace: "nowrap",
+                                              }
+                                            : null
+                                    }
                                 ></Column>
                                 <Column
                                     header="NPWP"
@@ -2430,10 +2508,15 @@ export default function Index({ auth, partner, usersProp, statusProp }) {
                                     className="dark:border-none"
                                     headerClassName="dark:border-none  dark:bg-slate-900 dark:text-gray-300"
                                     align="left"
-                                    style={{
-                                        width: "max-content",
-                                        whiteSpace: "nowrap",
-                                    }}
+                                    frozen={!isMobile}
+                                    style={
+                                        !isMobile
+                                            ? {
+                                                  width: "max-content",
+                                                  whiteSpace: "nowrap",
+                                              }
+                                            : null
+                                    }
                                 ></Column>
                                 <Column
                                     field="uuid"

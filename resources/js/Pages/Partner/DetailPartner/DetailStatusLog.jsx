@@ -13,7 +13,7 @@ import { OverlayPanel } from "primereact/overlaypanel";
 import { useRef } from "react";
 import { useEffect } from "react";
 import { useState } from "react";
-
+import { formateDate } from "@/Pages/Utils/formatDate";
 const DetailStatusLog = ({
     partner,
     handleSelectedDetailPartner,
@@ -23,7 +23,7 @@ const DetailStatusLog = ({
     const [isLoadingData, setIsLoadingData] = useState(false);
     const [selectedStatus, setSelectedStatus] = useState(null);
     const [preRenderLoad, setPreRenderLoad] = useState(true);
-    const [logs, setLogs] = useState(null);
+    const [logs, setLogs] = useState([]);
     const op = useRef();
     const [filters, setFilters] = useState({
         global: { value: null, matchMode: FilterMatchMode.CONTAINS },
@@ -41,7 +41,7 @@ const DetailStatusLog = ({
 
     const getLog = async () => {
         setIsLoadingData(true);
-        let response = await fetch("/api/partners/status/logs");
+        let response = await fetch("/api/partners/logs/status");
         let data = await response.json();
 
         setLogs((prev) => data);
@@ -58,19 +58,6 @@ const DetailStatusLog = ({
         fetchData();
     }, []);
 
-    function formatDate(inputDate) {
-        const date = new Date(inputDate);
-
-        const day = date.getUTCDate();
-        const month = date.getUTCMonth() + 1;
-        const year = date.getUTCFullYear();
-
-        const formattedDay = day < 10 ? `0${day}` : day;
-        const formattedMonth = month < 10 ? `0${month}` : month;
-
-        return `${formattedDay}/${formattedMonth}/${year}`;
-    }
-
     const headerStatus = () => {
         return (
             <HeaderDatatable
@@ -81,131 +68,146 @@ const DetailStatusLog = ({
     };
     return (
         <>
-            <div className="flex mx-auto flex-col justify-center gap-5">
-                <div className="card p-fluid w-full h-full flex justify-center rounded-lg">
-                    <DataTable
-                        id="tablelog"
-                        loading={isLoadingData}
-                        className="w-full h-full rounded-lg border-none text-center"
-                        pt={{
-                            bodyRow:
-                                "dark:bg-transparent bg-transparent dark:text-gray-300 h-full",
-                            table: "dark:bg-transparent bg-white dark:text-gray-300 h-full",
-                            header: "",
-                            thead: "hidden",
-                        }}
-                        style={{ height: "300px" }}
-                        showGridlines
-                        paginator
-                        filters={filters}
-                        rows={10}
-                        emptyMessage="Status tidak ditemukan."
-                        paginatorClassName="dark:bg-transparent paginator-status-log dark:text-gray-300 rounded-b-lg"
-                        globalFilterFields={["name", "category", "causer.name"]}
-                        value={logs}
-                        dataKey="id"
-                    >
-                        <Column
-                            field="causer"
-                            hidden
-                            className="border-none"
-                            headerClassName="border-none bg-transparent dark:bg-transparent dark:text-gray-300"
-                            align="left"
-                            style={{
-                                width: "max-content",
-                                whiteSpace: "nowrap",
+            {logs.length < 0 ? (
+                <div className="flex mx-auto flex-col justify-center gap-5">
+                    <div className="card p-fluid w-full h-full flex justify-center rounded-lg">
+                        <DataTable
+                            id="tablelog"
+                            loading={isLoadingData}
+                            className="w-full h-full rounded-lg border-none text-center"
+                            pt={{
+                                bodyRow:
+                                    "dark:bg-transparent bg-transparent dark:text-gray-300 h-full",
+                                table: "dark:bg-transparent bg-white dark:text-gray-300 h-full",
+                                header: "",
+                                thead: "hidden",
                             }}
-                            body={(rowData) => {
-                                return rowData.causer.name;
-                            }}
-                        ></Column>
-                        <Column
-                            field="uuid"
-                            hidden
-                            className="border-none"
-                            headerClassName="border-none bg-transparent dark:bg-transparent dark:text-gray-300"
-                            align="left"
-                            style={{
-                                width: "max-content",
-                                whiteSpace: "nowrap",
-                            }}
-                        ></Column>
-                        <Column
-                            className="border-none"
-                            headerClassName="border-none bg-transparent dark:bg-transparent dark:text-gray-300"
-                            align="left"
-                            style={{
-                                width: "max-content",
-                                whiteSpace: "nowrap",
-                            }}
-                            body={(rowData) => {
-                                return (
-                                    <div className="flex justify-between w-full gap-2">
-                                        <div className="flex gap-4">
-                                            <Badge
-                                                value={
-                                                    rowData.properties
-                                                        .attributes[
-                                                        "status.name"
-                                                    ]
-                                                }
-                                                className="w-20 text-white"
-                                                style={{
-                                                    backgroundColor:
-                                                        "#" +
+                            style={{ height: "300px" }}
+                            showGridlines
+                            paginator
+                            filters={filters}
+                            rows={10}
+                            emptyMessage="Status tidak ditemukan."
+                            paginatorClassName="dark:bg-transparent paginator-status-log dark:text-gray-300 rounded-b-lg"
+                            globalFilterFields={[
+                                "name",
+                                "category",
+                                "causer.name",
+                            ]}
+                            value={logs}
+                            dataKey="id"
+                        >
+                            <Column
+                                field="causer"
+                                hidden
+                                className="border-none"
+                                headerClassName="border-none bg-transparent dark:bg-transparent dark:text-gray-300"
+                                align="left"
+                                style={{
+                                    width: "max-content",
+                                    whiteSpace: "nowrap",
+                                }}
+                                body={(rowData) => {
+                                    return rowData.causer.name;
+                                }}
+                            ></Column>
+                            <Column
+                                field="uuid"
+                                hidden
+                                className="border-none"
+                                headerClassName="border-none bg-transparent dark:bg-transparent dark:text-gray-300"
+                                align="left"
+                                style={{
+                                    width: "max-content",
+                                    whiteSpace: "nowrap",
+                                }}
+                            ></Column>
+                            <Column
+                                className="border-none"
+                                headerClassName="border-none bg-transparent dark:bg-transparent dark:text-gray-300"
+                                align="left"
+                                style={{
+                                    width: "max-content",
+                                    whiteSpace: "nowrap",
+                                }}
+                                body={(rowData) => {
+                                    return (
+                                        <div className="flex justify-between w-full gap-2">
+                                            <div className="flex gap-4">
+                                                <Badge
+                                                    value={
                                                         rowData.properties
                                                             .attributes[
-                                                            "status.color"
-                                                        ],
-                                                }}
-                                            ></Badge>
-                                            <p>
-                                                {formatDate(
-                                                    rowData.created_at
-                                                ) +
-                                                    ", " +
-                                                    rowData.causer.name +
-                                                    " " +
-                                                    "memperbaharui status partner"}
-                                            </p>
-                                        </div>
-                                        {rowData.event !== "deleted" ? (
-                                            <div>
-                                                <Button
-                                                    label="detail"
-                                                    className="p-0 underline bg-transparent text-blue-700 text-left"
-                                                    onClick={(e) => {
-                                                        op.current.toggle(e);
-                                                        console.log(rowData);
-                                                        setSelectedStatus(
-                                                            (prev) =>
-                                                                (prev = rowData)
-                                                        );
+                                                            "status.name"
+                                                        ]
+                                                    }
+                                                    className="w-20 text-white"
+                                                    style={{
+                                                        backgroundColor:
+                                                            "#" +
+                                                            rowData.properties
+                                                                .attributes[
+                                                                "status.color"
+                                                            ],
                                                     }}
-                                                    aria-controls="popup_menu_right"
-                                                    aria-haspopup
-                                                />
+                                                ></Badge>
+                                                <p>
+                                                    {formateDate(
+                                                        rowData.created_at
+                                                    ) +
+                                                        ", " +
+                                                        rowData.causer.name +
+                                                        " " +
+                                                        "memperbaharui status partner"}
+                                                </p>
                                             </div>
-                                        ) : null}
-                                    </div>
-                                );
-                            }}
-                        ></Column>
-                    </DataTable>
-                </div>
-                <OverlayPanel
-                    className="w-[40%] shadow-md md:max-w-[50%] dark:bg-slate-900 dark:text-gray-300"
-                    ref={op}
-                    showCloseIcon
-                >
-                    <div className="flex flex-wrap flex-col gap-2 p-4">
-                        <p className="font-semibold">Keterangan</p>
-                        <p className="text-justify">
-                            {selectedStatus?.note_status}
-                        </p>
+                                            {rowData.event !== "deleted" ? (
+                                                <div>
+                                                    <Button
+                                                        label="detail"
+                                                        className="p-0 underline bg-transparent text-blue-700 text-left"
+                                                        onClick={(e) => {
+                                                            op.current.toggle(
+                                                                e
+                                                            );
+                                                            console.log(
+                                                                rowData
+                                                            );
+                                                            setSelectedStatus(
+                                                                (prev) =>
+                                                                    (prev =
+                                                                        rowData)
+                                                            );
+                                                        }}
+                                                        aria-controls="popup_menu_right"
+                                                        aria-haspopup
+                                                    />
+                                                </div>
+                                            ) : null}
+                                        </div>
+                                    );
+                                }}
+                            ></Column>
+                        </DataTable>
                     </div>
-                </OverlayPanel>
-            </div>
+                    <OverlayPanel
+                        className="w-[40%] shadow-md md:max-w-[50%] dark:bg-slate-900 dark:text-gray-300"
+                        ref={op}
+                        showCloseIcon
+                    >
+                        <div className="flex flex-wrap flex-col gap-2 p-4">
+                            <p className="font-semibold">Keterangan</p>
+                            <p className="text-justify">
+                                {selectedStatus?.note_status}
+                            </p>
+                        </div>
+                    </OverlayPanel>
+                </div>
+            ) : (
+                <div class="w-full h-full min-h-[300px] -mt-4 flex items-center justify-center">
+                    <p class="text-center">Tidak ada data log status</p>
+                </div>
+            )}
         </>
     );
 };

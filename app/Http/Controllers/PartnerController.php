@@ -53,7 +53,7 @@ class PartnerController extends Controller
             ])->where('uuid', '=', $uuid)->first();
         }
 
-        $statusProp = Status::all();
+        $statusProp = Status::where('category', 'partner')->get();
         return Inertia::render("Partner/Index", compact('partner', 'usersProp', 'statusProp'));
     }
 
@@ -78,6 +78,12 @@ class PartnerController extends Controller
 
         if ($request->user) {
             $partners->where('created_by', $request->user['id']);
+        }
+
+        if ($request->status) {
+            $partners->whereHas('status', function ($query) use ($request) {
+                $query->where('status_id', $request->status['id']);
+            });
         }
 
         if ($request->account_manager) {
@@ -325,9 +331,23 @@ class PartnerController extends Controller
         return response()->json($partner);
     }
 
+    public function apiGetLogs()
+    {
+        $logs = Activity::with(['causer', 'subject'])
+            ->whereMorphedTo('subject', Partner::class);
+
+        if (request()->query('partner')) {
+            $logs->whereMorphRelation('subject', Partner::class, 'subject_id', '=', request()->query('partner'));
+        }
+
+        $logs = $logs->latest()->get();
+
+        return response()->json($logs);
+    }
+
     public function apiGetStatusLogs()
     {
-        $logs = Activity::with(['causer', 'subject', 'subject.status']) // Menambahkan 'subject.status' untuk mengambil data status
+        $logs = Activity::with(['causer', 'subject'])
             ->where('subject_type', 'App\Models\Partner')
             ->where('event', 'updated')
             ->where('note_status', '!=', null)

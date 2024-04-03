@@ -216,7 +216,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/api/partner/detail/{partner:uuid}', [PartnerController::class, 'apiGetPartner'])->name('api.partner');
     Route::post('/api/partner/detail/{partner:uuid}', [PartnerController::class, 'updateDetailPartner'])->name('api.update.partner');
     Route::get('/api/partners', [PartnerController::class, 'apiGetPartners'])->name('api.partners');
-    Route::get('/api/partners/status/logs', [PartnerController::class, 'apiGetStatusLogs'])->name('api.status.logs');
+    Route::get('/api/partners/logs', [PartnerController::class, 'apiGetLogs'])->name('api.partner.logs');
+    Route::get('/api/partners/logs/status', [PartnerController::class, 'apiGetStatusLogs'])->name('api.partner.logs.status');
 
     // Partner Langganan
     Route::get('/api/subscriptions', [PartnerSubscriptionController::class, 'apiGetSubscription'])->name('api.partners.subscriptions');

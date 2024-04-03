@@ -27,7 +27,7 @@ class Partner extends Authenticatable
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()
-            ->logOnly(['name', 'npwp', 'password', 'phone_number', 'status.name', 'status.color', 'sales_id', 'referral_id', 'account_manager_id', 'onboarding_date', 'live_date', 'monitoring_date_after_3_month_live', 'province', 'regency', 'address', 'payment_metode', 'period'])
+            ->logOnly(['name', 'npwp', 'password', 'phone_number', 'status.name', 'status.color', 'sales.name', 'referral_name', 'account_manager.name', 'onboarding_date', 'live_date', 'monitoring_date_after_3_month_live', 'province', 'regency', 'address', 'payment_metode', 'period'])
             ->dontLogIfAttributesChangedOnly(['onboarding_age', 'live_age'])
             ->setDescriptionForEvent(function (string $eventName) {
                 $modelName = class_basename($this);

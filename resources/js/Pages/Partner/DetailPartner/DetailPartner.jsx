@@ -22,6 +22,7 @@ import DetailPriceList from "./DetailPriceList";
 import InputError from "@/Components/InputError";
 import { InputMask } from "primereact/inputmask";
 import DetailStatusLog from "./DetailStatusLog";
+import DetailLog from "./DetailLog";
 
 const DetailPartner = ({
     partners,
@@ -127,6 +128,13 @@ const DetailPartner = ({
             }`,
             command: () => {
                 setActiveMenu((prev) => (prev = "price_list"));
+            },
+        },
+        {
+            label: "Log",
+            className: `${activeMenu == "log" ? "p-menuitem-active" : ""}`,
+            command: () => {
+                setActiveMenu((prev) => (prev = "log"));
             },
         },
         {
@@ -347,6 +355,30 @@ const DetailPartner = ({
                                                 </tr>
                                                 <tr class="border-b">
                                                     <td class="pt-2 pb-1  text-base font-bold w-1/5">
+                                                        Status
+                                                    </td>
+                                                    <td class="pt-2 pb-1  text-base w-[2%]">
+                                                        :
+                                                    </td>
+                                                    <td class="pt-2 pb-1  text-base w-7/12">
+                                                        <Badge
+                                                            value={
+                                                                partner.status
+                                                                    .name
+                                                            }
+                                                            className="text-white"
+                                                            style={{
+                                                                backgroundColor:
+                                                                    "#" +
+                                                                    partner
+                                                                        .status
+                                                                        .color,
+                                                            }}
+                                                        ></Badge>
+                                                    </td>
+                                                </tr>
+                                                <tr class="border-b">
+                                                    <td class="pt-2 pb-1  text-base font-bold w-1/5">
                                                         NPWP
                                                     </td>
                                                     <td class="pt-2 pb-1  text-base w-[2%]">
@@ -551,30 +583,7 @@ const DetailPartner = ({
                                                             : "-"}
                                                     </td>
                                                 </tr>
-                                                <tr class="border-b">
-                                                    <td class="pt-2 pb-1  text-base font-bold w-1/5">
-                                                        Status
-                                                    </td>
-                                                    <td class="pt-2 pb-1  text-base w-[2%]">
-                                                        :
-                                                    </td>
-                                                    <td class="pt-2 pb-1  text-base w-7/12">
-                                                        <Badge
-                                                            value={
-                                                                partner.status
-                                                                    .name
-                                                            }
-                                                            className="text-white"
-                                                            style={{
-                                                                backgroundColor:
-                                                                    "#" +
-                                                                    partner
-                                                                        .status
-                                                                        .color,
-                                                            }}
-                                                        ></Badge>
-                                                    </td>
-                                                </tr>
+
                                                 <tr class="border-b">
                                                     <td class="pt-2 pb-1  text-base font-bold w-1/5">
                                                         Aksi
@@ -643,6 +652,16 @@ const DetailPartner = ({
                                                 showError={showError}
                                             />
                                         )}
+
+                                        {activeMenu === "log" && (
+                                            <DetailLog
+                                                partner={partner}
+                                                handleSelectedDetailPartner={
+                                                    handleSelectedDetailPartner
+                                                }
+                                            />
+                                        )}
+
                                         {activeMenu === "log_status" && (
                                             <DetailStatusLog
                                                 partner={partner}
