@@ -208,8 +208,8 @@ export default function Index({ auth, usersProp, statusProp }) {
                 showSuccess("Hapus");
                 reset();
             },
-            onError: () => {
-                showError("Hapus");
+            onError: (e) => {
+                showError(e);
             },
         });
     };
@@ -319,11 +319,31 @@ export default function Index({ auth, usersProp, statusProp }) {
         });
     };
 
-    const showError = (type) => {
+    const showError = (message) => {
         toast.current.show({
             severity: "error",
             summary: "Error",
-            detail: `${type} data gagal`,
+            detail: message,
+            content: (props) => {
+                return (
+                    <div className="flex flex-col">
+                        <div className="flex align-items-center gap-2">
+                            <span className="font-bold text-900">Error</span>
+                        </div>
+                        <div className=" my-3 text-900">
+                            <ul className="text-sm list-inside list-disc">
+                                {Object.values(props.message.detail).map(
+                                    (error) => {
+                                        return (
+                                            <li className="my-2">{error}</li>
+                                        );
+                                    }
+                                )}
+                            </ul>
+                        </div>
+                    </div>
+                );
+            },
             life: 3000,
         });
     };
@@ -378,8 +398,8 @@ export default function Index({ auth, usersProp, statusProp }) {
                     reset();
                     setActiveIndexTab((prev) => (prev = 0));
                 },
-                onError: () => {
-                    showError("Tambah");
+                onError: (e) => {
+                    showError(e);
                 },
             });
         } else {
@@ -390,8 +410,8 @@ export default function Index({ auth, usersProp, statusProp }) {
                     getLeads();
                     reset();
                 },
-                onError: () => {
-                    showError("Update");
+                onError: (e) => {
+                    showError(e);
                 },
             });
         }
@@ -406,8 +426,8 @@ export default function Index({ auth, usersProp, statusProp }) {
                 getLeads();
                 reset();
             },
-            onError: () => {
-                showError("Tambah");
+            onError: (e) => {
+                showError(e);
             },
         });
     };
