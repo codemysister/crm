@@ -74,7 +74,7 @@ export default function Index({ auth, partner, usersProp, statusProp }) {
 
     useEffect(() => {
         if (partner) {
-            setActiveIndexTab(2);
+            setActiveIndexTab(1);
         }
 
         let sales = usersProp.filter((user) => {
@@ -704,7 +704,7 @@ export default function Index({ auth, partner, usersProp, statusProp }) {
 
     const handleSelectedDetailPartner = (partner) => {
         getSelectedDetailPartner(partner);
-        setActiveIndexTab(2);
+        setActiveIndexTab(1);
     };
 
     if (preRenderLoad) {
