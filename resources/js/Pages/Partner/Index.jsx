@@ -2502,7 +2502,11 @@ export default function Index({ auth, partner, usersProp, statusProp }) {
                                 ></Column>
                                 <Column
                                     header="NPWP"
-                                    body={(rowData) => formatNPWP(rowData.npwp)}
+                                    body={(rowData) =>
+                                        rowData.npwp !== null
+                                            ? formatNPWP(rowData.npwp)
+                                            : "-"
+                                    }
                                     className="dark:border-none"
                                     headerClassName="dark:border-none  dark:bg-slate-900 dark:text-gray-300"
                                     align="left"
