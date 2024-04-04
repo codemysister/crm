@@ -17,14 +17,12 @@ class LeadRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => 'required',
+            'name' => 'required|unique:leads',
             'phone_number' => 'required',
             'address' => 'required',
             'total_members' => 'required',
             'status' => 'required',
             'pic' => 'required',
-
-
         ];
     }
 
@@ -32,7 +30,8 @@ class LeadRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'name' => 'Lembaga harus diisi',
+            'name.required' => 'Lembaga harus diisi',
+            'name.unique' => 'Lembaga sudah ada',
             'phone_number' => 'Nomor telepon lembaga harus diisi',
             'address' => 'Alamat lembaga harus diisi',
             'total_members' => 'Total member harus diisi',

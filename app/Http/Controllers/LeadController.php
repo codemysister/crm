@@ -8,8 +8,10 @@ use App\Models\Lead;
 use App\Models\Partner;
 use App\Models\Status;
 use App\Models\User;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Maatwebsite\Excel\Facades\Excel;
@@ -26,16 +28,23 @@ class LeadController extends Controller
 
     public function store(LeadRequest $request)
     {
-        $lead = Lead::create([
-            'uuid' => Str::uuid(),
-            'name' => $request->name,
-            'pic' => $request->pic,
-            'phone_number' => $request->phone_number,
-            'address' => $request->address,
-            'total_members' => $request->total_members,
-            'status_id' => $request->status['id'],
-            'created_by' => Auth::user()->id
-        ]);
+        try {
+            $lead = Lead::create([
+                'uuid' => Str::uuid(),
+                'name' => $request->name,
+                'pic' => $request->pic,
+                'phone_number' => $request->phone_number,
+                'address' => $request->address,
+                'total_members' => $request->total_members,
+                'status_id' => $request->status['id'],
+                'created_by' => Auth::user()->id
+            ]);
+        } catch (Exception $e) {
+            Log::error('Error tambah lead: ' . $e->getMessage());
+            return redirect()->back()->withErrors([
+                'error' => $e->getMessage()
+            ]);
+        }
     }
 
     public function update(LeadRequest $request, $uuid)

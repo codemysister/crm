@@ -326,12 +326,12 @@ export default function Index({ auth, usersProp, statusProp }) {
             detail: message,
             content: (props) => {
                 return (
-                    <div className="flex flex-col">
+                    <div className="flex w-full flex-col">
                         <div className="flex align-items-center gap-2">
                             <span className="font-bold text-900">Error</span>
                         </div>
-                        <div className=" my-3 text-900">
-                            <ul className="text-sm list-inside list-disc">
+                        <div className="w-[90%] my-3 text-900">
+                            <ul className="text-base list-inside list-disc">
                                 {Object.values(props.message.detail).map(
                                     (error) => {
                                         return (
@@ -399,6 +399,7 @@ export default function Index({ auth, usersProp, statusProp }) {
                     setActiveIndexTab((prev) => (prev = 0));
                 },
                 onError: (e) => {
+                    alert(e);
                     showError(e);
                 },
             });
@@ -860,7 +861,7 @@ export default function Index({ auth, usersProp, statusProp }) {
 
                             <div className="flex flex-col">
                                 <label htmlFor="phone_number">
-                                    Nomor Telepon
+                                    Nomor Telepon *
                                 </label>
                                 <InputText
                                     keyfilter="int"
@@ -879,7 +880,7 @@ export default function Index({ auth, usersProp, statusProp }) {
                             </div>
 
                             <div className="flex flex-col">
-                                <label htmlFor="address">Alamat</label>
+                                <label htmlFor="address">Alamat *</label>
                                 <InputTextarea
                                     value={data.address}
                                     onChange={(e) =>
@@ -892,7 +893,7 @@ export default function Index({ auth, usersProp, statusProp }) {
 
                             <div className="flex flex-col">
                                 <label htmlFor="total_members">
-                                    Jumlah Member
+                                    Jumlah Member *
                                 </label>
                                 <InputText
                                     keyfilter="int"
@@ -990,7 +991,7 @@ export default function Index({ auth, usersProp, statusProp }) {
 
                             <div className="flex flex-col">
                                 <label htmlFor="phone_number">
-                                    Nomor Telepon
+                                    Nomor Telepon *
                                 </label>
                                 <InputText
                                     keyfilter="int"
@@ -1009,7 +1010,7 @@ export default function Index({ auth, usersProp, statusProp }) {
                             </div>
 
                             <div className="flex flex-col">
-                                <label htmlFor="address">Alamat</label>
+                                <label htmlFor="address">Alamat *</label>
                                 <InputTextarea
                                     value={data.address}
                                     onChange={(e) =>
@@ -1022,7 +1023,7 @@ export default function Index({ auth, usersProp, statusProp }) {
 
                             <div className="flex flex-col">
                                 <label htmlFor="total_members">
-                                    Jumlah Member
+                                    Jumlah Member *
                                 </label>
                                 <InputText
                                     keyfilter="int"
