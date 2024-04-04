@@ -259,6 +259,8 @@ Route::middleware('auth')->group(function () {
     Route::delete('/accounts/{uuid}', [PartnerAccountSettingController::class, 'destroy'])->name('partners.accounts.destroy');
 
     // Partner Tarif
+    Route::get('/prices', [PartnerPriceListController::class, 'index'])->name('partners.prices.index');
+    Route::post('/prices/filter', [PartnerPriceListController::class, 'filter'])->name('partners.prices.filter');
     Route::post('/prices', [PartnerPriceListController::class, 'store'])->name('partners.prices.store');
     Route::get('/api/prices', [PartnerPriceListController::class, 'apiGetPriceLists'])->name('api.partners.prices');
     Route::put('/prices/{uuid}', [PartnerPriceListController::class, 'update'])->name('partners.prices.update');

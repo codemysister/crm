@@ -488,6 +488,10 @@
       padding: 0.2rem;
     }
 
+    #overpanel-info .p-overlaypanel-content{
+      padding: 0.7rem !important;
+    } 
+
    
 
     .dark .p-menu{

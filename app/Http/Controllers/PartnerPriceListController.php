@@ -3,16 +3,27 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\PartnerPriceListRequest;
+use App\Models\Partner;
 use App\Models\PartnerPriceList;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
+use Inertia\Inertia;
 
 class PartnerPriceListController extends Controller
 {
+
+    public function index()
+    {
+        $usersProp = User::with('roles')->get();
+        $partnersProp = Partner::with(['status'])->get();
+        return Inertia::render("Partner/Price/Index", compact('partnersProp', 'usersProp'));
+    }
+
     public function apiGetPriceLists()
     {
-        $priceLists = PartnerPriceList::with('partner')->latest()
+        $priceLists = PartnerPriceList::with(['partner', 'createdBy'])->latest()
             ->get();
         return response()->json($priceLists);
     }
@@ -24,7 +35,7 @@ class PartnerPriceListController extends Controller
             'partner_id' => $request["partner"]["id"],
             'price_card' => json_encode([
                 'price' => $request['price_card']['price'],
-                'type' => $request['price_card']['price'] !== null ? $request['price_card']['type']['name'] : '',
+                'type' => $request['price_card']['price'] !== null ? $request['price_card']['type'] : '',
             ]),
             'price_lanyard' => $request['price_lanyard'],
             'price_subscription_system' => $request['price_subscription_system'],
@@ -63,5 +74,26 @@ class PartnerPriceListController extends Controller
     public function destroy($uuid)
     {
         PartnerPriceList::where('uuid', $uuid)->delete();
+    }
+
+    public function filter(Request $request)
+    {
+        $priceLists = PartnerPriceList::with([
+            'partner',
+            'createdBy'
+        ]);
+
+        if ($request->user) {
+            $priceLists->where('created_by', $request->user['id']);
+        }
+
+        if ($request->input_date['start'] && $request->input_date['end']) {
+            $priceLists->whereBetween('created_at', [$request->input_date['start'], $request->input_date['end']]);
+        }
+
+
+        $priceLists = $priceLists->latest()->get();
+
+        return response()->json($priceLists);
     }
 }

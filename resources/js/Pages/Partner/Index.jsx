@@ -22,7 +22,6 @@ import { TabPanel, TabView } from "primereact/tabview";
 import { FilterMatchMode } from "primereact/api";
 import { OverlayPanel } from "primereact/overlaypanel";
 import DetailPartner from "./DetailPartner/DetailPartner.jsx";
-import PriceList from "./PriceList.jsx";
 import { FilePond, registerPlugin } from "react-filepond";
 import FilePondPluginFileValidateSize from "filepond-plugin-file-validate-size";
 import "filepond/dist/filepond.min.css";
@@ -2710,17 +2709,6 @@ export default function Index({ auth, partner, usersProp, statusProp }) {
                             </DataTable>
                         </div>
                     </div>
-                </TabPanel>
-
-                <TabPanel header="Tarif">
-                    <PriceList
-                        partners={partners}
-                        showSuccess={showSuccess}
-                        showError={showError}
-                        handleSelectedDetailPartner={
-                            handleSelectedDetailPartner
-                        }
-                    />
                 </TabPanel>
 
                 <TabPanel header="Detail Partner">
