@@ -220,6 +220,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/api/partners/logs/status', [PartnerController::class, 'apiGetStatusLogs'])->name('api.partner.logs.status');
 
     // Partner Langganan
+    Route::get('/subscriptions', [PartnerSubscriptionController::class, 'index'])->name('partners.subscriptions.index');
+    Route::post('/subscriptions/filter', [PartnerSubscriptionController::class, 'filter'])->name('partners.subscriptions.filter');
     Route::get('/api/subscriptions', [PartnerSubscriptionController::class, 'apiGetSubscription'])->name('api.partners.subscriptions');
     Route::post('/subscriptions', [PartnerSubscriptionController::class, 'store'])->name('partners.subscriptions.store');
     Route::put('/subscriptions/{uuid}', [PartnerSubscriptionController::class, 'update'])->name('partners.subscriptions.update');

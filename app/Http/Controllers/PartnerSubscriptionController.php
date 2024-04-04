@@ -3,13 +3,22 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\PartnerSubscriptionRequest;
+use App\Models\Partner;
 use App\Models\PartnerSubscription;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
+use Inertia\Inertia;
 
 class PartnerSubscriptionController extends Controller
 {
+    public function index(Request $request)
+    {
+        $usersProp = User::with('roles')->get();
+        $partnersProp = Partner::with(['status'])->get();
+        return Inertia::render("Partner/Subscription/Index", compact('partnersProp', 'usersProp'));
+    }
     public function apiGetSubscription()
     {
         $subscriptions = PartnerSubscription::with('partner')->latest()
@@ -43,6 +52,28 @@ class PartnerSubscriptionController extends Controller
             'total_bill' => $request['total_bill'],
         ]);
     }
+
+    public function filter(Request $request)
+    {
+        $subscriptions = PartnerSubscription::with([
+            'partner',
+            'createdBy'
+        ]);
+
+        if ($request->user) {
+            $subscriptions->where('created_by', $request->user['id']);
+        }
+
+        if ($request->input_date['start'] && $request->input_date['end']) {
+            $subscriptions->whereBetween('created_at', [$request->input_date['start'], $request->input_date['end']]);
+        }
+
+
+        $subscriptions = $subscriptions->latest()->get();
+
+        return response()->json($subscriptions);
+    }
+
 
     public function destroy($uuid)
     {

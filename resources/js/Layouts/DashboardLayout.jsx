@@ -375,36 +375,32 @@ export default function DashboardLayout({ user, children }) {
                                             </Link>
                                         </li>
 
-                                        {/* {roles[0] === 'super admin' && ( */}
                                         <li className="relative mt-3 px-3">
                                             {currentPath ==
-                                                "/role-permission" && (
+                                                "/subscriptions" && (
                                                 <span className="absolute inset-y-0 left-0 w-1 bg-purple-600 rounded-tr-lg rounded-br-lg"></span>
                                             )}
                                             <Link
                                                 className={`inline-flex items-center ${
                                                     currentPath ==
-                                                    "/role-permission"
+                                                    "/subscriptions"
                                                         ? "text-gray-800 dark:text-gray-100"
                                                         : ""
                                                 } w-full text-sm font-semibold transition-colors duration-150 hover:text-gray-800 dark:hover:text-gray-200 `}
-                                                href={route(
-                                                    "role-permission.view"
-                                                )}
+                                                href={"/subscriptions"}
                                             >
                                                 <svg
-                                                    className="w-5 h-5"
-                                                    fill="none"
-                                                    strokeLinecap="round"
-                                                    strokeLinejoin="round"
-                                                    strokeWidth="2"
+                                                    xmlns="http://www.w3.org/2000/svg"
                                                     viewBox="0 0 24 24"
-                                                    stroke="currentColor"
+                                                    className="w-5 h-5"
+                                                    fill="currentColor"
                                                 >
-                                                    <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path>
+                                                    <path d="M20 4H4c-1.103 0-2 .897-2 2v12c0 1.103.897 2 2 2h16c1.103 0 2-.897 2-2V6c0-1.103-.897-2-2-2zM4 6h16v2H4V6zm0 12v-6h16.001l.001 6H4z"></path>
+                                                    <path d="M6 14h6v2H6z"></path>
                                                 </svg>
+
                                                 <span className="ml-4">
-                                                    Role dan Perizinan
+                                                    Langganan
                                                 </span>
                                             </Link>
                                         </li>

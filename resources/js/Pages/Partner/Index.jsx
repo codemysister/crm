@@ -22,7 +22,6 @@ import { TabPanel, TabView } from "primereact/tabview";
 import { FilterMatchMode } from "primereact/api";
 import { OverlayPanel } from "primereact/overlaypanel";
 import DetailPartner from "./DetailPartner/DetailPartner.jsx";
-import Subscription from "./Subscription.jsx";
 import PriceList from "./PriceList.jsx";
 import { FilePond, registerPlugin } from "react-filepond";
 import FilePondPluginFileValidateSize from "filepond-plugin-file-validate-size";
@@ -76,7 +75,7 @@ export default function Index({ auth, partner, usersProp, statusProp }) {
 
     useEffect(() => {
         if (partner) {
-            setActiveIndexTab(3);
+            setActiveIndexTab(2);
         }
 
         let sales = usersProp.filter((user) => {
@@ -706,7 +705,7 @@ export default function Index({ auth, partner, usersProp, statusProp }) {
 
     const handleSelectedDetailPartner = (partner) => {
         getSelectedDetailPartner(partner);
-        setActiveIndexTab(3);
+        setActiveIndexTab(2);
     };
 
     if (preRenderLoad) {
@@ -2711,17 +2710,6 @@ export default function Index({ auth, partner, usersProp, statusProp }) {
                             </DataTable>
                         </div>
                     </div>
-                </TabPanel>
-
-                <TabPanel header="Langganan">
-                    <Subscription
-                        partners={partners}
-                        showSuccess={showSuccess}
-                        showError={showError}
-                        handleSelectedDetailPartner={
-                            handleSelectedDetailPartner
-                        }
-                    />
                 </TabPanel>
 
                 <TabPanel header="Tarif">
