@@ -21,10 +21,7 @@ import { Badge } from "primereact/badge";
 import { TabPanel, TabView } from "primereact/tabview";
 import { FilterMatchMode } from "primereact/api";
 import { OverlayPanel } from "primereact/overlaypanel";
-import Pic from "./PIC/Pic.jsx";
 import DetailPartner from "./DetailPartner/DetailPartner.jsx";
-import Bank from "./Bank.jsx";
-import Account from "./Account.jsx";
 import Subscription from "./Subscription.jsx";
 import PriceList from "./PriceList.jsx";
 import { FilePond, registerPlugin } from "react-filepond";
@@ -52,7 +49,7 @@ export default function Index({ auth, partner, usersProp, statusProp }) {
     const isMobile = viewportSize.width < 992;
     const [selectedPartner, setSelectedPartner] = useState(null);
     const [confirmIsVisible, setConfirmIsVisible] = useState(false);
-    const BtnOp = useRef(null);
+    const btnFilterRef = useRef(null);
     const action = useRef(null);
     const menuRight = useRef(null);
     const dt = useRef(null);
@@ -79,7 +76,7 @@ export default function Index({ auth, partner, usersProp, statusProp }) {
 
     useEffect(() => {
         if (partner) {
-            setActiveIndexTab(6);
+            setActiveIndexTab(3);
         }
 
         let sales = usersProp.filter((user) => {
@@ -709,7 +706,7 @@ export default function Index({ auth, partner, usersProp, statusProp }) {
 
     const handleSelectedDetailPartner = (partner) => {
         getSelectedDetailPartner(partner);
-        setActiveIndexTab(6);
+        setActiveIndexTab(3);
     };
 
     if (preRenderLoad) {
@@ -1011,6 +1008,7 @@ export default function Index({ auth, partner, usersProp, statusProp }) {
 
                     <div className="flex flex-row mt-5">
                         <Button
+                            ref={btnFilterRef}
                             label="Cari"
                             className="bg-purple-600 text-sm shadow-md rounded-lg mr-2"
                         />
@@ -1019,7 +1017,9 @@ export default function Index({ auth, partner, usersProp, statusProp }) {
                             label="Reset"
                             onClick={(e) => {
                                 resetFilter();
-                                handleFilter(e);
+                                setTimeout(() => {
+                                    btnFilterRef.current.click();
+                                }, 500);
                             }}
                             className="outline-purple-600 outline-1 outline-dotted bg-transparent text-slate-700  text-sm shadow-md rounded-lg mr-2"
                         />
@@ -2711,39 +2711,6 @@ export default function Index({ auth, partner, usersProp, statusProp }) {
                             </DataTable>
                         </div>
                     </div>
-                </TabPanel>
-
-                <TabPanel header="PIC">
-                    <Pic
-                        partners={partners}
-                        showSuccess={showSuccess}
-                        showError={showError}
-                        handleSelectedDetailPartner={
-                            handleSelectedDetailPartner
-                        }
-                    />
-                </TabPanel>
-
-                <TabPanel header="Bank">
-                    <Bank
-                        partners={partners}
-                        showSuccess={showSuccess}
-                        showError={showError}
-                        handleSelectedDetailPartner={
-                            handleSelectedDetailPartner
-                        }
-                    />
-                </TabPanel>
-
-                <TabPanel header="Akun">
-                    <Account
-                        partners={partners}
-                        showSuccess={showSuccess}
-                        showError={showError}
-                        handleSelectedDetailPartner={
-                            handleSelectedDetailPartner
-                        }
-                    />
                 </TabPanel>
 
                 <TabPanel header="Langganan">
