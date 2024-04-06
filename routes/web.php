@@ -307,11 +307,13 @@ Route::middleware('auth')->group(function () {
     Route::get('/sla', [SLAController::class, 'index'])->name('sla.view')->middleware(['can:lihat sla']);
     Route::get('/sla/create', [SLAController::class, 'create'])->name('sla.create')->middleware(['can:tambah sla']);
     Route::post('/sla', [SLAController::class, 'store'])->name('sla.store')->middleware(['can:tambah sla']);
+    Route::post('/sla/filter', [SLAController::class, 'filter'])->name('partners.sla.filter');
     Route::get('/sla/{sla:uuid}', [SLAController::class, 'edit'])->name('sla.edit')->middleware(['can:edit sla']);
     Route::post('/sla/{sla:uuid}', [SLAController::class, 'update'])->name('sla.update')->middleware(['can:edit sla']);
     Route::delete('/sla/{sla:uuid}', [SLAController::class, 'destroy'])->name('sla.destroy')->middleware(['can:hapus sla']);
     Route::get('/api/sla', [SLAController::class, 'apiGetSla'])->name('api.sla');
-    Route::post('/activity/{activity:uuid}', [SLAController::class, 'activityUpdate'])->name('activity.update')->middleware(['can:hapus sla']);
+    Route::get('api/activity/{sla:id}', [SLAController::class, 'apiGetActivities'])->name('api.activity')->middleware(['can:lihat sla']);
+    Route::post('/activity/{activity:uuid}', [SLAController::class, 'activityUpdate'])->name('activity.update')->middleware(['can:tambah sla']);
     Route::delete('/activity/{activity:uuid}', [SLAController::class, 'activityDestroy'])->name('activity.destroy')->middleware(['can:hapus sla']);
 
     // Invoice Umum

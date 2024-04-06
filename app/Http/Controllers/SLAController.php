@@ -29,7 +29,13 @@ class SLAController extends Controller
 
     public function apiGetSla()
     {
-        $slas = SLA::with(['activities', 'partner', 'user'])->latest()->get();
+        $slas = SLA::with([
+            'activities' => function ($query) {
+                $query->orderBy('id', 'asc');
+            },
+            'partner',
+            'createdBy'
+        ])->latest()->get();
         $roles = DB::table('roles')->distinct()->get("name");
         $users = User::all();
         return response()->json(["sla" => $slas, "roles" => $roles, "users" => $users]);
@@ -114,7 +120,8 @@ class SLAController extends Controller
                 "cazh_pic" => $activity['cazh_pic']['name'],
                 "duration" => $activity['duration'],
                 "estimation_date" => $activity['estimation_date'],
-                "realization_date" => $activity['realization_date'] ?? null
+                "realization_date" => $activity['realization_date'] ?? null,
+                "created_by" => $activity['cazh_pic']['id']
             ]);
         }
         foreach ($create as $activity) {
@@ -125,7 +132,8 @@ class SLAController extends Controller
                 "cazh_pic" => $activity['cazh_pic']['name'],
                 "duration" => $activity['duration'],
                 "estimation_date" => $activity['estimation_date'],
-                "realization_date" => $activity['realization_date'] ?? null
+                "realization_date" => $activity['realization_date'] ?? null,
+                "created_by" => $activity['cazh_pic']['id']
             ]);
         }
 
@@ -185,7 +193,8 @@ class SLAController extends Controller
                 "cazh_pic" => $activity['cazh_pic']['name'],
                 "duration" => $activity['duration'],
                 "estimation_date" => $activity['estimation_date'],
-                "realization_date" => $activity['realization_date'] ?? null
+                "realization_date" => $activity['realization_date'] ?? null,
+                "created_by" => $activity['cazh_pic']['id']
             ]);
         }
 
@@ -349,4 +358,35 @@ class SLAController extends Controller
         $activity->delete();
         GenerateSLAJob::dispatch($sla, $sla->activities);
     }
+
+    public function apiGetActivities($id)
+    {
+        $activities = SlaActivity::where('sla_id', '=', $id)->orderBy('id', 'asc')->get();
+        return response()->json($activities);
+    }
+
+    public function filter(Request $request)
+    {
+        $slas = SLA::with([
+            'activities' => function ($query) {
+                $query->orderBy('id', 'asc');
+            },
+            'partner',
+            'createdBy'
+        ]);
+
+        if ($request->user) {
+            $slas->where('created_by', $request->user['id']);
+        }
+
+        if ($request->input_date['start'] && $request->input_date['end']) {
+            $slas->whereBetween('created_at', [$request->input_date['start'], $request->input_date['end']]);
+        }
+
+
+        $slas = $slas->latest()->get();
+
+        return response()->json($slas);
+    }
+
 }

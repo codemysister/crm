@@ -17,7 +17,7 @@ class SLA extends Model
         return $this->belongsTo(Partner::class, 'partner_id', 'id');
     }
 
-    public function user()
+    public function createdBy()
     {
         return $this->hasOne(User::class, 'id', 'created_by');
     }

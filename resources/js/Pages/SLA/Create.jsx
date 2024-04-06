@@ -29,7 +29,7 @@ const Create = ({ usersProp, partnersProp, signaturesProp, referralsProp }) => {
     const [users, setUsers] = useState([
         ...usersProp,
         { name: "Account Executive" },
-        { name: "Account Manager", name: "Graphics Designer" },
+        { name: "Account Manager", name: "Designer" },
         { name: "Account Manager" },
     ]);
     const [partners, setPartners] = useState(partnersProp);
@@ -194,7 +194,7 @@ const Create = ({ usersProp, partnersProp, signaturesProp, referralsProp }) => {
             },
             {
                 activity: "Desain Kartu (versi digital dan cetak)",
-                cazh_pic: { name: "Graphics Designer" },
+                cazh_pic: { name: "Designer" },
                 duration: "3 hari sejak pendaftaran",
                 estimation_date: new Date(
                     new Date().setDate(new Date().getDate() + 4)
@@ -206,7 +206,7 @@ const Create = ({ usersProp, partnersProp, signaturesProp, referralsProp }) => {
             },
             {
                 activity: "Cetak Kartu (jika dicetak)",
-                cazh_pic: { name: "Graphics Designer" },
+                cazh_pic: { name: "Designer" },
                 duration: "4 hari desain approve",
                 estimation_date: new Date(
                     new Date().setDate(new Date().getDate() + 8)
@@ -218,7 +218,7 @@ const Create = ({ usersProp, partnersProp, signaturesProp, referralsProp }) => {
             },
             {
                 activity: "Pengiriman kartu dan device (bila ada)",
-                cazh_pic: { name: "Graphics Designer" },
+                cazh_pic: { name: "Designer" },
                 duration: "7 hari sejak cetak kartu selesai",
                 estimation_date: new Date(
                     new Date().setDate(new Date().getDate() + 15)
