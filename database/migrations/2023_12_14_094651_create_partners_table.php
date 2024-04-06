@@ -19,7 +19,7 @@ return new class extends Migration {
             $table->foreignId('account_manager_id')->nullable()->constrained('users', 'id')->onDelete('cascade');
             $table->foreignId('referral_id')->nullable()->constrained('users', 'id')->onDelete('cascade');
             $table->string('name')->unique();
-            $table->integer('total_members')->nullable();
+            $table->integer('total_members')->default(0);
             $table->string('npwp')->nullable();
             $table->string('password')->nullable();
             $table->string('logo')->nullable();
@@ -34,7 +34,7 @@ return new class extends Migration {
             $table->integer('live_age')->nullable();
             $table->date('monitoring_date_after_3_month_live')->nullable();
             $table->string('period')->nullable();
-            $table->string('payment_metode')->default('payment link');
+            $table->string('payment_metode')->nullable()->default('payment link');
             $table->string('note_status')->nullable();
             $table->softDeletes();
             $table->timestamps();

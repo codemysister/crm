@@ -257,6 +257,8 @@ export default function Index({ auth, partner, usersProp, statusProp }) {
             name: "",
             logo: null,
             npwp: null,
+            total_members: null,
+            pic: null,
             password: null,
             phone_number: null,
             province: null,
@@ -380,11 +382,31 @@ export default function Index({ auth, partner, usersProp, statusProp }) {
         });
     };
 
-    const showError = (type) => {
+    const showError = (message) => {
         toast.current.show({
             severity: "error",
             summary: "Error",
-            detail: `${type} data gagal`,
+            detail: message,
+            content: (props) => {
+                return (
+                    <div className="flex w-full flex-col">
+                        <div className="flex align-items-center gap-2">
+                            <span className="font-bold text-900">Error</span>
+                        </div>
+                        <div className="w-[90%] my-3 text-900">
+                            <ul className="text-base list-inside list-disc">
+                                {Object.values(props.message.detail).map(
+                                    (error) => {
+                                        return (
+                                            <li className="my-2">{error}</li>
+                                        );
+                                    }
+                                )}
+                            </ul>
+                        </div>
+                    </div>
+                );
+            },
             life: 3000,
         });
     };
@@ -399,7 +421,9 @@ export default function Index({ auth, partner, usersProp, statusProp }) {
                 name: partner.name,
                 npwp: partner.npwp,
                 password: partner.password,
-                logo: partner.logo,
+                total_members: partner.total_members,
+                pic: partner.pics[0].name,
+                logo: partner.logo ?? null,
                 phone_number: partner.phone_number,
                 sales: partner.sales,
                 referral: partner.referral,
@@ -534,6 +558,7 @@ export default function Index({ auth, partner, usersProp, statusProp }) {
                 Nama: data.name,
                 Status: data.status ? data.status.name : "-",
                 NPWP: data.npwp ? data.npwp : "-",
+                Jumlah_Member: data.total_members ? data.total_members : "-",
                 Nomor_Telepon_Lembaga: data.phone_number
                     ? data.phone_number
                     : "-",
@@ -650,16 +675,10 @@ export default function Index({ auth, partner, usersProp, statusProp }) {
                     showSuccess("Tambah");
                     setModalPartnersIsVisible((prev) => false);
                     getPartners();
-                    reset(
-                        "partner",
-                        "pic",
-                        "subscription",
-                        "account_setting",
-                        "bank"
-                    );
+                    reset("partner");
                 },
-                onError: () => {
-                    showError("Tambah");
+                onError: (errors) => {
+                    showError(errors);
                 },
             });
         } else {
@@ -670,8 +689,8 @@ export default function Index({ auth, partner, usersProp, statusProp }) {
                     getPartners();
                     reset("partner", "pic", "subscription");
                 },
-                onError: () => {
-                    showError("Update");
+                onError: (errors) => {
+                    showError(errors);
                 },
             });
         }
@@ -688,8 +707,8 @@ export default function Index({ auth, partner, usersProp, statusProp }) {
 
                 setActiveIndex((prev) => (prev = 0));
             },
-            onError: () => {
-                showError("Tambah");
+            onError: (errors) => {
+                showError(errors);
             },
         });
     };
@@ -893,7 +912,7 @@ export default function Index({ auth, partner, usersProp, statusProp }) {
                         />
                     </div>
                     <div className="flex flex-col mt-3">
-                        <label htmlFor="province">Provinsi</label>
+                        <label htmlFor="province">Provinsi *</label>
                         <Dropdown
                             dataKey="name"
                             value={
@@ -1144,6 +1163,52 @@ export default function Index({ auth, partner, usersProp, statusProp }) {
                                     </div>
 
                                     <div className="flex flex-col">
+                                        <label htmlFor="name">
+                                            Jumlah Member *
+                                        </label>
+                                        <InputText
+                                            keyfilter="int"
+                                            value={data.partner.total_members}
+                                            onChange={(e) =>
+                                                setData("partner", {
+                                                    ...data.partner,
+                                                    total_members:
+                                                        e.target.value,
+                                                })
+                                            }
+                                            className="dark:bg-gray-300"
+                                            id="total_members"
+                                            aria-describedby="total_members-help"
+                                        />
+                                        <InputError
+                                            message={
+                                                errors["partner.total_members"]
+                                            }
+                                            className="mt-2"
+                                        />
+                                    </div>
+
+                                    <div className="flex flex-col">
+                                        <label htmlFor="pic">PIC *</label>
+                                        <InputText
+                                            value={data.partner.pic}
+                                            onChange={(e) =>
+                                                setData("partner", {
+                                                    ...data.partner,
+                                                    pic: e.target.value,
+                                                })
+                                            }
+                                            className="dark:bg-gray-300"
+                                            id="pic"
+                                            aria-describedby="pic-help"
+                                        />
+                                        <InputError
+                                            message={errors["partner.pic"]}
+                                            className="mt-2"
+                                        />
+                                    </div>
+
+                                    <div className="flex flex-col">
                                         <label htmlFor="name">NPWP</label>
                                         <InputMask
                                             keyfilter="int"
@@ -1177,6 +1242,7 @@ export default function Index({ auth, partner, usersProp, statusProp }) {
                                             aria-describedby="password-help"
                                         />
                                     </div>
+
                                     <div className="flex flex-col">
                                         <label htmlFor="name">
                                             Nomor Telepon
@@ -1271,7 +1337,7 @@ export default function Index({ auth, partner, usersProp, statusProp }) {
 
                                     <div className="flex flex-col">
                                         <label htmlFor="province">
-                                            Provinsi
+                                            Provinsi *
                                         </label>
                                         <Dropdown
                                             dataKey="name"
@@ -1313,7 +1379,7 @@ export default function Index({ auth, partner, usersProp, statusProp }) {
 
                                     <div className="flex flex-col">
                                         <label htmlFor="regency">
-                                            Kabupaten
+                                            Kabupaten *
                                         </label>
                                         <Dropdown
                                             dataKey="name"
@@ -1733,9 +1799,7 @@ export default function Index({ auth, partner, usersProp, statusProp }) {
                             visible={modalEditPartnersIsVisible}
                             onHide={() => setModalEditPartnersIsVisible(false)}
                         >
-                            <form
-                                onSubmit={(e) => handleSubmitForm(e, "update")}
-                            >
+                            <form onSubmit={(e) => handleSubmitForm(e)}>
                                 <div className="flex flex-col justify-around gap-4 mt-3">
                                     <div className="flex flex-col">
                                         <label htmlFor="name">Nama *</label>
@@ -1765,6 +1829,7 @@ export default function Index({ auth, partner, usersProp, statusProp }) {
                                             typeof data.partner.logo ==
                                                 "string" ? (
                                                 <>
+                                                    {console.log(data.partner)}
                                                     <FilePond
                                                         files={
                                                             "storage/" +
@@ -1822,6 +1887,52 @@ export default function Index({ auth, partner, usersProp, statusProp }) {
                                     </div>
 
                                     <div className="flex flex-col">
+                                        <label htmlFor="name">
+                                            Jumlah Member *
+                                        </label>
+                                        <InputText
+                                            keyfilter="int"
+                                            value={data.partner.total_members}
+                                            onChange={(e) =>
+                                                setData("partner", {
+                                                    ...data.partner,
+                                                    total_members:
+                                                        e.target.value,
+                                                })
+                                            }
+                                            className="dark:bg-gray-300"
+                                            id="total_members"
+                                            aria-describedby="total_members-help"
+                                        />
+                                        <InputError
+                                            message={
+                                                errors["partner.total_members"]
+                                            }
+                                            className="mt-2"
+                                        />
+                                    </div>
+
+                                    <div className="flex flex-col">
+                                        <label htmlFor="pic">PIC *</label>
+                                        <InputText
+                                            value={data.partner.pic}
+                                            onChange={(e) =>
+                                                setData("partner", {
+                                                    ...data.partner,
+                                                    pic: e.target.value,
+                                                })
+                                            }
+                                            className="dark:bg-gray-300"
+                                            id="pic"
+                                            aria-describedby="pic-help"
+                                        />
+                                        <InputError
+                                            message={errors["partner.pic"]}
+                                            className="mt-2"
+                                        />
+                                    </div>
+
+                                    <div className="flex flex-col">
                                         <label htmlFor="name">NPWP</label>
                                         <InputMask
                                             keyfilter="int"
@@ -1855,6 +1966,7 @@ export default function Index({ auth, partner, usersProp, statusProp }) {
                                             aria-describedby="password-help"
                                         />
                                     </div>
+
                                     <div className="flex flex-col">
                                         <label htmlFor="name">
                                             Nomor Telepon
@@ -1991,7 +2103,7 @@ export default function Index({ auth, partner, usersProp, statusProp }) {
 
                                     <div className="flex flex-col">
                                         <label htmlFor="regency">
-                                            Kabupaten
+                                            Kabupaten *
                                         </label>
                                         <Dropdown
                                             dataKey="name"
@@ -2265,10 +2377,6 @@ export default function Index({ auth, partner, usersProp, statusProp }) {
                                             className={`w-full md:w-14rem 
                                         `}
                                         />
-                                        <InputError
-                                            message={errors["partner.period"]}
-                                            className="mt-2"
-                                        />
                                     </div>
 
                                     <div className="flex flex-col">
@@ -2317,11 +2425,7 @@ export default function Index({ auth, partner, usersProp, statusProp }) {
                                                 setData("partner", {
                                                     ...data.partner,
                                                     status: e.target.value,
-                                                    note_status: null,
                                                 });
-                                                setModalStatusIsVisible(
-                                                    (prev) => (prev = true)
-                                                );
                                             }}
                                             options={status}
                                             optionLabel="name"
@@ -2533,6 +2637,22 @@ export default function Index({ auth, partner, usersProp, statusProp }) {
                                     }}
                                 ></Column>
 
+                                <Column
+                                    field="total_members"
+                                    body={(rowData) => {
+                                        return rowData.total_members
+                                            ? rowData.total_members
+                                            : "-";
+                                    }}
+                                    className="dark:border-none"
+                                    headerClassName="dark:border-none dark:bg-transparent dark:text-gray-300"
+                                    header="Jumlah Member"
+                                    align="left"
+                                    style={{
+                                        width: "max-content",
+                                        whiteSpace: "nowrap",
+                                    }}
+                                ></Column>
                                 <Column
                                     field="phone_number"
                                     body={(rowData) => {

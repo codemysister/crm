@@ -399,7 +399,6 @@ export default function Index({ auth, usersProp, statusProp }) {
                     setActiveIndexTab((prev) => (prev = 0));
                 },
                 onError: (e) => {
-                    alert(e);
                     showError(e);
                 },
             });

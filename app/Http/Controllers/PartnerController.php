@@ -3,23 +3,19 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\PartnerGeneralRequest;
-use App\Http\Requests\PartnerRequest;
 use App\Imports\PartnerImport;
 use App\Models\Partner;
-use App\Models\PartnerAccountSetting;
-use App\Models\PartnerBank;
 use App\Models\PartnerPIC;
-use App\Models\PartnerPriceList;
-use App\Models\PartnerSubscription;
 use App\Models\Status;
 use App\Models\User;
 use Carbon\Carbon;
-use DateTime;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Maatwebsite\Excel\Facades\Excel;
@@ -118,54 +114,97 @@ class PartnerController extends Controller
 
     public function import()
     {
-
         $imported = Excel::import(new PartnerImport, request()->file('partner.excell'));
-        // Excel::queueImport(new PartnerImport, request()->file('partner.excell'));
-
     }
 
     public function store(PartnerGeneralRequest $request)
     {
-        $pathLogo = '';
+        $pathLogo = null;
         if ($request->hasFile('partner.logo')) {
             $file = $request->file('partner.logo');
             $filename = time() . '.' . $file->getClientOriginalExtension();
             $pathLogo = "images/logo/" . $filename;
             Storage::putFileAs('public/images/logo', $file, $filename);
-
         }
 
-        Partner::create([
-            'uuid' => Str::uuid(),
-            'name' => $request['partner']['name'],
-            'logo' => $pathLogo,
-            'npwp' => $request['partner']['npwp'] ?? null,
-            'password' => $request['partner']['password'] ?? null,
-            'phone_number' => $request['partner']['phone_number'] ?? null,
-            'status_id' => $request['partner']['status']['id'],
-            'sales_id' => $request['partner']['sales']['id'] ?? null,
-            'referral_id' => $request['partner']['referral']['id'] ?? null,
-            'account_manager_id' => $request['partner']['account_manager']['id'] ?? null,
-            'onboarding_date' => Carbon::parse($request['partner']['onboarding_date'])->setTimezone('GMT+7')->format('Y-m-d H:i:s'),
-            'live_date' => $request['partner']['live_date'] !== null ? Carbon::parse($request['partner']['live_date'])->setTimezone('GMT+7')->format('Y-m-d H:i:s') : null,
-            'onboarding_age' => $request['partner']['onboarding_age'],
-            'live_age' => $request['partner']['live_age'],
-            'monitoring_date_after_3_month_live' => $request['partner']['monitoring_date_after_3_month_live'] !== null ? Carbon::parse($request['partner']['monitoring_date_after_3_month_live'])->setTimezone('GMT+7')->format('Y-m-d H:i:s') : null,
-            'province' => $request['partner']['province'],
-            'regency' => $request['partner']['regency'],
-            'subdistrict' => $request['partner']['subdistrict'],
-            'address' => $request['partner']['address'],
-            'payment_metode' => $request['partner']['payment_metode'],
-            'period' => $request['partner']['period']['name'] ?? $request['partner']['period'],
-            'created_by' => Auth::user()->id
-        ]);
+        $request->merge(['request_method' => 'store']);
+
+        DB::beginTransaction();
+
+        try {
+            $partner = Partner::create([
+                'uuid' => Str::uuid(),
+                'name' => $request['partner']['name'],
+                'logo' => $pathLogo,
+                'npwp' => $request['partner']['npwp'] ?? null,
+                'password' => $request['partner']['password'] ?? null,
+                'phone_number' => $request['partner']['phone_number'] ?? null,
+                'total_members' => $request['partner']['total_members'] ?? null,
+                'status_id' => $request['partner']['status']['id'],
+                'sales_id' => $request['partner']['sales']['id'] ?? null,
+                'referral_id' => $request['partner']['referral']['id'] ?? null,
+                'account_manager_id' => $request['partner']['account_manager']['id'] ?? null,
+                'onboarding_date' => $request['partner']['onboarding_date'] !== null ? Carbon::parse($request['partner']['onboarding_date'])->setTimezone('GMT+7')->format('Y-m-d H:i:s') : null,
+                'live_date' => $request['partner']['live_date'] !== null ? Carbon::parse($request['partner']['live_date'])->setTimezone('GMT+7')->format('Y-m-d H:i:s') : null,
+                'onboarding_age' => $request['partner']['onboarding_age'],
+                'live_age' => $request['partner']['live_age'],
+                'monitoring_date_after_3_month_live' => $request['partner']['monitoring_date_after_3_month_live'] !== null ? Carbon::parse($request['partner']['monitoring_date_after_3_month_live'])->setTimezone('GMT+7')->format('Y-m-d H:i:s') : null,
+                'province' => $request['partner']['province'],
+                'regency' => $request['partner']['regency'],
+                'subdistrict' => $request['partner']['subdistrict'],
+                'address' => $request['partner']['address'],
+                'payment_metode' => $request['partner']['payment_metode'],
+                'period' => $request['partner']['period']['name'] ?? $request['partner']['period'],
+                'created_by' => Auth::user()->id
+            ]);
+
+            PartnerPIC::create([
+                'uuid' => Str::uuid(),
+                'partner_id' => $partner->id,
+                'name' => $request['partner']['pic'],
+                'created_by' => Auth::user()->id
+            ]);
+
+            DB::commit();
+
+        } catch (Exception $e) {
+            DB::rollback();
+            Log::error('Error tambah partner: ' . $e->getMessage());
+            return redirect()->back()->withErrors([
+                'error' => $e->getMessage()
+            ]);
+        }
 
     }
 
 
-    public function update(PartnerGeneralRequest $request, $uuid)
+    public function update(Request $request, $uuid)
     {
-        $partner = Partner::where('uuid', $uuid)->first();
+        $validator = Validator::make($request->all(), [
+            'partner.name' => 'required|string|max:255',
+            'partner.pic' => 'required|string|max:255',
+            'partner.total_members' => 'required',
+            'partner.logo' => 'nullable|image|mimes:jpg,png,jpeg|max:2048',
+            'partner.province' => 'required',
+            'partner.regency' => 'required',
+            'partner.status' => 'required',
+        ], [
+            'partner.name.required' => 'Nama lembaga harus diiisi',
+            'partner.total_members.required' => 'Total member harus diiisi',
+            'partner.pic.required' => 'PIC harus diiisi',
+            'partner.status.required' => 'Status lembaga harus diiisi',
+            'partner.province.required' => 'Provinsi lembaga harus diiisi',
+            'partner.regency.required' => 'Kab/kota lembaga harus diiisi',
+            'partner.logo.image' => 'File harus berupa gambar.',
+            'partner.logo.mimes' => 'Tipe file harus jpg, png, atau jpeg.',
+            'partner.logo.max' => 'Ukuran file tidak boleh melebihi 2 MB.',
+        ]);
+
+        $partner = Partner::with([
+            'pics' => function ($query) {
+                return $query->latest()->first();
+            }
+        ])->where('uuid', $uuid)->first();
         $pathLogo = null;
 
         if ($request->hasFile('partner.logo')) {
@@ -191,29 +230,46 @@ class PartnerController extends Controller
             }
         }
 
-        $partner->update([
-            'name' => $request['partner']['name'],
-            'logo' => $pathLogo,
-            'npwp' => $request['partner']['npwp'] ?? null,
-            'password' => $request['partner']['password'] ?? null,
-            'phone_number' => $request['partner']['phone_number'] ?? null,
-            'status_id' => $request['partner']['status']['id'],
-            'sales_id' => $request['partner']['sales']['id'] ?? null,
-            'referral_id' => $request['partner']['referral']['id'] ?? null,
-            'account_manager_id' => $request['partner']['account_manager']['id'] ?? null,
-            'onboarding_date' => Carbon::parse($request['partner']['onboarding_date'])->setTimezone('GMT+7')->format('Y-m-d H:i:s'),
-            'live_date' => $request['partner']['live_date'] !== null ? Carbon::parse($request['partner']['live_date'])->setTimezone('GMT+7')->format('Y-m-d H:i:s') : null,
-            'onboarding_age' => $request['partner']['onboarding_age'],
-            'live_age' => $request['partner']['live_age'],
-            'monitoring_date_after_3_month_live' => $request['partner']['monitoring_date_after_3_month_live'] !== null ? Carbon::parse($request['partner']['monitoring_date_after_3_month_live'])->setTimezone('GMT+7')->format('Y-m-d H:i:s') : null,
-            'province' => $request['partner']['province'],
-            'regency' => $request['partner']['regency'],
-            'subdistrict' => $request['partner']['subdistrict'],
-            'address' => $request['partner']['address'],
-            'payment_metode' => $request['partner']['payment_metode'],
-            'period' => $request['partner']['period']['name'] ?? $request['partner']['period'],
-            'note_status' => $request['partner']['note_status']
-        ]);
+        DB::beginTransaction();
+
+        try {
+            $partner->update([
+                'name' => $request['partner']['name'],
+                'logo' => $pathLogo,
+                'npwp' => $request['partner']['npwp'] ?? null,
+                'password' => $request['partner']['password'] ?? null,
+                'phone_number' => $request['partner']['phone_number'] ?? null,
+                'status_id' => $request['partner']['status']['id'],
+                'sales_id' => $request['partner']['sales']['id'] ?? null,
+                'referral_id' => $request['partner']['referral']['id'] ?? null,
+                'account_manager_id' => $request['partner']['account_manager']['id'] ?? null,
+                'onboarding_date' => $request['partner']['onboarding_date'] !== null ? Carbon::parse($request['partner']['onboarding_date'])->setTimezone('GMT+7')->format('Y-m-d H:i:s') : null,
+                'live_date' => $request['partner']['live_date'] !== null ? Carbon::parse($request['partner']['live_date'])->setTimezone('GMT+7')->format('Y-m-d H:i:s') : null,
+                'onboarding_age' => $request['partner']['onboarding_age'],
+                'live_age' => $request['partner']['live_age'],
+                'monitoring_date_after_3_month_live' => $request['partner']['monitoring_date_after_3_month_live'] !== null ? Carbon::parse($request['partner']['monitoring_date_after_3_month_live'])->setTimezone('GMT+7')->format('Y-m-d H:i:s') : null,
+                'province' => $request['partner']['province'],
+                'regency' => $request['partner']['regency'],
+                'subdistrict' => $request['partner']['subdistrict'],
+                'address' => $request['partner']['address'],
+                'payment_metode' => $request['partner']['payment_metode'],
+                'period' => $request['partner']['period']['name'] ?? $request['partner']['period'],
+                'note_status' => $request['partner']['note_status']
+            ]);
+
+            $partner->pics->first()->update([
+                'name' => $request['partner']['pic']
+            ]);
+
+            DB::commit();
+
+        } catch (Exception $e) {
+            DB::rollback();
+            Log::error('Error update partner: ' . $e->getMessage());
+            return redirect()->back()->withErrors([
+                'error' => $e->getMessage()
+            ]);
+        }
 
     }
 
