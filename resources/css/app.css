@@ -54,6 +54,15 @@
       border-top-right-radius: 0.5rem;
     }
 
+    .p-datatable-header .p-button-label{
+      flex: none;
+      text-align: start;
+    }
+
+    .p-datatable-header .p-button{
+      min-width: none;
+    }
+
     td .p-radiobutton .p-radiobutton-box{
       border-radius: 0;
     }
@@ -253,14 +262,12 @@
     }
     .dark .p-unselectable-text .p-tabview-title{
       color: rgb(209 213 219 / 1);
-;
     }
 
     .dark .p-dialog .p-dialog-header{
       background-color: #0F172A;
       box-shadow: 0px 2px 3px rgba(0, 0, 0, 0.267);
       color: rgb(209 213 219 / 1);
-;
     }
 
     .dark .p-dialog-footer{
@@ -275,7 +282,6 @@
 
     .dark .p-multiselect.p-multiselect-chip .p-multiselect-token {
       background-color: rgb(209 213 219 / 1);
-;
     }
     /* End Step */
 
@@ -295,6 +301,13 @@
       display: block;
     }
     /* End Input Password */
+
+
+    /* Checkbox */
+    .p-checkbox{
+      vertical-align: middle;
+      margin-bottom: 2px;
+    }
 
 
     /* Scroll */
@@ -583,9 +596,9 @@
    }
 
 
-   .p-button-icon-left ~ .p-button-label{
+   /* .p-button-icon-left ~ .p-button-label{
     flex: none;
-   }
+   } */
 
    /* message */
    .p-inline-message {
@@ -624,11 +637,6 @@ body{
   box-sizing: border-box;
   
 }
-
-
-.pi{
-  font-size: 0.8rem;
- }
 
 .dark body{
   background-color: rgb(2 6 23 / 1);

@@ -11,6 +11,8 @@ use App\Models\InvoiceSubscriptionBill;
 use App\Models\InvoiceSubscriptionBundle;
 use App\Models\Partner;
 use App\Models\Signature;
+use App\Models\Status;
+use App\Models\User;
 use App\Utils\ExtendedTemplateProcessor;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -32,39 +34,24 @@ class InvoiceSubscriptionController extends Controller
 
     public function editInvoice(Request $request, $uuid)
     {
-        $invoiceSubscriptionProp = InvoiceSubscription::with('bills', 'partner')->where('uuid', '=', $uuid)->first();
-        $partnersProp = Partner::with('subscriptions')->whereHas('subscriptions', function ($query) {
-            $query->where(function ($query) {
-                $query->where('period', 'like', '%bulan%');
-            });
-
-        })->where('status', '=', 'Aktif')->orWhere('status', '=', 'Proses')->get();
+        $invoiceSubscriptionProp = InvoiceSubscription::with('bills', 'partner', 'status')->where('uuid', '=', $uuid)->first();
+        $partnersProp = Partner::with('sales', 'account_manager', 'status', 'subscriptions')->get();
         $signaturesProp = Signature::all();
-
-        // return Inertia::render('InvoiceSubscription/Edit', compact('invoiceSubscriptionProp', 'partnersProp', 'signaturesProp'));
         return Inertia::render('InvoiceSubscription/Edit', compact('invoiceSubscriptionProp', 'partnersProp', 'signaturesProp'));
 
     }
 
     public function index()
     {
-        $partnersProp = Partner::with('subscriptions')->whereHas('subscriptions', function ($query) {
-            $query->where(function ($query) {
-                $query->where('period', 'like', '%bulan%');
-            });
-        })->where('status', '=', 'Aktif')->orWhere('status', '=', 'Proses')->latest()->get();
-
-
+        $partnersProp = Partner::with('sales', 'account_manager', 'status')->get();
+        $usersProp = User::with('roles')->get();
         $signaturesProp = Signature::all();
-        return Inertia::render('InvoiceSubscription/InvoiceSubscription', compact('partnersProp', 'signaturesProp'));
+        return Inertia::render('InvoiceSubscription/InvoiceSubscription', compact('partnersProp', 'signaturesProp', 'usersProp'));
     }
 
     public function create()
     {
-        $partnersProp = Partner::with('subscriptions')->whereHas('subscriptions', function ($query) {
-            $query->where('period', 'lembaga/bulan')->orWhere('period', 'kartu/bulan')->orWhere('period', 'LIKE', '%bulan%');
-            ;
-        })->where('status', '=', 'Aktif')->orWhere('status', '=', 'Proses')->get();
+        $partnersProp = Partner::with('sales', 'account_manager', 'status', 'subscriptions')->get();
         $signaturesProp = Signature::all();
         return Inertia::render('InvoiceSubscription/Create', compact('partnersProp', 'signaturesProp'));
     }
@@ -261,10 +248,6 @@ class InvoiceSubscriptionController extends Controller
         $currentMonth = date('n');
         $currentYear = date('Y');
 
-        // $romanMonth = $this->intToRoman($currentMonth);
-        // $latestData = InvoiceSubscription::latest()->first() ?? "$currentYear/$romanMonth/INV/0000";
-        // $lastCode = $latestData ? explode('/', $latestData->code ?? $latestData)[3] : 0;
-
         $totalDataPerMonth = InvoiceSubscription::whereYear('created_at', $currentYear)
             ->whereMonth('created_at', $currentMonth)
             ->count();
@@ -288,10 +271,6 @@ class InvoiceSubscriptionController extends Controller
     public function store(InvoiceSubscriptionRequest $request)
     {
         $lastCode = $this->generateCode();
-        $currentMonth = date('n');
-        $currentYear = date('Y');
-        $romanMonth = $this->intToRoman($currentMonth);
-
 
         $date = Carbon::parse($request->date)->setTimezone('GMT+7')->format('Y-m-d H:i:s');
         $due_date = Carbon::parse($request->due_date)->setTimezone('GMT+7')->format('Y-m-d H:i:s');
@@ -300,9 +279,12 @@ class InvoiceSubscriptionController extends Controller
 
         $rest_of_bill = $request->total_bill - $request->paid_off;
 
+        $statusBelumBayar = Status::where('name', 'belum bayar')->where('category', 'invoice')->first();
+
         $invoice_subscription = InvoiceSubscription::create([
             'uuid' => Str::uuid(),
             'partner_id' => $request->partner['id'],
+            'status_id' => $statusBelumBayar->id,
             'code' => $lastCode,
             'date' => $date,
             'period' => Carbon::parse($date)->locale('id')->isoFormat('DD MMMM YYYY'),
@@ -319,7 +301,6 @@ class InvoiceSubscriptionController extends Controller
             'rest_of_bill' => $rest_of_bill,
             'rest_of_bill_locked' => $rest_of_bill,
             'paid_off' => $request->paid_off,
-            'status' => "belum terbayar",
             'payment_metode' => $request['payment_metode'],
             'xendit_link' => $request->xendit_link,
             'created_by' => Auth()->user()->id,
@@ -446,18 +427,18 @@ class InvoiceSubscriptionController extends Controller
             ]);
         }
 
-        $status = null;
+        $status = Status::where('category', 'invoice');
         if ($rest_of_bill == 0) {
-            $status = "lunas";
+            $status = $status->where('name', 'lunas')->first();
         } else if ($paid_transaction == 0) {
-            $status = "belum terbayar";
+            $status = $status->where('name', 'belum bayar')->first();
         } else {
-            $status = "sebagian";
+            $status = $status->where('name', 'sebagian')->first();
         }
-
 
         $invoice_subscription->update([
             'date' => $date,
+            'status_id' => $status->id,
             'period' => Carbon::parse($date)->locale('id')->isoFormat('DD MMMM YYYY'),
             'due_date' => $due_date,
             'invoice_age' => $invoice_age,
@@ -472,7 +453,6 @@ class InvoiceSubscriptionController extends Controller
             'rest_of_bill' => $rest_of_bill,
             'rest_of_bill_locked' => $request->total_bill,
             'paid_off' => $request->paid_off,
-            'status' => $status,
             'payment_metode' => $request['payment_metode'],
             'xendit_link' => $request->xendit_link,
         ]);
@@ -495,9 +475,7 @@ class InvoiceSubscriptionController extends Controller
     public function edit($uuid)
     {
         $invoiceSubscriptionProp = InvoiceSubscription::with('bills', 'partner')->where('uuid', '=', $uuid)->first();
-        $partnersProp = Partner::with('subscriptions')->whereHas('subscriptions', function ($query) {
-            $query->where('period', 'lembaga/bulan')->orWhere('period', 'kartu/bulan');
-        })->where('status', '=', 'Aktif')->orWhere('status', '=', 'Proses')->get();
+        $partnersProp = Partner::with('sales', 'account_manager', 'status', 'subscriptions')->get();
         $signaturesProp = Signature::all();
         return Inertia::render('InvoiceSubscription/Editjal', compact('invoiceSubscriptionProp', 'partnersProp', 'signaturesProp'));
 
@@ -531,9 +509,33 @@ class InvoiceSubscriptionController extends Controller
         $invoice_subscription->delete();
     }
 
+    public function filter(Request $request)
+    {
+        $invoice_subscriptions = InvoiceSubscription::with(['partner', 'products', 'transactions.user', 'status']);
+
+        if ($request->user) {
+            $invoice_subscriptions->where('created_by', $request->user['id']);
+        }
+
+        if ($request->status) {
+            $invoice_subscriptions->whereHas('status', function ($query) use ($request) {
+                $query->where('status_id', $request->status['id']);
+            });
+        }
+
+        if ($request->input_date['start'] && $request->input_date['end']) {
+            $invoice_subscriptions->whereBetween('created_at', [$request->input_date['start'], $request->input_date['end']]);
+        }
+
+
+        $invoice_subscriptions = $invoice_subscriptions->get();
+
+        return response()->json($invoice_subscriptions);
+    }
+
     public function apiGetInvoiceSubscriptions()
     {
-        $invoice_subscriptions = InvoiceSubscription::with('bills', 'user', 'partner', 'transactions.user')->latest()->get();
+        $invoice_subscriptions = InvoiceSubscription::with('bills', 'user', 'partner', 'transactions.user', 'status')->latest()->get();
 
         return response()->json($invoice_subscriptions);
     }

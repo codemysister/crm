@@ -29,4 +29,9 @@ class InvoiceSubscription extends Model
     {
         return $this->hasMany(InvoiceSubscriptionTransaction::class, 'invoice_id', 'id');
     }
+
+    public function status()
+    {
+        return $this->belongsTo(Status::class);
+    }
 }

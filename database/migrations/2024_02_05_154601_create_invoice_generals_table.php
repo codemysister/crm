@@ -15,6 +15,7 @@ return new class extends Migration {
             $table->uuid('uuid');
             $table->string('code');
             $table->foreignId('partner_id')->constrained('partners', 'id')->onDelete('cascade');
+            $table->foreignId('status_id')->constrained('statuses', 'id')->onDelete('cascade');
             $table->string('partner_name');
             $table->string('partner_npwp')->nullable();
             $table->json('partner_province');
@@ -34,7 +35,6 @@ return new class extends Migration {
             $table->string('signature_image');
             $table->string('payment_metode');
             $table->string('xendit_link')->nullable();
-            $table->enum('status', ['lunas', 'belum terbayar', 'sebagian', 'terlambat']);
             $table->text('reason_late')->nullable();
             $table->string('invoice_general_doc')->nullable();
             $table->foreignId('created_by')->constrained('users', 'id')->onDelete('cascade');

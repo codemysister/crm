@@ -62,5 +62,27 @@ class StatusSeeder extends Seeder
             'category' => 'lead',
             'color' => '4f4f4f'
         ]);
+
+        Status::create([
+            'uuid' => Str::uuid(),
+            'name' => 'belum bayar',
+            'category' => 'invoice',
+            'color' => 'fbc02d'
+        ]);
+
+        Status::create([
+            'uuid' => Str::uuid(),
+            'name' => 'sebagian',
+            'category' => 'invoice',
+            'color' => '2196f3'
+        ]);
+
+        Status::create([
+            'uuid' => Str::uuid(),
+            'name' => 'lunas',
+            'category' => 'invoice',
+            'color' => '689f38'
+        ]);
+
     }
 }

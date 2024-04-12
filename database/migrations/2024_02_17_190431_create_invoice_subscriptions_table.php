@@ -14,6 +14,7 @@ return new class extends Migration {
             $table->id();
             $table->uuid('uuid');
             $table->foreignId('partner_id')->constrained()->onDelete('cascade');
+            $table->foreignId('status_id')->constrained('statuses', 'id')->onDelete('cascade');
             $table->string('code');
             $table->string('period');
             $table->date('date');
@@ -32,7 +33,6 @@ return new class extends Migration {
             $table->bigInteger('total_bill');
             $table->bigInteger('rest_of_bill');
             $table->bigInteger('rest_of_bill_locked');
-            $table->enum('status', ['lunas', 'belum terbayar', 'sebagian', 'terlambat']);
             $table->string('paid_off');
             $table->string('payment_metode');
             $table->string('xendit_link')->nullable()->default(null);

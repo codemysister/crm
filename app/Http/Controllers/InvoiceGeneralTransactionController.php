@@ -6,6 +6,7 @@ use App\Http\Requests\InvoiceGeneralTransactionRequest;
 use App\Jobs\GenerateReceiptJob;
 use App\Models\InvoiceGeneral;
 use App\Models\InvoiceGeneralTransaction;
+use App\Models\Status;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
@@ -56,11 +57,13 @@ class InvoiceGeneralTransactionController extends Controller
             return response()->json(['error' => 'Pembayaran melebihi sisa tagihan']);
         }
         $rest_of_bill = $rest_of_bill - $request->nominal;
-        $status = "belum terbayar";
-        if ($rest_of_bill !== 0) {
-            $status = "sebagian";
+
+
+        $status = Status::where('category', 'invoice');
+        if ($rest_of_bill != 0) {
+            $status = $status->where('name', 'sebagian')->first();
         } else {
-            $status = "lunas";
+            $status = $status->where('name', 'lunas')->first();
         }
 
         $transaction = InvoiceGeneralTransaction::create([
@@ -81,7 +84,7 @@ class InvoiceGeneralTransactionController extends Controller
         ]);
 
 
-        $invoice_general->update(['rest_of_bill' => $rest_of_bill, 'status' => $status, 'bill_date' => Carbon::parse($request->date)->setTimezone('GMT+7')->format('Y-m-d H:i:s')]);
+        $invoice_general->update(['rest_of_bill' => $rest_of_bill, 'status' => $status->id, 'bill_date' => Carbon::parse($request->date)->setTimezone('GMT+7')->format('Y-m-d H:i:s')]);
 
         GenerateReceiptJob::dispatch($transaction);
         return response()->json(['rest_of_bill' => $rest_of_bill]);

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Jobs\GenerateReceiptJob;
 use App\Models\InvoiceSubscription;
 use App\Models\InvoiceSubscriptionTransaction;
+use App\Models\Status;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -48,20 +49,17 @@ class InvoiceSubscriptionTransactionController extends Controller
     {
         $invoice_subscription = InvoiceSubscription::with('transactions')->where('uuid', '=', $request->dataTransaction['invoice_subscription'])->first();
         $rest_of_bill = $this->calculateRestOfBill($invoice_subscription);
-
-        // dd($rest_of_bill);
-        // dd($rest_of_bill < $request->dataTransaction['nominal']);
         if ($rest_of_bill < $request->dataTransaction['nominal']) {
 
             return response()->json(['error' => 'Pembayaran melebihi sisa tagihan']);
 
         }
         $rest_of_bill = $rest_of_bill - $request->dataTransaction['nominal'];
-        $status = "belum terbayar";
-        if ($rest_of_bill !== 0) {
-            $status = "sebagian";
+        $status = Status::where('category', 'invoice');
+        if ($rest_of_bill != 0) {
+            $status = $status->where('name', 'sebagian')->first();
         } else {
-            $status = "lunas";
+            $status = $status->where('name', 'lunas')->first();
         }
 
         $transaction = InvoiceSubscriptionTransaction::create([
@@ -82,7 +80,7 @@ class InvoiceSubscriptionTransactionController extends Controller
         ]);
 
 
-        $invoice_subscription->update(['rest_of_bill' => $rest_of_bill, 'status' => $status, 'bill_date' => Carbon::parse($request->dataTransaction['date'])->setTimezone('GMT+7')->format('Y-m-d H:i:s')]);
+        $invoice_subscription->update(['rest_of_bill' => $rest_of_bill, 'status_id' => $status->id, 'bill_date' => Carbon::parse($request->dataTransaction['date'])->setTimezone('GMT+7')->format('Y-m-d H:i:s')]);
 
         GenerateReceiptJob::dispatch($transaction);
 
@@ -133,23 +131,19 @@ class InvoiceSubscriptionTransactionController extends Controller
             return response()->json(['error' => $e->getMessage()], 500);
         }
 
-
-        $status = "belum terbayar";
-        if ($rest_of_bill !== 0 && count($invoice_subscription->transactions) > 0) {
-            $status = "sebagian";
+        $status = Status::where('category', 'invoice');
+        if ($rest_of_bill != 0 && count($invoice_subscription->transactions) > 0) {
+            $status = $status->where('name', 'sebagian')->first();
         } else {
-            $status = "lunas";
+            $status = $status->where('name', 'lunas')->first();
         }
 
         Storage::delete('public/' . $transaction->receipt_doc);
 
-        $invoice_subscription->update(['rest_of_bill' => $rest_of_bill, 'status' => $status, 'bill_date' => Carbon::parse($invoice_subscription->transactions->first()->date)->setTimezone('GMT+7')->format('Y-m-d H:i:s')]);
+        $invoice_subscription->update(['rest_of_bill' => $rest_of_bill, 'status_id' => $status->id, 'bill_date' => Carbon::parse($invoice_subscription->transactions->first()->date)->setTimezone('GMT+7')->format('Y-m-d H:i:s')]);
 
         GenerateReceiptJob::dispatch($transaction);
 
-        // return Inertia::render('InvoiceSubscription/InvoiceSubscription', [
-        //     'rest_of_bill' => $rest_of_bill
-        //   ]);
         return response()->json(['rest_of_bill' => $rest_of_bill]);
 
     }
@@ -176,7 +170,7 @@ class InvoiceSubscriptionTransactionController extends Controller
             $status = "lunas";
         }
 
-        $invoice_subcription->update(['rest_of_bill' => $rest_of_bill, 'status' => $status, 'bill_date' => count($invoice_subcription->transactions) > 0 ? Carbon::parse($invoice_subcription->transactions->first()->date)->setTimezone('GMT+7')->format('Y-m-d H:i:s') : null]);
+        $invoice_subcription->update(['rest_of_bill' => $rest_of_bill, 'status_id' => $status, 'bill_date' => count($invoice_subcription->transactions) > 0 ? Carbon::parse($invoice_subcription->transactions->first()->date)->setTimezone('GMT+7')->format('Y-m-d H:i:s') : null]);
         return response()->json(['rest_of_bill' => $rest_of_bill]);
 
     }

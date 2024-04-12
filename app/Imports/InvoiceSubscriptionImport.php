@@ -6,6 +6,7 @@ use App\Jobs\GenerateInvoiceSubscriptionJob;
 use App\Models\InvoiceSubscription;
 use App\Models\InvoiceSubscriptionBill;
 use App\Models\Partner;
+use App\Models\Status;
 use App\Utils\ExtendedTemplateProcessor;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
@@ -270,10 +271,12 @@ class InvoiceSubscriptionImport implements ToCollection, WithStartRow, WithHeadi
             $pajak3 = $row['pajak3'] ?? 0;
             $total_ppn = $this->convertInteger($pajak1) + $this->convertInteger($pajak2) + $this->convertInteger($pajak3);
 
+            $statusBelumBayar = Status::where('name', 'belum bayar')->where('category', 'invoice')->first();
 
             $invoice_subscription = InvoiceSubscription::create([
                 'uuid' => Str::uuid(),
                 'partner_id' => $partnerExist->id,
+                'status_id' => $statusBelumBayar->id,
                 'code' => $row['nomor'],
                 'date' => $this->convertDate($row['tanggal']),
                 'period' => $this->convertDate($row['tanggal']),
@@ -290,7 +293,6 @@ class InvoiceSubscriptionImport implements ToCollection, WithStartRow, WithHeadi
                 'rest_of_bill' => $this->convertInteger($row['total']),
                 'rest_of_bill_locked' => $this->convertInteger($row['total']),
                 'paid_off' => $this->convertInteger($row['diskon']),
-                'status' => "belum terbayar",
                 'payment_metode' => $row['xendit'] ? 'payment link' : 'cazhbox',
                 'xendit_link' => $row['xendit'] ? $row['xendit'] : null,
                 'created_by' => Auth()->user()->id,

@@ -6,9 +6,12 @@ import { Button } from "primereact/button";
 import DashboardLayout from "@/Layouts/DashboardLayout";
 import HeaderModule from "@/Components/HeaderModule";
 import { InputText } from "primereact/inputtext";
-import { useForm, usePage } from "@inertiajs/react";
-import { ConfirmDialog, confirmDialog } from "primereact/confirmdialog";
-import { Skeleton } from "primereact/skeleton";
+import { router, useForm, usePage } from "@inertiajs/react";
+import {
+    ConfirmDialog,
+    ConfirmDialog as ConfirmDialog2,
+    confirmDialog,
+} from "primereact/confirmdialog";
 import { Link } from "@inertiajs/react";
 import { FilterMatchMode } from "primereact/api";
 import { Dialog } from "primereact/dialog";
@@ -19,28 +22,48 @@ import { MultiSelect } from "primereact/multiselect";
 import { InputNumber } from "primereact/inputnumber";
 import { Calendar } from "primereact/calendar";
 import { Dropdown } from "primereact/dropdown";
-import { Message } from "primereact/message";
+import { ConfirmPopup, confirmPopup } from "primereact/confirmpopup";
 import axios from "axios";
 import { FilePond, registerPlugin } from "react-filepond";
 import FilePondPluginFileValidateSize from "filepond-plugin-file-validate-size";
 import "filepond/dist/filepond.min.css";
+import getViewportSize from "../Utils/getViewportSize";
+import { formateDate } from "../Utils/formatDate";
+import HeaderDatatable from "@/Components/HeaderDatatable";
+import SkeletonDatatable from "@/Components/SkeletonDatatable";
+import { Sidebar } from "primereact/sidebar";
+import { TabPanel, TabView } from "primereact/tabview";
+import { formatNPWP } from "../Utils/formatNPWP";
 registerPlugin(FilePondPluginFileValidateSize);
-
-const BASE_URL = import.meta.env.VITE_BASE_URL;
 
 export default function InvoiceSubscription({
     auth,
     partnersProp,
     signaturesProp,
+    statusProp,
+    usersProp,
 }) {
     const [invoiceSubscriptions, setInvoiceSubscriptions] = useState([]);
     const [partners, setPartners] = useState(partnersProp);
     const [signatures, setSignatures] = useState(signaturesProp);
+    const [status, setStatus] = useState(statusProp);
+    const [users, setUsers] = useState(usersProp);
     const [selectedPartners, setSelectedPartners] = useState(partnersProp);
+    const action = useRef(null);
     const [invoiceBills, setInvoiceBills] = useState([]);
     const [isLoadingData, setIsLoadingData] = useState(false);
     const [selectedInvoices, setSelectedInvoices] = useState([]);
     const [rowClick, setRowClick] = useState(true);
+    const viewportSize = getViewportSize();
+    const isMobile = viewportSize.width < 992;
+    const [confirmIsVisible, setConfirmIsVisible] = useState(false);
+    const [dataXendit, setDataXendit] = useState(null);
+    const [selectedInvoiceSubscription, setSelectedInvoiceSubscription] =
+        useState(null);
+    const [activeIndexTab, setActiveIndexTab] = useState(0);
+    const btnFilterRef = useRef(null);
+    const [sidebarFilter, setSidebarFilter] = useState(null);
+    const windowEscapeRef = useRef(null);
 
     const [modalTransactionIsVisible, setModalTransactionIsVisible] =
         useState(false);
@@ -49,7 +72,6 @@ export default function InvoiceSubscription({
     const [modalBundleIsVisible, setModalBundleIsVisible] = useState(false);
     const op = useRef(null);
     const add = useRef(null);
-    const dummyArray = Array.from({ length: 5 }, (v, i) => i);
     const [preRenderLoad, setPreRenderLoad] = useState(true);
     const toast = useRef(null);
     const { roles, permissions } = auth.user;
@@ -131,14 +153,34 @@ export default function InvoiceSubscription({
         rest_bill: null,
     });
 
+    const {
+        data: dataFilter,
+        setData: setDataFilter,
+        reset: resetFilter,
+    } = useForm({
+        user: null,
+        input_date: { start: null, end: null },
+        payment_metode: null,
+    });
+
     useEffect(() => {
-        const fetchData = async () => {
-            await getInvoiceSubscriptions();
+        if (activeIndexTab == 0) {
+            fetchData(getInvoiceSubscriptions);
+        }
+    }, [activeIndexTab]);
 
+    const fetchData = async (fnc) => {
+        try {
+            await Promise.all([fnc()]);
+            setIsLoadingData(false);
             setPreRenderLoad((prev) => (prev = false));
-        };
+        } catch (error) {
+            console.error("Error fetching data:", error);
+        }
+    };
 
-        fetchData();
+    useEffect(() => {
+        fetchData(getInvoiceSubscriptions);
     }, []);
 
     const [globalFilterValue, setGlobalFilterValue] = useState("");
@@ -234,6 +276,7 @@ export default function InvoiceSubscription({
             width: "10rem",
         },
     ];
+
     const [visibleColumns, setVisibleColumns] = useState([
         { field: "code", header: "Kode", type: "regular", width: "6rem" },
         { field: "date", header: "Tanggal", type: "date", width: "6rem" },
@@ -294,15 +337,8 @@ export default function InvoiceSubscription({
     ]);
 
     const handleSelectedDetailPartner = (partner) => {
-        const newUrl = `/partners?uuid=${partner.uuid}`;
-        window.location = newUrl;
+        router.get(`/partners?uuid=${partner.uuid}`);
     };
-
-    // handleSetDataTransaction = (data) => {
-    //     setData((prev) => ({
-    //         ...prev,
-    //     }));
-    // };
 
     const getInvoiceSubscriptions = async () => {
         setIsLoadingData(true);
@@ -314,20 +350,6 @@ export default function InvoiceSubscription({
 
         setIsLoadingData(false);
     };
-
-    useEffect(() => {
-        const fetchData = async () => {
-            try {
-                await Promise.all([getInvoiceSubscriptions()]);
-                setIsLoadingData(false);
-                setPreRenderLoad((prev) => (prev = false));
-            } catch (error) {
-                console.error("Error fetching data:", error);
-            }
-        };
-
-        fetchData();
-    }, []);
 
     const convertRupiah = async (nominal) => {
         const options = {
@@ -354,29 +376,13 @@ export default function InvoiceSubscription({
     const actionBodyTemplate = (rowData) => {
         return (
             <React.Fragment>
-                {permissions.includes("edit invoice langganan") && (
-                    <Button
-                        icon="pi pi-pencil"
-                        rounded
-                        outlined
-                        className="mr-2"
-                        onClick={() => {
-                            window.location =
-                                "/invoice_langganan/" + rowData.uuid;
-                        }}
-                    />
-                )}
-                {permissions.includes("hapus invoice langganan") && (
-                    <Button
-                        icon="pi pi-trash"
-                        rounded
-                        outlined
-                        severity="danger"
-                        onClick={() => {
-                            handleDeleteInvoiceSubscription(rowData);
-                        }}
-                    />
-                )}
+                <i
+                    className="pi pi-ellipsis-h pointer cursor-pointer"
+                    onClick={(event) => {
+                        setSelectedInvoiceSubscription(rowData);
+                        action.current.toggle(event);
+                    }}
+                ></i>
             </React.Fragment>
         );
     };
@@ -461,7 +467,6 @@ export default function InvoiceSubscription({
                         }
                     )
                     .then((response) => {
-                        // setDataTransaction("rest_bill", response.data.rest_of_bill);
                         if (response.data.error) {
                             showError(response.data.error);
                         } else {
@@ -483,19 +488,6 @@ export default function InvoiceSubscription({
                             }));
                         }
                     });
-                // destroy(
-                //     "invoice_subscriptions/transaction/" +
-                //         invoice_subscription.uuid,
-                //     {
-                //         onSuccess: () => {
-                //             getInvoiceSubscriptions();
-                //             showSuccess("Hapus");
-                //         },
-                //         onError: () => {
-                //             showError("Hapus");
-                //         },
-                //     }
-                // );
             },
         });
     };
@@ -518,39 +510,175 @@ export default function InvoiceSubscription({
         );
     };
 
-    const header = (
-        <div className="flex flex-col md:flex-row justify-between items-center">
-            <Button
-                label="Download ZIP"
-                className="rounded-lg shadow-md w-[15%] text-center bg-purple-600 text-sm"
-                onClick={(e) => {
-                    zipAll();
-                }}
-                disabled={selectedInvoices.length < 2}
-            />
-            <div className="flex w-full sm:w-[30%] flex-row justify-left gap-2 align-items-center items-end">
-                <div className="w-full">
-                    <span className="p-input-icon-left">
-                        <i className="pi pi-search dark:text-white" />
-                        <InputText
-                            className="dark:bg-transparent dark:placeholder-white"
-                            value={globalFilterValue}
-                            onChange={onGlobalFilterChange}
-                            placeholder="Keyword Search"
-                        />
+    const exportExcel = () => {
+        const exports = invoiceSubscriptions.map((data) => {
+            return {
+                Kode: data.code ?? "-",
+                Lembaga: data.partner ? data.partner.name : "-",
+                NPWP: data.partner ? data.partner.npwp : "-",
+                Link_Dokumen: {
+                    v:
+                        window.location.origin +
+                            "/" +
+                            data.invoice_subscription_doc ?? "-",
+                    h: "link",
+                    l: {
+                        Target:
+                            window.location.origin +
+                                "/storage/" +
+                                data.invoice_subscription_doc ?? "-",
+                        Tooltip: "Klik untuk membuka dokumen",
+                    },
+                },
+                Tanggal_Pembuatan: formateDate(data.created_at),
+            };
+        });
+
+        import("xlsx").then((xlsx) => {
+            const worksheet = xlsx.utils.json_to_sheet(exports);
+            const workbook = {
+                Sheets: { data: worksheet },
+                SheetNames: ["data"],
+            };
+            const excelBuffer = xlsx.write(workbook, {
+                bookType: "xlsx",
+                type: "array",
+            });
+
+            saveAsExcelFile(excelBuffer, "invoice_langganan");
+        });
+    };
+
+    const saveAsExcelFile = (buffer, fileName) => {
+        import("file-saver").then((module) => {
+            if (module && module.default) {
+                let EXCEL_TYPE =
+                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8";
+                let EXCEL_EXTENSION = ".xlsx";
+                const data = new Blob([buffer], {
+                    type: EXCEL_TYPE,
+                });
+
+                module.default.saveAs(data, fileName + EXCEL_EXTENSION);
+            }
+        });
+    };
+
+    const handleFilter = async (e) => {
+        e.preventDefault();
+        setIsLoadingData(true);
+        const formData = {
+            user: dataFilter.user,
+            input_date: dataFilter.input_date,
+            status: dataFilter.status,
+        };
+
+        const csrfToken = document
+            .querySelector('meta[name="csrf-token"]')
+            .getAttribute("content");
+
+        const response = await axios.post(
+            "/invoice_subscriptions/filter",
+            formData,
+            {
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRF-TOKEN": csrfToken,
+                },
+            }
+        );
+        const data = response.data;
+        setInvoiceSubscriptions(data);
+        setSidebarFilter(false);
+        setIsLoadingData(false);
+    };
+
+    const header = () => {
+        return (
+            <HeaderDatatable
+                globalFilterValue={globalFilterValue}
+                onGlobalFilterChange={onGlobalFilterChange}
+                setSidebarFilter={setSidebarFilter}
+                exportExcel={exportExcel}
+                isMobile={isMobile}
+            >
+                <Button
+                    className="shadow-md flex justify-center w-[10px] lg:w-[90px] border border-slate-600 bg-transparent text-slate-600 dark:bg-slate-700 dark:text-slate-300 rounded-lg"
+                    onClick={(e) => {
+                        zipAll();
+                    }}
+                    disabled={selectedInvoices.length < 2}
+                >
+                    <span className="w-full flex justify-center items-center gap-1">
+                        <i
+                            className="pi pi-box"
+                            style={{ fontSize: "0.8rem" }}
+                        ></i>{" "}
+                        {!isMobile && <span>zip</span>}
                     </span>
+                </Button>
+            </HeaderDatatable>
+        );
+    };
+
+    const handleEditXenditLink = () => {
+        const formData = { xendit_link: dataXendit };
+        windowEscapeRef.current.click();
+        axios
+            .put("invoice_subscriptions/" + data.uuid + "/xendit", formData, {
+                headers: {
+                    "X-CSRF-TOKEN": document.head.querySelector(
+                        'meta[name="csrf-token"]'
+                    ).content,
+                },
+            })
+            .then((response) => {
+                if (response.data.error) {
+                    showError(response.data.error);
+                } else {
+                    showSuccess("Update");
+                    getInvoiceSubscriptions();
+                    setDataXendit((prev) => (prev = null));
+                    reset();
+                }
+            });
+    };
+
+    const textEditor = (options) => {
+        setData(options.rowData);
+        return (
+            <div className="flex items-center gap-1">
+                <InputText
+                    type="text"
+                    className="w-[10rem]"
+                    value={options.value}
+                    onChange={(e) => {
+                        options.editorCallback(e.target.value);
+                        setDataXendit(e.target.value);
+                    }}
+                    onKeyDown={(e) => e.stopPropagation()}
+                />
+                <div className="flex gap-1">
+                    <Button
+                        icon="pi pi-times"
+                        onClick={() => {
+                            windowEscapeRef.current.click();
+                        }}
+                        className="p-0 rounded-full bg-red-500  dark:text-white"
+                    ></Button>
+                    <Button
+                        icon="pi pi-check"
+                        className="p-0 rounded-full bg-green-500  dark:text-white"
+                        onClick={handleEditXenditLink}
+                    ></Button>
                 </div>
             </div>
-            <MultiSelect
-                value={visibleColumns}
-                options={columns}
-                optionLabel="header"
-                onChange={onColumnToggle}
-                className="w-full sm:w-[30%] p-0"
-                display="chip"
-            />
-        </div>
-    );
+        );
+    };
+
+    const cellEditor = (options) => {
+        return textEditor(options);
+    };
 
     const optionSignatureTemplate = (item) => {
         return (
@@ -566,7 +694,6 @@ export default function InvoiceSubscription({
                         <span>{item.position}</span>
                     </div>
                 </div>
-                {/* <span className="font-bold text-900">${item.price}</span> */}
             </div>
         );
     };
@@ -629,58 +756,6 @@ export default function InvoiceSubscription({
             },
         },
     ];
-
-    if (preRenderLoad) {
-        return (
-            <>
-                <DashboardLayout auth={auth.user} className="">
-                    <div className="card my-5">
-                        <DataTable
-                            value={dummyArray}
-                            className="p-datatable-striped"
-                        >
-                            <Column
-                                style={{ width: "25%" }}
-                                body={<Skeleton />}
-                            ></Column>
-                            <Column
-                                style={{ width: "25%" }}
-                                body={<Skeleton />}
-                            ></Column>
-                            <Column
-                                style={{ width: "25%" }}
-                                body={<Skeleton />}
-                            ></Column>
-                            <Column
-                                style={{ width: "25%" }}
-                                body={<Skeleton />}
-                            ></Column>
-                        </DataTable>
-                    </div>
-                </DashboardLayout>
-            </>
-        );
-    }
-
-    const renderHeaderPartner = () => {
-        return (
-            <div className="flex w-full flex-row justify-between gap-2 align-items-center items-end">
-                <div className="w-full">
-                    <span className="p-input-icon-left w-full">
-                        <i className="pi pi-search dark:text-white" />
-                        <InputText
-                            className="dark:bg-transparent w-full dark:placeholder-white"
-                            value={globalFilterPartnerValue}
-                            onChange={onGlobalFilterPartnerChange}
-                            placeholder="Cari lembaga.."
-                        />
-                    </span>
-                </div>
-            </div>
-        );
-    };
-
-    const headerPartner = renderHeaderPartner();
 
     const headerTransaction = (
         <div className="flex flex-row gap-2 bg-gray-50 dark:bg-transparent p-2 rounded-lg align-items-center items-center justify-between justify-content-between">
@@ -875,19 +950,11 @@ export default function InvoiceSubscription({
     const handleSubmitForm = (e, type) => {
         e.preventDefault();
 
-        if (type === "tambah") {
-            // postTransaction("/invoice_subscriptions/transaction", {
-            //     onSuccess: () => {
-            //         showSuccess("Tambah");
-            //         setModalTransactionIsVisible((prev) => false);
+        const csrfToken = document
+            .querySelector('meta[name="csrf-token"]')
+            .getAttribute("content");
 
-            //         getInvoiceSubscriptions();
-            //         resetTransaction("nominal");
-            //     },
-            //     onError: (errors) => {
-            //         showError("Tambah", errors.error);
-            //     },
-            // });
+        if (type === "tambah") {
             axios
                 .post(
                     "/invoice_subscriptions/transaction",
@@ -896,14 +963,11 @@ export default function InvoiceSubscription({
                     },
                     {
                         headers: {
-                            "X-CSRF-TOKEN": document.head.querySelector(
-                                'meta[name="csrf-token"]'
-                            ).content,
+                            "X-CSRF-TOKEN": csrfToken,
                         },
                     }
                 )
                 .then((response) => {
-                    // setDataTransaction("rest_bill", response.data.rest_of_bill);
                     if (response.data.error) {
                         showError(response.data.error);
                     } else {
@@ -942,7 +1006,6 @@ export default function InvoiceSubscription({
                     }
                 )
                 .then((response) => {
-                    // setDataTransaction("rest_bill", response.data.rest_of_bill);
                     if (response.data.error) {
                         showError(response.data.error);
                     } else {
@@ -966,33 +1029,6 @@ export default function InvoiceSubscription({
                         }));
                     }
                 });
-            // putTransaction(
-            //     "/invoice_subscriptions/transaction/" + dataTransaction.uuid,
-            //     {
-            //         onSuccess: (data) => {
-            //             showSuccess("Update");
-            //             setModalEditTransactionIsVisible((prev) => false);
-            //             getInvoiceSubscriptions();
-            //             reset(
-            //                 "date",
-            //                 "metode",
-            //                 "money",
-            //                 "nominal",
-            //                 "payment_for",
-            //                 "signature"
-            //             );
-            //             // console.log(data.props.rest_of_bill);
-            //             // const rest_bill = data.props.rest_of_bill;
-            //             // setDataTransaction((prev)=>({
-            //             //     ...prev,
-            //             //     rest_bill: rest_bill
-            //             // }))
-            //         },
-            //         onError: () => {
-            //             showError("Update");
-            //         },
-            //     }
-            // );
         }
     };
 
@@ -1022,12 +1058,6 @@ export default function InvoiceSubscription({
     };
 
     const zipAll = async (uuid) => {
-        // let response = await fetch(``, {
-        //     method: "POST",
-        //     body: {
-        //         values: selectedInvoices,
-        //     },
-        // });
         axios
             .post(
                 "/invoice_subscriptions/zip",
@@ -1089,311 +1119,604 @@ export default function InvoiceSubscription({
         }
     };
 
+    if (preRenderLoad) {
+        return <SkeletonDatatable auth={auth} />;
+    }
+
     return (
         <DashboardLayout auth={auth.user} className="">
             <Toast ref={toast} />
             <ConfirmDialog />
 
-            <HeaderModule title="Invoice Langganan">
-                <Button
-                    label="Tambah"
-                    className="bg-purple-600 w-[10%] text-sm shadow-md rounded-lg mr-2"
-                    icon={addButtonIcon}
-                    onClick={(e) => add.current.toggle(e)}
-                />
-                <OverlayPanel ref={add} className="shadow-md p-0">
-                    <div className="flex flex-col text-left">
-                        <span>
-                            <Button
-                                label="Massal"
-                                className="p-0 bg-transparent font-semibold text-sm text-gray-600"
-                                onClick={() => {
-                                    setModalBundleIsVisible(
-                                        (prev) => (prev = true)
-                                    );
-                                    reset();
-                                }}
-                                aria-controls="popup_menu_right"
-                                aria-haspopup
-                            />
-                        </span>
-                        <hr className="my-1" />
-                        <span>
-                            <Link
-                                href="/invoice_subscriptions/create"
-                                className="bg-transparent text-center font-semibold p-0 block text-gray-600 text-sm "
-                            >
-                                Satuan
-                            </Link>
-                        </span>
+            <ConfirmPopup />
+
+            {/* Sidebar filter */}
+            <Sidebar
+                header="Filter"
+                visible={sidebarFilter}
+                className="w-full md:w-[30%] px-3 dark:glass dark:text-white"
+                position="right"
+                onHide={() => setSidebarFilter(false)}
+            >
+                <form onSubmit={handleFilter}>
+                    <div className="flex flex-col mt-3">
+                        <label htmlFor="name">Berdasarkan penginput</label>
+                        <Dropdown
+                            optionLabel="name"
+                            dataKey="id"
+                            value={dataFilter.user}
+                            onChange={(e) =>
+                                setDataFilter("user", e.target.value)
+                            }
+                            options={users}
+                            placeholder="Pilih User"
+                            filter
+                            showClear
+                            valueTemplate={selectedOptionTemplate}
+                            itemTemplate={optionTemplate}
+                            className="flex justify-center  dark:text-gray-400   "
+                        />
                     </div>
-                </OverlayPanel>
-            </HeaderModule>
-            <div className="flex mx-auto flex-col justify-center mt-5 gap-5">
-                <div className="card p-fluid w-full h-full flex justify-center rounded-lg">
-                    <DataTable
-                        loading={isLoadingData}
-                        className="w-full h-auto rounded-lg dark:glass border-none text-center shadow-md"
-                        pt={{
-                            bodyRow:
-                                "dark:bg-transparent bg-transparent dark:text-gray-300",
-                            table: "dark:bg-transparent bg-white dark:text-gray-300",
-                            header: "",
-                        }}
-                        paginator
-                        filters={filters}
-                        rows={5}
-                        emptyMessage="Invoice langganan tidak ditemukan."
-                        paginatorClassName="dark:bg-transparent paginator-custome dark:text-gray-300 rounded-b-lg"
-                        header={header}
-                        value={invoiceSubscriptions}
-                        dataKey="id"
-                        selection={selectedInvoices}
-                        onSelectionChange={(e) => setSelectedInvoices(e.value)}
-                        expandedRows={expandedRows}
-                        onRowToggle={(e) => {
-                            setExpandedRows(e.data);
-                        }}
-                        globalFilterFields={[
-                            "partner.name",
-                            "date",
-                            "code",
-                            "status",
-                            "period",
-                        ]}
-                        globalFilterMatchMode="contains"
-                        rowExpansionTemplate={rowExpansionTemplate}
-                        onRowExpand={onRowExpand}
-                    >
-                        <Column
-                            expander={allowExpansion}
-                            style={{
-                                width: "max-content",
-                                whiteSpace: "nowrap",
+
+                    <div className="flex flex-col mt-3">
+                        <label htmlFor="status">Status </label>
+                        <Dropdown
+                            dataKey="name"
+                            value={dataFilter.status}
+                            onChange={(e) => {
+                                setDataFilter("status", e.target.value);
                             }}
+                            options={status}
+                            optionLabel="name"
+                            placeholder="Pilih Status"
+                            className="w-full md:w-14rem"
                         />
+                    </div>
 
-                        <Column
-                            selectionMode="multiple"
-                            exportable={false}
-                        ></Column>
+                    <div className="flex flex-col mt-3">
+                        <label htmlFor="metode">Metode *</label>
+                        <Dropdown
+                            value={dataFilter.payment_metode}
+                            onChange={(e) =>
+                                setDataFilter("payment_metode", e.target.value)
+                            }
+                            options={[
+                                { name: "Tunai" },
+                                { name: "Cazhbox" },
+                                { name: "Transfer Bank" },
+                            ]}
+                            optionLabel="name"
+                            placeholder="Pilih metode"
+                            className="w-full md:w-14rem"
+                            editable
+                        />
+                    </div>
 
-                        <Column
-                            header="No"
-                            body={(_, { rowIndex }) => rowIndex + 1}
-                            style={{
-                                width: "max-content",
-                                whiteSpace: "nowrap",
+                    <div className="flex flex-col mt-3">
+                        <label htmlFor="">Tanggal Input</label>
+                        <div className="flex items-center gap-2">
+                            <Calendar
+                                value={
+                                    dataFilter.input_date.start
+                                        ? new Date(dataFilter.input_date.start)
+                                        : null
+                                }
+                                style={{ height: "35px" }}
+                                onChange={(e) => {
+                                    setDataFilter("input_date", {
+                                        ...dataFilter.input_date,
+                                        start: e.target.value,
+                                    });
+                                }}
+                                placeholder="mulai"
+                                showIcon
+                                dateFormat="dd/mm/yy"
+                            />
+                            <span>-</span>
+                            <Calendar
+                                value={
+                                    dataFilter.input_date.end
+                                        ? new Date(dataFilter.input_date.end)
+                                        : null
+                                }
+                                style={{ height: "35px" }}
+                                onChange={(e) => {
+                                    setDataFilter("input_date", {
+                                        ...dataFilter.input_date,
+                                        end: e.target.value,
+                                    });
+                                }}
+                                placeholder="selesai"
+                                showIcon
+                                dateFormat="dd/mm/yy"
+                            />
+                        </div>
+                    </div>
+
+                    <div className="flex flex-row mt-5">
+                        <Button
+                            ref={btnFilterRef}
+                            label="Terapkan"
+                            className="bg-purple-600 text-sm shadow-md rounded-lg mr-2"
+                        />
+                        <Button
+                            type="button"
+                            label="Reset"
+                            onClick={(e) => {
+                                resetFilter();
+                                setTimeout(() => {
+                                    btnFilterRef.current.click();
+                                }, 500);
                             }}
-                            className="dark:border-none pl-6"
-                            headerClassName="dark:border-none pl-6 bg-transparent dark:bg-transparent dark:text-gray-300"
+                            className="outline-purple-600 outline-1 outline-dotted bg-transparent text-slate-700  text-sm shadow-md rounded-lg mr-2"
                         />
-                        <Column
-                            field="uuid"
-                            hidden
-                            className="dark:border-none"
-                            headerClassName="dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300"
-                            header="Nama"
-                            align="left"
-                            style={{ width: "10%" }}
-                        ></Column>
+                    </div>
+                </form>
+            </Sidebar>
 
-                        <Column
-                            header="Status"
-                            body={(rowData) => {
-                                return (
-                                    <Badge
-                                        value={rowData.status}
-                                        className="text-white"
-                                        severity={
-                                            rowData.status == "lunas"
-                                                ? "success"
-                                                : null ||
-                                                  rowData.status == "sebagian"
-                                                ? "info"
-                                                : null ||
-                                                  rowData.status ==
-                                                      "belum terbayar"
-                                                ? "warning"
-                                                : null ||
-                                                  rowData.status == "telat"
-                                                ? "danger"
-                                                : null
-                                        }
-                                    ></Badge>
+            {/* Tombol Aksi */}
+            <OverlayPanel
+                className=" shadow-md p-1 dark:bg-slate-800 dark:text-gray-300"
+                ref={action}
+            >
+                <div className="flex flex-col flex-wrap w-full">
+                    {permissions.includes("edit invoice langganan") && (
+                        <Button
+                            icon="pi pi-pencil"
+                            label="edit"
+                            className="bg-transparent hover:bg-slate-200 w-full text-slate-500 border-b-2 border-slate-400"
+                            onClick={() => {
+                                router.get(
+                                    "/invoice_subscriptions/" +
+                                        selectedInvoiceSubscription.uuid
                                 );
                             }}
-                            className="dark:border-none"
-                            headerClassName="dark:border-none  bg-transparent dark:bg-transparent dark:text-gray-300"
-                            align="left"
-                            style={{
-                                width: "max-content",
-                                whiteSpace: "nowrap",
+                        />
+                    )}
+                    {permissions.includes("hapus invoice langganan") && (
+                        <Button
+                            icon="pi pi-trash"
+                            label="hapus"
+                            className="bg-transparent hover:bg-slate-200 w-full text-slate-500 border-b-2 border-slate-400"
+                            onClick={() => {
+                                confirmDeleteInvoice();
                             }}
-                        ></Column>
-                        <Column
-                            field="partner_name"
-                            className="dark:border-none"
-                            headerClassName="dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300"
-                            header="Lembaga"
-                            body={(rowData) => (
-                                <button
-                                    onClick={() =>
-                                        handleSelectedDetailPartner(
-                                            rowData.partner
-                                        )
-                                    }
-                                    className="hover:text-blue-700"
-                                >
-                                    {rowData.partner.name}
-                                </button>
-                            )}
-                            align="left"
-                            style={{
-                                width: "max-content",
-                                whiteSpace: "nowrap",
-                            }}
-                        ></Column>
+                        />
+                    )}
+                </div>
+            </OverlayPanel>
 
-                        <Column
-                            field="period"
-                            className="dark:border-none"
-                            headerClassName="dark:border-none  bg-transparent dark:bg-transparent dark:text-gray-300"
-                            align="left"
-                            header="Periode"
-                            hidden
-                            style={{ minWidth: "10rem" }}
-                        ></Column>
-
-                        {visibleColumns.map((col) => (
-                            <Column
-                                key={col.field}
-                                style={{ minWidth: col.width }}
-                                field={col.field}
-                                header={col.header}
-                                body={(rowData) => {
-                                    if (col.type === "location") {
-                                        return JSON.parse(rowData[col.field])
-                                            .name;
-                                    } else if (col.type === "date") {
-                                        return rowData[col.field]
-                                            ? new Date(
-                                                  rowData[col.field]
-                                              ).toLocaleDateString("id")
-                                            : "-";
-                                    } else if (col.type === "price") {
-                                        return rowData[col.field]
-                                            ? Number(
-                                                  rowData[col.field]
-                                              ).toLocaleString("id")
-                                            : 0;
-                                    }
-                                    return rowData[col.field];
-                                }}
-                            />
-                        ))}
-
-                        <Column
-                            field="invoice_age"
-                            className="dark:border-none"
-                            headerClassName="dark:border-none  bg-transparent dark:bg-transparent dark:text-gray-300"
-                            align="left"
-                            header="Umur Invoice"
-                            body={(rowData) => {
-                                return rowData.invoice_age + " hari";
-                            }}
-                            style={{
-                                width: "max-content",
-                                whiteSpace: "nowrap",
-                            }}
-                        ></Column>
-
-                        <Column
-                            field="products"
-                            className="dark:border-none"
-                            headerClassName="dark:border-none  bg-transparent dark:bg-transparent dark:text-gray-300"
-                            align="left"
-                            header="List Tagihan"
-                            body={(rowData) => {
-                                return (
+            <HeaderModule title="Invoice Langganan">
+                {permissions.includes("tambah invoice langganan") && (
+                    <>
+                        <Button
+                            label="Tambah"
+                            className="bg-purple-600 text-sm shadow-md rounded-lg mr-2"
+                            icon={addButtonIcon}
+                            onClick={(e) => add.current.toggle(e)}
+                        />
+                        <OverlayPanel ref={add} className="shadow-md p-0">
+                            <div className="flex flex-col text-left">
+                                <span>
                                     <Button
-                                        label="List"
-                                        className="p-0 underline bg-transparent text-blue-700 text-left"
-                                        onClick={(e) => {
-                                            op.current.toggle(e);
-                                            setInvoiceBills(
-                                                (prev) => (prev = rowData.bills)
+                                        label="Massal"
+                                        className="bg-transparent hover:bg-slate-200 w-full text-slate-500 dark:hover:text-slate-900 dark:text-white border-b-2 border-slate-400"
+                                        onClick={() => {
+                                            setModalBundleIsVisible(
+                                                (prev) => (prev = true)
                                             );
+                                            reset();
                                         }}
-                                        model={items}
                                         aria-controls="popup_menu_right"
                                         aria-haspopup
                                     />
-                                );
-                            }}
-                            style={{
-                                width: "max-content",
-                                whiteSpace: "nowrap",
-                            }}
-                        ></Column>
+                                </span>
+                                <hr className="my-1" />
+                                <span>
+                                    <Link
+                                        href="/invoice_subscriptions/create"
+                                        className="bg-transparent hover:bg-slate-200 w-full text-slate-500 dark:hover:text-slate-900 dark:text-white border-b-2 border-slate-400"
+                                    >
+                                        Satuan
+                                    </Link>
+                                </span>
+                            </div>
+                        </OverlayPanel>
+                    </>
+                )}
+            </HeaderModule>
 
-                        <Column
-                            body={(rowData) => {
-                                return rowData.invoice_subscription_doc ==
-                                    null ? (
-                                    <ProgressSpinner
-                                        style={{
-                                            width: "30px",
-                                            height: "30px",
+            <TabView
+                activeIndex={activeIndexTab}
+                onTabChange={(e) => {
+                    setActiveIndexTab(e.index);
+                }}
+                className="mt-2"
+            >
+                <TabPanel header="Semua Invoice">
+                    {activeIndexTab == 0 && (
+                        <>
+                            <ConfirmDialog />
+                            <ConfirmDialog2
+                                group="declarative"
+                                visible={confirmIsVisible}
+                                onHide={() => setConfirmIsVisible(false)}
+                                message="Konfirmasi kembali jika anda yakin!"
+                                header="Konfirmasi kembali"
+                                icon="pi pi-info-circle"
+                                accept={handleDeleteInvoiceSubscription}
+                            />
+
+                            <div
+                                className="flex mx-auto flex-col justify-center mt-5 gap-5"
+                                ref={windowEscapeRef}
+                            >
+                                <div className="card p-fluid w-full h-full flex justify-center rounded-lg">
+                                    <DataTable
+                                        loading={isLoadingData}
+                                        className="w-full h-auto rounded-lg dark:glass border-none text-center shadow-md"
+                                        pt={{
+                                            bodyRow:
+                                                "dark:bg-transparent bg-transparent dark:text-gray-300",
+                                            table: "dark:bg-transparent bg-white dark:text-gray-300",
+                                            header: "",
                                         }}
-                                        strokeWidth="8"
-                                        fill="var(--surface-ground)"
-                                        animationDuration=".5s"
-                                    />
-                                ) : (
-                                    <div className="flex w-full h-full items-center justify-center">
-                                        <a
-                                            href={
-                                                "/storage/" +
-                                                rowData.invoice_subscription_doc
+                                        paginator
+                                        rowsPerPageOptions={[10, 25, 50, 100]}
+                                        paginatorTemplate="RowsPerPageDropdown FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink"
+                                        currentPageReportTemplate="{first} - {last} dari {totalRecords}"
+                                        filters={filters}
+                                        rows={10}
+                                        emptyMessage="Invoice langganan tidak ditemukan."
+                                        paginatorClassName="dark:bg-transparent paginator-custome dark:text-gray-300 rounded-b-lg"
+                                        header={header}
+                                        value={invoiceSubscriptions}
+                                        dataKey="id"
+                                        selection={selectedInvoices}
+                                        onSelectionChange={(e) =>
+                                            setSelectedInvoices(e.value)
+                                        }
+                                        expandedRows={expandedRows}
+                                        onRowToggle={(e) => {
+                                            setExpandedRows(e.data);
+                                        }}
+                                        globalFilterFields={[
+                                            "partner.name",
+                                            "date",
+                                            "code",
+                                            "status.name",
+                                            "period",
+                                        ]}
+                                        scrollable
+                                        globalFilterMatchMode="contains"
+                                        rowExpansionTemplate={
+                                            rowExpansionTemplate
+                                        }
+                                        selectionMode="checkbox"
+                                        onRowExpand={onRowExpand}
+                                        editMode="cell"
+                                    >
+                                        <Column
+                                            expander={allowExpansion}
+                                            style={{
+                                                width: "max-content",
+                                                whiteSpace: "nowrap",
+                                            }}
+                                            frozen
+                                            className="bg-white dark:bg-slate-900"
+                                            headerClassName="bg-white dark:bg-slate-900"
+                                        />
+
+                                        <Column
+                                            selectionMode="multiple"
+                                            exportable={false}
+                                            frozen
+                                            className="bg-white dark:bg-slate-900"
+                                            headerClassName="bg-white dark:bg-slate-900"
+                                        ></Column>
+
+                                        <Column
+                                            header="Aksi"
+                                            body={actionBodyTemplate}
+                                            style={{
+                                                width: "max-content",
+                                                whiteSpace: "nowrap",
+                                            }}
+                                            frozen
+                                            align="center"
+                                            className="dark:border-none bg-white"
+                                            headerClassName="dark:border-none bg-white dark:bg-slate-900 dark:text-gray-300"
+                                        ></Column>
+
+                                        <Column
+                                            field="code"
+                                            className="dark:border-none bg-white lg:whitespace-nowrap lg:w-max"
+                                            headerClassName="dark:border-none bg-white dark:bg-slate-900 dark:text-gray-300"
+                                            header="Kode"
+                                            align="left"
+                                            frozen={!isMobile}
+                                            style={{
+                                                width: "max-content",
+                                                whiteSpace: "nowrap",
+                                            }}
+                                        ></Column>
+
+                                        <Column
+                                            header="Status"
+                                            body={(rowData) => {
+                                                return (
+                                                    <Badge
+                                                        value={
+                                                            rowData.status.name
+                                                        }
+                                                        className="text-white"
+                                                        style={{
+                                                            backgroundColor:
+                                                                "#" +
+                                                                rowData.status
+                                                                    .color,
+                                                        }}
+                                                    ></Badge>
+                                                );
+                                            }}
+                                            frozen={!isMobile}
+                                            style={{
+                                                width: "max-content",
+                                                whiteSpace: "nowrap",
+                                            }}
+                                            className="dark:border-none bg-white lg:whitespace-nowrap lg:w-max"
+                                            headerClassName="dark:border-none bg-white dark:bg-slate-900 dark:text-gray-300"
+                                            align="left"
+                                        ></Column>
+                                        <Column
+                                            header="Lembaga"
+                                            body={(rowData) => (
+                                                <button
+                                                    onClick={() =>
+                                                        handleSelectedDetailPartner(
+                                                            rowData
+                                                        )
+                                                    }
+                                                    className="hover:text-blue-700 text-left"
+                                                >
+                                                    {rowData.partner.name}
+                                                </button>
+                                            )}
+                                            className="dark:border-none bg-white lg:whitespace-nowrap lg:w-max"
+                                            headerClassName="dark:border-none bg-white dark:bg-slate-900 dark:text-gray-300"
+                                            align="left"
+                                            frozen={!isMobile}
+                                            style={{
+                                                width: "max-content",
+                                                whiteSpace: "nowrap",
+                                            }}
+                                        ></Column>
+                                        <Column
+                                            header="NPWP"
+                                            body={(rowData) =>
+                                                rowData.partner.npwp !== null
+                                                    ? formatNPWP(
+                                                          rowData.partner.npwp
+                                                      )
+                                                    : "-"
                                             }
-                                            download={`Invoice_Umum_${rowData.partner_name}`}
-                                            class="font-bold  w-full h-full text-center rounded-full "
-                                        >
-                                            <i
-                                                className="pi pi-file-pdf"
-                                                style={{
-                                                    width: "100%",
-                                                    height: "100%",
-                                                    fontSize: "1.5rem",
+                                            className="dark:border-none bg-white dark:bg-slate-900"
+                                            headerClassName="dark:border-none bg-white dark:bg-slate-900 dark:text-gray-300"
+                                            align="left"
+                                            style={{
+                                                width: "max-content",
+                                                whiteSpace: "nowrap",
+                                            }}
+                                        ></Column>
+                                        <Column
+                                            field="xendit_link"
+                                            className="dark:border-none"
+                                            headerClassName="dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300"
+                                            header="Link Xendit"
+                                            align="left"
+                                            style={{
+                                                width: "max-content",
+                                                whiteSpace: "nowrap",
+                                            }}
+                                            editor={(options) =>
+                                                cellEditor(options)
+                                            }
+                                        ></Column>
+
+                                        <Column
+                                            field="period"
+                                            className="dark:border-none"
+                                            headerClassName="dark:border-none  bg-transparent dark:bg-transparent dark:text-gray-300"
+                                            align="left"
+                                            header="Periode"
+                                            hidden
+                                            style={{ minWidth: "10rem" }}
+                                        ></Column>
+
+                                        {visibleColumns.map((col) => (
+                                            <Column
+                                                key={col.field}
+                                                field={col.field}
+                                                header={col.header}
+                                                body={(rowData) => {
+                                                    if (
+                                                        col.type === "location"
+                                                    ) {
+                                                        return JSON.parse(
+                                                            rowData[col.field]
+                                                        ).name;
+                                                    } else if (
+                                                        col.type === "date"
+                                                    ) {
+                                                        return rowData[
+                                                            col.field
+                                                        ]
+                                                            ? new Date(
+                                                                  rowData[
+                                                                      col.field
+                                                                  ]
+                                                              ).toLocaleDateString(
+                                                                  "id"
+                                                              )
+                                                            : "-";
+                                                    } else if (
+                                                        col.type === "price"
+                                                    ) {
+                                                        return rowData[
+                                                            col.field
+                                                        ]
+                                                            ? Number(
+                                                                  rowData[
+                                                                      col.field
+                                                                  ]
+                                                              ).toLocaleString(
+                                                                  "id"
+                                                              )
+                                                            : 0;
+                                                    }
+                                                    return rowData[col.field];
                                                 }}
-                                            ></i>
-                                        </a>
-                                    </div>
-                                );
-                            }}
-                            className="dark:border-none"
-                            headerClassName="dark:border-none  bg-transparent dark:bg-transparent dark:text-gray-300"
-                            align="left"
-                            header="Dokumen"
-                            style={{
-                                width: "max-content",
-                                whiteSpace: "nowrap",
-                            }}
-                        ></Column>
-                        <Column
-                            header="Action"
-                            body={actionBodyTemplate}
-                            style={{
-                                width: "max-content",
-                                whiteSpace: "nowrap",
-                            }}
-                            className="dark:border-none"
-                            headerClassName="dark:border-none  bg-transparent dark:bg-transparent dark:text-gray-300"
-                        ></Column>
-                    </DataTable>
-                </div>
-            </div>
+                                                style={{
+                                                    width: "max-content",
+                                                    whiteSpace: "nowrap",
+                                                }}
+                                            />
+                                        ))}
+
+                                        <Column
+                                            field="invoice_age"
+                                            className="dark:border-none"
+                                            headerClassName="dark:border-none  bg-transparent dark:bg-transparent dark:text-gray-300"
+                                            align="left"
+                                            header="Umur Invoice"
+                                            body={(rowData) => {
+                                                return (
+                                                    rowData.invoice_age +
+                                                    " hari"
+                                                );
+                                            }}
+                                            style={{
+                                                width: "max-content",
+                                                whiteSpace: "nowrap",
+                                            }}
+                                        ></Column>
+
+                                        <Column
+                                            field="products"
+                                            className="dark:border-none"
+                                            headerClassName="dark:border-none  bg-transparent dark:bg-transparent dark:text-gray-300"
+                                            align="left"
+                                            header="List Tagihan"
+                                            body={(rowData) => {
+                                                return (
+                                                    <Button
+                                                        label="List"
+                                                        className="p-0 underline bg-transparent text-blue-700 text-left"
+                                                        onClick={(e) => {
+                                                            op.current.toggle(
+                                                                e
+                                                            );
+                                                            setInvoiceBills(
+                                                                (prev) =>
+                                                                    (prev =
+                                                                        rowData.bills)
+                                                            );
+                                                        }}
+                                                        model={items}
+                                                        aria-controls="popup_menu_right"
+                                                        aria-haspopup
+                                                    />
+                                                );
+                                            }}
+                                            style={{
+                                                width: "max-content",
+                                                whiteSpace: "nowrap",
+                                            }}
+                                        ></Column>
+
+                                        <Column
+                                            body={(rowData) => {
+                                                return rowData.invoice_subscription_doc ==
+                                                    null ? (
+                                                    <ProgressSpinner
+                                                        style={{
+                                                            width: "30px",
+                                                            height: "30px",
+                                                        }}
+                                                        strokeWidth="8"
+                                                        fill="var(--surface-ground)"
+                                                        animationDuration=".5s"
+                                                    />
+                                                ) : (
+                                                    <div className="flex w-full h-full items-center justify-center">
+                                                        <a
+                                                            href={
+                                                                "/storage/" +
+                                                                rowData.invoice_subscription_doc
+                                                            }
+                                                            download={`Invoice_Umum_${rowData.partner_name}`}
+                                                            class="font-bold  w-full h-full text-center rounded-full "
+                                                        >
+                                                            <i
+                                                                className="pi pi-file-pdf"
+                                                                style={{
+                                                                    width: "100%",
+                                                                    height: "100%",
+                                                                    fontSize:
+                                                                        "1.5rem",
+                                                                }}
+                                                            ></i>
+                                                        </a>
+                                                    </div>
+                                                );
+                                            }}
+                                            className="dark:border-none"
+                                            headerClassName="dark:border-none  bg-transparent dark:bg-transparent dark:text-gray-300"
+                                            align="left"
+                                            header="Dokumen"
+                                            style={{
+                                                width: "max-content",
+                                                whiteSpace: "nowrap",
+                                            }}
+                                        ></Column>
+                                        <Column
+                                            header="Action"
+                                            body={actionBodyTemplate}
+                                            style={{
+                                                width: "max-content",
+                                                whiteSpace: "nowrap",
+                                            }}
+                                            className="dark:border-none"
+                                            headerClassName="dark:border-none  bg-transparent dark:bg-transparent dark:text-gray-300"
+                                        ></Column>
+                                    </DataTable>
+                                </div>
+                            </div>
+                        </>
+                    )}
+                </TabPanel>
+
+                <TabPanel header="Log">
+                    {activeIndexTab == 1 && (
+                        <Log
+                            auth={auth}
+                            users={users}
+                            showSuccess={showSuccess}
+                            showError={showError}
+                        />
+                    )}
+                </TabPanel>
+
+                <TabPanel header="Arsip">
+                    {activeIndexTab == 2 && (
+                        <Arsip
+                            auth={auth}
+                            showSuccess={showSuccess}
+                            showError={showError}
+                        />
+                    )}
+                </TabPanel>
+            </TabView>
 
             <OverlayPanel
                 className="w-[95%] md:max-w-[50%] dark:bg-slate-900 dark:text-gray-300"
@@ -1476,6 +1799,7 @@ export default function InvoiceSubscription({
                     ></Column>
                 </DataTable>
             </OverlayPanel>
+
             <Dialog
                 header="Invoice Massal"
                 headerClassName="dark:glass shadow-md dark:text-white"

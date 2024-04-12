@@ -46,35 +46,6 @@ use Illuminate\Http\Response;
 |
 */
 
-// Route::get('/', function () {
-//     return Inertia::render('Welcome', [
-//         'canLogin' => Route::has('login'),
-//         'canRegister' => Route::has('register'),
-//         'laravelVersion' => Application::VERSION,
-//         'phpVersion' => PHP_VERSION,
-//     ]);
-// });
-
-
-Route::get('/browsershot', function () {
-
-    $html = view('pdf.sla')->render();
-    $pdf = Browsershot::html($html)
-        ->setIncludedPath(config('services.browsershot.included_path'))
-        ->showBackground()
-        ->save('example.pdf');
-
-    // return new Response($pdf, 200, [
-    //     'Content-Type' => 'application/pdf',
-    //     'Content-Disposition' => 'attachment; filename="example.pdf"',
-    //     'Content-Length' => strlen($pdf)
-    // ]);
-    // Browsershot::url('https://laravel.com')
-    //     ->setIncludedPath(config('services.browsershot.included_path'))
-    //     ->save('example.pdf');
-
-});
-
 Route::redirect('/', '/login', 301);
 
 Route::get('/pdf', function () {
@@ -88,9 +59,6 @@ Route::get('/pdf', function () {
         ->headerHtml('<div></div>')
         ->footerHtml('<div style="text-align: left; font-size: 10px; width:100%; margin-left: 2.5cm; margin-bottom: 1cm;">*) Tarif produk/layanan tidak termasuk biaya admin transaksi <span style="font-style:italic;">user</span> aplikasi <span style="font-style:italic;">mobile</span>.</div>')
         ->save('demo.pdf');
-
-
-    // Storage::put("public/$path", $pdf);
 });
 
 Route::get('/tes', function () {
@@ -100,21 +68,6 @@ Route::get('/tes', function () {
     ]);
     $phpWord->saveAs('sample.docx');
 });
-// Route::get('/convert', function () {
-
-//     $domPdfPath = base_path('vendor/dompdf/dompdf');
-
-//     \PhpOffice\PhpWord\Settings::setPdfRendererPath($domPdfPath);
-//     \PhpOffice\PhpWord\Settings::setPdfRendererName('DomPDF');
-//     $Content = \PhpOffice\PhpWord\IOFactory::load(public_path('storage/invoice_langganan/4b883efd-313b-4155-a0ee-338479c81607.docx'));
-//     $PDFWriter = \PhpOffice\PhpWord\IOFactory::createWriter($Content, 'PDF');
-
-//     $pdfFileName = time() . '.pdf';
-//     $PDFWriter->save(storage_path('app/public/invoice_langganan/' . $pdfFileName));
-
-//     return response()->download(storage_path('app/public/invoice_langganan/' . $pdfFileName));
-
-// });
 
 Route::get('migrate', function () {
     Artisan::call('migrate:fresh --seed --force');
@@ -319,7 +272,9 @@ Route::middleware('auth')->group(function () {
     // Invoice Umum
     Route::get('/invoice_generals', [InvoiceGeneralController::class, 'index'])->name('invoice_generals.view')->middleware(['can:lihat invoice umum']);
     Route::get('/invoice_generals/create', [InvoiceGeneralController::class, 'create'])->name('invoice_generals.create')->middleware(['can:tambah invoice umum']);
+    Route::post('/invoice_generals/filter', [InvoiceGeneralController::class, 'filter'])->name('invoice_generals.filter')->middleware(['can:tambah invoice umum']);
     Route::post('/invoice_generals', [InvoiceGeneralController::class, 'store'])->name('invoice_generals.store')->middleware(['can:tambah invoice umum']);
+    Route::put('/invoice_generals/{invoice_generals:uuid}/xendit', [InvoiceGeneralController::class, 'updateXendit'])->name('invoice_generals.update.xendit')->middleware(['can:edit invoice umum']);
     Route::get('/invoice_generals/{invoice_generals:uuid}', [InvoiceGeneralController::class, 'edit'])->name('invoice_generals.edit')->middleware(['can:edit invoice umum']);
     Route::put('/invoice_generals/{invoice_generals:uuid}', [InvoiceGeneralController::class, 'update'])->name('invoice_generals.update')->middleware(['can:edit invoice umum']);
     Route::delete('/invoice_generals/{invoice_generals:uuid}', [InvoiceGeneralController::class, 'destroy'])->name('invoice_generals.destroy')->middleware(['can:hapus invoice umum']);
@@ -334,6 +289,7 @@ Route::middleware('auth')->group(function () {
     // Invoice Langganan
     Route::get('/invoice_subscriptions', [InvoiceSubscriptionController::class, 'index'])->name('invoice_subscriptions.view')->middleware(['can:lihat invoice langganan']);
     Route::get('/invoice_subscriptions/create', [InvoiceSubscriptionController::class, 'create'])->name('invoice_subscriptions.create');
+    Route::post('/invoice_subscriptions/filter', [InvoiceSubscriptionController::class, 'filter'])->name('invoice_subscriptions.filter')->middleware(['can:tambah invoice langganan']);
     Route::post('/invoice_subscriptions', [InvoiceSubscriptionController::class, 'store'])->name('invoice_subscriptions.store')->middleware(['can:tambah invoice langganan']);
     Route::post('/invoice_subscriptions/batch', [InvoiceSubscriptionController::class, 'storeBatch'])->name('invoice_subscriptions.store.batch')->middleware(['can:tambah invoice langganan']);
     Route::post('/invoice_subscriptions/zip', [InvoiceSubscriptionController::class, 'zipAll'])->name('invoice_subscriptions.zip')->middleware(['can:lihat invoice langganan']);

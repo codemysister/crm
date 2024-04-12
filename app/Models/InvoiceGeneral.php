@@ -27,4 +27,9 @@ class InvoiceGeneral extends Model
         return $this->hasMany(InvoiceGeneralTransaction::class);
     }
 
+    public function status()
+    {
+        return $this->belongsTo(Status::class);
+    }
+
 }

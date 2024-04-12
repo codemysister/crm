@@ -9,6 +9,8 @@ use App\Models\InvoiceGeneralProducts;
 use App\Models\Partner;
 use App\Models\Product;
 use App\Models\Signature;
+use App\Models\Status;
+use App\Models\User;
 use App\Utils\ExtendedTemplateProcessor;
 use Carbon\Carbon;
 use Dipantry\Rupiah\RupiahService;
@@ -27,8 +29,10 @@ class InvoiceGeneralController extends Controller
     public function index()
     {
         $partnersProp = Partner::all();
+        $usersProp = User::with('roles')->get();
+        $statusProp = Status::where('category', 'invoice')->get();
         $signaturesProp = Signature::all();
-        return Inertia::render('InvoiceGeneral/Index', compact('partnersProp', 'signaturesProp'));
+        return Inertia::render('InvoiceGeneral/Index', compact('partnersProp', 'signaturesProp', 'usersProp', 'statusProp'));
     }
 
     public function create()
@@ -190,10 +194,13 @@ class InvoiceGeneralController extends Controller
 
         $code = $this->generateCode();
 
+        $statusBelumBayar = Status::where('name', 'belum bayar')->where('category', 'invoice')->first();
+
         $invoice_general = InvoiceGeneral::create([
             'uuid' => Str::uuid(),
             'code' => $code,
             'partner_id' => $request['partner']['id'],
+            'status_id' => $statusBelumBayar->id,
             'partner_name' => $request['partner']['name'],
             'partner_province' => $request['partner']['province'],
             'partner_regency' => $request['partner']['regency'],
@@ -211,7 +218,6 @@ class InvoiceGeneralController extends Controller
             'signature_image' => $request['signature']['image'],
             'payment_metode' => $request->payment_metode,
             'xendit_link' => $request->xendit_link,
-            'status' => 'belum terbayar',
             'invoice_general_doc' => '',
             'created_by' => Auth::user()->id
         ]);
@@ -331,18 +337,19 @@ class InvoiceGeneralController extends Controller
             ]);
         }
 
-        $status = null;
+        $status = Status::where('category', 'invoice');
         if ($rest_of_bill == 0) {
-            $status = "lunas";
+            $status = $status->where('name', 'lunas')->first();
         } else if ($paid_transaction == 0) {
-            $status = "belum terbayar";
+            $status = $status->where('name', 'belum bayar')->first();
         } else {
-            $status = "sebagian";
+            $status = $status->where('name', 'sebagian')->first();
         }
 
 
         $invoice_general->update([
             'partner_id' => $request['partner']['id'],
+            'status_id' => $status->id,
             'partner_name' => $request['partner']['name'],
             'partner_province' => $request['partner']['province'],
             'partner_regency' => $request['partner']['regency'],
@@ -360,23 +367,55 @@ class InvoiceGeneralController extends Controller
             'signature_image' => $request['signature']['image'],
             'payment_metode' => $request->payment_metode,
             'xendit_link' => $request->xendit_link,
-            'status' => 'belum terbayar',
             'invoice_general_doc' => '',
         ]);
 
         $results = $this->updateProducts($invoice_general, $invoice_general->products, $request->products);
         $rest_of_bill = $this->calculateRestOfBill($invoice_general);
 
-        $invoice_general->update(['rest_of_bill' => $rest_of_bill, 'status' => $status]);
+        $invoice_general->update(['rest_of_bill' => $rest_of_bill, 'status_id' => $status->id]);
 
         // $this->generateInvoiceGeneral($invoice_general, $request->products);
         GenerateInvoiceGeneralJob::dispatch($invoice_general, $request->products);
 
     }
 
+    public function filter(Request $request)
+    {
+        $invoice_generals = InvoiceGeneral::with(['partner', 'products', 'transactions.user', 'status']);
+
+        if ($request->user) {
+            $invoice_generals->where('created_by', $request->user['id']);
+        }
+
+        if ($request->status) {
+            $invoice_generals->whereHas('status', function ($query) use ($request) {
+                $query->where('status_id', $request->status['id']);
+            });
+        }
+
+        if ($request->input_date['start'] && $request->input_date['end']) {
+            $invoice_generals->whereBetween('created_at', [$request->input_date['start'], $request->input_date['end']]);
+        }
+
+
+        $invoice_generals = $invoice_generals->get();
+
+        return response()->json($invoice_generals);
+    }
+
+    public function updateXendit(Request $request, $uuid)
+    {
+        $invoice_general = InvoiceGeneral::where('uuid', '=', $uuid)->first();
+        $invoice_general->update([
+            'xendit_link' => $request->xendit_link,
+        ]);
+        GenerateInvoiceGeneralJob::dispatch($invoice_general, $request->products);
+    }
+
     public function apiGetInvoiceGenerals()
     {
-        $invoiceGenerals = InvoiceGeneral::with(['partner', 'products', 'transactions.user'])->latest()->get();
+        $invoiceGenerals = InvoiceGeneral::with(['partner', 'products', 'transactions.user', 'status'])->latest()->get();
         return response()->json($invoiceGenerals);
     }
 
