@@ -41,11 +41,11 @@ class PartnerPriceListRequest extends FormRequest
             'price_subscription_system.required' => 'Harga langganan sistem harus diiisi',
             'price_training_offline.required' => 'Harga pelatihan offline harus diiisi',
             'price_training_online.required' => 'Harga pelatihan online harus diiisi',
-            'fee_purchase_cazhpoin.required' => 'Harga tarif isi cazhpoin harus diiisi',
-            'fee_bill_cazhpoin.required' => 'Harga tarif bayar tagihan cazhpoin harus diiisi',
-            'fee_topup_cazhpos.required' => 'Harga tarif topup cazhpos harus diiisi',
-            'fee_withdraw_cazhpos.required' => 'Harga tarif withdraw cazhpos harus diiisi',
-            'fee_bill_saldokartu.required' => 'Harga tarif bayar tagihan saldokartu harus diiisi',
+            'fee_purchase_cazhpoin.required' => 'Harga isi cazhpoin harus diiisi',
+            'fee_bill_cazhpoin.required' => 'Harga bayar tagihan cazhpoin harus diiisi',
+            'fee_topup_cazhpos.required' => 'Harga topup cazhpos harus diiisi',
+            'fee_withdraw_cazhpos.required' => 'Harga withdraw cazhpos harus diiisi',
+            'fee_bill_saldokartu.required' => 'Harga bayar tagihan saldokartu harus diiisi',
         ];
     }
 }

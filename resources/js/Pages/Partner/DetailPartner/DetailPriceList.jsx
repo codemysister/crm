@@ -155,7 +155,7 @@ const DetailPriceList = ({
                     <table class="w-full dark:text-slate-300 dark:bg-slate-700">
                         <tr class="border-b">
                             <td class="pt-2 pb-1  text-base font-bold w-1/5">
-                                Tarif Kartu
+                                Harga Kartu
                             </td>
                             <td class="pt-2 pb-1  text-base w-[2%]">:</td>
                             <td class="pt-2 pb-1  text-base w-7/12">
@@ -173,7 +173,7 @@ const DetailPriceList = ({
                         </tr>
                         <tr class="border-b">
                             <td class="pt-2 pb-1  text-base font-bold w-1/5">
-                                Tarif Lanyard
+                                Harga Lanyard
                             </td>
                             <td class="pt-2 pb-1  text-base w-[2%]">:</td>
                             <td class="pt-2 pb-1  text-base w-7/12">
@@ -186,7 +186,7 @@ const DetailPriceList = ({
                         </tr>
                         <tr class="border-b">
                             <td class="pt-2 pb-1  text-base font-bold w-1/5">
-                                Tarif Langganan Sistem
+                                Harga Langganan Sistem
                             </td>
                             <td class="pt-2 pb-1  text-base w-[2%]">:</td>
                             <td class="pt-2 pb-1  text-base w-7/12">
@@ -199,7 +199,7 @@ const DetailPriceList = ({
                         </tr>
                         <tr class="border-b">
                             <td class="pt-2 pb-1  text-base font-bold w-1/5">
-                                Tarif Training Offline
+                                Harga Training Offline
                             </td>
                             <td class="pt-2 pb-1  text-base w-[2%]">:</td>
                             <td class="pt-2 pb-1  text-base w-7/12">
@@ -212,7 +212,7 @@ const DetailPriceList = ({
                         </tr>
                         <tr class="border-b">
                             <td class="pt-2 pb-1  text-base font-bold w-1/5">
-                                Tarif Training Online
+                                Harga Training Online
                             </td>
                             <td class="pt-2 pb-1  text-base w-[2%]">:</td>
                             <td class="pt-2 pb-1  text-base w-7/12">
@@ -309,7 +309,7 @@ const DetailPriceList = ({
                     {/* Modal edit langganan */}
                     <div className="card flex justify-content-center">
                         <Dialog
-                            header="Tarif"
+                            header="Harga"
                             headerClassName="dark:glass dark:text-white"
                             className="bg-white w-[80%] md:w-[60%] lg:w-[35%] dark:glass dark:text-white"
                             contentClassName="dark:glass dark:text-white"
@@ -322,13 +322,13 @@ const DetailPriceList = ({
                                 <div className="flex flex-col justify-around gap-4 mt-1">
                                     <div className="flex flex-col mt-3">
                                         <label htmlFor="price_card">
-                                            Tarif Kartu
+                                            Harga Kartu
                                         </label>
 
                                         <div className="flex justify-between gap-1 w-full items-center">
                                             <div className="w-full flex gap-2 h-full">
                                                 <InputNumber
-                                                    placeholder="tarif"
+                                                    placeholder="harga"
                                                     value={
                                                         dataPriceList.price_card
                                                             .price
@@ -375,7 +375,7 @@ const DetailPriceList = ({
 
                                     <div className="flex flex-col">
                                         <label htmlFor="price_card">
-                                            Tarif Lanyard
+                                            Harga Lanyard
                                         </label>
                                         <div className="flex justify-between gap-1 w-full items-center">
                                             <div className="w-full flex gap-2 h-full">
@@ -395,7 +395,7 @@ const DetailPriceList = ({
                                                     }
                                                     optionLabel="price"
                                                     optionValue="price"
-                                                    placeholder="Pilih Tarif"
+                                                    placeholder="Pilih Harga"
                                                     editable
                                                     valueTemplate={
                                                         selectedOptionTrainingTemplate
@@ -411,12 +411,12 @@ const DetailPriceList = ({
 
                                     <div className="flex flex-col">
                                         <label htmlFor="price_card">
-                                            Tarif Langganan Sistem
+                                            Harga Langganan Sistem
                                         </label>
                                         <div className="flex justify-between gap-1 w-full items-center">
                                             <div className="w-full flex gap-2 h-full">
                                                 <InputNumber
-                                                    placeholder="tarif"
+                                                    placeholder="harga"
                                                     value={
                                                         dataPriceList.price_subscription_system
                                                     }
@@ -438,7 +438,7 @@ const DetailPriceList = ({
 
                                     <div className="flex flex-col">
                                         <label htmlFor="price_card">
-                                            Tarif Pelatihan Offline
+                                            Harga Pelatihan Offline
                                         </label>
                                         <div className="flex justify-between gap-1 w-full items-center">
                                             <div className="w-full flex gap-2 h-full">
@@ -458,7 +458,7 @@ const DetailPriceList = ({
                                                     }
                                                     optionLabel="price"
                                                     optionValue="price"
-                                                    placeholder="Pilih Tarif"
+                                                    placeholder="Pilih Harga"
                                                     editable
                                                     valueTemplate={
                                                         selectedOptionTrainingTemplate
@@ -474,7 +474,7 @@ const DetailPriceList = ({
 
                                     <div className="flex flex-col">
                                         <label htmlFor="price_card">
-                                            Tarif Pelatihan Online
+                                            Harga Pelatihan Online
                                         </label>
                                         <div className="flex justify-between gap-1 w-full items-center">
                                             <div className="w-full flex gap-2 h-full">
@@ -538,7 +538,7 @@ const DetailPriceList = ({
 
                                     <div className="flex flex-col">
                                         <label htmlFor="price_card">
-                                            Tarif Isi Kartu Via Cazhpoin
+                                            Harga Isi Kartu Via Cazhpoin
                                         </label>
                                         <div className="flex justify-between gap-1 w-full items-center">
                                             <div className="w-full flex gap-2 h-full">
@@ -556,7 +556,7 @@ const DetailPriceList = ({
                                                     options={option_fee_price}
                                                     optionLabel="price"
                                                     optionValue="price"
-                                                    placeholder="Pilih Tarif"
+                                                    placeholder="Pilih Harga"
                                                     editable
                                                     valueTemplate={
                                                         selectedOptionFeeTemplate
@@ -572,7 +572,7 @@ const DetailPriceList = ({
 
                                     <div className="flex flex-col">
                                         <label htmlFor="price_card">
-                                            Tarif Bayar Tagihan via CazhPOIN
+                                            Harga Bayar Tagihan via CazhPOIN
                                         </label>
                                         <div className="flex justify-between gap-1 w-full items-center">
                                             <div className="w-full flex gap-2 h-full">
@@ -590,7 +590,7 @@ const DetailPriceList = ({
                                                     options={option_fee_price}
                                                     optionLabel="price"
                                                     optionValue="price"
-                                                    placeholder="Pilih Tarif"
+                                                    placeholder="Pilih Harga"
                                                     editable
                                                     valueTemplate={
                                                         selectedOptionFeeTemplate
@@ -606,7 +606,7 @@ const DetailPriceList = ({
 
                                     <div className="flex flex-col">
                                         <label htmlFor="price_card">
-                                            Tarif TopUp Kartu via Cazh POS
+                                            Harga TopUp Kartu via Cazh POS
                                         </label>
                                         <div className="flex justify-between gap-1 w-full items-center">
                                             <div className="w-full flex gap-2 h-full">
@@ -624,7 +624,7 @@ const DetailPriceList = ({
                                                     options={option_fee_price}
                                                     optionLabel="price"
                                                     optionValue="price"
-                                                    placeholder="Pilih Tarif"
+                                                    placeholder="Pilih Harga"
                                                     editable
                                                     valueTemplate={
                                                         selectedOptionFeeTemplate
@@ -640,7 +640,7 @@ const DetailPriceList = ({
 
                                     <div className="flex flex-col">
                                         <label htmlFor="price_card">
-                                            Tarif Penarikan Saldo Kartu via Cazh
+                                            Harga Penarikan Saldo Kartu via Cazh
                                             POS
                                         </label>
                                         <div className="flex justify-between gap-1 w-full items-center">
@@ -659,7 +659,7 @@ const DetailPriceList = ({
                                                     options={option_fee_price}
                                                     optionLabel="price"
                                                     optionValue="price"
-                                                    placeholder="Pilih Tarif"
+                                                    placeholder="Pilih Harga"
                                                     editable
                                                     valueTemplate={
                                                         selectedOptionFeeTemplate
@@ -675,7 +675,7 @@ const DetailPriceList = ({
 
                                     <div className="flex flex-col">
                                         <label htmlFor="price_card">
-                                            Tarif Pembayaran Tagihan via Saldo
+                                            Harga Pembayaran Tagihan via Saldo
                                             Kartu
                                         </label>
                                         <div className="flex justify-between gap-1 w-full items-center">
@@ -694,7 +694,7 @@ const DetailPriceList = ({
                                                     options={option_fee_price}
                                                     optionLabel="price"
                                                     optionValue="price"
-                                                    placeholder="Pilih Tarif"
+                                                    placeholder="Pilih Harga"
                                                     editable
                                                     valueTemplate={
                                                         selectedOptionFeeTemplate
@@ -721,7 +721,7 @@ const DetailPriceList = ({
                 </>
             ) : (
                 <div class="w-full h-full min-h-[300px] -mt-4 flex items-center justify-center">
-                    <p class="text-center">Tidak ada data tarif</p>
+                    <p class="text-center">Tidak ada data harga</p>
                 </div>
             )}
         </>

@@ -620,18 +620,30 @@ export default function Index({ auth, partner, usersProp, statusProp }) {
                 onGlobalFilterChange={onGlobalFilterChange}
             >
                 <Button
-                    icon={filterButtonIcon}
-                    className="shadow-md border border-slate-600 bg-transparent text-slate-600 dark:bg-slate-700 dark:text-slate-300 rounded-lg"
-                    label="filter"
+                    className="shadow-md w-[10px] lg:w-[90px] border border-slate-600 bg-transparent text-slate-600 dark:bg-slate-700 dark:text-slate-300 rounded-lg"
                     onClick={() => setSidebarFilter(true)}
-                />
+                >
+                    <span className="w-full flex justify-center items-center gap-1">
+                        <i
+                            className="pi pi-filter"
+                            style={{ fontSize: "0.7rem" }}
+                        ></i>{" "}
+                        {!isMobile && <span>filter</span>}
+                    </span>
+                </Button>
                 <Button
-                    icon={exportButtonIcon}
-                    className="shadow-md bg-transparent text-slate-600 dark:bg-slate-700 dark:text-slate-300 dark:border rounded-lg"
-                    label="export"
+                    className="shadow-md w-[10px] lg:w-[90px] bg-transparent text-slate-600 dark:bg-slate-700 dark:text-slate-300 dark:border rounded-lg"
                     onClick={exportExcel}
                     data-pr-tooltip="XLS"
-                />
+                >
+                    <span className="w-full flex items-center justify-center gap-1">
+                        <i
+                            className="pi pi-file-excel"
+                            style={{ fontSize: "0.8rem" }}
+                        ></i>{" "}
+                        {!isMobile && <span>export</span>}
+                    </span>
+                </Button>
             </HeaderDatatable>
         );
     };
@@ -1026,7 +1038,7 @@ export default function Index({ auth, partner, usersProp, statusProp }) {
                     <div className="flex flex-row mt-5">
                         <Button
                             ref={btnFilterRef}
-                            label="Cari"
+                            label="Terapkan"
                             className="bg-purple-600 text-sm shadow-md rounded-lg mr-2"
                         />
                         <Button

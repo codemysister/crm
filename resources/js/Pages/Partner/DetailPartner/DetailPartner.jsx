@@ -122,7 +122,7 @@ const DetailPartner = ({
         },
 
         {
-            label: "Tarif",
+            label: "Harga",
             className: `${
                 activeMenu == "price_list" ? "p-menuitem-active" : ""
             }`,

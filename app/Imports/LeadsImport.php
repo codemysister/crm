@@ -28,7 +28,6 @@ class LeadsImport implements ToCollection, SkipsEmptyRows, WithValidation, WithS
         return [
             'lembaga' => [
                 'required',
-                'string',
             ],
             'pic_partner' => [
                 'required',

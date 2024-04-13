@@ -957,7 +957,7 @@ const Create = ({ usersProp, partnersProp, signaturesProp, referralsProp }) => {
                                             options={option_price_lanyard}
                                             optionLabel="price"
                                             optionValue="price"
-                                            placeholder="Pilih Tarif"
+                                            placeholder="Pilih Harga"
                                             editable
                                             valueTemplate={
                                                 selectedOptionTrainingTemplate
@@ -1234,7 +1234,7 @@ const Create = ({ usersProp, partnersProp, signaturesProp, referralsProp }) => {
                                 </div>
                                 <div className="flex flex-col mt-3">
                                     <label htmlFor="fee_purchase_cazhpoin">
-                                        Tarif QRIS*
+                                        Harga QRIS*
                                     </label>
 
                                     <InputText
@@ -1269,7 +1269,7 @@ const Create = ({ usersProp, partnersProp, signaturesProp, referralsProp }) => {
                                 </div>
                                 <div className="flex flex-col mt-3">
                                     <label htmlFor="fee_purchase_cazhpoin">
-                                        Tarif isi kartu via CazhPOIN*
+                                        Harga isi kartu via CazhPOIN*
                                     </label>
 
                                     <InputNumber
@@ -1306,7 +1306,7 @@ const Create = ({ usersProp, partnersProp, signaturesProp, referralsProp }) => {
                                 </div>
                                 <div className="flex flex-col mt-3">
                                     <label htmlFor="fee_bill_cazhpoin">
-                                        Tarif bayar tagihan via CazhPOIN*
+                                        Harga bayar tagihan via CazhPOIN*
                                     </label>
 
                                     <InputNumber
@@ -1344,7 +1344,7 @@ const Create = ({ usersProp, partnersProp, signaturesProp, referralsProp }) => {
                                 </div>
                                 <div className="flex flex-col mt-3">
                                     <label htmlFor="fee_topup_cazhpos">
-                                        Tarif topup kartu via CazhPOIN*
+                                        Harga topup kartu via CazhPOIN*
                                     </label>
 
                                     <InputNumber
@@ -1382,7 +1382,7 @@ const Create = ({ usersProp, partnersProp, signaturesProp, referralsProp }) => {
                                 </div>
                                 <div className="flex flex-col mt-3">
                                     <label htmlFor="fee_withdraw_cazhpos">
-                                        Tarif penarikan saldo kartu via
+                                        Harga penarikan saldo kartu via
                                         CazhPOIN*
                                     </label>
 
@@ -1421,7 +1421,7 @@ const Create = ({ usersProp, partnersProp, signaturesProp, referralsProp }) => {
                                 </div>
                                 <div className="flex flex-col mt-3">
                                     <label htmlFor="fee_bill_saldokartu">
-                                        Tarif bayar tagihan via Saldo Kartu*
+                                        Harga bayar tagihan via Saldo Kartu*
                                     </label>
 
                                     <InputNumber
@@ -2823,7 +2823,7 @@ const Create = ({ usersProp, partnersProp, signaturesProp, referralsProp }) => {
                                                                                                 }
                                                                                             >
                                                                                                 {data.fee_qris ??
-                                                                                                    "{{Tarif QRIS}}"}
+                                                                                                    "{{Harga QRIS}}"}
                                                                                             </span>
                                                                                         </li>
                                                                                     </ul>
@@ -2866,7 +2866,7 @@ const Create = ({ usersProp, partnersProp, signaturesProp, referralsProp }) => {
                                                                                         </li>
                                                                                         <li>
                                                                                             {data.fee_qris ??
-                                                                                                "{{Tarif QRIS}}"}
+                                                                                                "{{Harga QRIS}}"}
                                                                                         </li>
                                                                                     </ul>
                                                                                 </td>
@@ -2910,7 +2910,7 @@ const Create = ({ usersProp, partnersProp, signaturesProp, referralsProp }) => {
                                                                                         </li>
                                                                                         <li>
                                                                                             {data.fee_qris ??
-                                                                                                "{{Tarif QRIS}}"}
+                                                                                                "{{Harga QRIS}}"}
                                                                                         </li>
                                                                                         <li>
                                                                                             2%
@@ -2970,7 +2970,7 @@ const Create = ({ usersProp, partnersProp, signaturesProp, referralsProp }) => {
                                                                                         </li>
                                                                                         <li>
                                                                                             {data.fee_qris ??
-                                                                                                "{{Tarif QRIS}}"}
+                                                                                                "{{Harga QRIS}}"}
                                                                                         </li>
                                                                                         <li>
                                                                                             <span

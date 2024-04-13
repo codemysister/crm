@@ -29,6 +29,8 @@ import "filepond/dist/filepond.min.css";
 import Log from "./Log";
 import Arsip from "./Arsip";
 import DetailLead from "./DetailLead/DetailLead";
+import getViewportSize from "../Utils/getViewportSize";
+import { formateDate } from "../Utils/formatDate";
 registerPlugin(FilePondPluginFileValidateSize);
 
 export default function Index({ auth, usersProp, statusProp }) {
@@ -40,6 +42,8 @@ export default function Index({ auth, usersProp, statusProp }) {
     const [confirmIsVisible, setConfirmIsVisible] = useState(false);
     const [selectedLead, setSelectedLead] = useState(null);
     const [isLoadingData, setIsLoadingData] = useState(false);
+    const viewportSize = getViewportSize();
+    const isMobile = viewportSize.width < 992;
     const toast = useRef(null);
     const action = useRef(null);
     const menuAddRef = useRef(null);
@@ -235,6 +239,7 @@ export default function Index({ auth, usersProp, statusProp }) {
                 NomorTelepon: data.phone_number ? data.phone_number : "",
                 Alamat: data.address ? data.address : "",
                 JumlahMember: data.total_members ? data.total_members : "",
+                Tanggal_Pembuatan: formateDate(data.created_at),
             };
         });
         import("xlsx").then((xlsx) => {
@@ -294,18 +299,30 @@ export default function Index({ auth, usersProp, statusProp }) {
                 onGlobalFilterChange={onGlobalFilterChange}
             >
                 <Button
-                    icon={filterButtonIcon}
-                    className="shadow-md border border-slate-600 bg-transparent text-slate-600 dark:bg-slate-700 dark:text-slate-300 rounded-lg"
-                    label="filter"
+                    className="shadow-md w-[10px] lg:w-[90px] border border-slate-600 bg-transparent text-slate-600 dark:bg-slate-700 dark:text-slate-300 rounded-lg"
                     onClick={() => setSidebarFilter(true)}
-                />
+                >
+                    <span className="w-full flex justify-center items-center gap-1">
+                        <i
+                            className="pi pi-filter"
+                            style={{ fontSize: "0.7rem" }}
+                        ></i>{" "}
+                        {!isMobile && <span>filter</span>}
+                    </span>
+                </Button>
                 <Button
-                    icon={exportButtonIcon}
-                    className="shadow-md bg-transparent text-slate-600 dark:bg-slate-700 dark:text-slate-300 dark:border rounded-lg"
-                    label="export"
+                    className="shadow-md w-[10px] lg:w-[90px] bg-transparent text-slate-600 dark:bg-slate-700 dark:text-slate-300 dark:border rounded-lg"
                     onClick={exportExcel}
                     data-pr-tooltip="XLS"
-                />
+                >
+                    <span className="w-full flex items-center justify-center gap-1">
+                        <i
+                            className="pi pi-file-excel"
+                            style={{ fontSize: "0.8rem" }}
+                        ></i>{" "}
+                        {!isMobile && <span>export</span>}
+                    </span>
+                </Button>
             </HeaderDatatable>
         );
     };
@@ -584,7 +601,7 @@ export default function Index({ auth, usersProp, statusProp }) {
                         />
                         <Button
                             type="button"
-                            label="Kosongkan"
+                            label="Reset"
                             onClick={(e) => {
                                 resetFilter();
                                 btnFilterRef.current.click();
