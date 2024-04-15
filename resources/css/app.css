@@ -63,9 +63,6 @@
       min-width: none;
     }
 
-    td .p-radiobutton .p-radiobutton-box{
-      border-radius: 0;
-    }
 
     .p-datatable .p-datatable-header{
       padding: 0.75rem 1rem;
@@ -505,6 +502,10 @@
       padding: 0.7rem !important;
     } 
 
+    .p-overlaypanel-content .p-button-label{
+      display: flex !important;
+    }
+
    
 
     .dark .p-menu{
@@ -568,9 +569,14 @@
     }
 
    /* button */
+   .p-button{
+    min-width: 0px !important;
+   }
+
    .p-button.p-component.p-fileupload-choose{
     width: 100%;
    }
+
    .p-image-preview-indicator{
     width: 50%;
    }

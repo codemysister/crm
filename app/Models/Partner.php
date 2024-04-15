@@ -89,7 +89,7 @@ class Partner extends Authenticatable
 
     public function sph()
     {
-        return $this->hasOne(SPH::class, 'partner_id', 'id');
+        return $this->morphOne(SPH::class, 'sphable');
     }
 
     public function status()

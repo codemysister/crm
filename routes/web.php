@@ -233,6 +233,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/sph', [SPHController::class, 'index'])->name('sph.view')->middleware(['can:lihat sph']);
     Route::get('/sph/create', [SPHController::class, 'create'])->name('sph.create')->middleware(['can:tambah sph']);
     Route::post('/sph', [SPHController::class, 'store'])->name('sph.store')->middleware(['can:tambah sph']);
+    Route::post('/sph/filter', [SPHController::class, 'filter'])->name('sph.filter');
     Route::get('/sph/{sph:uuid}', [SPHController::class, 'edit'])->name('sph.edit')->middleware(['can:edit sph']);
     Route::put('/sph/{sph:uuid}', [SPHController::class, 'update'])->name('sph.update')->middleware(['can:edit sph']);
     Route::delete('/sph/{sph:uuid}', [SPHController::class, 'destroy'])->name('sph.destroy')->middleware(['can:hapus sph']);

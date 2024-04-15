@@ -22,7 +22,7 @@ const HeaderDatatable = ({
                     />
                 </span>
             </div>
-            <div className="flex w-[30%] justify-end gap-2">{children}</div>
+            <div className="flex justify-end gap-2">{children}</div>
         </div>
     );
 };

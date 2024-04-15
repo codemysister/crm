@@ -16,9 +16,9 @@ class SPH extends Model
         return $this->hasOne(User::class, 'id', 'created_by');
     }
 
-    public function partner()
+    public function sphable()
     {
-        return $this->belongsTo(Partner::class, 'partner_id', 'id');
+        return $this->morphTo();
     }
 
     public function products()

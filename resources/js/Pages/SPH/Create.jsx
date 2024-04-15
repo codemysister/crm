@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { Button } from "primereact/button";
 import { DataTable } from "primereact/datatable";
 import { Dialog } from "primereact/dialog";
-import { Head, Link, useForm } from "@inertiajs/react";
+import { Head, Link, router, useForm } from "@inertiajs/react";
 import { Column } from "primereact/column";
 import { useRef } from "react";
 import { FilterMatchMode } from "primereact/api";
@@ -14,6 +14,9 @@ import { Toast } from "primereact/toast";
 import { Badge } from "primereact/badge";
 import { InputNumber } from "primereact/inputnumber";
 import InputError from "@/Components/InputError";
+import { SelectButton } from "primereact/selectbutton";
+import HeaderDatatable from "@/Components/HeaderDatatable";
+import { formatNPWP } from "../Utils/formatNPWP";
 
 const BASE_URL = import.meta.env.VITE_BASE_URL;
 
@@ -26,19 +29,33 @@ const Create = ({
 }) => {
     const [users, setUsers] = useState(usersProp);
     const [partners, setPartners] = useState(partnersProp);
+    const [leads, setLeads] = useState(null);
     const [sales, setSales] = useState(salesProp);
+    const [isLoadingData, setIsLoadingData] = useState(false);
     const [signatures, setSignatures] = useState(signaturesProp);
     const [products, setProducts] = useState(productsProp);
     const [dialogVisible, setDialogVisible] = useState(false);
     const [dialogProductVisible, setDialogProductVisible] = useState(false);
+    const [dialogInstitutionVisible, setDialogInstitutionVisible] =
+        useState(false);
     const [rowClick, setRowClick] = useState(true);
-    const [selectedProducts, setSelectedProducts] = useState([]);
+    const [selected, setselected] = useState([]);
+    const [selectedInstitution, setSelectedInstitution] = useState([]);
     const toast = useRef(null);
     const partnerScrollRef = useRef(null);
     const [provinces, setProvinces] = useState([]);
     const [regencys, setRegencys] = useState([]);
     const [codeProvince, setcodeProvince] = useState(null);
     const [theme, setTheme] = useState(localStorage.theme);
+
+    const [institutionTypeOptions] = useState([
+        { label: "Partner", value: "partner" },
+        { label: "Lead", value: "lead" },
+    ]);
+    const [institutionType, setInstitutionType] = useState(
+        institutionTypeOptions[0].value
+    );
+
     useEffect(() => {
         theme
             ? (localStorage.theme = "dark")
@@ -113,6 +130,36 @@ const Create = ({
             getRegencys(codeProvince);
         }
     }, [codeProvince]);
+
+    useEffect(() => {
+        if (institutionType == "lead") {
+            getLeads();
+        } else {
+            getPartners();
+        }
+    }, [institutionType]);
+
+    const getPartners = async () => {
+        setIsLoadingData(true);
+
+        let response = await fetch("/api/partners");
+        let data = await response.json();
+
+        setPartners((prev) => (prev = data.partners));
+
+        setIsLoadingData(false);
+    };
+
+    const getLeads = async () => {
+        setIsLoadingData(true);
+
+        let response = await fetch("/api/leads");
+        let data = await response.json();
+
+        setLeads((prev) => (prev = data));
+
+        setIsLoadingData(false);
+    };
 
     const getProvince = async () => {
         const options = {
@@ -195,6 +242,42 @@ const Create = ({
 
     document.querySelector("body").classList.add("overflow-hidden");
 
+    const dialogFooterInstitutionTemplate = (type) => {
+        return (
+            <Button
+                label="OK"
+                icon="pi pi-check"
+                onClick={() => {
+                    if (institutionType == "partner") {
+                        setData("partner", {
+                            ...data.partner,
+                            uuid: selectedInstitution.uuid,
+                            name: selectedInstitution.name,
+                            province: selectedInstitution.province,
+                            regency: selectedInstitution.regency,
+                            pic: selectedInstitution.pics[0].name,
+                            type: institutionType,
+                        });
+                        setcodeProvince(
+                            (prev) =>
+                                (prev = JSON.parse(
+                                    selectedInstitution.province
+                                ).code)
+                        );
+                    } else {
+                        setData("partner", {
+                            ...data.partner,
+                            uuid: selectedInstitution.uuid,
+                            name: selectedInstitution.name,
+                            pic: selectedInstitution.pic,
+                            type: institutionType,
+                        });
+                    }
+                    setDialogInstitutionVisible(false);
+                }}
+            />
+        );
+    };
     const dialogFooterTemplate = (type) => {
         return (
             <Button
@@ -208,7 +291,7 @@ const Create = ({
     };
 
     const onDoneSelect = () => {
-        const filtered = selectedProducts.filter((product) => {
+        const filtered = selected.filter((product) => {
             return !data.products.includes(product);
         });
 
@@ -219,7 +302,7 @@ const Create = ({
         const updatedProducts = [...data.products, ...mapped];
         setData("products", updatedProducts);
         setDialogProductVisible(false);
-        setSelectedProducts((prev) => (prev = []));
+        setselected((prev) => (prev = []));
     };
 
     const triggerInputFocus = (ref) => {
@@ -275,21 +358,30 @@ const Create = ({
         );
     };
 
-    const header = (
-        <div className="flex flex-row justify-left gap-2 align-items-center items-end">
-            <div className="w-[30%]">
-                <span className="p-input-icon-left">
-                    <i className="pi pi-search dark:text-white" />
-                    <InputText
-                        className="dark:bg-transparent dark:placeholder-white"
-                        value={globalFilterValue}
-                        onChange={onGlobalFilterChange}
-                        placeholder="Keyword Search"
-                    />
-                </span>
-            </div>
-        </div>
-    );
+    const headerProduct = () => {
+        return (
+            <HeaderDatatable
+                globalFilterValue={globalFilterValue}
+                onGlobalFilterChange={onGlobalFilterChange}
+            ></HeaderDatatable>
+        );
+    };
+
+    const header = () => {
+        return (
+            <HeaderDatatable
+                globalFilterValue={globalFilterValue}
+                onGlobalFilterChange={onGlobalFilterChange}
+            >
+                <SelectButton
+                    className="w-full flex justify-end lg:text-md text-center"
+                    value={institutionType}
+                    onChange={(e) => setInstitutionType(e.value)}
+                    options={institutionTypeOptions}
+                />
+            </HeaderDatatable>
+        );
+    };
 
     // fungsi toast
     const showSuccess = (type) => {
@@ -330,8 +422,7 @@ const Create = ({
         post("/sph", {
             onSuccess: () => {
                 showSuccess("Tambah");
-                window.location = "/sph";
-                // reset("name", "category", "price", "unit", "description");
+                router.get("/sph");
             },
 
             onError: () => {
@@ -425,6 +516,33 @@ const Create = ({
 
                                 <div className="flex flex-col mt-3">
                                     <label htmlFor="lembaga">Lembaga *</label>
+                                    <InputText
+                                        value={data.partner.name}
+                                        onFocus={() => {
+                                            triggerInputFocus(
+                                                animatePartnerNameRef
+                                            );
+                                        }}
+                                        onBlur={() => {
+                                            stopAnimateInputFocus(
+                                                animatePartnerNameRef
+                                            );
+                                        }}
+                                        onClick={() => {
+                                            setDialogInstitutionVisible(true);
+                                        }}
+                                        placeholder="Pilih lembaga"
+                                        className="dark:bg-gray-300 cursor-pointer"
+                                        id="partner"
+                                        aria-describedby="partner-help"
+                                    />
+                                    <InputError
+                                        message={errors["partner.name"]}
+                                        className="mt-2"
+                                    />
+                                </div>
+                                {/* <div className="flex flex-col mt-3">
+                                    <label htmlFor="lembaga">Lembaga *</label>
                                     <div className="p-inputgroup flex-1">
                                         <InputText
                                             value={data.partner.name}
@@ -507,7 +625,7 @@ const Create = ({
                                         message={errors["partner.name"]}
                                         className="mt-2"
                                     />
-                                </div>
+                                </div> */}
 
                                 <div className="flex flex-col mt-3">
                                     <label htmlFor="province">Provinsi *</label>
@@ -970,19 +1088,17 @@ const Create = ({
                                 value={products}
                                 paginator
                                 filters={filters}
-                                rows={5}
-                                header={header}
+                                rows={10}
+                                header={headerProduct}
                                 scrollable
                                 scrollHeight="flex"
                                 tableStyle={{ minWidth: "50rem" }}
                                 selectionMode={rowClick ? null : "checkbox"}
-                                // onSelectionChange={(e) => {
-                                //     setData("products", e.value);
-                                // }}
-                                selection={selectedProducts}
-                                onSelectionChange={(e) =>
-                                    setSelectedProducts(e.value)
-                                }
+                                rowsPerPageOptions={[10, 25, 50, 100]}
+                                paginatorTemplate="RowsPerPageDropdown FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink"
+                                currentPageReportTemplate="{first} - {last} dari {totalRecords}"
+                                selection={selected}
+                                onSelectionChange={(e) => setselected(e.value)}
                                 dataKey="id"
                             >
                                 <Column
@@ -1001,6 +1117,131 @@ const Create = ({
                                 <Column field="price" header="Harga"></Column>
                             </DataTable>
                         </Dialog>
+                    </Dialog>
+
+                    <Dialog
+                        header="Pilih Lembaga"
+                        visible={dialogInstitutionVisible}
+                        className="w-[100vw] lg:w-[75vw]"
+                        maximizable
+                        modal
+                        onHide={() => setDialogInstitutionVisible(false)}
+                        footer={() => dialogFooterInstitutionTemplate()}
+                    >
+                        <DataTable
+                            value={
+                                institutionType == "partner" ? partners : leads
+                            }
+                            paginator
+                            filters={filters}
+                            rowsPerPageOptions={[10, 25, 50, 100]}
+                            paginatorTemplate="RowsPerPageDropdown FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink"
+                            currentPageReportTemplate="{first} - {last} dari {totalRecords}"
+                            rows={10}
+                            header={header}
+                            globalFilterFields={[
+                                "name",
+                                "status",
+                                "npwp",
+                                "address",
+                                "phone_number",
+                            ]}
+                            scrollable
+                            scrollHeight="flex"
+                            tableStyle={{ minWidth: "50rem" }}
+                            selectionMode="radiobutton"
+                            loading={isLoadingData}
+                            selection={selectedInstitution}
+                            onSelectionChange={(e) =>
+                                setSelectedInstitution(e.value)
+                            }
+                            dataKey="id"
+                        >
+                            <Column
+                                selectionMode="single"
+                                headerStyle={{ width: "3rem" }}
+                            ></Column>
+                            <Column
+                                field="name"
+                                header="Nama"
+                                align="left"
+                                style={{
+                                    width: "max-content",
+                                    whiteSpace: "nowrap",
+                                }}
+                            ></Column>
+                            <Column
+                                header="Status"
+                                body={(rowData) => {
+                                    return (
+                                        <Badge
+                                            value={rowData.status.name}
+                                            className="text-white"
+                                            style={{
+                                                backgroundColor:
+                                                    "#" + rowData.status.color,
+                                            }}
+                                        ></Badge>
+                                    );
+                                }}
+                                className="dark:border-none  lg:w-max lg:whitespace-nowrap"
+                                headerClassName="dark:border-none  dark:bg-slate-900 dark:text-gray-300"
+                                align="left"
+                                style={{
+                                    width: "max-content",
+                                    whiteSpace: "nowrap",
+                                }}
+                            ></Column>
+                            {institutionType == "partner" && (
+                                <Column
+                                    header="NPWP"
+                                    body={(rowData) =>
+                                        rowData.npwp !== null
+                                            ? formatNPWP(rowData.npwp)
+                                            : "-"
+                                    }
+                                    className="dark:border-none"
+                                    headerClassName="dark:border-none  dark:bg-slate-900 dark:text-gray-300"
+                                    align="left"
+                                    style={{
+                                        width: "max-content",
+                                        whiteSpace: "nowrap",
+                                    }}
+                                ></Column>
+                            )}
+                            <Column
+                                field="phone_number"
+                                body={(rowData) => {
+                                    return rowData.phone_number
+                                        ? rowData.phone_number
+                                        : "-";
+                                }}
+                                className="dark:border-none"
+                                headerClassName="dark:border-none dark:bg-transparent dark:text-gray-300"
+                                header="No. Telepon"
+                                align="left"
+                                style={{
+                                    width: "max-content",
+                                    whiteSpace: "nowrap",
+                                }}
+                            ></Column>
+                            <Column
+                                field="address"
+                                body={(rowData) => {
+                                    return rowData.address
+                                        ? rowData.address
+                                        : "-";
+                                }}
+                                className="dark:border-none"
+                                headerClassName="dark:border-none dark:bg-transparent dark:text-gray-300"
+                                header="Alamat"
+                                align="left"
+                                style={{
+                                    width: "max-content",
+                                    whiteSpace: "nowrap",
+                                }}
+                            ></Column>
+                        </DataTable>
                     </Dialog>
 
                     <div className="md:w-[65%] hidden md:block text-sm h-screen max-h-screen overflow-y-auto p-5">

@@ -13,7 +13,7 @@ return new class extends Migration {
         Schema::create('sphs', function (Blueprint $table) {
             $table->id();
             $table->uuid();
-            $table->foreignId('partner_id')->nullable()->constrained('partners', 'id')->onDelete('cascade');
+            $table->morphs('sphable');
             $table->string('code');
             $table->date('date');
             $table->string('partner_name');

@@ -5,7 +5,7 @@ import { Button } from "primereact/button";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { Dialog } from "primereact/dialog";
-import { Head, Link, useForm } from "@inertiajs/react";
+import { Head, Link, router, useForm } from "@inertiajs/react";
 import { useRef } from "react";
 import { FilterMatchMode } from "primereact/api";
 import { Dropdown } from "primereact/dropdown";
@@ -15,8 +15,9 @@ import { Badge } from "primereact/badge";
 import { useEffect } from "react";
 import { InputNumber } from "primereact/inputnumber";
 import InputError from "@/Components/InputError";
-
-const BASE_URL = import.meta.env.VITE_BASE_URL;
+import { formatNPWP } from "../Utils/formatNPWP";
+import { SelectButton } from "primereact/selectbutton";
+import HeaderDatatable from "@/Components/HeaderDatatable";
 
 const Edit = ({
     usersProp,
@@ -28,17 +29,29 @@ const Edit = ({
 }) => {
     const [users, setUsers] = useState(usersProp);
     const [partners, setPartners] = useState(partnersProp);
+    const [leads, setLeads] = useState(null);
     const [sales, setSales] = useState(salesProp);
     const [signatures, setSignatures] = useState(signaturesProp);
     const [products, setProducts] = useState(productsProp);
+    const [isLoadingData, setIsLoadingData] = useState(false);
+    const [selectedInstitution, setSelectedInstitution] = useState([]);
     const [dialogVisible, setDialogVisible] = useState(false);
     const [dialogProductVisible, setDialogProductVisible] = useState(false);
+    const [dialogInstitutionVisible, setDialogInstitutionVisible] =
+        useState(false);
     const [rowClick, setRowClick] = useState(true);
     const toast = useRef(null);
     const [selectedProducts, setSelectedProducts] = useState("");
     const [provinces, setProvinces] = useState([]);
     const [regencys, setRegencys] = useState([]);
     const [codeProvince, setcodeProvince] = useState(null);
+    const [institutionTypeOptions] = useState([
+        { label: "Partner", value: "partner" },
+        { label: "Lead", value: "lead" },
+    ]);
+    const [institutionType, setInstitutionType] = useState(
+        institutionTypeOptions[0].value
+    );
 
     const [theme, setTheme] = useState(localStorage.theme);
     useEffect(() => {
@@ -115,6 +128,36 @@ const Edit = ({
             getRegencys(codeProvince);
         }
     }, [codeProvince]);
+
+    useEffect(() => {
+        if (institutionType == "lead") {
+            getLeads();
+        } else {
+            getPartners();
+        }
+    }, [institutionType]);
+
+    const getPartners = async () => {
+        setIsLoadingData(true);
+
+        let response = await fetch("/api/partners");
+        let data = await response.json();
+
+        setPartners((prev) => (prev = data.partners));
+
+        setIsLoadingData(false);
+    };
+
+    const getLeads = async () => {
+        setIsLoadingData(true);
+
+        let response = await fetch("/api/leads");
+        let data = await response.json();
+
+        setLeads((prev) => (prev = data));
+
+        setIsLoadingData(false);
+    };
 
     const getProvince = async () => {
         const options = {
@@ -230,6 +273,43 @@ const Edit = ({
         );
     };
 
+    const dialogFooterInstitutionTemplate = (type) => {
+        return (
+            <Button
+                label="OK"
+                icon="pi pi-check"
+                onClick={() => {
+                    if (institutionType == "partner") {
+                        setData("partner", {
+                            ...data.partner,
+                            uuid: selectedInstitution.uuid,
+                            name: selectedInstitution.name,
+                            province: selectedInstitution.province,
+                            regency: selectedInstitution.regency,
+                            pic: selectedInstitution.pics[0].name,
+                            type: institutionType,
+                        });
+                        setcodeProvince(
+                            (prev) =>
+                                (prev = JSON.parse(
+                                    selectedInstitution.province
+                                ).code)
+                        );
+                    } else {
+                        setData("partner", {
+                            ...data.partner,
+                            uuid: selectedInstitution.uuid,
+                            name: selectedInstitution.name,
+                            pic: selectedInstitution.pic,
+                            type: institutionType,
+                        });
+                    }
+                    setDialogInstitutionVisible(false);
+                }}
+            />
+        );
+    };
+
     const selectedOptionTemplate = (option, props) => {
         if (option) {
             return (
@@ -284,6 +364,22 @@ const Edit = ({
             </div>
         </div>
     );
+
+    const headerInstitution = () => {
+        return (
+            <HeaderDatatable
+                globalFilterValue={globalFilterValue}
+                onGlobalFilterChange={onGlobalFilterChange}
+            >
+                <SelectButton
+                    className="w-full flex justify-end lg:text-md text-center"
+                    value={institutionType}
+                    onChange={(e) => setInstitutionType(e.value)}
+                    options={institutionTypeOptions}
+                />
+            </HeaderDatatable>
+        );
+    };
 
     // fungsi toast
     const showSuccess = (type) => {
@@ -340,12 +436,11 @@ const Edit = ({
         put("/sph/" + sph.uuid, {
             onSuccess: () => {
                 showSuccess("Update");
-                window.location = "/sph";
-                // reset("name", "category", "price", "unit", "description");
+                router.get("/sph");
             },
 
             onError: () => {
-                showError("Update");
+                showError("Tambah");
             },
         });
     };
@@ -403,54 +498,6 @@ const Edit = ({
                                     />
                                 </div>
 
-                                {/* <div className="flex flex-col mt-3">
-                                    <label htmlFor="lembaga">Lembaga *</label>
-                                    <Dropdown
-                                        value={data.partner}
-                                        dataKey="id"
-                                        onChange={(e) => {
-                                            setData("partner", {
-                                                ...data.partner,
-                                                id: e.target.value.id,
-                                                name: e.target.value.name,
-                                                province:
-                                                    e.target.value.province,
-                                                regency: e.target.value.regency,
-                                                pic: e.target.value.pics[0]
-                                                    .name,
-                                            });
-                                            setcodeProvince(
-                                                (prev) =>
-                                                    (prev = JSON.parse(
-                                                        e.target.value.province
-                                                    ).code)
-                                            );
-                                        }}
-                                        onFocus={() => {
-                                            triggerInputFocus(
-                                                animatePartnerNameRef
-                                            );
-                                        }}
-                                        onShow={() => {
-                                            triggerInputFocus(
-                                                animatePartnerNameRef
-                                            );
-                                        }}
-                                        onBlur={() => {
-                                            stopAnimateInputFocus(
-                                                animatePartnerNameRef
-                                            );
-                                        }}
-                                        options={partners}
-                                        optionLabel="name"
-                                        placeholder="Pilih Lembaga"
-                                        filter
-                                        valueTemplate={selectedOptionTemplate}
-                                        itemTemplate={optionTemplate}
-                                        className="w-full md:w-14rem"
-                                    />
-                                </div> */}
-
                                 <div className="flex flex-col mt-3">
                                     <label htmlFor="partner_pic">PIC *</label>
                                     <InputText
@@ -484,84 +531,26 @@ const Edit = ({
 
                                 <div className="flex flex-col mt-3">
                                     <label htmlFor="lembaga">Lembaga *</label>
-                                    <div className="p-inputgroup flex-1">
-                                        <InputText
-                                            value={data.partner.name}
-                                            placeholder="Lembaga"
-                                            onChange={(e) => {
-                                                if (
-                                                    typeof e.target.value ==
-                                                    "object"
-                                                ) {
-                                                    setData((prev) => ({
-                                                        ...prev,
-                                                        partner: {
-                                                            ...prev.partner,
-                                                            name: e.target.value
-                                                                .name,
-                                                            id: e.target.value
-                                                                .id,
-                                                        },
-                                                    }));
-                                                } else {
-                                                    setData((prev) => ({
-                                                        ...prev,
-                                                        partner: {
-                                                            ...prev.partner,
-                                                            name: e.target
-                                                                .value,
-                                                            id: null,
-                                                        },
-                                                    }));
-                                                }
-                                            }}
-                                            onFocus={() => {
-                                                triggerInputFocus(
-                                                    animatePartnerNameRef
-                                                );
-                                            }}
-                                            onBlur={() => {
-                                                stopAnimateInputFocus(
-                                                    animatePartnerNameRef
-                                                );
-                                            }}
-                                            className="w-[90%]"
-                                        />
-                                        <Dropdown
-                                            value={data.partner}
-                                            dataKey="name"
-                                            onChange={(e) => {
-                                                setData("partner", {
-                                                    ...data.partner,
-                                                    id: e.target.value.id,
-                                                    name: e.target.value.name,
-                                                    province:
-                                                        e.target.value.province,
-                                                    regency:
-                                                        e.target.value.regency,
-                                                    pic: e.target.value.pics[0]
-                                                        .name,
-                                                });
-                                                setcodeProvince(
-                                                    (prev) =>
-                                                        (prev = JSON.parse(
-                                                            e.target.value
-                                                                .province
-                                                        ).code)
-                                                );
-                                            }}
-                                            options={partners}
-                                            filter
-                                            placeholder={false}
-                                            showClear={false}
-                                            optionLabel="name"
-                                            valueTemplate={
-                                                selectedOptionTemplate
-                                            }
-                                            itemTemplate={optionTemplate}
-                                            className="w-[10%] dropdown-group border-l-0"
-                                        />
-                                    </div>
+                                    <InputText
+                                        value={data.partner.name}
+                                        onFocus={() => {
+                                            triggerInputFocus(
+                                                animatePartnerNameRef
+                                            );
+                                        }}
+                                        onBlur={() => {
+                                            stopAnimateInputFocus(
+                                                animatePartnerNameRef
+                                            );
+                                        }}
+                                        onClick={() => {
+                                            setDialogInstitutionVisible(true);
+                                        }}
+                                        placeholder="Pilih lembaga"
+                                        className="dark:bg-gray-300 cursor-pointer"
+                                        id="partner"
+                                        aria-describedby="partner-help"
+                                    />
                                     <InputError
                                         message={errors["partner.name"]}
                                         className="mt-2"
@@ -1218,6 +1207,125 @@ const Edit = ({
                     </div>
                 </div>
             </div>
+
+            <Dialog
+                header="Pilih Lembaga"
+                visible={dialogInstitutionVisible}
+                className="w-[100vw] lg:w-[75vw]"
+                maximizable
+                modal
+                onHide={() => setDialogInstitutionVisible(false)}
+                footer={() => dialogFooterInstitutionTemplate()}
+            >
+                <DataTable
+                    value={institutionType == "partner" ? partners : leads}
+                    paginator
+                    filters={filters}
+                    rowsPerPageOptions={[10, 25, 50, 100]}
+                    paginatorTemplate="RowsPerPageDropdown FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink"
+                    currentPageReportTemplate="{first} - {last} dari {totalRecords}"
+                    rows={10}
+                    header={headerInstitution}
+                    globalFilterFields={[
+                        "name",
+                        "status",
+                        "npwp",
+                        "address",
+                        "phone_number",
+                    ]}
+                    scrollable
+                    scrollHeight="flex"
+                    tableStyle={{ minWidth: "50rem" }}
+                    selectionMode="radiobutton"
+                    loading={isLoadingData}
+                    selection={selectedInstitution}
+                    onSelectionChange={(e) => setSelectedInstitution(e.value)}
+                    dataKey="id"
+                >
+                    <Column
+                        selectionMode="single"
+                        headerStyle={{ width: "3rem" }}
+                    ></Column>
+                    <Column
+                        field="name"
+                        header="Nama"
+                        align="left"
+                        style={{
+                            width: "max-content",
+                            whiteSpace: "nowrap",
+                        }}
+                    ></Column>
+                    <Column
+                        header="Status"
+                        body={(rowData) => {
+                            return (
+                                <Badge
+                                    value={rowData.status.name}
+                                    className="text-white"
+                                    style={{
+                                        backgroundColor:
+                                            "#" + rowData.status.color,
+                                    }}
+                                ></Badge>
+                            );
+                        }}
+                        className="dark:border-none  lg:w-max lg:whitespace-nowrap"
+                        headerClassName="dark:border-none  dark:bg-slate-900 dark:text-gray-300"
+                        align="left"
+                        style={{
+                            width: "max-content",
+                            whiteSpace: "nowrap",
+                        }}
+                    ></Column>
+                    {institutionType == "partner" && (
+                        <Column
+                            header="NPWP"
+                            body={(rowData) =>
+                                rowData.npwp !== null
+                                    ? formatNPWP(rowData.npwp)
+                                    : "-"
+                            }
+                            className="dark:border-none"
+                            headerClassName="dark:border-none  dark:bg-slate-900 dark:text-gray-300"
+                            align="left"
+                            style={{
+                                width: "max-content",
+                                whiteSpace: "nowrap",
+                            }}
+                        ></Column>
+                    )}
+                    <Column
+                        field="phone_number"
+                        body={(rowData) => {
+                            return rowData.phone_number
+                                ? rowData.phone_number
+                                : "-";
+                        }}
+                        className="dark:border-none"
+                        headerClassName="dark:border-none dark:bg-transparent dark:text-gray-300"
+                        header="No. Telepon"
+                        align="left"
+                        style={{
+                            width: "max-content",
+                            whiteSpace: "nowrap",
+                        }}
+                    ></Column>
+                    <Column
+                        field="address"
+                        body={(rowData) => {
+                            return rowData.address ? rowData.address : "-";
+                        }}
+                        className="dark:border-none"
+                        headerClassName="dark:border-none dark:bg-transparent dark:text-gray-300"
+                        header="Alamat"
+                        align="left"
+                        style={{
+                            width: "max-content",
+                            whiteSpace: "nowrap",
+                        }}
+                    ></Column>
+                </DataTable>
+            </Dialog>
         </>
     );
 };

@@ -50,4 +50,9 @@ class Lead extends Model
     {
         return $this->belongsTo(Status::class);
     }
+
+    public function sph()
+    {
+        return $this->morphOne(SPH::class, 'sphable');
+    }
 }
