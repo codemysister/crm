@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\PartnerGeneralRequest;
 use App\Imports\PartnerImport;
+use App\Models\Lead;
 use App\Models\Partner;
 use App\Models\PartnerPIC;
 use App\Models\Status;
@@ -49,8 +50,10 @@ class PartnerController extends Controller
             ])->where('uuid', '=', $uuid)->first();
         }
 
+        $queryParamsProp = $request->all(['onboarding']);
+
         $statusProp = Status::where('category', 'partner')->get();
-        return Inertia::render("Partner/Index", compact('partner', 'usersProp', 'statusProp'));
+        return Inertia::render("Partner/Index", compact('partner', 'usersProp', 'statusProp', 'queryParamsProp'));
     }
 
     public function filter(Request $request)
@@ -132,10 +135,11 @@ class PartnerController extends Controller
         DB::beginTransaction();
 
         try {
+
             $partner = Partner::create([
                 'uuid' => Str::uuid(),
                 'name' => $request['partner']['name'],
-                'logo' => $pathLogo,
+                'logo' => $pathLogo ?? null,
                 'npwp' => $request['partner']['npwp'] ?? null,
                 'password' => $request['partner']['password'] ?? null,
                 'phone_number' => $request['partner']['phone_number'] ?? null,
@@ -157,6 +161,25 @@ class PartnerController extends Controller
                 'period' => $request['partner']['period']['name'] ?? $request['partner']['period'],
                 'created_by' => Auth::user()->id
             ]);
+
+
+            if ($request['partner']['uuid_lead'] && $request['partner']['onboarding']) {
+
+                $leadExist = Lead::with('status')->where('uuid', $request['partner']['uuid_lead'])->first();
+
+                Activity::create([
+                    'log_name' => 'onboarding',
+                    'description' => 'onboardingkan partner baru',
+                    'subject_type' => get_class($leadExist),
+                    'subject_id' => $leadExist->id,
+                    'causer_type' => get_class(Auth::user()),
+                    'causer_id' => Auth::user()->id,
+                    "event" => "onboarding",
+                    'properties' => ["attributes" => ["name" => $leadExist->name, "status.name" => $leadExist->status->name, "status.color" => $leadExist->status->color, "phone_number" => $leadExist->phone_number, "total_members" => $leadExist->total_members, "address" => $leadExist->address, "pic" => $leadExist->pic]]
+                ]);
+
+                $leadExist->forceDelete();
+            }
 
             PartnerPIC::create([
                 'uuid' => Str::uuid(),

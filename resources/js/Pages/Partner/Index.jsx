@@ -8,15 +8,12 @@ import { Dialog } from "primereact/dialog";
 import { InputText } from "primereact/inputtext";
 import { Dropdown } from "primereact/dropdown";
 import { InputTextarea } from "primereact/inputtextarea";
-import { InputMask } from "primereact/inputmask";
 import { useForm } from "@inertiajs/react";
 import {
     ConfirmDialog,
     ConfirmDialog as ConfirmDialog2,
     confirmDialog,
-    confirmDialog as confirmDialog2,
 } from "primereact/confirmdialog";
-import { Calendar } from "primereact/calendar";
 import { Badge } from "primereact/badge";
 import { TabPanel, TabView } from "primereact/tabview";
 import { FilterMatchMode } from "primereact/api";
@@ -32,9 +29,19 @@ import HeaderModule from "@/Components/HeaderModule.jsx";
 import { Sidebar } from "primereact/sidebar";
 import axios from "axios";
 import getViewportSize from "../Utils/getViewportSize.js";
+import { Calendar } from "primereact/calendar";
+import { InputMask } from "primereact/inputmask";
+import { DatatablePartner } from "./Component/DatatablePartner.jsx";
+import { memo } from "react";
 registerPlugin(FilePondPluginFileValidateSize);
 
-export default function Index({ auth, partner, usersProp, statusProp }) {
+export default function Index({
+    auth,
+    partner,
+    usersProp,
+    statusProp,
+    queryParamsProp,
+}) {
     const [partners, setPartners] = useState(null);
     const [users, setUsers] = useState(usersProp);
     const [sales, setSales] = useState(null);
@@ -67,14 +74,87 @@ export default function Index({ auth, partner, usersProp, statusProp }) {
         useState(false);
     const toast = useRef(null);
     const modalPartner = useRef(null);
-    const scrollForm = useRef(null);
     const { roles, permissions } = auth.user;
-    const [activeIndex, setActiveIndex] = useState(0);
     const [preRenderLoad, setPreRenderLoad] = useState(true);
+
+    // const [totalRecords, setTotalRecords] = useState(0);
+    // const [lazyState, setlazyState] = useState({
+    //     first: 0,
+    //     rows: 200,
+    //     page: 1,
+    //     sortField: null,
+    //     sortOrder: null,
+    //     filters: {
+    //         global: { value: null, matchMode: FilterMatchMode.CONTAINS },
+    //         name: { value: "", matchMode: "contains" },
+    //     },
+    // });
+
+    // let networkTimeout = null;
+
+    // useEffect(() => {
+    //     loadLazyData();
+    // }, [lazyState]);
+
+    // const loadLazyData = () => {
+    //     setIsLoadingData(true);
+
+    //     if (networkTimeout) {
+    //         clearTimeout(networkTimeout);
+    //     }
+    //     networkTimeout = setTimeout(() => {
+    //         axios
+    //             .get(
+    //                 `/api/partners?first=${lazyState.first}&rows=${lazyState.rows}`
+    //             )
+    //             .then((response) => {
+    //                 const { totalRecords, partners } = response.data;
+    //                 setTotalRecords(totalRecords);
+    //                 setPartners(partners);
+    //                 setIsLoadingData(false);
+    //             })
+    //             .catch((error) => {
+    //                 console.error("Error fetching partners:", error);
+    //                 setIsLoadingData(false);
+    //             });
+    //     }, Math.random() * 1000 + 250);
+    // };
+
+    // const onPage = (event) => {
+    //     setlazyState(event);
+    // };
+
+    // const onSort = (event) => {
+    //     setlazyState(event);
+    // };
+
+    // const onFilter = (event) => {
+    //     event["first"] = 0;
+    //     setlazyState(event);
+    // };
+
+    const [filters, setFilters] = useState({
+        global: { value: null, matchMode: FilterMatchMode.CONTAINS },
+    });
+    const [globalFilterValue, setGlobalFilterValue] = useState("");
+    const onGlobalFilterChange = (e) => {
+        const value = e.target.value;
+        let _filters = { ...filters };
+
+        _filters["global"].value = value;
+
+        setFilters(_filters);
+        setGlobalFilterValue(value);
+    };
 
     useEffect(() => {
         if (partner) {
             setActiveIndexTab(1);
+        }
+
+        if (queryParamsProp.onboarding) {
+            fetchData(getLeads);
+            setModalPartnersIsVisible(true);
         }
 
         let sales = usersProp.filter((user) => {
@@ -95,17 +175,6 @@ export default function Index({ auth, partner, usersProp, statusProp }) {
     }, []);
 
     useEffect(() => {
-        if (scrollForm.current) {
-            setTimeout(() => {
-                scrollForm.current.scrollIntoView({
-                    behavior: "smooth",
-                    block: "end",
-                });
-            }, 200);
-        }
-    }, [activeIndex]);
-
-    useEffect(() => {
         const fetchData = async () => {
             await getPartners();
             await getProvince();
@@ -123,6 +192,40 @@ export default function Index({ auth, partner, usersProp, statusProp }) {
             getSubdistricts(codeProvince, codeRegency);
         }
     }, [codeProvince, codeRegency]);
+
+    const fetchData = async (fnc) => {
+        try {
+            await Promise.all([fnc()]);
+            setIsLoadingData(false);
+            setPreRenderLoad((prev) => (prev = false));
+        } catch (error) {
+            console.error("Error fetching data:", error);
+        }
+    };
+
+    const getLeads = async () => {
+        setIsLoadingData(true);
+
+        let response = await fetch("/leads/" + queryParamsProp.onboarding);
+        let data = await response.json();
+
+        setData((prevData) => ({
+            ...prevData,
+            partner: {
+                ...prevData.partner,
+                uuid: data.uuid,
+                pic: data.pic,
+                name: data.name,
+                npwp: data.npwp,
+                total_members: data.total_members,
+                address: data.address,
+                onboarding: true,
+                uuid_lead: data.uuid,
+            },
+        }));
+
+        setIsLoadingData(false);
+    };
 
     const getProvince = async () => {
         const options = {
@@ -221,20 +324,6 @@ export default function Index({ auth, partner, usersProp, statusProp }) {
         }
     };
 
-    const [filters, setFilters] = useState({
-        global: { value: null, matchMode: FilterMatchMode.CONTAINS },
-    });
-    const [globalFilterValue, setGlobalFilterValue] = useState("");
-    const onGlobalFilterChange = (e) => {
-        const value = e.target.value;
-        let _filters = { ...filters };
-
-        _filters["global"].value = value;
-
-        setFilters(_filters);
-        setGlobalFilterValue(value);
-    };
-
     const {
         data,
         setData,
@@ -275,6 +364,7 @@ export default function Index({ auth, partner, usersProp, statusProp }) {
             status: "",
             note_status: null,
             excell: null,
+            onboarding: false,
         },
     });
 
@@ -339,13 +429,12 @@ export default function Index({ auth, partner, usersProp, statusProp }) {
     const getPartners = async () => {
         setIsLoadingData(true);
 
-        let response = await fetch("/api/partners");
+        let response = await fetch(`/api/partners`);
         let data = await response.json();
-
-        setPartners((prev) => data.partners);
-        setSales((prev) => data.sales);
-        setAccountManagers((prev) => data.account_managers);
-
+        setPartners(data.partners);
+        setSales(data.sales);
+        setAccountManagers(data.account_managers);
+        // setTotalRecords(data.totalRecords);
         setIsLoadingData(false);
     };
 
@@ -412,6 +501,7 @@ export default function Index({ auth, partner, usersProp, statusProp }) {
     };
 
     const handleEditPartner = (partner) => {
+        console.log(partner);
         clearErrors();
         setData((prevData) => ({
             ...prevData,
@@ -489,42 +579,6 @@ export default function Index({ auth, partner, usersProp, statusProp }) {
                 style={{ fontSize: "0.7rem", paddingRight: "5px" }}
             ></i>
         );
-    };
-    const filterButtonIcon = () => {
-        return (
-            <i
-                className="pi pi-filter"
-                style={{ fontSize: "0.7rem", paddingRight: "5px" }}
-            ></i>
-        );
-    };
-    const exportButtonIcon = () => {
-        return (
-            <i
-                className="pi pi-file-excel
-                "
-                style={{ fontSize: "0.8rem", paddingRight: "5px" }}
-            ></i>
-        );
-    };
-
-    const onRowSelect = (event) => {
-        setTimeout(() => {
-            const highlightElement = document.querySelector(
-                ".p-radiobutton-box.p-component.p-highlight"
-            );
-
-            setCheckedElement(highlightElement);
-            if (highlightElement) {
-                highlightElement.addEventListener("click", (e) => {
-                    action.current.toggle(e);
-                });
-                highlightElement.click();
-                highlightElement.click();
-                highlightElement.click();
-                highlightElement.click();
-            }
-        }, 100);
     };
 
     function formatNPWP(input) {
@@ -1084,7 +1138,10 @@ export default function Index({ auth, partner, usersProp, statusProp }) {
                             className="bg-white min-h-[500px] max-h-[80%] w-[80%] md:w-[60%] lg:w-[35%] dark:glass dark:text-white"
                             contentClassName="dark:bg-slate-900 dark:text-white"
                             visible={modalPartnersIsVisible}
-                            onHide={() => setModalPartnersIsVisible(false)}
+                            onHide={() => {
+                                reset("partner");
+                                setModalPartnersIsVisible(false);
+                            }}
                         >
                             <form
                                 onSubmit={(e) => handleSubmitForm(e, "tambah")}
@@ -2507,342 +2564,14 @@ export default function Index({ auth, partner, usersProp, statusProp }) {
 
                     <div className="flex w-full mx-auto flex-col justify-center mt-5 gap-5">
                         <div className="card p-fluid w-full h-full flex justify-center rounded-lg">
-                            <DataTable
-                                loading={isLoadingData}
-                                className="w-full h-auto rounded-lg dark:glass border-none text-center shadow-md"
-                                pt={{
-                                    bodyRow:
-                                        "dark:bg-transparent  dark:text-gray-300",
-                                    table: "dark:bg-transparent bg-white dark:text-gray-300",
-                                }}
-                                paginator
-                                rowsPerPageOptions={[5, 10, 25, 50]}
-                                paginatorTemplate="RowsPerPageDropdown FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink"
-                                currentPageReportTemplate="{first} - {last} dari {totalRecords}"
-                                rows={10}
-                                filters={filters}
-                                ref={dt}
-                                // selection={selectedPartner}
-                                // selectionMode="single"
-                                // onSelectionChange={(e) =>
-                                //     setSelectedPartner(e.value)
-                                // }
-                                // onRowSelect={onRowSelect}
-                                scrollable
-                                globalFilterFields={[
-                                    "name",
-                                    "status",
-                                    "province",
-                                    "regency",
-                                    "onboarding_date",
-                                    "live_date",
-                                    "monitoring_date_after_3_month_live",
-                                    "sales.name",
-                                    "account_manager.name",
-                                ]}
-                                emptyMessage="Partner tidak ditemukan."
-                                paginatorClassName="dark:bg-transparent paginator-custome dark:text-gray-300 rounded-b-lg"
-                                header={header}
-                                value={partners}
-                                dataKey="id"
-                            >
-                                {/* <Column
-                                    frozen
-                                    selectionMode="single"
-                                    className="bg-white dark:bg-slate-900"
-                                    headerClassName="bg-white dark:bg-slate-900"
-                                    // body={actionBodyTemplate}
-                                    // exportable={false}
-                                ></Column> */}
-                                <Column
-                                    header="Aksi"
-                                    frozen
-                                    body={actionBodyTemplate}
-                                    className="dark:border-none lg:w-max lg:whitespace-nowrap"
-                                    headerClassName="dark:border-none dark:bg-slate-900 dark:text-gray-300"
-                                ></Column>
-                                <Column
-                                    header="Nama"
-                                    body={(rowData) => (
-                                        <button
-                                            onClick={() =>
-                                                handleSelectedDetailPartner(
-                                                    rowData
-                                                )
-                                            }
-                                            className="hover:text-blue-700 text-left"
-                                        >
-                                            {rowData.name}
-                                        </button>
-                                    )}
-                                    className="dark:border-none bg-white lg:whitespace-nowrap lg:w-max"
-                                    headerClassName="dark:border-none bg-white dark:bg-slate-900 dark:text-gray-300"
-                                    align="left"
-                                    frozen={!isMobile}
-                                    style={
-                                        !isMobile
-                                            ? {
-                                                  width: "max-content",
-                                                  whiteSpace: "nowrap",
-                                              }
-                                            : null
-                                    }
-                                ></Column>
-                                <Column
-                                    header="Status"
-                                    body={(rowData) => {
-                                        return (
-                                            <Badge
-                                                value={rowData.status.name}
-                                                className="text-white"
-                                                style={{
-                                                    backgroundColor:
-                                                        "#" +
-                                                        rowData.status.color,
-                                                }}
-                                            ></Badge>
-                                        );
-                                    }}
-                                    className="dark:border-none bg-white lg:w-max lg:whitespace-nowrap"
-                                    headerClassName="dark:border-none bg-white dark:bg-slate-900 dark:text-gray-300"
-                                    align="left"
-                                    frozen={!isMobile}
-                                    style={
-                                        !isMobile
-                                            ? {
-                                                  width: "max-content",
-                                                  whiteSpace: "nowrap",
-                                              }
-                                            : null
-                                    }
-                                ></Column>
-                                <Column
-                                    header="NPWP"
-                                    body={(rowData) =>
-                                        rowData.npwp !== null
-                                            ? formatNPWP(rowData.npwp)
-                                            : "-"
-                                    }
-                                    className="dark:border-none"
-                                    headerClassName="dark:border-none  dark:bg-slate-900 dark:text-gray-300"
-                                    align="left"
-                                    frozen={!isMobile}
-                                    style={
-                                        !isMobile
-                                            ? {
-                                                  width: "max-content",
-                                                  whiteSpace: "nowrap",
-                                              }
-                                            : null
-                                    }
-                                ></Column>
-                                <Column
-                                    field="uuid"
-                                    hidden
-                                    className="dark:border-none"
-                                    headerClassName="dark:border-none  dark:bg-transparent dark:text-gray-300"
-                                    header="Nama"
-                                    align="left"
-                                    style={{
-                                        width: "max-content",
-                                        whiteSpace: "nowrap",
-                                    }}
-                                ></Column>
-
-                                <Column
-                                    field="total_members"
-                                    body={(rowData) => {
-                                        return rowData.total_members
-                                            ? rowData.total_members
-                                            : "-";
-                                    }}
-                                    className="dark:border-none"
-                                    headerClassName="dark:border-none dark:bg-transparent dark:text-gray-300"
-                                    header="Jumlah Member"
-                                    align="left"
-                                    style={{
-                                        width: "max-content",
-                                        whiteSpace: "nowrap",
-                                    }}
-                                ></Column>
-                                <Column
-                                    field="phone_number"
-                                    body={(rowData) => {
-                                        return rowData.phone_number
-                                            ? rowData.phone_number
-                                            : "-";
-                                    }}
-                                    className="dark:border-none"
-                                    headerClassName="dark:border-none dark:bg-transparent dark:text-gray-300"
-                                    header="No. Telepon"
-                                    align="left"
-                                    style={{
-                                        width: "max-content",
-                                        whiteSpace: "nowrap",
-                                    }}
-                                ></Column>
-                                <Column
-                                    header="Sales"
-                                    body={(rowData) => {
-                                        return rowData.sales
-                                            ? rowData.sales.name
-                                            : "-";
-                                    }}
-                                    className="dark:border-none"
-                                    headerClassName="dark:border-none  dark:bg-transparent dark:text-gray-300"
-                                    align="left"
-                                    style={{
-                                        width: "max-content",
-                                        whiteSpace: "nowrap",
-                                    }}
-                                ></Column>
-                                <Column
-                                    header="Account Manager"
-                                    body={(rowData) =>
-                                        rowData.account_manager !== null
-                                            ? rowData.account_manager.name
-                                            : "-"
-                                    }
-                                    className="dark:border-none"
-                                    headerClassName="dark:border-none  dark:bg-transparent dark:text-gray-300"
-                                    align="left"
-                                    style={{
-                                        width: "max-content",
-                                        whiteSpace: "nowrap",
-                                    }}
-                                ></Column>
-                                <Column
-                                    field="province"
-                                    className="dark:border-none"
-                                    headerClassName="dark:border-none  dark:bg-transparent dark:text-gray-300"
-                                    header="Provinsi"
-                                    body={(rowData) => {
-                                        return rowData.province
-                                            ? JSON.parse(rowData.province).name
-                                            : "belum diiisi";
-                                    }}
-                                    align="left"
-                                    style={{
-                                        width: "max-content",
-                                        whiteSpace: "nowrap",
-                                    }}
-                                ></Column>
-                                <Column
-                                    field="regency"
-                                    className="dark:border-none"
-                                    headerClassName="dark:border-none dark:bg-transparent dark:text-gray-300"
-                                    header="Kabupaten"
-                                    body={(rowData) => {
-                                        return rowData.regency
-                                            ? JSON.parse(rowData.regency).name
-                                            : "-";
-                                    }}
-                                    align="left"
-                                    style={{
-                                        width: "max-content",
-                                        whiteSpace: "nowrap",
-                                    }}
-                                ></Column>
-                                <Column
-                                    field="subdistrict"
-                                    className="dark:border-none"
-                                    headerClassName="dark:border-none dark:bg-transparent dark:text-gray-300"
-                                    header="Kecamatan"
-                                    body={(rowData) => {
-                                        return rowData.subdistrict
-                                            ? JSON.parse(rowData.subdistrict)
-                                                  .name
-                                            : "-";
-                                    }}
-                                    align="left"
-                                    style={{
-                                        width: "max-content",
-                                        whiteSpace: "nowrap",
-                                    }}
-                                ></Column>
-                                <Column
-                                    header="Tanggal onboarding"
-                                    body={(rowData) => {
-                                        return rowData.onboarding_date
-                                            ? new Date(
-                                                  rowData.onboarding_date
-                                              ).toLocaleDateString("id")
-                                            : "-";
-                                    }}
-                                    className="dark:border-none"
-                                    headerClassName="dark:border-none  dark:bg-transparent dark:text-gray-300"
-                                    align="left"
-                                    style={{
-                                        width: "max-content",
-                                        whiteSpace: "nowrap",
-                                    }}
-                                ></Column>
-                                <Column
-                                    header="Tanggal live"
-                                    body={(rowData) =>
-                                        rowData.live_date !== null
-                                            ? new Date(
-                                                  rowData.live_date
-                                              ).toLocaleDateString("id")
-                                            : "-"
-                                    }
-                                    className="dark:border-none"
-                                    headerClassName="dark:border-none  dark:bg-transparent dark:text-gray-300"
-                                    align="left"
-                                    style={{
-                                        width: "max-content",
-                                        whiteSpace: "nowrap",
-                                    }}
-                                ></Column>
-                                <Column
-                                    header="Tanggal Monitoring (3 bulan setelah live)"
-                                    body={(rowData) =>
-                                        rowData.monitoring_date_after_3_month_live !==
-                                        null
-                                            ? new Date(
-                                                  rowData.monitoring_date_after_3_month_live
-                                              ).toLocaleDateString("id")
-                                            : "-"
-                                    }
-                                    className="dark:border-none"
-                                    headerClassName="dark:border-none  dark:bg-transparent dark:text-gray-300"
-                                    align="left"
-                                    style={{
-                                        width: "max-content",
-                                        whiteSpace: "nowrap",
-                                    }}
-                                ></Column>
-                                <Column
-                                    header="Umur Onboarding"
-                                    body={(rowData) =>
-                                        rowData.onboarding_age !== null
-                                            ? rowData.onboarding_age + " hari"
-                                            : "-"
-                                    }
-                                    className="dark:border-none"
-                                    headerClassName="dark:border-none  dark:bg-transparent dark:text-gray-300"
-                                    align="left"
-                                    style={{
-                                        width: "max-content",
-                                        whiteSpace: "nowrap",
-                                    }}
-                                ></Column>
-                                <Column
-                                    header="Umur Live"
-                                    body={(rowData) =>
-                                        rowData.live_age !== null
-                                            ? rowData.live_age + " hari"
-                                            : "-"
-                                    }
-                                    className="dark:border-none"
-                                    headerClassName="dark:border-none  dark:bg-transparent dark:text-gray-300"
-                                    align="left"
-                                    style={{
-                                        width: "max-content",
-                                        whiteSpace: "nowrap",
-                                    }}
-                                ></Column>
-                            </DataTable>
+                            {
+                                <DatatablePartner
+                                    partners={partners}
+                                    isLoadingData={isLoadingData}
+                                    setSelectedPartner={setSelectedPartner}
+                                    action={action}
+                                />
+                            }
                         </div>
                     </div>
                 </TabPanel>
