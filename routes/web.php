@@ -18,6 +18,7 @@ use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReferralController;
+use App\Http\Controllers\RegionController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\SignatureController;
 use App\Http\Controllers\SLAController;
@@ -77,9 +78,15 @@ Route::get('clear', function () {
     Artisan::call('cache:clear');
 });
 
+
 Route::middleware('auth')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('api/dashboard/{account_manager:id}', [DashboardController::class, 'getPartnerByUser'])->name('getByUser');
+
+    // Wilayah
+    Route::get('/provinces', [RegionController::class, 'provinces'])->name('provinces');
+    Route::get('/regencys', [RegionController::class, 'regencys'])->name('regencys');
+    Route::get('/subdistricts', [RegionController::class, 'subdistricts'])->name('subdistricts');
 
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');

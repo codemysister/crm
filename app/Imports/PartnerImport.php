@@ -2,6 +2,7 @@
 
 namespace App\Imports;
 
+use App\Http\Controllers\RegionController;
 use App\Models\Partner;
 use App\Models\PartnerAccountSetting;
 use App\Models\PartnerBank;
@@ -42,6 +43,7 @@ class PartnerImport implements ToCollection, WithValidation, SkipsEmptyRows, Wit
      * @return \Illuminate\Database\Eloquent\Model|null
      */
 
+    private $regionController;
     private $partner;
     private $sales;
     private $account_managers;
@@ -52,11 +54,12 @@ class PartnerImport implements ToCollection, WithValidation, SkipsEmptyRows, Wit
 
     public function __construct()
     {
+        $this->regionController = new RegionController;
         $this->sales = User::role('account executive')->get();
         $this->account_managers = User::role('account manager')->get();
         $this->status = collect(Status::where('category', 'partner')->get(['id', 'name']));
-        $this->provinsi = collect($this->provinsi());
-        $this->kabupaten = collect($this->kabupaten());
+        $this->provinsi = $this->regionController->provinces();
+        $this->kabupaten = $this->regionController->regencys();
     }
 
     public function rules(): array
@@ -88,40 +91,6 @@ class PartnerImport implements ToCollection, WithValidation, SkipsEmptyRows, Wit
                 'required',
             ],
         ];
-    }
-
-    public function provinsi()
-    {
-        $url = "https://sipedas.pertanian.go.id/api/wilayah/list_wilayah?thn=2024&lvl=10&lv2=11";
-        try {
-
-            $client = new Client();
-            $response = $client->get($url);
-            $data = json_decode($response->getBody(), true);
-
-            return $data;
-        } catch (\Exception $e) {
-
-            dd($e->getMessage());
-        }
-    }
-
-    public function kabupaten()
-    {
-
-        $url = "https://sipedas.pertanian.go.id/api/wilayah/list_wilayah?thn=2024&lvl=10&lv2=12";
-
-
-        try {
-            $client = new Client();
-            $response = $client->get($url);
-            $data = json_decode($response->getBody(), true);
-
-            return $data;
-        } catch (\Exception $e) {
-
-            dd($e->getMessage());
-        }
     }
 
     public function startRow(): int
@@ -169,6 +138,7 @@ class PartnerImport implements ToCollection, WithValidation, SkipsEmptyRows, Wit
                     continue;
                 }
 
+
                 $regency = $this->kabupaten->filter(function ($kabupaten) use ($row) {
                     if ($row['kabkota'] === 'Kab. OKU Timur') {
                         $row['kabkota'] = 'KAB. OGAN KOMERING ULU TIMUR';
@@ -178,13 +148,27 @@ class PartnerImport implements ToCollection, WithValidation, SkipsEmptyRows, Wit
                         $row['kabkota'] = 'Kab. Bintan';
                     } else if ($row['kabkota'] == 'Kec. Kebumen') {
                         $row['kabkota'] = 'Kab. Kebumen';
+                    } else if ($row['kabkota'] == 'Kab. Batubara') {
+                        $row['kabkota'] = 'Kab. Batu Bara';
                     }
-                    return stripos(str_replace(' ', '', $kabupaten), str_replace(' ', '', $row['kabkota'])) !== false;
+
+
+                    if (preg_match("/kab\.\s/i", $row['kabkota'])) {
+                        $row['kabkota'] = strtolower(preg_replace("/\bkab\.\s*\b/i", "", $row['kabkota']));
+                    }
+                    if (preg_match("/kec\.\s/i", $row['kabkota'])) {
+                        $row['kabkota'] = strtolower(preg_replace("/\bkec\.\s*\b/i", "", $row['kabkota']));
+                    }
+
+
+                    return str_contains(str_replace(' ', '', strtolower($kabupaten->name)), str_replace(' ', '', strtolower($row['kabkota'])));
                 });
 
                 $province = $this->provinsi->filter(function ($provinsi) use ($row) {
                     if ($row['provinsi'] == 'NTB') {
                         $row['provinsi'] = 'Nusa Tenggara Barat';
+                    } else if ($row['provinsi'] == 'DI Yogyakarta') {
+                        $row['provinsi'] = 'DAERAH ISTIMEWA YOGYAKARTA';
                     }
                     return stripos(str_replace(' ', '', $provinsi), str_replace(' ', '', $row['provinsi'])) !== false;
                 });
@@ -194,12 +178,9 @@ class PartnerImport implements ToCollection, WithValidation, SkipsEmptyRows, Wit
                     return strtolower($row['status']) === strtolower($status['name']);
                 });
 
-                foreach ($regency as $code => $name) {
-                    $regency = ["code" => $code, "name" => ucwords(strtolower($name))];
-                }
-                foreach ($province as $code => $name) {
-                    $province = ["code" => $code, "name" => ucwords(strtolower($name))];
-                }
+                $province = collect($province->first());
+                $regency = collect($regency->first());
+
 
                 $tanggal_live = $row["tanggal_live"] ? Carbon::parse(Date::excelToDateTimeObject($row["tanggal_live"]))->format('Y-m-d H:i:s') : null;
                 $tanggal_onboarding = $row["tanggal_onboarding"] ? Carbon::parse(Date::excelToDateTimeObject($row["tanggal_onboarding"]))->format('Y-m-d H:i:s') : null;
@@ -214,8 +195,8 @@ class PartnerImport implements ToCollection, WithValidation, SkipsEmptyRows, Wit
                     'onboarding_age' => $this->calculateOnboardingAge($tanggal_live, $tanggal_onboarding),
                     'live_age' => $this->calculateLiveAge($tanggal_live),
                     'monitoring_date_after_3_month_live' => $row["tanggal_monitoring_3_bulan_after_live"] ? Carbon::parse(Date::excelToDateTimeObject($row["tanggal_monitoring_3_bulan_after_live"]))->format('Y-m-d H:i:s') : null,
-                    'regency' => json_encode($regency),
-                    'province' => json_encode($province),
+                    'regency' => $regency,
+                    'province' => $province,
                     'status_id' => $status->first()->id,
                     'created_by' => Auth::user()->id
                 ]);

@@ -5,6 +5,9 @@ namespace Database\Seeders;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use App\Models\Status;
 use Illuminate\Database\Seeder;
+use Laravolt\Indonesia\Seeds\ProvincesSeeder;
+use Laravolt\Indonesia\Seeds\CitiesSeeder;
+use Laravolt\Indonesia\Seeds\DistrictsSeeder;
 
 class DatabaseSeeder extends Seeder
 {
@@ -19,6 +22,9 @@ class DatabaseSeeder extends Seeder
         $this->call(UserSeeder::class);
         $this->call(ProductSeeder::class);
         $this->call(StatusSeeder::class);
+        $this->call(ProvincesSeeder::class);
+        $this->call(CitiesSeeder::class);
+        $this->call(DistrictsSeeder::class);
         // $this->call(PartnerSeeder::class);
         // $this->call(PartnerPicSeeder::class);
         // $this->call(PartnerBankSeeder::class);
