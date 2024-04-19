@@ -14,7 +14,7 @@ return new class extends Migration {
             $table->id();
             $table->uuid('uuid');
             $table->string('code');
-            $table->foreignId('partner_id')->nullable()->onDelete('cascade');
+            $table->morphs('memoable');
             $table->string('partner_name');
             $table->string('price_card');
             $table->string('price_e_card');

@@ -14,7 +14,7 @@ return new class extends Migration {
             $table->id();
             $table->uuid('uuid');
             $table->string('code');
-            $table->foreignId('partner_id')->constrained('partners', 'id')->onDelete('cascade');
+            $table->morphs('invoice_generalable');
             $table->foreignId('status_id')->constrained('statuses', 'id')->onDelete('cascade');
             $table->string('partner_name');
             $table->string('partner_npwp')->nullable();
