@@ -7,6 +7,7 @@ use App\Jobs\GenerateMemoJob;
 use App\Models\Memo;
 use App\Models\Partner;
 use App\Models\Signature;
+use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -17,7 +18,8 @@ class MemoController extends Controller
 {
     public function index()
     {
-        return Inertia::render('Memo/Index');
+        $usersProp = User::with('roles')->get();
+        return Inertia::render('Memo/Index', compact('usersProp'));
     }
 
     public function create()

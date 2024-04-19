@@ -23,7 +23,7 @@ import { Sidebar } from "primereact/sidebar";
 import { OverlayPanel } from "primereact/overlaypanel";
 import InputError from "@/Components/InputError";
 import SkeletonDatatable from "@/Components/SkeletonDatatable";
-import getViewportSize from "@/Pages/Utils/getViewportSize";
+import getViewportSize from "@/Utils/getViewportSize";
 import HeaderDatatable from "@/Components/HeaderDatatable";
 
 const Index = ({ auth, partnersProp, usersProp }) => {

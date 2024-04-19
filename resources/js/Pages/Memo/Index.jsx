@@ -5,20 +5,39 @@ import { Toast } from "primereact/toast";
 import { Button } from "primereact/button";
 import DashboardLayout from "@/Layouts/DashboardLayout";
 import HeaderModule from "@/Components/HeaderModule";
-import { InputText } from "primereact/inputtext";
-import { useForm, usePage } from "@inertiajs/react";
-import { ConfirmDialog, confirmDialog } from "primereact/confirmdialog";
-import { Skeleton } from "primereact/skeleton";
+import { router, useForm } from "@inertiajs/react";
+import {
+    ConfirmDialog,
+    ConfirmDialog as ConfirmDialog2,
+    confirmDialog,
+} from "primereact/confirmdialog";
 import { Link } from "@inertiajs/react";
 import { FilterMatchMode } from "primereact/api";
 import { ProgressSpinner } from "primereact/progressspinner";
+import HeaderDatatable from "@/Components/HeaderDatatable";
+import SkeletonDatatable from "@/Components/SkeletonDatatable";
+import { Dropdown } from "primereact/dropdown";
+import { Sidebar } from "primereact/sidebar";
+import { OverlayPanel } from "primereact/overlaypanel";
+import getViewportSize from "../../Utils/getViewportSize";
+import { Calendar } from "primereact/calendar";
+import { TabPanel, TabView } from "primereact/tabview";
 
-const BASE_URL = import.meta.env.VITE_BASE_URL;
-
-export default function Index({ auth, memosDefault }) {
+export default function Index({ auth, memosDefault, usersProp }) {
     const [memos, setMemos] = useState(memosDefault);
+    const [selectedSph, setSelectedSph] = useState(null);
+    const [users, setUsers] = useState(usersProp);
+    const viewportSize = getViewportSize();
+    const isMobile = viewportSize.width < 992;
+    const [confirmIsVisible, setConfirmIsVisible] = useState(false);
+    const [activeIndexTab, setActiveIndexTab] = useState(0);
+    const op = useRef(null);
+    const action = useRef(null);
+    const btnFilterRef = useRef(null);
+    const [sidebarFilter, setSidebarFilter] = useState(null);
+    const windowEscapeRef = useRef(null);
+
     const [isLoadingData, setIsLoadingData] = useState(false);
-    const dummyArray = Array.from({ length: 5 }, (v, i) => i);
     const [preRenderLoad, setPreRenderLoad] = useState(true);
     const toast = useRef(null);
     const { roles, permissions } = auth.user;
@@ -44,6 +63,16 @@ export default function Index({ auth, memosDefault }) {
         description: "",
     });
 
+    const {
+        data: dataFilter,
+        setData: setDataFilter,
+        reset: resetFilter,
+    } = useForm({
+        user: null,
+        input_date: { start: null, end: null },
+        institution_type: null,
+    });
+
     const [globalFilterValue, setGlobalFilterValue] = useState("");
     const onGlobalFilterChange = (e) => {
         const value = e.target.value;
@@ -67,44 +96,35 @@ export default function Index({ auth, memosDefault }) {
     };
 
     useEffect(() => {
-        const fetchData = async () => {
-            try {
-                await Promise.all([getMemos()]);
-                setIsLoadingData(false);
-                setPreRenderLoad((prev) => (prev = false));
-            } catch (error) {
-                console.error("Error fetching data:", error);
-            }
-        };
+        if (activeIndexTab == 0) {
+            fetchData(getMemos);
+        }
+    }, [activeIndexTab]);
 
-        fetchData();
+    const fetchData = async (fnc) => {
+        try {
+            await Promise.all([fnc()]);
+            setIsLoadingData(false);
+            setPreRenderLoad((prev) => (prev = false));
+        } catch (error) {
+            console.error("Error fetching data:", error);
+        }
+    };
+
+    useEffect(() => {
+        fetchData(getMemos);
     }, []);
 
     const actionBodyTemplate = (rowData) => {
         return (
             <React.Fragment>
-                {permissions.includes("edit memo") && (
-                    <Button
-                        icon="pi pi-pencil"
-                        rounded
-                        outlined
-                        className="mr-2"
-                        onClick={() =>
-                            (window.location = "/memo/" + rowData.uuid)
-                        }
-                    />
-                )}
-                {permissions.includes("hapus memo") && (
-                    <Button
-                        icon="pi pi-trash"
-                        rounded
-                        outlined
-                        severity="danger"
-                        onClick={() => {
-                            handleDeleteMemo(rowData);
-                        }}
-                    />
-                )}
+                <i
+                    className="pi pi-ellipsis-h pointer cursor-pointer"
+                    onClick={(event) => {
+                        setSelectedSph(rowData);
+                        action.current.toggle(event);
+                    }}
+                ></i>
             </React.Fragment>
         );
     };
@@ -129,47 +149,34 @@ export default function Index({ auth, memosDefault }) {
     };
 
     const handleDeleteMemo = (memo) => {
-        confirmDialog({
-            message: "Apakah Anda yakin untuk menghapus ini?",
-            header: "Konfirmasi hapus",
-            icon: "pi pi-info-circle",
-            acceptClassName: "p-button-danger",
-            accept: async () => {
-                destroy("memo/" + memo.uuid, {
-                    onSuccess: () => {
-                        getMemos();
-                        showSuccess("Hapus");
-                    },
-                    onError: () => {
-                        showError("Hapus");
-                    },
-                });
+        destroy("memo/" + memo.uuid, {
+            onSuccess: () => {
+                getMemos();
+                showSuccess("Hapus");
+            },
+            onError: () => {
+                showError("Hapus");
             },
         });
     };
 
-    const header = (
-        <div className=" flex flex-row justify-left gap-2 align-items-center items-end">
-            <div className="w-[30%]">
-                <span className="p-input-icon-left">
-                    <i className="pi pi-search dark:text-white" />
-                    <InputText
-                        className="dark:bg-transparent dark:placeholder-white"
-                        type="search"
-                        onInput={(e) => setGlobalFilter(e.target.value)}
-                        placeholder="Search..."
-                    />
-                </span>
-            </div>
-        </div>
-    );
+    const selectedOptionTemplate = (option, props) => {
+        if (option) {
+            return (
+                <div className="flex align-items-center">
+                    <div>{option.name}</div>
+                </div>
+            );
+        }
 
-    const addButtonIcon = () => {
+        return <span>{props.placeholder}</span>;
+    };
+
+    const optionTemplate = (option) => {
         return (
-            <i
-                className="pi pi-plus"
-                style={{ fontSize: "0.7rem", paddingRight: "5px" }}
-            ></i>
+            <div className="flex align-items-center">
+                <div>{option.name}</div>
+            </div>
         );
     };
 
@@ -178,52 +185,135 @@ export default function Index({ auth, memosDefault }) {
         window.location = newUrl;
     };
 
-    if (preRenderLoad) {
+    const exportExcel = () => {
+        const exports = memos.map((data) => {
+            return {
+                Kode: data.code ?? "-",
+                Lembaga: data.memoable ? data.memoable.name : "-",
+                NPWP: data.memoable ? data.memoable.npwp : "-",
+                Link_Dokumen: {
+                    v: window.location.origin + "/" + data.memo_doc ?? "-",
+                    h: "link",
+                    l: {
+                        Target:
+                            window.location.origin + "/" + data.memo_doc ?? "-",
+                        Tooltip: "Klik untuk membuka dokumen",
+                    },
+                },
+                Tanggal_Pembuatan: formateDate(data.created_at),
+                Diinput_Oleh: data.user.name,
+            };
+        });
+
+        import("xlsx").then((xlsx) => {
+            const worksheet = xlsx.utils.json_to_sheet(exports);
+            const workbook = {
+                Sheets: { data: worksheet },
+                SheetNames: ["data"],
+            };
+            const excelBuffer = xlsx.write(workbook, {
+                bookType: "xlsx",
+                type: "array",
+            });
+
+            saveAsExcelFile(excelBuffer, "memo_" + formateDate(new Date()));
+        });
+    };
+
+    const saveAsExcelFile = (buffer, fileName) => {
+        import("file-saver").then((module) => {
+            if (module && module.default) {
+                let EXCEL_TYPE =
+                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8";
+                let EXCEL_EXTENSION = ".xlsx";
+                const data = new Blob([buffer], {
+                    type: EXCEL_TYPE,
+                });
+
+                module.default.saveAs(data, fileName + EXCEL_EXTENSION);
+            }
+        });
+    };
+
+    const header = () => {
         return (
-            <>
-                <DashboardLayout auth={auth.user} className="">
-                    <div className="card my-5">
-                        <DataTable
-                            value={dummyArray}
-                            className="p-datatable-striped dark:bg-slate-900"
-                            pt={{
-                                bodyRow:
-                                    "dark:bg-transparent bg-transparent dark:text-gray-300",
-                                table: "dark:bg-transparent bg-white dark:text-gray-300",
-                                header: "dark:bg-transparent",
-                            }}
-                        >
-                            <Column
-                                style={{ width: "25%" }}
-                                body={<Skeleton />}
-                                headerClassName="dark:border-none pl-6 bg-transparent dark:bg-transparent dark:text-gray-300"
-                            ></Column>
-                            <Column
-                                style={{ width: "25%" }}
-                                body={<Skeleton />}
-                                headerClassName="dark:border-none pl-6 bg-transparent dark:bg-transparent dark:text-gray-300"
-                            ></Column>
-                            <Column
-                                style={{ width: "25%" }}
-                                body={<Skeleton />}
-                                headerClassName="dark:border-none pl-6 bg-transparent dark:bg-transparent dark:text-gray-300"
-                            ></Column>
-                            <Column
-                                style={{ width: "25%" }}
-                                body={<Skeleton />}
-                                headerClassName="dark:border-none pl-6 bg-transparent dark:bg-transparent dark:text-gray-300"
-                            ></Column>
-                        </DataTable>
-                    </div>
-                </DashboardLayout>
-            </>
+            <HeaderDatatable
+                globalFilterValue={globalFilterValue}
+                onGlobalFilterChange={onGlobalFilterChange}
+            >
+                <Button
+                    className="shadow-md w-[10px] lg:w-[90px] border border-slate-600 bg-transparent text-slate-600 dark:bg-slate-700 dark:text-slate-300 rounded-lg"
+                    onClick={() => setSidebarFilter(true)}
+                >
+                    <span className="w-full flex justify-center items-center gap-1">
+                        <i
+                            className="pi pi-filter"
+                            style={{ fontSize: "0.7rem" }}
+                        ></i>{" "}
+                        {!isMobile && <span>filter</span>}
+                    </span>
+                </Button>
+                <Button
+                    className="shadow-md w-[10px] lg:w-[90px] bg-transparent text-slate-600 dark:bg-slate-700 dark:text-slate-300 dark:border rounded-lg"
+                    onClick={exportExcel}
+                    data-pr-tooltip="XLS"
+                >
+                    <span className="w-full flex items-center justify-center gap-1">
+                        <i
+                            className="pi pi-file-excel"
+                            style={{ fontSize: "0.8rem" }}
+                        ></i>{" "}
+                        {!isMobile && <span>export</span>}
+                    </span>
+                </Button>
+            </HeaderDatatable>
         );
+    };
+
+    const confirmDeleteSph = () => {
+        confirmDialog({
+            message: "Apakah Anda yakin untuk menghapus ini?",
+            header: "Konfirmasi hapus",
+            icon: "pi pi-info-circle",
+            acceptClassName: "p-button-danger",
+            accept: () => {
+                setConfirmIsVisible(true);
+            },
+        });
+    };
+
+    const handleFilter = async (e) => {
+        e.preventDefault();
+        setIsLoadingData(true);
+        const formData = {
+            user: dataFilter.user,
+            input_date: dataFilter.input_date,
+            institution_type: dataFilter.institution_type,
+        };
+
+        const csrfToken = document
+            .querySelector('meta[name="csrf-token"]')
+            .getAttribute("content");
+
+        const response = await axios.post("/memo/filter", formData, {
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRF-TOKEN": csrfToken,
+            },
+        });
+        const data = response.data;
+        setSphs(data);
+        setSidebarFilter(false);
+        setIsLoadingData(false);
+    };
+
+    if (preRenderLoad) {
+        return <SkeletonDatatable auth={auth} />;
     }
 
     return (
         <DashboardLayout auth={auth.user} className="">
             <Toast ref={toast} />
-            <ConfirmDialog />
 
             <HeaderModule title="Memo Deviasi Harga">
                 {permissions.includes("tambah memo") && (
@@ -240,205 +330,418 @@ export default function Index({ auth, memosDefault }) {
                 )}
             </HeaderModule>
 
-            <div className="flex mx-auto flex-col justify-center mt-5 gap-5">
-                <div className="card p-fluid w-full h-full flex justify-center rounded-lg">
-                    <DataTable
-                        loading={isLoadingData}
-                        className="w-full h-auto rounded-lg dark:glass border-none text-center shadow-md"
-                        pt={{
-                            bodyRow:
-                                "dark:bg-transparent bg-transparent dark:text-gray-300",
-                            table: "dark:bg-transparent bg-white rounded-lg dark:text-gray-300",
-                            header: "",
-                        }}
-                        paginator
-                        filters={filters}
-                        rows={5}
-                        emptyMessage="Memo deviasi harga tidak ditemukan."
-                        paginatorClassName="dark:bg-transparent paginator-custome dark:text-gray-300 rounded-b-lg"
-                        header={header}
-                        value={memos}
-                        globalFilterFields={["partner_name", "code", "date"]}
-                        dataKey="id"
-                    >
-                        <Column
-                            header="No"
-                            body={(_, { rowIndex }) => rowIndex + 1}
-                            className="dark:border-none pl-6"
-                            headerClassName="dark:border-none pl-6 bg-transparent dark:bg-transparent dark:text-gray-300"
+            {/* Sidebar filter */}
+            <Sidebar
+                header="Filter"
+                visible={sidebarFilter}
+                className="w-full md:w-[30%] px-3 dark:glass dark:text-white"
+                position="right"
+                onHide={() => setSidebarFilter(false)}
+            >
+                <form onSubmit={handleFilter}>
+                    <div className="flex flex-col mt-3">
+                        <label htmlFor="name">Berdasarkan penginput</label>
+                        <Dropdown
+                            optionLabel="name"
+                            dataKey="id"
+                            value={dataFilter.user}
+                            onChange={(e) =>
+                                setDataFilter("user", e.target.value)
+                            }
+                            options={users}
+                            placeholder="Pilih User"
+                            filter
+                            showClear
+                            valueTemplate={selectedOptionTemplate}
+                            itemTemplate={optionTemplate}
+                            className="flex justify-center  dark:text-gray-400   "
                         />
-                        <Column
-                            field="uuid"
-                            hidden
-                            className="dark:border-none"
-                            headerClassName="dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300"
-                            header="Nama"
-                            align="left"
-                            style={{
-                                width: "max-content",
-                                whiteSpace: "nowrap",
-                            }}
-                        ></Column>
-                        <Column
-                            field="partner_name"
-                            className="dark:border-none"
-                            headerClassName="dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300"
-                            header="Lembaga"
-                            body={(rowData) => {
-                                {
-                                    return rowData.partner_id == null ? (
-                                        rowData.partner_name
-                                    ) : (
-                                        <button
-                                            onClick={() =>
-                                                handleSelectedDetailPartner(
-                                                    rowData.partner
-                                                )
-                                            }
-                                            className="hover:text-blue-700"
-                                        >
-                                            {rowData.partner.name}
-                                        </button>
-                                    );
+                    </div>
+
+                    <div className="flex flex-col mt-3">
+                        <label htmlFor="institution_type">Tipe Lembaga</label>
+                        <Dropdown
+                            value={dataFilter.institution_type}
+                            onChange={(e) =>
+                                setDataFilter(
+                                    "institution_type",
+                                    e.target.value
+                                )
+                            }
+                            showClear
+                            options={[{ name: "Lead" }, { name: "Partner" }]}
+                            optionLabel="name"
+                            optionValue="name"
+                            placeholder="Pilih tipe"
+                            className="w-full md:w-14rem"
+                        />
+                    </div>
+
+                    <div className="flex flex-col mt-3">
+                        <label htmlFor="">Tanggal Input</label>
+                        <div className="flex items-center gap-2">
+                            <Calendar
+                                value={
+                                    dataFilter.input_date.start
+                                        ? new Date(dataFilter.input_date.start)
+                                        : null
                                 }
-                            }}
-                            align="left"
-                            style={{
-                                width: "max-content",
-                                whiteSpace: "nowrap",
-                            }}
-                        ></Column>
-                        <Column
-                            field="code"
-                            className="dark:border-none"
-                            headerClassName="dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300"
-                            header="Kode"
-                            align="left"
-                            style={{
-                                width: "max-content",
-                                whiteSpace: "nowrap",
-                            }}
-                        ></Column>
+                                style={{ height: "35px" }}
+                                onChange={(e) => {
+                                    setDataFilter("input_date", {
+                                        ...dataFilter.input_date,
+                                        start: e.target.value,
+                                    });
+                                }}
+                                placeholder="mulai"
+                                showIcon
+                                dateFormat="dd/mm/yy"
+                            />
+                            <span>-</span>
+                            <Calendar
+                                value={
+                                    dataFilter.input_date.end
+                                        ? new Date(dataFilter.input_date.end)
+                                        : null
+                                }
+                                style={{ height: "35px" }}
+                                onChange={(e) => {
+                                    setDataFilter("input_date", {
+                                        ...dataFilter.input_date,
+                                        end: e.target.value,
+                                    });
+                                }}
+                                placeholder="selesai"
+                                showIcon
+                                dateFormat="dd/mm/yy"
+                            />
+                        </div>
+                    </div>
 
-                        <Column
-                            body={(rowData) => {
-                                return new Date(
-                                    rowData.date
-                                ).toLocaleDateString("id");
+                    <div className="flex flex-row mt-5">
+                        <Button
+                            ref={btnFilterRef}
+                            label="Terapkan"
+                            className="bg-purple-600 text-sm shadow-md rounded-lg mr-2"
+                        />
+                        <Button
+                            type="button"
+                            label="Reset"
+                            onClick={(e) => {
+                                resetFilter();
+                                setTimeout(() => {
+                                    btnFilterRef.current.click();
+                                }, 500);
                             }}
-                            className="dark:border-none"
-                            headerClassName="dark:border-none  bg-transparent dark:bg-transparent dark:text-gray-300"
-                            align="left"
-                            header="Tanggal"
-                            style={{
-                                width: "max-content",
-                                whiteSpace: "nowrap",
-                            }}
-                        ></Column>
+                            className="outline-purple-600 outline-1 outline-dotted bg-transparent text-slate-700  text-sm shadow-md rounded-lg mr-2"
+                        />
+                    </div>
+                </form>
+            </Sidebar>
 
-                        <Column
-                            field="price_card"
-                            className="dark:border-none"
-                            headerClassName="dark:border-none  bg-transparent dark:bg-transparent dark:text-gray-300"
-                            align="left"
-                            header="Harga Kartu"
-                            style={{
-                                width: "max-content",
-                                whiteSpace: "nowrap",
+            {/* Tombol Aksi */}
+            <OverlayPanel
+                className=" shadow-md p-1 dark:bg-slate-800 dark:text-gray-300"
+                ref={action}
+            >
+                <div className="flex flex-col flex-wrap w-full">
+                    {permissions.includes("edit memo") && (
+                        <Button
+                            icon="pi pi-pencil"
+                            label="edit"
+                            className="bg-transparent hover:bg-slate-200 w-full text-slate-500 border-b-2 border-slate-400"
+                            onClick={() => {
+                                router.get("/memo/" + selectedSph.uuid);
                             }}
-                        ></Column>
-
-                        <Column
-                            field="price_e_card"
-                            className="dark:border-none"
-                            headerClassName="dark:border-none  bg-transparent dark:bg-transparent dark:text-gray-300"
-                            align="left"
-                            header="Harga E-Card"
-                            style={{
-                                width: "max-content",
-                                whiteSpace: "nowrap",
+                        />
+                    )}
+                    {permissions.includes("hapus memo") && (
+                        <Button
+                            icon="pi pi-trash"
+                            label="hapus"
+                            className="bg-transparent hover:bg-slate-200 w-full text-slate-500 border-b-2 border-slate-400"
+                            onClick={() => {
+                                confirmDeleteSph();
                             }}
-                        ></Column>
-
-                        <Column
-                            field="price_subscription"
-                            className="dark:border-none"
-                            headerClassName="dark:border-none  bg-transparent dark:bg-transparent dark:text-gray-300"
-                            align="left"
-                            header="Biaya Langganan"
-                            style={{
-                                width: "max-content",
-                                whiteSpace: "nowrap",
-                            }}
-                        ></Column>
-
-                        <Column
-                            field="consideration"
-                            className="dark:border-none"
-                            headerClassName="dark:border-none  bg-transparent dark:bg-transparent dark:text-gray-300"
-                            align="left"
-                            header="Pertimbangan"
-                            style={{
-                                width: "max-content",
-                                whiteSpace: "nowrap",
-                            }}
-                        ></Column>
-                        <Column
-                            body={(rowData) => {
-                                return rowData.memo_doc == null ? (
-                                    <ProgressSpinner
-                                        style={{
-                                            width: "30px",
-                                            height: "30px",
-                                        }}
-                                        strokeWidth="8"
-                                        fill="var(--surface-ground)"
-                                        animationDuration=".5s"
-                                    />
-                                ) : (
-                                    <div className="flex w-full h-full items-center justify-center">
-                                        <a
-                                            href={"/" + rowData.memo_doc}
-                                            download={`${rowData.code}_${rowData.partner_name}`}
-                                            class="font-bold  w-full h-full text-center rounded-full "
-                                        >
-                                            <i
-                                                className="pi pi-file-pdf"
-                                                style={{
-                                                    width: "100%",
-                                                    height: "100%",
-                                                    fontSize: "1.5rem",
-                                                }}
-                                            ></i>
-                                        </a>
-                                    </div>
-                                );
-                            }}
-                            className="dark:border-none"
-                            headerClassName="dark:border-none  bg-transparent dark:bg-transparent dark:text-gray-300"
-                            align="left"
-                            header="Dokumen"
-                            style={{
-                                width: "max-content",
-                                whiteSpace: "nowrap",
-                            }}
-                        ></Column>
-                        {/* {permissions.includes("hapus memo") &&
-                            permissions.includes("edit memo") && ( */}
-                        <Column
-                            header="Action"
-                            body={actionBodyTemplate}
-                            style={{
-                                width: "max-content",
-                                whiteSpace: "nowrap",
-                            }}
-                            className="dark:border-none"
-                            headerClassName="dark:border-none  bg-transparent dark:bg-transparent dark:text-gray-300"
-                        ></Column>
-                        {/* )} */}
-                    </DataTable>
+                        />
+                    )}
                 </div>
-            </div>
+            </OverlayPanel>
+
+            <TabView
+                activeIndex={activeIndexTab}
+                onTabChange={(e) => {
+                    setActiveIndexTab(e.index);
+                }}
+                className="mt-2"
+            >
+                <TabPanel header="Semua Memo">
+                    {activeIndexTab == 0 && (
+                        <>
+                            <ConfirmDialog />
+                            <ConfirmDialog2
+                                group="declarative"
+                                visible={confirmIsVisible}
+                                onHide={() => setConfirmIsVisible(false)}
+                                message="Konfirmasi kembali jika anda yakin!"
+                                header="Konfirmasi kembali"
+                                icon="pi pi-info-circle"
+                                accept={handleDeleteMemo}
+                            />
+
+                            <div
+                                className="flex mx-auto flex-col justify-center mt-5 gap-5"
+                                ref={windowEscapeRef}
+                            >
+                                <div className="card p-fluid w-full h-full flex justify-center rounded-lg">
+                                    <DataTable
+                                        loading={isLoadingData}
+                                        className="w-full h-auto rounded-lg dark:glass border-none text-center shadow-md"
+                                        pt={{
+                                            bodyRow:
+                                                "dark:bg-transparent bg-transparent dark:text-gray-300",
+                                            table: "dark:bg-transparent bg-white rounded-lg dark:text-gray-300",
+                                            header: "",
+                                        }}
+                                        paginator
+                                        filters={filters}
+                                        rows={5}
+                                        emptyMessage="Memo deviasi harga tidak ditemukan."
+                                        paginatorClassName="dark:bg-transparent paginator-custome dark:text-gray-300 rounded-b-lg"
+                                        header={header}
+                                        value={memos}
+                                        globalFilterFields={[
+                                            "partner_name",
+                                            "code",
+                                            "date",
+                                        ]}
+                                        dataKey="id"
+                                    >
+                                        <Column
+                                            header="Aksi"
+                                            body={actionBodyTemplate}
+                                            style={{
+                                                width: "max-content",
+                                                whiteSpace: "nowrap",
+                                            }}
+                                            frozen
+                                            align="center"
+                                            className="dark:border-none bg-white"
+                                            headerClassName="dark:border-none bg-white dark:bg-slate-900 dark:text-gray-300"
+                                        ></Column>
+                                        <Column
+                                            field="code"
+                                            className="dark:border-none bg-white lg:whitespace-nowrap lg:w-max"
+                                            headerClassName="dark:border-none bg-white dark:bg-slate-900 dark:text-gray-300"
+                                            header="Kode"
+                                            align="left"
+                                            frozen={!isMobile}
+                                            style={
+                                                !isMobile
+                                                    ? {
+                                                          width: "max-content",
+                                                          whiteSpace: "nowrap",
+                                                      }
+                                                    : null
+                                            }
+                                        ></Column>
+
+                                        <Column
+                                            header="Nama"
+                                            body={(rowData) => (
+                                                <button
+                                                    onClick={() =>
+                                                        handleSelectedDetailPartner(
+                                                            rowData
+                                                        )
+                                                    }
+                                                    className="hover:text-blue-700 text-left"
+                                                >
+                                                    {rowData.memoable.name}
+                                                </button>
+                                            )}
+                                            className="dark:border-none bg-white lg:whitespace-nowrap lg:w-max"
+                                            headerClassName="dark:border-none bg-white dark:bg-slate-900 dark:text-gray-300"
+                                            align="left"
+                                            frozen={!isMobile}
+                                            style={
+                                                !isMobile
+                                                    ? {
+                                                          width: "max-content",
+                                                          whiteSpace: "nowrap",
+                                                      }
+                                                    : null
+                                            }
+                                        ></Column>
+
+                                        <Column
+                                            header="NPWP"
+                                            body={(rowData) => {
+                                                if (
+                                                    rowData.memoable.npwp ==
+                                                    undefined
+                                                ) {
+                                                    return "-";
+                                                } else {
+                                                    return rowData.memoable
+                                                        .npwp !== null
+                                                        ? formatNPWP(
+                                                              rowData.memoable
+                                                                  .npwp
+                                                          )
+                                                        : "-";
+                                                }
+                                            }}
+                                            className="dark:border-none"
+                                            headerClassName="dark:border-none  dark:bg-slate-900 dark:text-gray-300"
+                                            align="left"
+                                            frozen={!isMobile}
+                                            style={
+                                                !isMobile
+                                                    ? {
+                                                          width: "max-content",
+                                                          whiteSpace: "nowrap",
+                                                      }
+                                                    : null
+                                            }
+                                        ></Column>
+
+                                        <Column
+                                            body={(rowData) => {
+                                                return new Date(
+                                                    rowData.date
+                                                ).toLocaleDateString("id");
+                                            }}
+                                            className="dark:border-none"
+                                            headerClassName="dark:border-none  bg-transparent dark:bg-transparent dark:text-gray-300"
+                                            align="left"
+                                            header="Tanggal"
+                                            style={{
+                                                width: "max-content",
+                                                whiteSpace: "nowrap",
+                                            }}
+                                        ></Column>
+
+                                        <Column
+                                            field="price_card"
+                                            className="dark:border-none"
+                                            headerClassName="dark:border-none  bg-transparent dark:bg-transparent dark:text-gray-300"
+                                            align="left"
+                                            header="Harga Kartu"
+                                            style={{
+                                                width: "max-content",
+                                                whiteSpace: "nowrap",
+                                            }}
+                                        ></Column>
+
+                                        <Column
+                                            field="price_e_card"
+                                            className="dark:border-none"
+                                            headerClassName="dark:border-none  bg-transparent dark:bg-transparent dark:text-gray-300"
+                                            align="left"
+                                            header="Harga E-Card"
+                                            style={{
+                                                width: "max-content",
+                                                whiteSpace: "nowrap",
+                                            }}
+                                        ></Column>
+
+                                        <Column
+                                            field="price_subscription"
+                                            className="dark:border-none"
+                                            headerClassName="dark:border-none  bg-transparent dark:bg-transparent dark:text-gray-300"
+                                            align="left"
+                                            header="Biaya Langganan"
+                                            style={{
+                                                width: "max-content",
+                                                whiteSpace: "nowrap",
+                                            }}
+                                        ></Column>
+
+                                        <Column
+                                            field="consideration"
+                                            className="dark:border-none"
+                                            headerClassName="dark:border-none  bg-transparent dark:bg-transparent dark:text-gray-300"
+                                            align="left"
+                                            header="Pertimbangan"
+                                            style={{
+                                                width: "max-content",
+                                                whiteSpace: "nowrap",
+                                            }}
+                                        ></Column>
+                                        <Column
+                                            body={(rowData) => {
+                                                return rowData.memo_doc ==
+                                                    null ? (
+                                                    <ProgressSpinner
+                                                        style={{
+                                                            width: "30px",
+                                                            height: "30px",
+                                                        }}
+                                                        strokeWidth="8"
+                                                        fill="var(--surface-ground)"
+                                                        animationDuration=".5s"
+                                                    />
+                                                ) : (
+                                                    <div className="flex w-full h-full items-center justify-center">
+                                                        <a
+                                                            href={
+                                                                "/" +
+                                                                rowData.memo_doc
+                                                            }
+                                                            download={`${rowData.code}_${rowData.partner_name}`}
+                                                            class="font-bold  w-full h-full text-center rounded-full "
+                                                        >
+                                                            <i
+                                                                className="pi pi-file-pdf"
+                                                                style={{
+                                                                    width: "100%",
+                                                                    height: "100%",
+                                                                    fontSize:
+                                                                        "1.5rem",
+                                                                }}
+                                                            ></i>
+                                                        </a>
+                                                    </div>
+                                                );
+                                            }}
+                                            className="dark:border-none"
+                                            headerClassName="dark:border-none  bg-transparent dark:bg-transparent dark:text-gray-300"
+                                            align="left"
+                                            header="Dokumen"
+                                            style={{
+                                                width: "max-content",
+                                                whiteSpace: "nowrap",
+                                            }}
+                                        ></Column>
+                                    </DataTable>
+                                </div>
+                            </div>
+                        </>
+                    )}
+                </TabPanel>
+
+                <TabPanel header="Log">
+                    {activeIndexTab == 1 && (
+                        <Log
+                            auth={auth}
+                            users={users}
+                            showSuccess={showSuccess}
+                            showError={showError}
+                        />
+                    )}
+                </TabPanel>
+
+                <TabPanel header="Arsip">
+                    {activeIndexTab == 2 && (
+                        <Arsip
+                            auth={auth}
+                            showSuccess={showSuccess}
+                            showError={showError}
+                        />
+                    )}
+                </TabPanel>
+            </TabView>
         </DashboardLayout>
     );
 }

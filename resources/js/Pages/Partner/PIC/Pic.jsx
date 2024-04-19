@@ -21,7 +21,7 @@ import { OverlayPanel } from "primereact/overlaypanel";
 import InputError from "@/Components/InputError";
 import HeaderDatatable from "@/Components/HeaderDatatable";
 import SkeletonDatatable from "@/Components/SkeletonDatatable";
-import getViewportSize from "../../Utils/getViewportSize";
+import getViewportSize from "../../../Utils/getViewportSize";
 import { Sidebar } from "primereact/sidebar";
 import { Calendar } from "primereact/calendar";
 import Log from "./Log";

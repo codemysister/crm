@@ -22,7 +22,7 @@ import { TabPanel, TabView } from "primereact/tabview";
 import { FilterMatchMode } from "primereact/api";
 
 import InputError from "@/Components/InputError";
-import getViewportSize from "@/Pages/Utils/getViewportSize";
+import getViewportSize from "@/Utils/getViewportSize";
 import SkeletonDatatable from "@/Components/SkeletonDatatable";
 import { Sidebar } from "primereact/sidebar";
 import HeaderDatatable from "@/Components/HeaderDatatable";

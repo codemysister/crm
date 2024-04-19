@@ -16,7 +16,7 @@ import {
 } from "primereact/confirmdialog";
 import { FilterMatchMode } from "primereact/api";
 import InputError from "@/Components/InputError";
-import getViewportSize from "@/Pages/Utils/getViewportSize";
+import getViewportSize from "@/Utils/getViewportSize";
 import HeaderDatatable from "@/Components/HeaderDatatable";
 import SkeletonDatatable from "@/Components/SkeletonDatatable";
 import { Sidebar } from "primereact/sidebar";

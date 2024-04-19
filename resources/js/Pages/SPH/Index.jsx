@@ -16,7 +16,7 @@ import { Link } from "@inertiajs/react";
 import { FilterMatchMode } from "primereact/api";
 import { ProgressSpinner } from "primereact/progressspinner";
 import { router } from "@inertiajs/react";
-import getViewportSize from "../Utils/getViewportSize";
+import getViewportSize from "../../Utils/getViewportSize";
 import SkeletonDatatable from "@/Components/SkeletonDatatable";
 import { Sidebar } from "primereact/sidebar";
 import { Dropdown } from "primereact/dropdown";
@@ -24,8 +24,8 @@ import { Calendar } from "primereact/calendar";
 import { OverlayPanel } from "primereact/overlaypanel";
 import { TabPanel, TabView } from "primereact/tabview";
 import HeaderDatatable from "@/Components/HeaderDatatable";
-import { formatNPWP } from "../Utils/formatNPWP";
-import { formateDate } from "../Utils/formatDate";
+import { formatNPWP } from "../../Utils/formatNPWP";
+import { formateDate } from "../../Utils/formatDate";
 
 export default function Index({
     auth,

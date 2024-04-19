@@ -22,7 +22,7 @@ import { Sidebar } from "primereact/sidebar";
 import { useRef } from "react";
 import { useEffect } from "react";
 import { useState } from "react";
-import { formateDate } from "../Utils/formatDate";
+import { formateDate } from "../../Utils/formatDate";
 
 const Log = ({ auth, users, showError, showSuccess }) => {
     const [isLoadingData, setIsLoadingData] = useState(false);
@@ -110,19 +110,31 @@ const Log = ({ auth, users, showError, showSuccess }) => {
                 onGlobalFilterChange={onGlobalFilterChange}
             >
                 <Button
-                    icon={filterButtonIcon}
                     className="shadow-md border border-slate-600 bg-transparent text-slate-600 dark:bg-slate-700 dark:text-slate-300 rounded-md"
-                    label="filter"
                     onClick={() => setSidebarFilter(true)}
-                />
+                >
+                    <span className="w-full flex justify-center items-center gap-1">
+                        <i
+                            className="pi pi-filter"
+                            style={{ fontSize: "0.7rem" }}
+                        ></i>{" "}
+                        <span>filter</span>
+                    </span>
+                </Button>
                 <Button
-                    label="Hapus"
-                    icon="pi pi-trash"
                     severity="danger"
                     className="rounded-md shadow-md text-sm"
                     onClick={confirmDeleteLog}
                     disabled={!selectedLogDelete || !selectedLogDelete.length}
-                />
+                >
+                    <span className="w-full flex justify-center items-center gap-1">
+                        <i
+                            className="pi pi-trash"
+                            style={{ fontSize: "0.7rem" }}
+                        ></i>{" "}
+                        <span>hapus</span>
+                    </span>
+                </Button>
             </HeaderDatatable>
         );
     };
@@ -139,6 +151,8 @@ const Log = ({ auth, users, showError, showSuccess }) => {
             keyIndo = "Status";
         } else if (firstKey == "pic") {
             keyIndo = "PIC";
+        } else if (firstKey == "phone_number") {
+            keyIndo = "Nomor Telepon";
         } else {
             keyIndo = "Alamat";
         }
@@ -401,6 +415,10 @@ const Log = ({ auth, users, showError, showSuccess }) => {
                                 event = "edit";
                                 color = "blue";
                                 severity = "info";
+                            } else if (rowData.event == "onboarding") {
+                                event = "onboarding";
+                                color = "blue";
+                                severity = "info";
                             }
                             return (
                                 <div className="flex justify-between w-full">
@@ -456,6 +474,7 @@ const Log = ({ auth, users, showError, showSuccess }) => {
             >
                 <div className="flex flex-wrap gap-2">
                     {selectedLog?.event == "created" ||
+                    selectedLog?.event == "onboarding" ||
                     selectedLog?.event == "updated" ||
                     selectedLog?.event == "restored" ? (
                         <div className="flex-1 w-1/2">
@@ -468,12 +487,19 @@ const Log = ({ auth, users, showError, showSuccess }) => {
                                             {(selectedLog?.event ===
                                                 "created" ||
                                                 selectedLog?.event ===
+                                                    "onboarding" ||
+                                                selectedLog?.event ===
                                                     "restored") &&
                                             selectedLog !== null
                                                 ? Object.keys(
                                                       selectedLog.properties
                                                           .attributes
                                                   ).map((key) => {
+                                                      if (
+                                                          key === "status.color"
+                                                      ) {
+                                                          return null;
+                                                      }
                                                       return (
                                                           <>
                                                               <p>
@@ -489,49 +515,46 @@ const Log = ({ auth, users, showError, showSuccess }) => {
                                                                       ]
                                                                   }
                                                               </p>
-                                                              <hr className=" w-full bg-slate-300" />
+                                                              <hr className="w-full bg-slate-300" />
                                                           </>
                                                       );
                                                   })
                                                 : null}
 
-                                            {selectedLog?.event == "updated" &&
-                                                (selectedLog !== null
-                                                    ? Object.keys(
+                                            {selectedLog?.event === "updated" &&
+                                            selectedLog !== null
+                                                ? Object.keys(
+                                                      selectedLog.properties
+                                                          .attributes
+                                                  ).map((key) => {
+                                                      return (
                                                           selectedLog.properties
-                                                              .attributes
-                                                      ).map((key) => {
-                                                          return (
+                                                              .attributes[
+                                                              key
+                                                          ] !==
                                                               selectedLog
                                                                   .properties
-                                                                  .attributes[
-                                                                  key
-                                                              ] !==
-                                                                  selectedLog
-                                                                      .properties
-                                                                      .old[
-                                                                      key
-                                                                  ] && (
-                                                                  <>
-                                                                      <p>
-                                                                          {objectKeyToIndo(
+                                                                  .old[key] && (
+                                                              <>
+                                                                  <p>
+                                                                      {objectKeyToIndo(
+                                                                          key
+                                                                      )}{" "}
+                                                                      :{" "}
+                                                                      {
+                                                                          selectedLog
+                                                                              .properties
+                                                                              .attributes[
                                                                               key
-                                                                          )}{" "}
-                                                                          :{" "}
-                                                                          {
-                                                                              selectedLog
-                                                                                  .properties
-                                                                                  .attributes[
-                                                                                  key
-                                                                              ]
-                                                                          }
-                                                                      </p>
-                                                                      <hr className=" w-full bg-slate-300" />
-                                                                  </>
-                                                              )
-                                                          );
-                                                      })
-                                                    : null)}
+                                                                          ]
+                                                                      }
+                                                                  </p>
+                                                                  <hr className="w-full bg-slate-300" />
+                                                              </>
+                                                          )
+                                                      );
+                                                  })
+                                                : null}
                                         </div>
                                     </div>
                                 }
@@ -551,6 +574,11 @@ const Log = ({ auth, users, showError, showSuccess }) => {
                                                 ? Object.keys(
                                                       selectedLog.properties.old
                                                   ).map((key) => {
+                                                      if (
+                                                          key === "status.color"
+                                                      ) {
+                                                          return null;
+                                                      }
                                                       return (
                                                           selectedLog.properties
                                                               .attributes[
@@ -595,20 +623,27 @@ const Log = ({ auth, users, showError, showSuccess }) => {
                                         <div className="flex w-full flex-col gap-2">
                                             {Object.keys(
                                                 selectedLog.properties.old
-                                            ).map((key) => (
-                                                <>
-                                                    <p>
-                                                        {objectKeyToIndo(key)} :{" "}
-                                                        {
-                                                            selectedLog
-                                                                .properties.old[
+                                            ).map((key) => {
+                                                if (key === "status.color") {
+                                                    return null;
+                                                }
+                                                return (
+                                                    <>
+                                                        <p>
+                                                            {objectKeyToIndo(
                                                                 key
-                                                            ]
-                                                        }
-                                                    </p>
-                                                    <hr className=" w-full bg-slate-300" />
-                                                </>
-                                            ))}
+                                                            )}{" "}
+                                                            :{" "}
+                                                            {
+                                                                selectedLog
+                                                                    .properties
+                                                                    .old[key]
+                                                            }
+                                                        </p>
+                                                        <hr className=" w-full bg-slate-300" />
+                                                    </>
+                                                );
+                                            })}
                                         </div>
                                     </div>
                                 }

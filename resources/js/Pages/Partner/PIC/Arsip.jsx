@@ -1,6 +1,6 @@
 import HeaderDatatable from "@/Components/HeaderDatatable";
 import SkeletonDatatable from "@/Components/SkeletonDatatable";
-import getViewportSize from "@/Pages/Utils/getViewportSize";
+import getViewportSize from "@/Utils/getViewportSize";
 import { useForm } from "@inertiajs/react";
 import { FilterMatchMode } from "primereact/api";
 import { Badge } from "primereact/badge";

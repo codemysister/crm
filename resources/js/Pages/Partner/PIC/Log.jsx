@@ -22,7 +22,7 @@ import { Sidebar } from "primereact/sidebar";
 import { useRef } from "react";
 import { useEffect } from "react";
 import { useState } from "react";
-import { formateDate } from "../../Utils/formatDate";
+import { formateDate } from "../../../Utils/formatDate";
 
 const Log = ({ auth, users, showError, showSuccess }) => {
     const [isLoadingData, setIsLoadingData] = useState(false);

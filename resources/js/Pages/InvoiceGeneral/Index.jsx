@@ -24,13 +24,13 @@ import { Dropdown } from "primereact/dropdown";
 import { ConfirmPopup, confirmPopup } from "primereact/confirmpopup";
 import HeaderDatatable from "@/Components/HeaderDatatable";
 import SkeletonDatatable from "@/Components/SkeletonDatatable";
-import { handleSelectedDetailPartner } from "../Utils/handleSelectedDetailPartner";
+import { handleSelectedDetailPartner } from "../../Utils/handleSelectedDetailPartner";
 import { Sidebar } from "primereact/sidebar";
 import { TabPanel, TabView } from "primereact/tabview";
-import { formateDate } from "../Utils/formatDate";
+import { formateDate } from "../../Utils/formatDate";
 import InputError from "@/Components/InputError";
-import getViewportSize from "../Utils/getViewportSize";
-import { formatNPWP } from "../Utils/formatNPWP";
+import getViewportSize from "../../Utils/getViewportSize";
+import { formatNPWP } from "../../Utils/formatNPWP";
 
 export default function Index({
     auth,
@@ -396,6 +396,7 @@ export default function Index({
             },
         });
     };
+
     const handleDeleteTransaction = (invoice_general) => {
         confirmDialog({
             message: "Apakah Anda yakin untuk menghapus ini?",
@@ -460,25 +461,6 @@ export default function Index({
         );
 
         setVisibleColumns(orderedSelectedColumns);
-    };
-
-    const filterButtonIcon = () => {
-        return (
-            <i
-                className="pi pi-filter"
-                style={{ fontSize: "0.7rem", paddingRight: "5px" }}
-            ></i>
-        );
-    };
-
-    const exportButtonIcon = () => {
-        return (
-            <i
-                className="pi pi-file-excel
-                "
-                style={{ fontSize: "0.8rem", paddingRight: "5px" }}
-            ></i>
-        );
     };
 
     const exportExcel = () => {
@@ -617,45 +599,6 @@ export default function Index({
             </div>
         );
     };
-
-    const items = [
-        {
-            label: "Update",
-            icon: "pi pi-refresh",
-            command: () => {
-                toast.current.show({
-                    severity: "success",
-                    summary: "Updated",
-                    detail: "Data Updated",
-                });
-            },
-        },
-        {
-            label: "Delete",
-            icon: "pi pi-times",
-            command: () => {
-                toast.current.show({
-                    severity: "warn",
-                    summary: "Delete",
-                    detail: "Data Deleted",
-                });
-            },
-        },
-        {
-            label: "React Website",
-            icon: "pi pi-external-link",
-            command: () => {
-                window.location.href = "https://reactjs.org/";
-            },
-        },
-        {
-            label: "Upload",
-            icon: "pi pi-upload",
-            command: () => {
-                //router.push('/fileupload');
-            },
-        },
-    ];
 
     const confirmDeleteInvoice = () => {
         confirmDialog({

@@ -7,7 +7,7 @@ import DashboardLayout from "@/Layouts/DashboardLayout";
 import { InputText } from "primereact/inputtext";
 import { Dropdown } from "primereact/dropdown";
 import { InputTextarea } from "primereact/inputtextarea";
-import { useForm } from "@inertiajs/react";
+import { router, useForm } from "@inertiajs/react";
 import {
     ConfirmDialog,
     ConfirmDialog as ConfirmDialog2,
@@ -29,8 +29,8 @@ import "filepond/dist/filepond.min.css";
 import Log from "./Log";
 import Arsip from "./Arsip";
 import DetailLead from "./DetailLead/DetailLead";
-import getViewportSize from "../Utils/getViewportSize";
-import { formateDate } from "../Utils/formatDate";
+import getViewportSize from "../../Utils/getViewportSize";
+import { formateDate } from "../../Utils/formatDate";
 registerPlugin(FilePondPluginFileValidateSize);
 
 export default function Index({ auth, usersProp, statusProp }) {
@@ -59,6 +59,63 @@ export default function Index({ auth, usersProp, statusProp }) {
     const [filters, setFilters] = useState({
         global: { value: null, matchMode: FilterMatchMode.CONTAINS },
     });
+
+    // const [totalRecords, setTotalRecords] = useState(0);
+    // const [lazyState, setlazyState] = useState({
+    //     first: 0,
+    //     rows: 10,
+    //     page: 1,
+    //     sortField: null,
+    //     sortOrder: null,
+    //     filters: {
+    //         global: { value: null, matchMode: FilterMatchMode.CONTAINS },
+    //         name: { value: "", matchMode: "contains" },
+    //     },
+    // });
+
+    // let networkTimeout = null;
+
+    // useEffect(() => {
+    //     loadLazyData();
+    // }, [lazyState]);
+
+    // const loadLazyData = () => {
+    //     setIsLoadingData(true);
+
+    //     if (networkTimeout) {
+    //         clearTimeout(networkTimeout);
+    //     }
+    //     networkTimeout = setTimeout(() => {
+    //         axios
+    //             .get(
+    //                 `/api/leads?first=${lazyState.first}&rows=${lazyState.rows}`
+    //             )
+    //             .then((response) => {
+    //                 const { totalRecords, leads } = response.data;
+    //                 console.log(leads);
+    //                 setTotalRecords(totalRecords);
+    //                 setLeads(leads);
+    //                 setIsLoadingData(false);
+    //             })
+    //             .catch((error) => {
+    //                 console.error("Error fetching leads:", error);
+    //                 setIsLoadingData(false);
+    //             });
+    //     }, Math.random() * 1000 + 250);
+    // };
+
+    // const onPage = (event) => {
+    //     setlazyState(event);
+    // };
+
+    // const onSort = (event) => {
+    //     setlazyState(event);
+    // };
+
+    // const onFilter = (event) => {
+    //     event["first"] = 0;
+    //     setlazyState(event);
+    // };
 
     const {
         data,
@@ -116,11 +173,9 @@ export default function Index({ auth, usersProp, statusProp }) {
     const getLeads = async () => {
         setIsLoadingData(true);
 
-        let response = await fetch("/api/leads");
+        let response = await fetch(`/api/leads`);
         let data = await response.json();
-
-        setLeads((prev) => data);
-
+        setLeads(data.leads);
         setIsLoadingData(false);
     };
 
@@ -147,31 +202,11 @@ export default function Index({ auth, usersProp, statusProp }) {
         fetchData(getLeads);
     }, []);
 
-    let categories = [{ name: "lead" }, { name: "partner" }];
-
     const addButtonIcon = () => {
         return (
             <i
                 className="pi pi-plus"
                 style={{ fontSize: "0.7rem", paddingRight: "5px" }}
-            ></i>
-        );
-    };
-
-    const filterButtonIcon = () => {
-        return (
-            <i
-                className="pi pi-filter"
-                style={{ fontSize: "0.7rem", paddingRight: "5px" }}
-            ></i>
-        );
-    };
-    const exportButtonIcon = () => {
-        return (
-            <i
-                className="pi pi-file-excel
-                "
-                style={{ fontSize: "0.8rem", paddingRight: "5px" }}
             ></i>
         );
     };
@@ -294,10 +329,7 @@ export default function Index({ auth, usersProp, statusProp }) {
 
     const headerLead = () => {
         return (
-            <HeaderDatatable
-                globalFilterValue={globalFilterValue}
-                onGlobalFilterChange={onGlobalFilterChange}
-            >
+            <HeaderDatatable filters={filters} setFilters={setFilters}>
                 <Button
                     className="shadow-md w-[10px] lg:w-[90px] border border-slate-600 bg-transparent text-slate-600 dark:bg-slate-700 dark:text-slate-300 rounded-lg"
                     onClick={() => setSidebarFilter(true)}
@@ -461,6 +493,16 @@ export default function Index({ auth, usersProp, statusProp }) {
                 ref={action}
             >
                 <div className="flex flex-col flex-wrap w-full">
+                    <Button
+                        icon="pi pi-verified"
+                        label="onboarding"
+                        className="bg-transparent hover:bg-slate-200 w-full text-slate-500 border-b-2 border-slate-400"
+                        onClick={() => {
+                            router.get(
+                                "/partners?onboarding=" + selectedLead.uuid
+                            );
+                        }}
+                    />
                     <Button
                         icon="pi pi-pencil"
                         label="edit"
@@ -662,6 +704,10 @@ export default function Index({ auth, usersProp, statusProp }) {
                                         ]}
                                         value={leads}
                                         dataKey="id"
+                                        // lazy
+                                        // first={lazyState.first}
+                                        // totalRecords={totalRecords}
+                                        // onPage={onPage}
                                     >
                                         <Column
                                             header="Aksi"
@@ -670,6 +716,7 @@ export default function Index({ auth, usersProp, statusProp }) {
                                                 width: "max-content",
                                                 whiteSpace: "nowrap",
                                             }}
+                                            align="center"
                                             className="dark:border-none"
                                             headerClassName="dark:border-none  bg-transparent dark:bg-transparent dark:text-gray-300"
                                         ></Column>
@@ -770,6 +817,7 @@ export default function Index({ auth, usersProp, statusProp }) {
                                                 whiteSpace: "nowrap",
                                             }}
                                         ></Column>
+
                                         <Column
                                             field="created_by"
                                             className="dark:border-none"

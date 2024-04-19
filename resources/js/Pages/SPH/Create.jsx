@@ -16,7 +16,7 @@ import { InputNumber } from "primereact/inputnumber";
 import InputError from "@/Components/InputError";
 import { SelectButton } from "primereact/selectbutton";
 import HeaderDatatable from "@/Components/HeaderDatatable";
-import { formatNPWP } from "../Utils/formatNPWP";
+import { formatNPWP } from "../../Utils/formatNPWP";
 
 const BASE_URL = import.meta.env.VITE_BASE_URL;
 

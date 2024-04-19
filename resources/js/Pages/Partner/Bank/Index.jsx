@@ -14,7 +14,7 @@ import {
 } from "primereact/confirmdialog";
 import InputError from "@/Components/InputError";
 import DashboardLayout from "@/Layouts/DashboardLayout";
-import getViewportSize from "@/Pages/Utils/getViewportSize";
+import getViewportSize from "@/Utils/getViewportSize";
 import HeaderDatatable from "@/Components/HeaderDatatable";
 import SkeletonDatatable from "@/Components/SkeletonDatatable";
 import { useRef } from "react";

@@ -24,11 +24,11 @@ import "filepond/dist/filepond.min.css";
 import { OverlayPanel } from "primereact/overlaypanel";
 import { Image } from "primereact/image";
 import SkeletonDatatable from "@/Components/SkeletonDatatable";
-import getViewportSize from "../Utils/getViewportSize";
+import getViewportSize from "../../Utils/getViewportSize";
 import HeaderDatatable from "@/Components/HeaderDatatable";
 import { Sidebar } from "primereact/sidebar";
 import { TabPanel, TabView } from "primereact/tabview";
-import { formateDate } from "../Utils/formatDate";
+import { formateDate } from "../../Utils/formatDate";
 registerPlugin(FilePondPluginFileValidateSize);
 
 export default function Index({ auth }) {

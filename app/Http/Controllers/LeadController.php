@@ -47,7 +47,7 @@ class LeadController extends Controller
         }
     }
 
-    public function update(LeadRequest $request, $uuid)
+    public function update(Request $request, $uuid)
     {
         $lead = Lead::where('uuid', $uuid)->first();
 
@@ -81,13 +81,14 @@ class LeadController extends Controller
 
     public function apiGetLeads()
     {
-        $leadsDefault = Lead::with([
-            'status',
-            'createdBy'
-        ])->latest()->get();
-        return response()->json(
-            $leadsDefault
-        );
+        $leads = Lead::with(['status', 'createdBy'])
+            ->latest()
+            ->get();
+
+        return response()->json([
+            'leads' => $leads,
+        ]);
+
     }
 
     public function import()

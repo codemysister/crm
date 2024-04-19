@@ -23,6 +23,7 @@ import InputError from "@/Components/InputError";
 import { InputMask } from "primereact/inputmask";
 import DetailStatusLog from "./DetailStatusLog";
 import DetailLog from "./DetailLog";
+import { upperCaseEachWord } from "@/Utils/UppercaseEachWord";
 
 const DetailPartner = ({
     partners,
@@ -37,8 +38,8 @@ const DetailPartner = ({
     provinces,
     regencys,
     subdistricts,
-    setcodeProvince,
-    setcodeRegency,
+    setProvinceName,
+    setRegencyName,
     isLoading,
 }) => {
     const [partner, setPartner] = useState(detailPartner);
@@ -236,14 +237,14 @@ const DetailPartner = ({
         }));
 
         partner.regency
-            ? setcodeRegency(
-                  (prev) => (prev = JSON.parse(partner.regency).code)
+            ? setRegencyName(
+                  (prev) => (prev = JSON.parse(partner.regency).name)
               )
             : null;
 
         partner.regency
-            ? setcodeProvince(
-                  (prev) => (prev = JSON.parse(partner.province).code)
+            ? setProvinceName(
+                  (prev) => (prev = JSON.parse(partner.province).name)
               )
             : null;
 
@@ -412,9 +413,11 @@ const DetailPartner = ({
                                                     </td>
                                                     <td class="pt-2 pb-1  text-base w-7/12">
                                                         {partner.province
-                                                            ? JSON.parse(
-                                                                  partner.province
-                                                              ).name
+                                                            ? upperCaseEachWord(
+                                                                  JSON.parse(
+                                                                      partner.province
+                                                                  ).name
+                                                              )
                                                             : "-"}
                                                     </td>
                                                 </tr>
@@ -427,9 +430,11 @@ const DetailPartner = ({
                                                     </td>
                                                     <td class="pt-2 pb-1  text-base w-7/12">
                                                         {partner.regency
-                                                            ? JSON.parse(
-                                                                  partner.regency
-                                                              ).name
+                                                            ? upperCaseEachWord(
+                                                                  JSON.parse(
+                                                                      partner.regency
+                                                                  ).name
+                                                              )
                                                             : "-"}
                                                     </td>
                                                 </tr>
@@ -872,16 +877,16 @@ const DetailPartner = ({
                             <div className="flex flex-col">
                                 <label htmlFor="province">Provinsi</label>
                                 <Dropdown
-                                    dataKey="name"
+                                    dataKey="code"
                                     value={
                                         data.province
                                             ? JSON.parse(data.province)
                                             : null
                                     }
                                     onChange={(e) => {
-                                        setcodeProvince(
+                                        setProvinceName(
                                             (prev) =>
-                                                (prev = e.target.value.code)
+                                                (prev = e.target.value.name)
                                         );
                                         setData(
                                             "province",
@@ -905,16 +910,16 @@ const DetailPartner = ({
                             <div className="flex flex-col">
                                 <label htmlFor="regency">Kabupaten</label>
                                 <Dropdown
-                                    dataKey="name"
+                                    dataKey="code"
                                     value={
                                         data.regency
                                             ? JSON.parse(data.regency)
                                             : null
                                     }
                                     onChange={(e) => {
-                                        setcodeRegency(
+                                        setRegencyName(
                                             (prev) =>
-                                                (prev = e.target.value.code)
+                                                (prev = e.target.value.name)
                                         );
                                         setData(
                                             "regency",
@@ -938,6 +943,7 @@ const DetailPartner = ({
                             <div className="flex flex-col">
                                 <label htmlFor="subdistrict">Kecamatan</label>
                                 <Dropdown
+                                    dataKey="code"
                                     value={
                                         data.subdistrict
                                             ? JSON.parse(data.subdistrict)

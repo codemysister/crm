@@ -1,6 +1,7 @@
 import HeaderDatatable from "@/Components/HeaderDatatable";
-import { formatNPWP } from "@/Pages/Utils/formatNPWP";
-import getViewportSize from "@/Pages/Utils/getViewportSize";
+import { formatNPWP } from "@/Utils/formatNPWP";
+import getViewportSize from "@/Utils/getViewportSize";
+import { upperCaseEachWord } from "@/Utils/UppercaseEachWord";
 import { FilterMatchMode } from "primereact/api";
 import { Badge } from "primereact/badge";
 import { Button } from "primereact/button";
@@ -8,24 +9,24 @@ import { Column } from "primereact/column";
 import { DataTable } from "primereact/datatable";
 import { useState } from "react";
 import { memo } from "react";
+import { useDebounce } from "primereact/hooks";
+import { useMemo } from "react";
 
 export const DatatablePartner = memo(
-    ({ children, isLoadingData, partners, action, setSelectedPartner }) => {
+    ({
+        children,
+        isLoadingData,
+        handleSelectedDetailPartner,
+        partners,
+        action,
+        setSelectedPartner,
+        setSidebarFilter,
+    }) => {
         const viewportSize = getViewportSize();
         const isMobile = viewportSize.width < 992;
         const [filters, setFilters] = useState({
             global: { value: null, matchMode: FilterMatchMode.CONTAINS },
         });
-        const [globalFilterValue, setGlobalFilterValue] = useState("");
-        const onGlobalFilterChange = (e) => {
-            const value = e.target.value;
-            let _filters = { ...filters };
-
-            _filters["global"].value = value;
-
-            setFilters(_filters);
-            setGlobalFilterValue(value);
-        };
 
         const exportExcel = () => {
             const exports = partners.map((data) => {
@@ -114,10 +115,7 @@ export const DatatablePartner = memo(
 
         const header = () => {
             return (
-                <HeaderDatatable
-                    globalFilterValue={globalFilterValue}
-                    onGlobalFilterChange={onGlobalFilterChange}
-                >
+                <HeaderDatatable filters={filters} setFilters={setFilters}>
                     <Button
                         className="shadow-md w-[10px] lg:w-[90px] border border-slate-600 bg-transparent text-slate-600 dark:bg-slate-700 dark:text-slate-300 rounded-lg"
                         onClick={() => setSidebarFilter(true)}
@@ -159,9 +157,9 @@ export const DatatablePartner = memo(
                 rowsPerPageOptions={[5, 10, 25, 50]}
                 paginatorTemplate="RowsPerPageDropdown FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink"
                 currentPageReportTemplate="{first} - {last} dari {totalRecords}"
-                // rows={lazyState.rows}
                 children={children}
                 rows={10}
+                filter
                 filters={filters}
                 scrollable
                 globalFilterFields={[
@@ -246,8 +244,8 @@ export const DatatablePartner = memo(
                     body={(rowData) =>
                         rowData.npwp !== null ? formatNPWP(rowData.npwp) : "-"
                     }
-                    className="dark:border-none"
-                    headerClassName="dark:border-none  dark:bg-slate-900 dark:text-gray-300"
+                    className="dark:border-none bg-white lg:w-max lg:whitespace-nowrap"
+                    headerClassName="dark:border-none bg-white dark:bg-slate-900 dark:text-gray-300"
                     align="left"
                     frozen={!isMobile}
                     style={
@@ -327,7 +325,9 @@ export const DatatablePartner = memo(
                     header="Provinsi"
                     body={(rowData) => {
                         return rowData.province
-                            ? JSON.parse(rowData.province).name
+                            ? upperCaseEachWord(
+                                  JSON.parse(rowData.province).name
+                              )
                             : "belum diiisi";
                     }}
                     align="left"
@@ -343,7 +343,9 @@ export const DatatablePartner = memo(
                     header="Kabupaten"
                     body={(rowData) => {
                         return rowData.regency
-                            ? JSON.parse(rowData.regency).name
+                            ? upperCaseEachWord(
+                                  JSON.parse(rowData.regency).name
+                              )
                             : "-";
                     }}
                     align="left"

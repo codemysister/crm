@@ -27,13 +27,13 @@ import axios from "axios";
 import { FilePond, registerPlugin } from "react-filepond";
 import FilePondPluginFileValidateSize from "filepond-plugin-file-validate-size";
 import "filepond/dist/filepond.min.css";
-import getViewportSize from "../Utils/getViewportSize";
-import { formateDate } from "../Utils/formatDate";
+import getViewportSize from "../../Utils/getViewportSize";
+import { formateDate } from "../../Utils/formatDate";
 import HeaderDatatable from "@/Components/HeaderDatatable";
 import SkeletonDatatable from "@/Components/SkeletonDatatable";
 import { Sidebar } from "primereact/sidebar";
 import { TabPanel, TabView } from "primereact/tabview";
-import { formatNPWP } from "../Utils/formatNPWP";
+import { formatNPWP } from "../../Utils/formatNPWP";
 registerPlugin(FilePondPluginFileValidateSize);
 
 export default function InvoiceSubscription({
@@ -615,6 +615,31 @@ export default function InvoiceSubscription({
                             style={{ fontSize: "0.8rem" }}
                         ></i>{" "}
                         {!isMobile && <span>zip</span>}
+                    </span>
+                </Button>
+                <Button
+                    className="shadow-md w-[10px] lg:w-[90px] border border-slate-600 bg-transparent text-slate-600 dark:bg-slate-700 dark:text-slate-300 rounded-lg"
+                    onClick={() => setSidebarFilter(true)}
+                >
+                    <span className="w-full flex justify-center items-center gap-1">
+                        <i
+                            className="pi pi-filter"
+                            style={{ fontSize: "0.7rem" }}
+                        ></i>{" "}
+                        {!isMobile && <span>filter</span>}
+                    </span>
+                </Button>
+                <Button
+                    className="shadow-md w-[10px] lg:w-[90px] bg-transparent text-slate-600 dark:bg-slate-700 dark:text-slate-300 dark:border rounded-lg"
+                    onClick={exportExcel}
+                    data-pr-tooltip="XLS"
+                >
+                    <span className="w-full flex items-center justify-center gap-1">
+                        <i
+                            className="pi pi-file-excel"
+                            style={{ fontSize: "0.8rem" }}
+                        ></i>{" "}
+                        {!isMobile && <span>export</span>}
                     </span>
                 </Button>
             </HeaderDatatable>

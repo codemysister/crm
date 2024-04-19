@@ -15,7 +15,7 @@ import { Badge } from "primereact/badge";
 import { useEffect } from "react";
 import { InputNumber } from "primereact/inputnumber";
 import InputError from "@/Components/InputError";
-import { formatNPWP } from "../Utils/formatNPWP";
+import { formatNPWP } from "../../Utils/formatNPWP";
 import { SelectButton } from "primereact/selectbutton";
 import HeaderDatatable from "@/Components/HeaderDatatable";
 

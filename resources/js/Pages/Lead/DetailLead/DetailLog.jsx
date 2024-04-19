@@ -13,7 +13,7 @@ import { OverlayPanel } from "primereact/overlaypanel";
 import { useRef } from "react";
 import { useEffect } from "react";
 import { useState } from "react";
-import { formateDate } from "@/Pages/Utils/formatDate";
+import { formateDate } from "@/Utils/formatDate";
 const DetailLog = ({
     lead,
     handleSelectedDetailPartner,

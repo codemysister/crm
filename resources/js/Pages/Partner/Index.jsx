@@ -28,11 +28,13 @@ import HeaderDatatable from "@/Components/HeaderDatatable.jsx";
 import HeaderModule from "@/Components/HeaderModule.jsx";
 import { Sidebar } from "primereact/sidebar";
 import axios from "axios";
-import getViewportSize from "../Utils/getViewportSize.js";
+import getViewportSize from "../../Utils/getViewportSize.js";
 import { Calendar } from "primereact/calendar";
 import { InputMask } from "primereact/inputmask";
 import { DatatablePartner } from "./Component/DatatablePartner.jsx";
 import { memo } from "react";
+import { useCallback } from "react";
+import { useMemo } from "react";
 registerPlugin(FilePondPluginFileValidateSize);
 
 export default function Index({
@@ -61,8 +63,8 @@ export default function Index({
     const [provinces, setProvinces] = useState([]);
     const [regencys, setRegencys] = useState([]);
     const [subdistricts, setSubdistricts] = useState([]);
-    const [codeProvince, setcodeProvince] = useState(null);
-    const [codeRegency, setcodeRegency] = useState(null);
+    const [ProvinceName, setProvinceName] = useState(null);
+    const [RegencyName, setRegencyName] = useState(null);
     const [activeIndexTab, setActiveIndexTab] = useState(0);
     const [isLoadingData, setIsLoadingData] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
@@ -185,13 +187,13 @@ export default function Index({
     }, [activeIndexTab]);
 
     useEffect(() => {
-        if (codeProvince) {
-            getRegencys(codeProvince);
+        if (ProvinceName) {
+            getRegencys(ProvinceName);
         }
-        if (codeRegency && codeProvince) {
-            getSubdistricts(codeProvince, codeRegency);
+        if (RegencyName && ProvinceName) {
+            getSubdistricts(RegencyName);
         }
-    }, [codeProvince, codeRegency]);
+    }, [ProvinceName, RegencyName]);
 
     const fetchData = async (fnc) => {
         try {
@@ -258,9 +260,7 @@ export default function Index({
     };
 
     const getRegencys = async (code) => {
-        let url = code
-            ? `api/wilayah/kabupaten?provinsi=${code}`
-            : `api/wilayah/kabupaten`;
+        let url = `regencys?province=${code}`;
         const options = {
             method: "GET",
             url: url,
@@ -271,30 +271,23 @@ export default function Index({
 
         try {
             const response = await axios.request(options);
-            const dataArray = Object.entries(response.data).map(
-                ([key, value]) => ({
-                    code: key,
-                    name: value
-                        .toLowerCase()
-                        .split(" ")
-                        .map(
-                            (word) =>
-                                word.charAt(0).toUpperCase() + word.slice(1)
-                        )
-                        .join(" "),
-                })
-            );
+            const dataArray = response.data.map((e) => ({
+                ...e,
+                code: e.code,
+                name: e.name
+                    .toLowerCase()
+                    .split(" ")
+                    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+                    .join(" "),
+            }));
             setRegencys((prev) => (prev = dataArray));
         } catch (error) {
             console.log(error);
         }
     };
 
-    const getSubdistricts = async (codeProv, codeRege) => {
-        let url =
-            codeProv !== null && codeRege !== null
-                ? `api/wilayah/kecamatan?provinsi=${codeProv}&kabupaten=${codeRege}`
-                : `api/wilayah/kecamatan`;
+    const getSubdistricts = async (regencyName) => {
+        let url = `subdistricts?regency=${regencyName}`;
         const options = {
             method: "GET",
             url: url,
@@ -305,19 +298,15 @@ export default function Index({
 
         try {
             const response = await axios.request(options);
-            const dataArray = Object.entries(response.data).map(
-                ([key, value]) => ({
-                    code: key,
-                    name: value
-                        .toLowerCase()
-                        .split(" ")
-                        .map(
-                            (word) =>
-                                word.charAt(0).toUpperCase() + word.slice(1)
-                        )
-                        .join(" "),
-                })
-            );
+            const dataArray = response.data.map((e) => ({
+                ...e,
+                code: e.code,
+                name: e.name
+                    .toLowerCase()
+                    .split(" ")
+                    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+                    .join(" "),
+            }));
             setSubdistricts((prev) => (prev = dataArray));
         } catch (error) {
             console.log(error);
@@ -365,6 +354,7 @@ export default function Index({
             note_status: null,
             excell: null,
             onboarding: false,
+            uuid_lead: null,
         },
     });
 
@@ -501,7 +491,6 @@ export default function Index({
     };
 
     const handleEditPartner = (partner) => {
-        console.log(partner);
         clearErrors();
         setData((prevData) => ({
             ...prevData,
@@ -535,14 +524,14 @@ export default function Index({
         }));
 
         partner.regency
-            ? setcodeRegency(
-                  (prev) => (prev = JSON.parse(partner.regency).code)
+            ? setRegencyName(
+                  (prev) => (prev = JSON.parse(partner.regency).name)
               )
             : null;
 
         partner.regency
-            ? setcodeProvince(
-                  (prev) => (prev = JSON.parse(partner.province).code)
+            ? setProvinceName(
+                  (prev) => (prev = JSON.parse(partner.province).name)
               )
             : null;
         setModalEditPartnersIsVisible(true);
@@ -787,10 +776,13 @@ export default function Index({
         setIsLoading((prev) => (prev = false));
     };
 
-    const handleSelectedDetailPartner = (partner) => {
-        getSelectedDetailPartner(partner);
-        setActiveIndexTab(1);
-    };
+    const handleSelectedDetailPartner = useCallback(
+        (partner) => {
+            getSelectedDetailPartner(partner);
+            setActiveIndexTab(1);
+        },
+        [partner]
+    );
 
     if (preRenderLoad) {
         return <SkeletonDatatable auth={auth} />;
@@ -1418,10 +1410,10 @@ export default function Index({
                                                     : null
                                             }
                                             onChange={(e) => {
-                                                setcodeProvince(
+                                                setProvinceName(
                                                     (prev) =>
                                                         (prev =
-                                                            e.target.value.code)
+                                                            e.target.value.name)
                                                 );
                                                 setData("partner", {
                                                     ...data.partner,
@@ -1460,10 +1452,10 @@ export default function Index({
                                                     : null
                                             }
                                             onChange={(e) => {
-                                                setcodeRegency(
+                                                setRegencyName(
                                                     (prev) =>
                                                         (prev =
-                                                            e.target.value.code)
+                                                            e.target.value.name)
                                                 );
                                                 setData("partner", {
                                                     ...data.partner,
@@ -2130,10 +2122,10 @@ export default function Index({
 
                                     <div className="flex flex-col">
                                         <label htmlFor="province">
-                                            Provinsi
+                                            Provinsi *
                                         </label>
                                         <Dropdown
-                                            dataKey="name"
+                                            dataKey="code"
                                             value={
                                                 data.partner.province
                                                     ? JSON.parse(
@@ -2142,7 +2134,7 @@ export default function Index({
                                                     : null
                                             }
                                             onChange={(e) => {
-                                                setcodeProvince(
+                                                setProvinceName(
                                                     (prev) =>
                                                         (prev =
                                                             e.target.value.code)
@@ -2175,7 +2167,7 @@ export default function Index({
                                             Kabupaten *
                                         </label>
                                         <Dropdown
-                                            dataKey="name"
+                                            dataKey="code"
                                             value={
                                                 data.partner.regency
                                                     ? JSON.parse(
@@ -2184,10 +2176,10 @@ export default function Index({
                                                     : null
                                             }
                                             onChange={(e) => {
-                                                setcodeRegency(
+                                                setRegencyName(
                                                     (prev) =>
                                                         (prev =
-                                                            e.target.value.code)
+                                                            e.target.value.name)
                                                 );
                                                 setData("partner", {
                                                     ...data.partner,
@@ -2217,6 +2209,7 @@ export default function Index({
                                             Kecamatan
                                         </label>
                                         <Dropdown
+                                            dataKey="code"
                                             value={
                                                 data.partner.subdistrict
                                                     ? JSON.parse(
@@ -2568,8 +2561,12 @@ export default function Index({
                                 <DatatablePartner
                                     partners={partners}
                                     isLoadingData={isLoadingData}
+                                    handleSelectedDetailPartner={
+                                        handleSelectedDetailPartner
+                                    }
                                     setSelectedPartner={setSelectedPartner}
                                     action={action}
+                                    setSidebarFilter={setSidebarFilter}
                                 />
                             }
                         </div>
@@ -2591,10 +2588,10 @@ export default function Index({
                         provinces={provinces}
                         regencys={regencys}
                         subdistricts={subdistricts}
-                        codeProvince={codeProvince}
-                        codeRegency={codeRegency}
-                        setcodeProvince={setcodeProvince}
-                        setcodeRegency={setcodeRegency}
+                        ProvinceName={ProvinceName}
+                        RegencyName={RegencyName}
+                        setProvinceName={setProvinceName}
+                        setRegencyName={setRegencyName}
                         showSuccess={showSuccess}
                         showError={showError}
                     />
