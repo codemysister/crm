@@ -11,22 +11,22 @@ class RegionController extends Controller
         $provinces = \Indonesia::allProvinces();
         return $provinces;
     }
-    public function regencys(Request $request)
+    public function regencys()
     {
         $regencys = null;
-        if ($request->query('province')) {
-            $regencys = \Indonesia::search($request->query('province'))->allCities();
+        if (request()->query('province')) {
+            $regencys = \Indonesia::search(request()->query('province'))->allCities();
         } else {
             $regencys = \Indonesia::allCities();
         }
         return $regencys;
     }
 
-    public function subdistricts(Request $request)
+    public function subdistricts()
     {
         $subdistricts = null;
-        if ($request->query('regency')) {
-            $subdistricts = \Indonesia::search($request->query('regency'))->allDistricts();
+        if (request()->query('regency')) {
+            $subdistricts = \Indonesia::search(request()->query('regency'))->allDistricts();
         } else {
             $subdistricts = \Indonesia::allDistricts();
         }
