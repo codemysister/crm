@@ -33,7 +33,6 @@ class InvoiceGeneralRequest extends FormRequest
             'paid_off' => 'required',
             'rest_of_bill' => 'required',
             'payment_metode' => 'required',
-            'signature' => 'required',
         ];
     }
 }

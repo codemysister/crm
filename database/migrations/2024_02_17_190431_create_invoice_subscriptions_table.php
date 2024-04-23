@@ -25,8 +25,8 @@ return new class extends Migration {
             $table->string('partner_npwp')->nullable();
             $table->string('partner_province');
             $table->string('partner_regency');
-            $table->string('signature_name');
-            $table->string('signature_image');
+            $table->string('signature_name')->nullable();
+            $table->string('signature_image')->nullable();
             $table->string('partner_pic_signature')->nullable()->default(null);
             $table->bigInteger('total_nominal');
             $table->bigInteger('total_ppn');

@@ -23,9 +23,9 @@ return new class extends Migration {
             $table->date('return_date');
             $table->string('transportation');
             $table->string('accommodation');
-            $table->string('signature_name');
-            $table->string('signature_image');
-            $table->string('signature_position');
+            $table->string('signature_name')->nullable();
+            $table->string('signature_image')->nullable();
+            $table->string('signature_position')->nullable();
             $table->string('stpd_doc');
             $table->softDeletes();
             $table->timestamps();

@@ -23,9 +23,9 @@ return new class extends Migration {
             $table->string('sales_name');
             $table->string('sales_wa');
             $table->string('sales_email');
-            $table->string('signature_name');
-            $table->string('signature_position');
-            $table->string('signature_image');
+            $table->string('signature_name')->nullable();
+            $table->string('signature_position')->nullable();
+            $table->string('signature_image')->nullable();
             $table->string('sph_doc');
             $table->foreignId('created_by')->constrained('users', 'id')->onDelete('cascade');
             $table->softDeletes();

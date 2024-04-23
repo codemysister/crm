@@ -22,8 +22,8 @@ return new class extends Migration {
             $table->text('money');
             $table->string('metode');
             $table->string('payment_for');
-            $table->string('signature_name');
-            $table->string('signature_image');
+            $table->string('signature_name')->nullable();
+            $table->string('signature_image')->nullable();
             $table->string('receipt_doc');
             $table->foreignId('created_by')->constrained('users', 'id')->onDelete('cascade');
             $table->timestamps();

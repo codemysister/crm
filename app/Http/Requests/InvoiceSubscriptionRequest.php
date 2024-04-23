@@ -26,7 +26,6 @@ class InvoiceSubscriptionRequest extends FormRequest
             'due_date' => 'required',
             'partner' => 'required',
             'bills' => 'required',
-            'signature' => 'required',
             'total_nominal' => 'required',
             'total_ppn' => 'required',
             'paid_off' => 'required',

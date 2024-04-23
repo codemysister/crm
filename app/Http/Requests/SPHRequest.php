@@ -30,7 +30,6 @@ class SPHRequest extends FormRequest
             'sales.name' => 'required',
             'sales.email' => 'required',
             'sales.wa' => 'required',
-            'signature.image' => 'required',
         ];
     }
 
@@ -46,7 +45,6 @@ class SPHRequest extends FormRequest
             'sales.name.required' => 'Sales harus diiisi',
             'sales.email.required' => 'Email Sales harus diiisi',
             'sales.wa.required' => 'WA Sales harus diiisi',
-            'signature.image.required' => 'Tanda tangan harus diiisi',
         ];
     }
 }

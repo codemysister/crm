@@ -31,8 +31,8 @@ return new class extends Migration {
             $table->bigInteger('paid_off');
             $table->bigInteger('rest_of_bill')->nullable();
             $table->bigInteger('rest_of_bill_locked')->nullable();
-            $table->string('signature_name');
-            $table->string('signature_image');
+            $table->string('signature_name')->nullable();
+            $table->string('signature_image')->nullable();
             $table->string('payment_metode');
             $table->string('xendit_link')->nullable();
             $table->text('reason_late')->nullable();

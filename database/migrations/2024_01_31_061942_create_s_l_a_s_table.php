@@ -24,8 +24,8 @@ return new class extends Migration {
             $table->string('partner_pic_email')->nullable();
             $table->string('partner_pic_number')->nullable();
             $table->string('partner_pic_signature')->nullable()->default(null);
-            $table->string('signature_image');
-            $table->string('signature_name');
+            $table->string('signature_image')->nullable();
+            $table->string('signature_name')->nullable();
             $table->boolean('referral');
             $table->string('referral_name')->nullable();
             $table->string('referral_institution')->nullable();

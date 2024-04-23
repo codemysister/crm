@@ -27,9 +27,6 @@ class MemoRequest extends FormRequest
             'price_e_card' => 'required',
             'price_subscription' => 'required',
             'consideration' => 'required',
-            'signature_first.image' => 'required',
-            'signature_second.image' => 'required',
-            'signature_third.image' => 'required',
 
         ];
     }
@@ -43,9 +40,6 @@ class MemoRequest extends FormRequest
             'price_e_card' => 'Harga E-Card harus diisi',
             'price_subscription' => 'Harga langganan harus diisi',
             'consideration' => 'Pertimbangan harus diisi',
-            'signature_first.image' => 'Tanda tangan yang mengajukan harus diisi',
-            'signature_second.image' => 'Tanda tangan yang mengetahui harus diisi',
-            'signature_third.image' => 'Tanda tangan yang menyetujui harus diisi',
         ];
     }
 }

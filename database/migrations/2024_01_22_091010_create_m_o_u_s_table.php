@@ -45,9 +45,9 @@ return new class extends Migration {
             // $table->boolean('referral');
             // $table->string('referral_name')->nullable();
             // $table->string('referral_signature')->nullable()->default(null);
-            $table->string('signature_name');
-            $table->string('signature_position');
-            $table->string('signature_image');
+            $table->string('signature_name')->nullable();
+            $table->string('signature_position')->nullable();
+            $table->string('signature_image')->nullable();
             $table->string('mou_doc');
             $table->string('mou_doc_word')->nullable()->default(null);
             $table->foreignId('created_by')->constrained('users', 'id')->onDelete('cascade');

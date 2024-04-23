@@ -32,7 +32,6 @@ class SLARequest extends FormRequest
             "partner.pic_email" => "required",
             "partner.pic_number" => "required",
             "referral" => "required",
-            "signature" => "required",
         ];
     }
 }
