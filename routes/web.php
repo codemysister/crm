@@ -244,8 +244,15 @@ Route::middleware('auth')->group(function () {
     Route::post('/sph/filter', [SPHController::class, 'filter'])->name('sph.filter');
     Route::get('/sph/{sph:uuid}', [SPHController::class, 'edit'])->name('sph.edit')->middleware(['can:edit sph']);
     Route::put('/sph/{sph:uuid}', [SPHController::class, 'update'])->name('sph.update')->middleware(['can:edit sph']);
+    Route::delete('/sph/logs', [SPHController::class, 'destroyLogs'])->name('sph.log.destroy')->middleware(['can:hapus sph']);
+    Route::put('/sph/{sph:uuid}/restore', [SPHController::class, 'restore'])->name('sph.restore');
+    Route::delete('/sph/{sph:uuid}/force', [SPHController::class, 'destroyForce'])->name('sph.destroy.force');
     Route::delete('/sph/{sph:uuid}', [SPHController::class, 'destroy'])->name('sph.destroy')->middleware(['can:hapus sph']);
+    Route::get('/api/sph/logs', [SPHController::class, 'apiGetLogs'])->name('api.sph.logs');
+    Route::get('api/sph/arsip', [SPHController::class, 'apiGetArsip'])->name('sph.arsip')->middleware(['can:tambah partner']);
+    Route::post('/sph/arsip/filter', [SPHController::class, 'arsipFilter'])->name('sph.arsip.filter')->middleware(['can:tambah partner']);
     Route::get('/api/sph', [SPHController::class, 'apiGetSPH'])->name('api.sph');
+    Route::post('/sph/logs/filter', [SPHController::class, 'logFilter'])->name('sph.log.filter')->middleware(['can:tambah sph']);
 
     // Memo
     Route::get('/memo', [MemoController::class, 'index'])->name('memo.view')->middleware(['can:lihat memo']);

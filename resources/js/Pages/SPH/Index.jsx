@@ -26,6 +26,8 @@ import { TabPanel, TabView } from "primereact/tabview";
 import HeaderDatatable from "@/Components/HeaderDatatable";
 import { formatNPWP } from "../../Utils/formatNPWP";
 import { formateDate } from "../../Utils/formatDate";
+import LogComponent from "@/Components/LogComponent";
+import ArsipComponent from "@/Components/ArsipComponent";
 
 export default function Index({
     auth,
@@ -245,6 +247,100 @@ export default function Index({
         });
     };
 
+    const globalFilterFields = [
+        "partner.name",
+        "partner.npwp",
+        "code",
+        "status.name",
+    ];
+
+    const columns = [
+        {
+            field: "code",
+            header: "Kode",
+            frozen: !isMobile,
+            style: !isMobile
+                ? {
+                      width: "max-content",
+                      whiteSpace: "nowrap",
+                  }
+                : null,
+        },
+
+        {
+            field: "sphable",
+            header: "Lembaga",
+            frozen: !isMobile,
+            style: !isMobile
+                ? {
+                      width: "max-content",
+                      whiteSpace: "nowrap",
+                  }
+                : null,
+            body: (rowData) => (
+                <button
+                    onClick={() => handleSelectedDetailPartner(rowData)}
+                    className="hover:text-blue-700 text-left"
+                >
+                    {rowData.sphable.name}
+                </button>
+            ),
+        },
+
+        {
+            field: "npwp",
+            header: "NPWP",
+            frozen: !isMobile,
+            style: !isMobile
+                ? {
+                      width: "max-content",
+                      whiteSpace: "nowrap",
+                  }
+                : null,
+            body: (rowData) => {
+                if (rowData.sphable?.npwp == undefined) {
+                    return "-";
+                } else {
+                    return rowData.sphable.npwp !== null
+                        ? formatNPWP(rowData.sphable.npwp)
+                        : "-";
+                }
+            },
+        },
+
+        {
+            field: "sph_doc",
+            header: "Dokumen",
+            frozen: !isMobile,
+            style: !isMobile
+                ? {
+                      width: "max-content",
+                      whiteSpace: "nowrap",
+                  }
+                : null,
+            body: (rowData) => {
+                return (
+                    <div className="flex w-full h-full items-center justify-center">
+                        <a
+                            href={rowData.sph_doc}
+                            download={`SPH_${rowData.partner_name}`}
+                            class="font-bold  w-full h-full text-center rounded-full "
+                        >
+                            <i
+                                className="pi pi-file-pdf"
+                                style={{
+                                    width: "100%",
+                                    height: "100%",
+                                    fontSize: "1.5rem",
+                                }}
+                            ></i>
+                        </a>
+                    </div>
+                );
+            },
+        },
+    ];
+
     const header = () => {
         return (
             <HeaderDatatable
@@ -277,15 +373,6 @@ export default function Index({
                     </span>
                 </Button>
             </HeaderDatatable>
-        );
-    };
-
-    const addButtonIcon = () => {
-        return (
-            <i
-                className="pi pi-plus"
-                style={{ fontSize: "0.7rem", paddingRight: "5px" }}
-            ></i>
         );
     };
 
@@ -324,6 +411,29 @@ export default function Index({
         setSphs(data);
         setSidebarFilter(false);
         setIsLoadingData(false);
+    };
+
+    const objectKeyToIndo = (key) => {
+        let keyIndo;
+        const keySplit = key.split(".");
+        const firstKey = keySplit[0];
+        if (firstKey == "partner_name") {
+            keyIndo = "Lembaga";
+        } else if (firstKey == "partner_pic") {
+            keyIndo = "PIC";
+        } else if (firstKey == "sales_name") {
+            keyIndo = "Sales";
+        } else if (firstKey == "sales_wa") {
+            keyIndo = "Wa Sales";
+        } else if (firstKey == "sales_email") {
+            keyIndo = "Email Sales";
+        } else if (firstKey == "signature_name") {
+            keyIndo = "Tanda Tangan";
+        } else if (firstKey == "code") {
+            keyIndo = "Kode";
+        }
+
+        return keyIndo;
     };
 
     if (preRenderLoad) {
@@ -530,12 +640,7 @@ export default function Index({
                                         emptyMessage="Surat penawaran harga tidak ditemukan."
                                         paginatorClassName="dark:bg-transparent paginator-custome dark:text-gray-300 rounded-b-lg"
                                         header={header}
-                                        globalFilterFields={[
-                                            "partner.name",
-                                            "partner.npwp",
-                                            "code",
-                                            "status.name",
-                                        ]}
+                                        globalFilterFields={globalFilterFields}
                                         scrollable
                                         value={sphs}
                                         dataKey="id"
@@ -552,126 +657,21 @@ export default function Index({
                                             className="dark:border-none bg-white"
                                             headerClassName="dark:border-none bg-white dark:bg-slate-900 dark:text-gray-300"
                                         ></Column>
-                                        <Column
-                                            field="code"
-                                            className="dark:border-none bg-white lg:whitespace-nowrap lg:w-max"
-                                            headerClassName="dark:border-none bg-white dark:bg-slate-900 dark:text-gray-300"
-                                            header="Kode"
-                                            align="left"
-                                            frozen={!isMobile}
-                                            style={
-                                                !isMobile
-                                                    ? {
-                                                          width: "max-content",
-                                                          whiteSpace: "nowrap",
-                                                      }
-                                                    : null
-                                            }
-                                        ></Column>
 
-                                        <Column
-                                            header="Nama"
-                                            body={(rowData) => (
-                                                <button
-                                                    onClick={() =>
-                                                        handleSelectedDetailPartner(
-                                                            rowData
-                                                        )
-                                                    }
-                                                    className="hover:text-blue-700 text-left"
-                                                >
-                                                    {rowData.sphable.name}
-                                                </button>
-                                            )}
-                                            className="dark:border-none bg-white lg:whitespace-nowrap lg:w-max"
-                                            headerClassName="dark:border-none bg-white dark:bg-slate-900 dark:text-gray-300"
-                                            align="left"
-                                            frozen={!isMobile}
-                                            style={
-                                                !isMobile
-                                                    ? {
-                                                          width: "max-content",
-                                                          whiteSpace: "nowrap",
-                                                      }
-                                                    : null
-                                            }
-                                        ></Column>
-
-                                        <Column
-                                            header="NPWP"
-                                            body={(rowData) => {
-                                                if (
-                                                    rowData.sphable.npwp ==
-                                                    undefined
-                                                ) {
-                                                    return "-";
-                                                } else {
-                                                    return rowData.sphable
-                                                        .npwp !== null
-                                                        ? formatNPWP(
-                                                              rowData.sphable
-                                                                  .npwp
-                                                          )
-                                                        : "-";
-                                                }
-                                            }}
-                                            className="dark:border-none"
-                                            headerClassName="dark:border-none  dark:bg-slate-900 dark:text-gray-300"
-                                            align="left"
-                                            frozen={!isMobile}
-                                            style={
-                                                !isMobile
-                                                    ? {
-                                                          width: "max-content",
-                                                          whiteSpace: "nowrap",
-                                                      }
-                                                    : null
-                                            }
-                                        ></Column>
-
-                                        <Column
-                                            body={(rowData) => {
-                                                return rowData.sph_doc == "" ? (
-                                                    <ProgressSpinner
-                                                        style={{
-                                                            width: "30px",
-                                                            height: "30px",
-                                                        }}
-                                                        strokeWidth="8"
-                                                        fill="var(--surface-ground)"
-                                                        animationDuration=".5s"
-                                                    />
-                                                ) : (
-                                                    <div className="flex w-full h-full items-center justify-center">
-                                                        <a
-                                                            href={
-                                                                rowData.sph_doc
-                                                            }
-                                                            download={`SPH_${rowData.partner_name}`}
-                                                            class="font-bold  w-full h-full text-center rounded-full "
-                                                        >
-                                                            <i
-                                                                className="pi pi-file-pdf"
-                                                                style={{
-                                                                    width: "100%",
-                                                                    height: "100%",
-                                                                    fontSize:
-                                                                        "1.5rem",
-                                                                }}
-                                                            ></i>
-                                                        </a>
-                                                    </div>
-                                                );
-                                            }}
-                                            className="dark:border-none"
-                                            headerClassName="dark:border-none  bg-transparent dark:bg-transparent dark:text-gray-300"
-                                            align="center"
-                                            header="Dokumen"
-                                            style={{
-                                                width: "max-content",
-                                                whiteSpace: "nowrap",
-                                            }}
-                                        ></Column>
+                                        {columns.map((col) => {
+                                            return (
+                                                <Column
+                                                    field={col.field}
+                                                    header={col.header}
+                                                    body={col.body}
+                                                    style={col.style}
+                                                    frozen={col.frozen}
+                                                    align="left"
+                                                    className="dark:border-none bg-white"
+                                                    headerClassName="dark:border-none bg-white dark:bg-slate-900 dark:text-gray-300"
+                                                ></Column>
+                                            );
+                                        })}
 
                                         <Column
                                             field="created_at"
@@ -696,7 +696,7 @@ export default function Index({
                                             header="Diinput Oleh"
                                             align="left"
                                             body={(rowData) => {
-                                                return rowData.user.name;
+                                                return rowData.created_by.name;
                                             }}
                                             style={{
                                                 width: "max-content",
@@ -712,8 +712,12 @@ export default function Index({
 
                 <TabPanel header="Log">
                     {activeIndexTab == 1 && (
-                        <Log
+                        <LogComponent
                             auth={auth}
+                            fetchUrl={"/api/sph/logs"}
+                            filterUrl={"/sph/logs/filter"}
+                            deleteUrl={"/sph/logs"}
+                            objectKeyToIndo={objectKeyToIndo}
                             users={users}
                             showSuccess={showSuccess}
                             showError={showError}
@@ -723,10 +727,17 @@ export default function Index({
 
                 <TabPanel header="Arsip">
                     {activeIndexTab == 2 && (
-                        <Arsip
+                        <ArsipComponent
                             auth={auth}
+                            users={users}
+                            fetchUrl={"/api/sph/arsip"}
+                            forceDeleteUrl={"/sph/{id}/force"}
+                            restoreUrl={"/sph/{id}/restore"}
+                            filterUrl={"/sph/arsip/filter"}
+                            columns={columns}
                             showSuccess={showSuccess}
                             showError={showError}
+                            globalFilterFields={globalFilterFields}
                         />
                     )}
                 </TabPanel>

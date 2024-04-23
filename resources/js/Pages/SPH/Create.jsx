@@ -17,6 +17,12 @@ import InputError from "@/Components/InputError";
 import { SelectButton } from "primereact/selectbutton";
 import HeaderDatatable from "@/Components/HeaderDatatable";
 import { formatNPWP } from "../../Utils/formatNPWP";
+import { getRegencys } from "@/Services/getRegency";
+import { getProvince } from "@/Services/getProvince";
+import { upperCaseEachWord } from "@/Utils/UppercaseEachWord";
+import DialogInstitution from "@/Components/DialogInstitution";
+import { BlockUI } from "primereact/blockui";
+import LoadingDocument from "@/Components/LoadingDocument";
 
 const BASE_URL = import.meta.env.VITE_BASE_URL;
 
@@ -40,21 +46,13 @@ const Create = ({
         useState(false);
     const [rowClick, setRowClick] = useState(true);
     const [selected, setselected] = useState([]);
-    const [selectedInstitution, setSelectedInstitution] = useState([]);
     const toast = useRef(null);
     const partnerScrollRef = useRef(null);
     const [provinces, setProvinces] = useState([]);
     const [regencys, setRegencys] = useState([]);
-    const [codeProvince, setcodeProvince] = useState(null);
+    const [provinceName, setProvinceName] = useState(null);
     const [theme, setTheme] = useState(localStorage.theme);
-
-    const [institutionTypeOptions] = useState([
-        { label: "Partner", value: "partner" },
-        { label: "Lead", value: "lead" },
-    ]);
-    const [institutionType, setInstitutionType] = useState(
-        institutionTypeOptions[0].value
-    );
+    const [blocked, setBlocked] = useState(false);
 
     useEffect(() => {
         theme
@@ -118,166 +116,38 @@ const Create = ({
     });
 
     useEffect(() => {
-        const fetchData = async () => {
-            await getProvince();
+        const fetch = async () => {
+            let response = await getProvince();
+            setProvinces((prev) => (prev = response));
         };
 
-        fetchData();
+        fetch();
     }, []);
 
     useEffect(() => {
-        if (codeProvince) {
-            getRegencys(codeProvince);
+        if (processing) {
+            setBlocked(true);
+        } else {
+            setBlocked(false);
         }
-    }, [codeProvince]);
+    }, [processing]);
 
     useEffect(() => {
-        if (institutionType == "lead") {
-            getLeads();
-        } else {
-            getPartners();
-        }
-    }, [institutionType]);
-
-    const getPartners = async () => {
-        setIsLoadingData(true);
-
-        let response = await fetch("/api/partners");
-        let data = await response.json();
-
-        setPartners((prev) => (prev = data.partners));
-
-        setIsLoadingData(false);
-    };
-
-    const getLeads = async () => {
-        setIsLoadingData(true);
-
-        let response = await fetch("/api/leads");
-        let data = await response.json();
-
-        setLeads((prev) => (prev = data));
-
-        setIsLoadingData(false);
-    };
-
-    const getProvince = async () => {
-        const options = {
-            method: "GET",
-            url: `/api/wilayah/provinsi/`,
-            headers: {
-                "Content-Type": "application/json",
-            },
+        const fetch = async () => {
+            if (provinceName) {
+                let response = await getRegencys(provinceName);
+                setRegencys((prev) => (prev = response));
+            }
         };
-
-        try {
-            const response = await axios.request(options);
-            const dataArray = Object.entries(response.data).map(
-                ([key, value]) => ({
-                    code: key,
-                    name: value
-                        .toLowerCase()
-                        .split(" ")
-                        .map(
-                            (word) =>
-                                word.charAt(0).toUpperCase() + word.slice(1)
-                        )
-                        .join(" "),
-                })
-            );
-            setProvinces((prev) => (prev = dataArray));
-        } catch (error) {
-            console.log(error);
-        }
-    };
-
-    const getRegencys = async (code) => {
-        let url = code
-            ? `/api/wilayah/kabupaten?provinsi=${code}`
-            : `/api/wilayah/kabupaten`;
-        const options = {
-            method: "GET",
-            url: url,
-            headers: {
-                "Content-Type": "application/json",
-            },
-        };
-
-        try {
-            const response = await axios.request(options);
-            const dataArray = Object.entries(response.data).map(
-                ([key, value]) => ({
-                    code: key,
-                    name: value
-                        .toLowerCase()
-                        .split(" ")
-                        .map(
-                            (word) =>
-                                word.charAt(0).toUpperCase() + word.slice(1)
-                        )
-                        .join(" "),
-                })
-            );
-            setRegencys((prev) => (prev = dataArray));
-        } catch (error) {
-            console.log(error);
-        }
-    };
+        fetch();
+    }, [provinceName]);
 
     const [filters, setFilters] = useState({
         global: { value: null, matchMode: FilterMatchMode.CONTAINS },
     });
 
-    const [globalFilterValue, setGlobalFilterValue] = useState("");
-
-    const onGlobalFilterChange = (e) => {
-        const value = e.target.value;
-        let _filters = { ...filters };
-
-        _filters["global"].value = value;
-
-        setFilters(_filters);
-        setGlobalFilterValue(value);
-    };
-
     document.querySelector("body").classList.add("overflow-hidden");
 
-    const dialogFooterInstitutionTemplate = (type) => {
-        return (
-            <Button
-                label="OK"
-                icon="pi pi-check"
-                onClick={() => {
-                    if (institutionType == "partner") {
-                        setData("partner", {
-                            ...data.partner,
-                            uuid: selectedInstitution.uuid,
-                            name: selectedInstitution.name,
-                            province: selectedInstitution.province,
-                            regency: selectedInstitution.regency,
-                            pic: selectedInstitution.pics[0].name,
-                            type: institutionType,
-                        });
-                        setcodeProvince(
-                            (prev) =>
-                                (prev = JSON.parse(
-                                    selectedInstitution.province
-                                ).code)
-                        );
-                    } else {
-                        setData("partner", {
-                            ...data.partner,
-                            uuid: selectedInstitution.uuid,
-                            name: selectedInstitution.name,
-                            pic: selectedInstitution.pic,
-                            type: institutionType,
-                        });
-                    }
-                    setDialogInstitutionVisible(false);
-                }}
-            />
-        );
-    };
     const dialogFooterTemplate = (type) => {
         return (
             <Button
@@ -361,25 +231,9 @@ const Create = ({
     const headerProduct = () => {
         return (
             <HeaderDatatable
-                globalFilterValue={globalFilterValue}
-                onGlobalFilterChange={onGlobalFilterChange}
+                filters={filters}
+                setFilters={setFilters}
             ></HeaderDatatable>
-        );
-    };
-
-    const header = () => {
-        return (
-            <HeaderDatatable
-                globalFilterValue={globalFilterValue}
-                onGlobalFilterChange={onGlobalFilterChange}
-            >
-                <SelectButton
-                    className="w-full flex justify-end lg:text-md text-center"
-                    value={institutionType}
-                    onChange={(e) => setInstitutionType(e.value)}
-                    options={institutionTypeOptions}
-                />
-            </HeaderDatatable>
         );
     };
 
@@ -435,113 +289,120 @@ const Create = ({
         <>
             <Head title="Surat Penawaran Harga"></Head>
             <Toast ref={toast} />
-            <div className="h-screen max-h-screen overflow-y-hidden">
-                <div className="flex flex-col h-screen max-h-screen overflow-hidden md:flex-row z-40 relative gap-5">
-                    <div className="md:w-[35%] overflow-y-auto h-screen max-h-screen p-5">
-                        <Card>
-                            <div className="flex justify-between items-center mb-4">
-                                <h1 className="font-bold text-2xl">
-                                    Surat Penawaran Harga
-                                </h1>
-                                <Link href="/sph">
-                                    <svg
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        fill="none"
-                                        viewBox="0 0 24 24"
-                                        stroke-width="1.5"
-                                        stroke="currentColor"
-                                        class="w-6 h-6"
-                                    >
-                                        <path
-                                            stroke-linecap="round"
-                                            stroke-linejoin="round"
-                                            d="M8.25 9V5.25A2.25 2.25 0 0 1 10.5 3h6a2.25 2.25 0 0 1 2.25 2.25v13.5A2.25 2.25 0 0 1 16.5 21h-6a2.25 2.25 0 0 1-2.25-2.25V15m-3 0-3-3m0 0 3-3m-3 3H15"
+            <BlockUI blocked={blocked} template={LoadingDocument}>
+                <div className="h-screen max-h-screen overflow-y-hidden">
+                    <div className="flex flex-col h-screen max-h-screen overflow-hidden md:flex-row z-40 relative gap-5">
+                        <div className="md:w-[35%] overflow-y-auto h-screen max-h-screen p-5">
+                            <Card>
+                                <div className="flex justify-between items-center mb-4">
+                                    <h1 className="font-bold text-2xl">
+                                        Surat Penawaran Harga
+                                    </h1>
+                                    <Link href="/sph">
+                                        <svg
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            fill="none"
+                                            viewBox="0 0 24 24"
+                                            stroke-width="1.5"
+                                            stroke="currentColor"
+                                            class="w-6 h-6"
+                                        >
+                                            <path
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                d="M8.25 9V5.25A2.25 2.25 0 0 1 10.5 3h6a2.25 2.25 0 0 1 2.25 2.25v13.5A2.25 2.25 0 0 1 16.5 21h-6a2.25 2.25 0 0 1-2.25-2.25V15m-3 0-3-3m0 0 3-3m-3 3H15"
+                                            />
+                                        </svg>
+                                    </Link>
+                                </div>
+                                <div className="flex flex-col">
+                                    <Button
+                                        label="Tambah Produk"
+                                        icon="pi pi-external-link"
+                                        onClick={() => setDialogVisible(true)}
+                                    />
+                                    <InputError
+                                        message={errors["products"]}
+                                        className="mt-2"
+                                    />
+
+                                    <div className="flex flex-col mt-3">
+                                        <InputText
+                                            value={data.code}
+                                            onChange={(e) =>
+                                                setData("code", e.target.value)
+                                            }
+                                            className="dark:bg-gray-300"
+                                            id="code"
+                                            aria-describedby="code-help"
+                                            hidden
                                         />
-                                    </svg>
-                                </Link>
-                            </div>
-                            <div className="flex flex-col">
-                                <Button
-                                    label="Tambah Produk"
-                                    icon="pi pi-external-link"
-                                    onClick={() => setDialogVisible(true)}
-                                />
-                                <InputError
-                                    message={errors["products"]}
-                                    className="mt-2"
-                                />
+                                    </div>
 
-                                <div className="flex flex-col mt-3">
-                                    <InputText
-                                        value={data.code}
-                                        onChange={(e) =>
-                                            setData("code", e.target.value)
-                                        }
-                                        className="dark:bg-gray-300"
-                                        id="code"
-                                        aria-describedby="code-help"
-                                        hidden
-                                    />
-                                </div>
+                                    <div className="flex flex-col mt-3">
+                                        <label htmlFor="partner_pic">
+                                            PIC *
+                                        </label>
+                                        <InputText
+                                            value={data.partner.pic}
+                                            onChange={(e) =>
+                                                setData("partner", {
+                                                    ...data.partner,
+                                                    pic: e.target.value,
+                                                })
+                                            }
+                                            onFocus={() => {
+                                                triggerInputFocus(
+                                                    animatePartnerPicRef
+                                                );
+                                            }}
+                                            onBlur={() => {
+                                                stopAnimateInputFocus(
+                                                    animatePartnerPicRef
+                                                );
+                                            }}
+                                            className="dark:bg-gray-300"
+                                            id="partner_pic"
+                                            aria-describedby="partner_pic-help"
+                                        />
+                                        <InputError
+                                            message={errors["partner.pic"]}
+                                            className="mt-2"
+                                        />
+                                    </div>
 
-                                <div className="flex flex-col mt-3">
-                                    <label htmlFor="partner_pic">PIC *</label>
-                                    <InputText
-                                        value={data.partner.pic}
-                                        onChange={(e) =>
-                                            setData("partner", {
-                                                ...data.partner,
-                                                pic: e.target.value,
-                                            })
-                                        }
-                                        onFocus={() => {
-                                            triggerInputFocus(
-                                                animatePartnerPicRef
-                                            );
-                                        }}
-                                        onBlur={() => {
-                                            stopAnimateInputFocus(
-                                                animatePartnerPicRef
-                                            );
-                                        }}
-                                        className="dark:bg-gray-300"
-                                        id="partner_pic"
-                                        aria-describedby="partner_pic-help"
-                                    />
-                                    <InputError
-                                        message={errors["partner.pic"]}
-                                        className="mt-2"
-                                    />
-                                </div>
-
-                                <div className="flex flex-col mt-3">
-                                    <label htmlFor="lembaga">Lembaga *</label>
-                                    <InputText
-                                        value={data.partner.name}
-                                        onFocus={() => {
-                                            triggerInputFocus(
-                                                animatePartnerNameRef
-                                            );
-                                        }}
-                                        onBlur={() => {
-                                            stopAnimateInputFocus(
-                                                animatePartnerNameRef
-                                            );
-                                        }}
-                                        onClick={() => {
-                                            setDialogInstitutionVisible(true);
-                                        }}
-                                        placeholder="Pilih lembaga"
-                                        className="dark:bg-gray-300 cursor-pointer"
-                                        id="partner"
-                                        aria-describedby="partner-help"
-                                    />
-                                    <InputError
-                                        message={errors["partner.name"]}
-                                        className="mt-2"
-                                    />
-                                </div>
-                                {/* <div className="flex flex-col mt-3">
+                                    <div className="flex flex-col mt-3">
+                                        <label htmlFor="lembaga">
+                                            Lembaga *
+                                        </label>
+                                        <InputText
+                                            value={data.partner.name}
+                                            onFocus={() => {
+                                                triggerInputFocus(
+                                                    animatePartnerNameRef
+                                                );
+                                            }}
+                                            onBlur={() => {
+                                                stopAnimateInputFocus(
+                                                    animatePartnerNameRef
+                                                );
+                                            }}
+                                            onClick={() => {
+                                                setDialogInstitutionVisible(
+                                                    true
+                                                );
+                                            }}
+                                            placeholder="Pilih lembaga"
+                                            className="dark:bg-gray-300 cursor-pointer"
+                                            id="partner"
+                                            aria-describedby="partner-help"
+                                        />
+                                        <InputError
+                                            message={errors["partner.name"]}
+                                            className="mt-2"
+                                        />
+                                    </div>
+                                    {/* <div className="flex flex-col mt-3">
                                     <label htmlFor="lembaga">Lembaga *</label>
                                     <div className="p-inputgroup flex-1">
                                         <InputText
@@ -601,7 +462,7 @@ const Create = ({
                                                     pic: e.target.value.pics[0]
                                                         .name,
                                                 });
-                                                setcodeProvince(
+                                                setProvinceName(
                                                     (prev) =>
                                                         (prev = JSON.parse(
                                                             e.target.value
@@ -627,393 +488,348 @@ const Create = ({
                                     />
                                 </div> */}
 
-                                <div className="flex flex-col mt-3">
-                                    <label htmlFor="province">Provinsi *</label>
-
-                                    <Dropdown
-                                        value={
-                                            data.partner.province
-                                                ? JSON.parse(
-                                                      data.partner.province
-                                                  )
-                                                : null
-                                        }
-                                        onChange={(e) => {
-                                            setcodeProvince(
-                                                (prev) =>
-                                                    (prev = e.target.value.code)
-                                            );
-                                            setData("partner", {
-                                                ...data.partner,
-                                                province: JSON.stringify(
-                                                    e.target.value
-                                                ),
-                                            });
-                                        }}
-                                        dataKey="name"
-                                        options={provinces}
-                                        optionLabel="name"
-                                        placeholder="Pilih Provinsi"
-                                        filter
-                                        valueTemplate={selectedOptionTemplate}
-                                        itemTemplate={optionTemplate}
-                                        className="w-full md:w-14rem"
-                                        onFocus={() => {
-                                            triggerInputFocus(
-                                                animatePartnerProvinceRef
-                                            );
-                                        }}
-                                        onShow={() => {
-                                            triggerInputFocus(
-                                                animatePartnerProvinceRef
-                                            );
-                                        }}
-                                        onBlur={() => {
-                                            stopAnimateInputFocus(
-                                                animatePartnerProvinceRef
-                                            );
-                                        }}
-                                    />
-                                    <InputError
-                                        message={errors["partner.province"]}
-                                        className="mt-2"
-                                    />
-                                </div>
-
-                                <div className="flex flex-col mt-3">
-                                    <label htmlFor="regency">Kabupaten *</label>
-                                    <Dropdown
-                                        dataKey="name"
-                                        value={
-                                            data.partner.regency
-                                                ? JSON.parse(
-                                                      data.partner.regency
-                                                  )
-                                                : null
-                                        }
-                                        onChange={(e) => {
-                                            setData("partner", {
-                                                ...data.partner,
-                                                regency: JSON.stringify(
-                                                    e.target.value
-                                                ),
-                                            });
-                                        }}
-                                        onFocus={() => {
-                                            triggerInputFocus(
-                                                animatePartnerRegencyRef
-                                            );
-                                        }}
-                                        onShow={() => {
-                                            triggerInputFocus(
-                                                animatePartnerRegencyRef
-                                            );
-                                        }}
-                                        onBlur={() => {
-                                            stopAnimateInputFocus(
-                                                animatePartnerRegencyRef
-                                            );
-                                        }}
-                                        options={regencys}
-                                        optionLabel="name"
-                                        placeholder="Pilih Kabupaten"
-                                        filter
-                                        valueTemplate={selectedOptionTemplate}
-                                        itemTemplate={optionTemplate}
-                                        className="w-full md:w-14rem"
-                                    />
-                                    <InputError
-                                        message={errors["partner.regency"]}
-                                        className="mt-2"
-                                    />
-                                </div>
-
-                                <div className="flex flex-col mt-3">
-                                    <label htmlFor="sales">Sales *</label>
-                                    <Dropdown
-                                        value={data.sales}
-                                        onChange={(e) => {
-                                            setData("sales", {
-                                                ...data.sales,
-                                                name: e.target.value.name,
-                                                wa: e.target.value.number,
-                                                email: e.target.value.email,
-                                            });
-                                        }}
-                                        dataKey="name"
-                                        options={sales}
-                                        optionLabel="name"
-                                        placeholder="Pilih Sales"
-                                        filter
-                                        valueTemplate={selectedOptionTemplate}
-                                        itemTemplate={optionTemplate}
-                                        className="w-full md:w-14rem"
-                                        onFocus={() => {
-                                            triggerInputFocus(
-                                                animateSalesNameRef
-                                            );
-                                        }}
-                                        onShow={() => {
-                                            triggerInputFocus(
-                                                animateSalesNameRef
-                                            );
-                                        }}
-                                        onBlur={() => {
-                                            stopAnimateInputFocus(
-                                                animateSalesNameRef
-                                            );
-                                        }}
-                                    />
-                                    <InputError
-                                        message={errors["sales.name"]}
-                                        className="mt-2"
-                                    />
-                                </div>
-                                <div className="flex flex-col mt-3">
-                                    <label htmlFor="sales-whatsapp">
-                                        Whatsapp Sales *
-                                    </label>
-                                    <InputText
-                                        value={data.sales.wa}
-                                        onChange={(e) => {
-                                            setData("sales", {
-                                                ...data.sales,
-                                                wa: e.target.value,
-                                            });
-                                        }}
-                                        keyfilter="int"
-                                        className="dark:bg-gray-300"
-                                        id="sales-whatsapp"
-                                        aria-describedby="sales-whatsapp-help"
-                                        onFocus={() => {
-                                            triggerInputFocus(
-                                                animateSalesWaRef
-                                            );
-                                        }}
-                                        onBlur={() => {
-                                            stopAnimateInputFocus(
-                                                animateSalesWaRef
-                                            );
-                                        }}
-                                    />
-                                    <InputError
-                                        message={errors["sales.wa"]}
-                                        className="mt-2"
-                                    />
-                                </div>
-                                <div className="flex flex-col mt-3">
-                                    <label htmlFor="sales-email">
-                                        Email Sales *
-                                    </label>
-                                    <InputText
-                                        value={data.sales.email}
-                                        onChange={(e) =>
-                                            setData("sales", {
-                                                ...data.sales,
-                                                email: e.target.value,
-                                            })
-                                        }
-                                        className="dark:bg-gray-300"
-                                        id="sales-email"
-                                        aria-describedby="sales-email-help"
-                                        onFocus={() => {
-                                            triggerInputFocus(
-                                                animateSalesEmailRef
-                                            );
-                                        }}
-                                        onBlur={() => {
-                                            stopAnimateInputFocus(
-                                                animateSalesEmailRef
-                                            );
-                                        }}
-                                    />
-                                    <InputError
-                                        message={errors["sales.email"]}
-                                        className="mt-2"
-                                    />
-                                </div>
-                                <div className="flex flex-col mt-3">
-                                    <label htmlFor="signature">
-                                        Tanda Tangan *
-                                    </label>
-                                    <Dropdown
-                                        value={data.signature}
-                                        onChange={(e) => {
-                                            setData("signature", {
-                                                ...data.signature,
-                                                name: e.target.value.name,
-                                                position:
-                                                    e.target.value.position,
-                                                image: e.target.value.image,
-                                            });
-                                        }}
-                                        dataKey="name"
-                                        options={signatures}
-                                        optionLabel="name"
-                                        placeholder="Pilih Tanda Tangan"
-                                        filter
-                                        valueTemplate={selectedOptionTemplate}
-                                        itemTemplate={optionSignatureTemplate}
-                                        className="w-full md:w-14rem"
-                                        onFocus={() => {
-                                            triggerInputFocus(
-                                                animateSignatureNameRef
-                                            );
-                                        }}
-                                        onShow={() => {
-                                            triggerInputFocus(
-                                                animateSignatureNameRef
-                                            );
-                                        }}
-                                        onBlur={() => {
-                                            stopAnimateInputFocus(
-                                                animateSignatureNameRef
-                                            );
-                                        }}
-                                    />
-                                    <InputError
-                                        message={errors["signature.image"]}
-                                        className="mt-2"
-                                    />
-                                </div>
-
-                                <div className="flex-flex-col mt-3">
-                                    <form onSubmit={handleSubmitForm}>
-                                        <Button className="mx-auto justify-center block">
-                                            Submit
-                                        </Button>
-                                    </form>
-                                </div>
-                            </div>
-                        </Card>
-                    </div>
-
-                    <Dialog
-                        header="Input Produk"
-                        visible={dialogVisible}
-                        style={{ width: "85vw" }}
-                        maximizable
-                        modal
-                        contentStyle={{ height: "550px" }}
-                        onHide={() => setDialogVisible(false)}
-                        footer={dialogFooterTemplate}
-                    >
-                        <div className="flex my-5 gap-3">
-                            <Button
-                                label="Pilih Produk"
-                                icon="pi pi-external-link"
-                                onClick={() => setDialogProductVisible(true)}
-                                className="text-xs md:text-base"
-                            />
-                            <Button
-                                label="Tambah Produk"
-                                icon="pi pi-plus"
-                                className="text-xs md:text-base"
-                                onClick={() => {
-                                    let inputNew = {
-                                        name: "",
-                                        price: "",
-                                        qty: "",
-                                        detail: null,
-                                        total: "",
-                                    };
-
-                                    let updatedProducts = [
-                                        ...data.products,
-                                        inputNew,
-                                    ];
-
-                                    setData("products", updatedProducts);
-                                }}
-                            />
-                        </div>
-
-                        {data.products?.map((product, index) => {
-                            const no = index + 1;
-                            return (
-                                <div
-                                    className="flex gap-5 mt-2 items-center"
-                                    key={product + index}
-                                >
-                                    <div>
-                                        <Badge value={no} size="large"></Badge>
-                                    </div>
-
-                                    <div className="flex flex-col">
-                                        <label htmlFor="partner_address">
-                                            Produk/Layanan *
+                                    <div className="flex flex-col mt-3">
+                                        <label htmlFor="province">
+                                            Provinsi *
                                         </label>
-                                        <InputText
-                                            value={product.name}
-                                            onChange={(e) =>
-                                                handleInputChange(
-                                                    index,
-                                                    "name",
-                                                    e.target.value
-                                                )
+
+                                        <Dropdown
+                                            value={
+                                                data.partner.province
+                                                    ? JSON.parse(
+                                                          data.partner.province
+                                                      )
+                                                    : null
                                             }
-                                            className="dark:bg-gray-300"
-                                            id="partner_address"
-                                            aria-describedby="partner_address-help"
+                                            onChange={(e) => {
+                                                setProvinceName(
+                                                    (prev) =>
+                                                        (prev =
+                                                            e.target.value.name)
+                                                );
+                                                setData("partner", {
+                                                    ...data.partner,
+                                                    province: JSON.stringify(
+                                                        e.target.value
+                                                    ),
+                                                });
+                                            }}
+                                            dataKey="code"
+                                            options={provinces}
+                                            optionLabel="name"
+                                            placeholder="Pilih Provinsi"
+                                            filter
+                                            valueTemplate={
+                                                selectedOptionTemplate
+                                            }
+                                            itemTemplate={optionTemplate}
+                                            className="w-full md:w-14rem"
+                                            onFocus={() => {
+                                                triggerInputFocus(
+                                                    animatePartnerProvinceRef
+                                                );
+                                            }}
+                                            onShow={() => {
+                                                triggerInputFocus(
+                                                    animatePartnerProvinceRef
+                                                );
+                                            }}
+                                            onBlur={() => {
+                                                stopAnimateInputFocus(
+                                                    animatePartnerProvinceRef
+                                                );
+                                            }}
+                                        />
+                                        <InputError
+                                            message={errors["partner.province"]}
+                                            className="mt-2"
                                         />
                                     </div>
 
-                                    <div className="flex">
-                                        <div className="flex flex-col">
-                                            <label htmlFor="partner_address">
-                                                Harga *
-                                            </label>
-                                            <InputNumber
-                                                value={product.price}
-                                                onChange={(e) =>
-                                                    handleInputChange(
-                                                        index,
-                                                        "price",
-                                                        e.value
-                                                    )
-                                                }
-                                                className="dark:bg-gray-300"
-                                                id="partner_address"
-                                                aria-describedby="partner_address-help"
-                                                locale="id-ID"
-                                            />
-                                        </div>
+                                    <div className="flex flex-col mt-3">
+                                        <label htmlFor="regency">
+                                            Kabupaten *
+                                        </label>
+                                        <Dropdown
+                                            dataKey="code"
+                                            value={
+                                                data.partner.regency
+                                                    ? JSON.parse(
+                                                          data.partner.regency
+                                                      )
+                                                    : null
+                                            }
+                                            onChange={(e) => {
+                                                setData("partner", {
+                                                    ...data.partner,
+                                                    regency: JSON.stringify(
+                                                        e.target.value
+                                                    ),
+                                                });
+                                            }}
+                                            onFocus={() => {
+                                                triggerInputFocus(
+                                                    animatePartnerRegencyRef
+                                                );
+                                            }}
+                                            onShow={() => {
+                                                triggerInputFocus(
+                                                    animatePartnerRegencyRef
+                                                );
+                                            }}
+                                            onBlur={() => {
+                                                stopAnimateInputFocus(
+                                                    animatePartnerRegencyRef
+                                                );
+                                            }}
+                                            options={regencys}
+                                            optionLabel="name"
+                                            placeholder="Pilih Kabupaten"
+                                            filter
+                                            valueTemplate={
+                                                selectedOptionTemplate
+                                            }
+                                            itemTemplate={optionTemplate}
+                                            className="w-full md:w-14rem"
+                                        />
+                                        <InputError
+                                            message={errors["partner.regency"]}
+                                            className="mt-2"
+                                        />
                                     </div>
 
-                                    <div className="flex">
-                                        <div className="flex flex-col">
-                                            <label htmlFor="partner_address">
-                                                Kuantitas *
-                                            </label>
-                                            <InputNumber
-                                                value={product.qty}
-                                                onChange={(e) =>
-                                                    handleInputChange(
-                                                        index,
-                                                        "qty",
-                                                        e.value
-                                                    )
-                                                }
-                                                className="dark:bg-gray-300"
-                                                id="partner_address"
-                                                aria-describedby="partner_address-help"
-                                                keyfilter="int"
-                                                locale="id-ID"
-                                            />
-                                        </div>
+                                    <div className="flex flex-col mt-3">
+                                        <label htmlFor="sales">Sales *</label>
+                                        <Dropdown
+                                            value={data.sales}
+                                            onChange={(e) => {
+                                                setData("sales", {
+                                                    ...data.sales,
+                                                    name: e.target.value.name,
+                                                    wa: e.target.value.number,
+                                                    email: e.target.value.email,
+                                                });
+                                            }}
+                                            dataKey="name"
+                                            options={sales}
+                                            optionLabel="name"
+                                            placeholder="Pilih Sales"
+                                            filter
+                                            valueTemplate={
+                                                selectedOptionTemplate
+                                            }
+                                            itemTemplate={optionTemplate}
+                                            className="w-full md:w-14rem"
+                                            onFocus={() => {
+                                                triggerInputFocus(
+                                                    animateSalesNameRef
+                                                );
+                                            }}
+                                            onShow={() => {
+                                                triggerInputFocus(
+                                                    animateSalesNameRef
+                                                );
+                                            }}
+                                            onBlur={() => {
+                                                stopAnimateInputFocus(
+                                                    animateSalesNameRef
+                                                );
+                                            }}
+                                        />
+                                        <InputError
+                                            message={errors["sales.name"]}
+                                            className="mt-2"
+                                        />
+                                    </div>
+                                    <div className="flex flex-col mt-3">
+                                        <label htmlFor="sales-whatsapp">
+                                            Whatsapp Sales *
+                                        </label>
+                                        <InputText
+                                            value={data.sales.wa}
+                                            onChange={(e) => {
+                                                setData("sales", {
+                                                    ...data.sales,
+                                                    wa: e.target.value,
+                                                });
+                                            }}
+                                            keyfilter="int"
+                                            className="dark:bg-gray-300"
+                                            id="sales-whatsapp"
+                                            aria-describedby="sales-whatsapp-help"
+                                            onFocus={() => {
+                                                triggerInputFocus(
+                                                    animateSalesWaRef
+                                                );
+                                            }}
+                                            onBlur={() => {
+                                                stopAnimateInputFocus(
+                                                    animateSalesWaRef
+                                                );
+                                            }}
+                                        />
+                                        <InputError
+                                            message={errors["sales.wa"]}
+                                            className="mt-2"
+                                        />
+                                    </div>
+                                    <div className="flex flex-col mt-3">
+                                        <label htmlFor="sales-email">
+                                            Email Sales *
+                                        </label>
+                                        <InputText
+                                            value={data.sales.email}
+                                            onChange={(e) =>
+                                                setData("sales", {
+                                                    ...data.sales,
+                                                    email: e.target.value,
+                                                })
+                                            }
+                                            className="dark:bg-gray-300"
+                                            id="sales-email"
+                                            aria-describedby="sales-email-help"
+                                            onFocus={() => {
+                                                triggerInputFocus(
+                                                    animateSalesEmailRef
+                                                );
+                                            }}
+                                            onBlur={() => {
+                                                stopAnimateInputFocus(
+                                                    animateSalesEmailRef
+                                                );
+                                            }}
+                                        />
+                                        <InputError
+                                            message={errors["sales.email"]}
+                                            className="mt-2"
+                                        />
+                                    </div>
+                                    <div className="flex flex-col mt-3">
+                                        <label htmlFor="signature">
+                                            Tanda Tangan *
+                                        </label>
+                                        <Dropdown
+                                            value={data.signature}
+                                            onChange={(e) => {
+                                                setData("signature", {
+                                                    ...data.signature,
+                                                    name: e.target.value.name,
+                                                    position:
+                                                        e.target.value.position,
+                                                    image: e.target.value.image,
+                                                });
+                                            }}
+                                            dataKey="name"
+                                            options={signatures}
+                                            optionLabel="name"
+                                            placeholder="Pilih Tanda Tangan"
+                                            filter
+                                            valueTemplate={
+                                                selectedOptionTemplate
+                                            }
+                                            itemTemplate={
+                                                optionSignatureTemplate
+                                            }
+                                            className="w-full md:w-14rem"
+                                            onFocus={() => {
+                                                triggerInputFocus(
+                                                    animateSignatureNameRef
+                                                );
+                                            }}
+                                            onShow={() => {
+                                                triggerInputFocus(
+                                                    animateSignatureNameRef
+                                                );
+                                            }}
+                                            onBlur={() => {
+                                                stopAnimateInputFocus(
+                                                    animateSignatureNameRef
+                                                );
+                                            }}
+                                        />
+                                        <InputError
+                                            message={errors["signature.image"]}
+                                            className="mt-2"
+                                        />
                                     </div>
 
-                                    <div className="flex">
+                                    <div className="flex-flex-col mt-3">
+                                        <form onSubmit={handleSubmitForm}>
+                                            <Button className="mx-auto justify-center block">
+                                                Submit
+                                            </Button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </Card>
+                        </div>
+
+                        <Dialog
+                            header="Input Produk"
+                            visible={dialogVisible}
+                            style={{ width: "85vw" }}
+                            maximizable
+                            modal
+                            contentStyle={{ height: "550px" }}
+                            onHide={() => setDialogVisible(false)}
+                            footer={dialogFooterTemplate}
+                        >
+                            <div className="flex my-5 gap-3">
+                                <Button
+                                    label="Pilih Produk"
+                                    icon="pi pi-external-link"
+                                    onClick={() =>
+                                        setDialogProductVisible(true)
+                                    }
+                                    className="text-xs md:text-base"
+                                />
+                                <Button
+                                    label="Tambah Produk"
+                                    icon="pi pi-plus"
+                                    className="text-xs md:text-base"
+                                    onClick={() => {
+                                        let inputNew = {
+                                            name: "",
+                                            price: "",
+                                            qty: "",
+                                            detail: null,
+                                            total: "",
+                                        };
+
+                                        let updatedProducts = [
+                                            ...data.products,
+                                            inputNew,
+                                        ];
+
+                                        setData("products", updatedProducts);
+                                    }}
+                                />
+                            </div>
+
+                            {data.products?.map((product, index) => {
+                                const no = index + 1;
+                                return (
+                                    <div
+                                        className="flex gap-5 mt-2 items-center"
+                                        key={product + index}
+                                    >
+                                        <div>
+                                            <Badge
+                                                value={no}
+                                                size="large"
+                                            ></Badge>
+                                        </div>
+
                                         <div className="flex flex-col">
                                             <label htmlFor="partner_address">
-                                                Rincian *
+                                                Produk/Layanan *
                                             </label>
                                             <InputText
-                                                value={product.detail}
+                                                value={product.name}
                                                 onChange={(e) =>
                                                     handleInputChange(
                                                         index,
-                                                        "detail",
+                                                        "name",
                                                         e.target.value
                                                     )
                                                 }
@@ -1022,401 +838,383 @@ const Create = ({
                                                 aria-describedby="partner_address-help"
                                             />
                                         </div>
-                                    </div>
 
-                                    <div className="flex">
-                                        <div className="flex flex-col">
-                                            <label htmlFor="partner_address">
-                                                Jumlah *
-                                            </label>
-                                            <InputNumber
-                                                value={product.total}
-                                                className="dark:bg-gray-300"
-                                                id="partner_address"
-                                                aria-describedby="partner_address-help"
-                                                locale="id-ID"
-                                                disabled
+                                        <div className="flex">
+                                            <div className="flex flex-col">
+                                                <label htmlFor="partner_address">
+                                                    Harga *
+                                                </label>
+                                                <InputNumber
+                                                    value={product.price}
+                                                    onChange={(e) =>
+                                                        handleInputChange(
+                                                            index,
+                                                            "price",
+                                                            e.value
+                                                        )
+                                                    }
+                                                    className="dark:bg-gray-300"
+                                                    id="partner_address"
+                                                    aria-describedby="partner_address-help"
+                                                    locale="id-ID"
+                                                />
+                                            </div>
+                                        </div>
+
+                                        <div className="flex">
+                                            <div className="flex flex-col">
+                                                <label htmlFor="partner_address">
+                                                    Kuantitas *
+                                                </label>
+                                                <InputNumber
+                                                    value={product.qty}
+                                                    onChange={(e) =>
+                                                        handleInputChange(
+                                                            index,
+                                                            "qty",
+                                                            e.value
+                                                        )
+                                                    }
+                                                    className="dark:bg-gray-300"
+                                                    id="partner_address"
+                                                    aria-describedby="partner_address-help"
+                                                    keyfilter="int"
+                                                    locale="id-ID"
+                                                />
+                                            </div>
+                                        </div>
+
+                                        <div className="flex">
+                                            <div className="flex flex-col">
+                                                <label htmlFor="partner_address">
+                                                    Rincian *
+                                                </label>
+                                                <InputText
+                                                    value={product.detail}
+                                                    onChange={(e) =>
+                                                        handleInputChange(
+                                                            index,
+                                                            "detail",
+                                                            e.target.value
+                                                        )
+                                                    }
+                                                    className="dark:bg-gray-300"
+                                                    id="partner_address"
+                                                    aria-describedby="partner_address-help"
+                                                />
+                                            </div>
+                                        </div>
+
+                                        <div className="flex">
+                                            <div className="flex flex-col">
+                                                <label htmlFor="partner_address">
+                                                    Jumlah *
+                                                </label>
+                                                <InputNumber
+                                                    value={product.total}
+                                                    className="dark:bg-gray-300"
+                                                    id="partner_address"
+                                                    aria-describedby="partner_address-help"
+                                                    locale="id-ID"
+                                                    disabled
+                                                />
+                                            </div>
+                                        </div>
+
+                                        <div className="flex self-center pt-4 ">
+                                            <Button
+                                                className="bg-red-500 h-1 w-1 shadow-md rounded-full "
+                                                icon={() => (
+                                                    <i
+                                                        className="pi pi-minus"
+                                                        style={{
+                                                            fontSize: "0.7rem",
+                                                        }}
+                                                    ></i>
+                                                )}
+                                                onClick={() => {
+                                                    const updatedProducts = [
+                                                        ...data.products,
+                                                    ];
+
+                                                    updatedProducts.splice(
+                                                        index,
+                                                        1
+                                                    );
+
+                                                    setData((prevData) => ({
+                                                        ...prevData,
+                                                        products:
+                                                            updatedProducts,
+                                                    }));
+                                                }}
+                                                aria-controls="popup_menu_right"
+                                                aria-haspopup
                                             />
                                         </div>
                                     </div>
+                                );
+                            })}
 
-                                    <div className="flex self-center pt-4 ">
-                                        <Button
-                                            className="bg-red-500 h-1 w-1 shadow-md rounded-full "
-                                            icon={() => (
-                                                <i
-                                                    className="pi pi-minus"
-                                                    style={{
-                                                        fontSize: "0.7rem",
-                                                    }}
-                                                ></i>
-                                            )}
-                                            onClick={() => {
-                                                const updatedProducts = [
-                                                    ...data.products,
-                                                ];
+                            <Dialog
+                                header="Produk"
+                                visible={dialogProductVisible}
+                                style={{ width: "75vw" }}
+                                maximizable
+                                modal
+                                contentStyle={{ height: "550px" }}
+                                onHide={() => setDialogProductVisible(false)}
+                                footer={() => dialogFooterTemplate("product")}
+                            >
+                                <DataTable
+                                    value={products}
+                                    paginator
+                                    filters={filters}
+                                    rows={10}
+                                    header={headerProduct}
+                                    scrollable
+                                    scrollHeight="flex"
+                                    tableStyle={{ minWidth: "50rem" }}
+                                    selectionMode={rowClick ? null : "checkbox"}
+                                    rowsPerPageOptions={[10, 25, 50, 100]}
+                                    paginatorTemplate="RowsPerPageDropdown FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink"
+                                    currentPageReportTemplate="{first} - {last} dari {totalRecords}"
+                                    selection={selected}
+                                    onSelectionChange={(e) =>
+                                        setselected(e.value)
+                                    }
+                                    dataKey="id"
+                                >
+                                    <Column
+                                        selectionMode="multiple"
+                                        headerStyle={{ width: "3rem" }}
+                                    ></Column>
+                                    <Column field="name" header="Nama"></Column>
+                                    <Column
+                                        field="description"
+                                        header="Deskripsi"
+                                    ></Column>
+                                    <Column
+                                        field="category"
+                                        header="Kategori"
+                                    ></Column>
+                                    <Column
+                                        field="price"
+                                        header="Harga"
+                                    ></Column>
+                                </DataTable>
+                            </Dialog>
+                        </Dialog>
 
-                                                updatedProducts.splice(
-                                                    index,
-                                                    1
-                                                );
+                        <DialogInstitution
+                            dialogInstitutionVisible={dialogInstitutionVisible}
+                            setDialogInstitutionVisible={
+                                setDialogInstitutionVisible
+                            }
+                            filters={filters}
+                            setFilters={setFilters}
+                            isLoadingData={isLoadingData}
+                            setIsLoadingData={setIsLoadingData}
+                            leads={leads}
+                            setLeads={setLeads}
+                            partners={partners}
+                            setPartners={setPartners}
+                            data={data}
+                            setData={setData}
+                            reset={reset}
+                            setProvinceName={setProvinceName}
+                        />
 
-                                                setData((prevData) => ({
-                                                    ...prevData,
-                                                    products: updatedProducts,
-                                                }));
-                                            }}
-                                            aria-controls="popup_menu_right"
-                                            aria-haspopup
+                        <div className="md:w-[65%] hidden md:block text-sm h-screen max-h-screen overflow-y-auto p-5">
+                            <header>
+                                <div className="flex justify-between items-center">
+                                    <div className="w-full">
+                                        <img
+                                            src="/assets/img/cazh.png"
+                                            alt=""
+                                            className="float-left w-1/3 h-1/3"
                                         />
                                     </div>
+                                    <div className="w-full text-right text-xs">
+                                        <h2 className="font-bold">
+                                            PT CAZH TEKNOLOGI INOVASI
+                                        </h2>
+                                        <p>
+                                            Bonavida Park D1, Jl. Raya
+                                            Karanggintung
+                                        </p>
+                                        <p>
+                                            Kec. Sumbang, Kab. Banyumas,Jawa
+                                            Tengah 53183
+                                        </p>
+
+                                        <p>
+                                            hello@cards.co.id |
+                                            https://cards.co.id
+                                        </p>
+                                    </div>
                                 </div>
-                            );
-                        })}
+                            </header>
 
-                        <Dialog
-                            header="Produk"
-                            visible={dialogProductVisible}
-                            style={{ width: "75vw" }}
-                            maximizable
-                            modal
-                            contentStyle={{ height: "550px" }}
-                            onHide={() => setDialogProductVisible(false)}
-                            footer={() => dialogFooterTemplate("product")}
-                        >
-                            <DataTable
-                                value={products}
-                                paginator
-                                filters={filters}
-                                rows={10}
-                                header={headerProduct}
-                                scrollable
-                                scrollHeight="flex"
-                                tableStyle={{ minWidth: "50rem" }}
-                                selectionMode={rowClick ? null : "checkbox"}
-                                rowsPerPageOptions={[10, 25, 50, 100]}
-                                paginatorTemplate="RowsPerPageDropdown FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink"
-                                currentPageReportTemplate="{first} - {last} dari {totalRecords}"
-                                selection={selected}
-                                onSelectionChange={(e) => setselected(e.value)}
-                                dataKey="id"
-                            >
-                                <Column
-                                    selectionMode="multiple"
-                                    headerStyle={{ width: "3rem" }}
-                                ></Column>
-                                <Column field="name" header="Nama"></Column>
-                                <Column
-                                    field="description"
-                                    header="Deskripsi"
-                                ></Column>
-                                <Column
-                                    field="category"
-                                    header="Kategori"
-                                ></Column>
-                                <Column field="price" header="Harga"></Column>
-                            </DataTable>
-                        </Dialog>
-                    </Dialog>
-
-                    <Dialog
-                        header="Pilih Lembaga"
-                        visible={dialogInstitutionVisible}
-                        className="w-[100vw] lg:w-[75vw]"
-                        maximizable
-                        modal
-                        onHide={() => setDialogInstitutionVisible(false)}
-                        footer={() => dialogFooterInstitutionTemplate()}
-                    >
-                        <DataTable
-                            value={
-                                institutionType == "partner" ? partners : leads
-                            }
-                            paginator
-                            filters={filters}
-                            rowsPerPageOptions={[10, 25, 50, 100]}
-                            paginatorTemplate="RowsPerPageDropdown FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink"
-                            currentPageReportTemplate="{first} - {last} dari {totalRecords}"
-                            rows={10}
-                            header={header}
-                            globalFilterFields={[
-                                "name",
-                                "status",
-                                "npwp",
-                                "address",
-                                "phone_number",
-                            ]}
-                            scrollable
-                            scrollHeight="flex"
-                            tableStyle={{ minWidth: "50rem" }}
-                            selectionMode="radiobutton"
-                            loading={isLoadingData}
-                            selection={selectedInstitution}
-                            onSelectionChange={(e) =>
-                                setSelectedInstitution(e.value)
-                            }
-                            dataKey="id"
-                        >
-                            <Column
-                                selectionMode="single"
-                                headerStyle={{ width: "3rem" }}
-                            ></Column>
-                            <Column
-                                field="name"
-                                header="Nama"
-                                align="left"
-                                style={{
-                                    width: "max-content",
-                                    whiteSpace: "nowrap",
-                                }}
-                            ></Column>
-                            <Column
-                                header="Status"
-                                body={(rowData) => {
-                                    return (
-                                        <Badge
-                                            value={rowData.status.name}
-                                            className="text-white"
-                                            style={{
-                                                backgroundColor:
-                                                    "#" + rowData.status.color,
-                                            }}
-                                        ></Badge>
-                                    );
-                                }}
-                                className="dark:border-none  lg:w-max lg:whitespace-nowrap"
-                                headerClassName="dark:border-none  dark:bg-slate-900 dark:text-gray-300"
-                                align="left"
-                                style={{
-                                    width: "max-content",
-                                    whiteSpace: "nowrap",
-                                }}
-                            ></Column>
-                            {institutionType == "partner" && (
-                                <Column
-                                    header="NPWP"
-                                    body={(rowData) =>
-                                        rowData.npwp !== null
-                                            ? formatNPWP(rowData.npwp)
-                                            : "-"
-                                    }
-                                    className="dark:border-none"
-                                    headerClassName="dark:border-none  dark:bg-slate-900 dark:text-gray-300"
-                                    align="left"
-                                    style={{
-                                        width: "max-content",
-                                        whiteSpace: "nowrap",
-                                    }}
-                                ></Column>
-                            )}
-                            <Column
-                                field="phone_number"
-                                body={(rowData) => {
-                                    return rowData.phone_number
-                                        ? rowData.phone_number
-                                        : "-";
-                                }}
-                                className="dark:border-none"
-                                headerClassName="dark:border-none dark:bg-transparent dark:text-gray-300"
-                                header="No. Telepon"
-                                align="left"
-                                style={{
-                                    width: "max-content",
-                                    whiteSpace: "nowrap",
-                                }}
-                            ></Column>
-                            <Column
-                                field="address"
-                                body={(rowData) => {
-                                    return rowData.address
-                                        ? rowData.address
-                                        : "-";
-                                }}
-                                className="dark:border-none"
-                                headerClassName="dark:border-none dark:bg-transparent dark:text-gray-300"
-                                header="Alamat"
-                                align="left"
-                                style={{
-                                    width: "max-content",
-                                    whiteSpace: "nowrap",
-                                }}
-                            ></Column>
-                        </DataTable>
-                    </Dialog>
-
-                    <div className="md:w-[65%] hidden md:block text-sm h-screen max-h-screen overflow-y-auto p-5">
-                        <header>
-                            <div className="flex justify-between items-center">
-                                <div className="w-full">
-                                    <img
-                                        src="/assets/img/cazh.png"
-                                        alt=""
-                                        className="float-left w-1/3 h-1/3"
-                                    />
-                                </div>
-                                <div className="w-full text-right text-xs">
-                                    <h2 className="font-bold">
-                                        PT CAZH TEKNOLOGI INOVASI
-                                    </h2>
-                                    <p>
-                                        Bonavida Park D1, Jl. Raya Karanggintung
-                                    </p>
-                                    <p>
-                                        Kec. Sumbang, Kab. Banyumas,Jawa Tengah
-                                        53183
-                                    </p>
-
-                                    <p>
-                                        hello@cards.co.id | https://cards.co.id
-                                    </p>
-                                </div>
+                            <div className="text-center mt-5">
+                                <h1 className="font-bold underline mx-auto">
+                                    SURAT PENAWARAN HARGA
+                                </h1>
+                                <p className="">
+                                    Nomor : <b>{data.code}</b>
+                                </p>
                             </div>
-                        </header>
 
-                        <div className="text-center mt-5">
-                            <h1 className="font-bold underline mx-auto">
-                                SURAT PENAWARAN HARGA
-                            </h1>
-                            <p className="">
-                                Nomor : <b>{data.code}</b>
-                            </p>
-                        </div>
+                            <div className="mt-5" ref={partnerScrollRef}>
+                                <h1>Kepada Yth.</h1>
+                                <h1
+                                    className="font-bold"
+                                    ref={animatePartnerPicRef}
+                                >
+                                    {data.partner.pic ?? "{{pic}}"}
+                                </h1>
+                                <h1
+                                    className="font-bold"
+                                    ref={animatePartnerNameRef}
+                                >
+                                    {data.partner.name ?? "{{partner}}"}
+                                </h1>
+                                <h1>
+                                    di{" "}
+                                    <span ref={animatePartnerRegencyRef}>
+                                        {data.partner.regency
+                                            ? upperCaseEachWord(
+                                                  JSON.parse(
+                                                      data.partner.regency
+                                                  ).name
+                                              )
+                                            : "{{alamat}}"}
+                                    </span>
+                                    {", "}
+                                    <span ref={animatePartnerProvinceRef}>
+                                        {data.partner.province
+                                            ? upperCaseEachWord(
+                                                  JSON.parse(
+                                                      data.partner.province
+                                                  ).name
+                                              )
+                                            : "{{alamat}}"}
+                                    </span>
+                                </h1>
+                            </div>
 
-                        <div className="mt-5" ref={partnerScrollRef}>
-                            <h1>Kepada Yth.</h1>
-                            <h1
-                                className="font-bold"
-                                ref={animatePartnerPicRef}
-                            >
-                                {data.partner.pic ?? "{{pic}}"}
-                            </h1>
-                            <h1
-                                className="font-bold"
-                                ref={animatePartnerNameRef}
-                            >
-                                {data.partner.name ?? "{{partner}}"}
-                            </h1>
-                            <h1>
-                                di{" "}
-                                <span ref={animatePartnerRegencyRef}>
-                                    {data.partner.regency
-                                        ? JSON.parse(data.partner.regency).name
-                                        : "{{alamat}}"}
-                                </span>
-                                {", "}
-                                <span ref={animatePartnerProvinceRef}>
-                                    {data.partner.province
-                                        ? JSON.parse(data.partner.province).name
-                                        : "{{alamat}}"}
-                                </span>
-                            </h1>
-                        </div>
+                            <div className="mt-5">
+                                <h1>Dengan Hormat</h1>
+                            </div>
 
-                        <div className="mt-5">
-                            <h1>Dengan Hormat</h1>
-                        </div>
+                            <div className="mt-5">
+                                <h1>
+                                    Menindaklanjuti komunikasi yang telah
+                                    dilakukan oleh tim marketing kami{" "}
+                                    {data.sales.name ?? "{{sales}}"} dengan
+                                    perwakilan dari{" "}
+                                    {data.partner.name ?? "{{partner}}"}, dengan
+                                    ini kami sampaikan penawaran sebagai
+                                    berikut:
+                                </h1>
+                            </div>
 
-                        <div className="mt-5">
-                            <h1>
-                                Menindaklanjuti komunikasi yang telah dilakukan
-                                oleh tim marketing kami{" "}
-                                {data.sales.name ?? "{{sales}}"} dengan
-                                perwakilan dari{" "}
-                                {data.partner.name ?? "{{partner}}"}, dengan ini
-                                kami sampaikan penawaran sebagai berikut:
-                            </h1>
-                        </div>
-
-                        <div className="w-full mt-5">
-                            <table className="w-full">
-                                <thead className="bg-blue-100 dark:text-black text-left">
-                                    <th className="pl-2">No</th>
-                                    <th className="py-2">Produk/Layanan</th>
-                                    <th className="py-2">Rincian</th>
-                                    <th className="py-2 text-center">Jumlah</th>
-                                </thead>
-                                <tbody>
-                                    {data.products?.length == 0 && (
-                                        <tr className="text-center">
-                                            <td colSpan={4}>
-                                                Produk belum ditambah
-                                            </td>
-                                        </tr>
-                                    )}
-                                    {data.products?.map((data, i) => {
-                                        return (
-                                            <tr key={data.name + i}>
-                                                <td className="pl-2">{++i}</td>
-                                                <td>{data.name}</td>
-                                                <td>{data.detail}</td>
-                                                <td className="text-right px-4">
-                                                    Rp
-                                                    {data.total
-                                                        ? data.total.toLocaleString(
-                                                              "id"
-                                                          )
-                                                        : 0}
+                            <div className="w-full mt-5">
+                                <table className="w-full">
+                                    <thead className="bg-blue-100 dark:text-black text-left">
+                                        <th className="pl-2">No</th>
+                                        <th className="py-2">Produk/Layanan</th>
+                                        <th className="py-2">Rincian</th>
+                                        <th className="py-2 text-center">
+                                            Jumlah
+                                        </th>
+                                    </thead>
+                                    <tbody>
+                                        {data.products?.length == 0 && (
+                                            <tr className="text-center">
+                                                <td colSpan={4}>
+                                                    Produk belum ditambah
                                                 </td>
                                             </tr>
-                                        );
-                                    })}
-                                </tbody>
-                            </table>
-                        </div>
-
-                        <div className="mt-5">
-                            <h1>
-                                Untuk konfirmasi persetujuan silakan hubungi :
-                            </h1>
-                            <h1>
-                                <b ref={animateSalesNameRef}>
-                                    {data.sales.name ?? "{{sales}}"}
-                                </b>{" "}
-                                via WA :{" "}
-                                <b ref={animateSalesWaRef}>
-                                    {data.sales.wa ?? "{{wa_sales}}"}
-                                </b>
-                                , email :{" "}
-                                <b ref={animateSalesEmailRef}>
-                                    {data.sales.email ?? "{{email_sales}}"}
-                                </b>
-                            </h1>
-                        </div>
-
-                        <div className="mt-5">
-                            <h1>
-                                Demikian surat penawaran harga ini kami
-                                sampaikan dengan sesungguhnya. Atas perhatian
-                                dan kerja sama yang baik, kami sampaikan terima
-                                kasih.
-                            </h1>
-                        </div>
-
-                        <div
-                            className="flex flex-col mt-5 justify-start w-[30%]"
-                            ref={animateSignatureNameRef}
-                        >
-                            <p>
-                                Purwokerto,{" "}
-                                {new Date().toLocaleDateString("id-ID", {
-                                    day: "numeric",
-                                    month: "long",
-                                    year: "numeric",
-                                })}
-                            </p>
-                            <div className="h-[100px] w-[170px] self-start py-2">
-                                <img
-                                    src={"/storage/" + data.signature.image}
-                                    alt=""
-                                    className="object-fill  w-full h-full"
-                                />
+                                        )}
+                                        {data.products?.map((data, i) => {
+                                            return (
+                                                <tr key={data.name + i}>
+                                                    <td className="pl-2">
+                                                        {++i}
+                                                    </td>
+                                                    <td>{data.name}</td>
+                                                    <td>{data.detail}</td>
+                                                    <td className="text-right px-4">
+                                                        Rp
+                                                        {data.total
+                                                            ? data.total.toLocaleString(
+                                                                  "id"
+                                                              )
+                                                            : 0}
+                                                    </td>
+                                                </tr>
+                                            );
+                                        })}
+                                    </tbody>
+                                </table>
                             </div>
-                            <p>{data.signature.name}</p>
-                            <p>{data.signature.position}</p>
+
+                            <div className="mt-5">
+                                <h1>
+                                    Untuk konfirmasi persetujuan silakan hubungi
+                                    :
+                                </h1>
+                                <h1>
+                                    <b ref={animateSalesNameRef}>
+                                        {data.sales.name ?? "{{sales}}"}
+                                    </b>{" "}
+                                    via WA :{" "}
+                                    <b ref={animateSalesWaRef}>
+                                        {data.sales.wa ?? "{{wa_sales}}"}
+                                    </b>
+                                    , email :{" "}
+                                    <b ref={animateSalesEmailRef}>
+                                        {data.sales.email ?? "{{email_sales}}"}
+                                    </b>
+                                </h1>
+                            </div>
+
+                            <div className="mt-5">
+                                <h1>
+                                    Demikian surat penawaran harga ini kami
+                                    sampaikan dengan sesungguhnya. Atas
+                                    perhatian dan kerja sama yang baik, kami
+                                    sampaikan terima kasih.
+                                </h1>
+                            </div>
+
+                            <div
+                                className="flex flex-col mt-5 justify-start w-[30%]"
+                                ref={animateSignatureNameRef}
+                            >
+                                <p>
+                                    Purwokerto,{" "}
+                                    {new Date().toLocaleDateString("id-ID", {
+                                        day: "numeric",
+                                        month: "long",
+                                        year: "numeric",
+                                    })}
+                                </p>
+                                <div className="h-[100px] w-[170px] self-start py-2">
+                                    <img
+                                        src={"/storage/" + data.signature.image}
+                                        alt=""
+                                        className="object-fill  w-full h-full"
+                                    />
+                                </div>
+                                <p>{data.signature.name}</p>
+                                <p>{data.signature.position}</p>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
+            </BlockUI>
         </>
     );
 };

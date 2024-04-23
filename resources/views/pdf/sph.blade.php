@@ -63,8 +63,8 @@
         <p class="text-sm">Kepada Yth.</p>
         <p class="text-sm"><b>{{$sph->partner_pic}}</b></p>
         <p class="text-sm"><b>{{$sph->partner_name}}</b></p>
-        <p class="text-sm">di {{json_decode($sph->partner_regency)->name}},
-            {{json_decode($sph->partner_province)->name}}
+        <p class="text-sm">di {{ucwords(strtolower(json_decode($sph->partner_regency)->name))}},
+            {{ucwords(strtolower(json_decode($sph->partner_province)->name))}}
         </p>
     </div>
 
@@ -95,7 +95,7 @@
                 <tr>
                     <td class="p-1" style=" width: 10%; text-align: center;">{{$loop->index + 1}}</td>
                     <td class="p-1" style="width: 40%;">{{$product['name']}}</td>
-                    <td class="p-1" style="width: 20%;">{{isset ($product['detail']) ? $product['detail'] : null}}</td>
+                    <td class="p-1" style="width: 20%;">{{isset($product['detail']) ? $product['detail'] : null}}</td>
                     <td class="p-1" style="text-align: right;">Rp{{number_format($product['total'], 0, ',', '.')}}</td>
                 </tr>
                 @endforeach
@@ -103,7 +103,11 @@
         </table>
     </div>
 
-    <div class="mt-10">
+    <div class="mt-3">
+    <div style="text-align: left; font-size: 10px; width:100%;">*) Harga produk/layanan tidak termasuk biaya admin transaksi <span style="font-style:italic;">user</span> aplikasi <span style="font-style:italic;">mobile</span>.</div>
+    </div>
+
+    <div class="mt-6">
         <p class="text-sm">
             Untuk konfirmasi persetujuan silakan hubungi :
         </p>
@@ -126,10 +130,12 @@
     'D MMMM YYYY',
     'Do MMMM YYYY'
 ) }}</p>
+        @if($sph->signature_name)
         <div style="width: 170px; height: 100px; overflow: hidden;" class="py-2">
             <img class="h-20 w-[15%]" style="width: 100%; height: 100%; object-fit:fill;" src="{{ public_path("/storage/$sph->signature_image") }}" alt="Signature">
         </div>
         <div class="text-sm">{{ $sph->signature_name }}</div>
+        @endif
     </div>
 
 
