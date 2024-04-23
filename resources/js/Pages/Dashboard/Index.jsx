@@ -54,8 +54,10 @@ const Index = ({ statisticGeneralProp, usersProp }) => {
             }
         };
 
-        if (selectedAM) {
+        if (selectedAM !== null && selectedAM !== undefined) {
             fetchData();
+        } else {
+            getStatGeneral();
         }
     }, [selectedAM]);
 
@@ -70,10 +72,34 @@ const Index = ({ statisticGeneralProp, usersProp }) => {
         setGlobalFilterValue(value);
     };
 
+    const getStatGeneral = async () => {
+        let response = await fetch("/api/dashboard");
+        let data = await response.json();
+        // setStatisticAM((prev) => ({
+        //     ...prev,
+        //     data: [
+        //         data.totalProses,
+        //         data.totalAktif,
+        //         data.totalNonaktif,
+        //         data.totalCancel,
+        //         data.totalCLBK,
+        //     ],
+        //     totalPartner: data.totalPartner,
+        //     totalAktif: data.totalAktif,
+        //     totalCLBK: data.totalCLBK,
+        //     totalCancel: data.totalCancel,
+        //     totalProses: data.totalProses,
+        //     totalNonaktif: data.totalNonaktif,
+        //     partnersByProvince: data.partnersByProvince,
+        //     partners: data.partners,
+        // }));
+        statisticGeneralProp = data;
+        setStatisticAM((prev) => (prev = { data: [0, 0, 0, 0, 0] }));
+    };
+
     const getPartnerByUser = async () => {
         let response = await fetch("/api/dashboard/" + selectedAM?.id);
         let data = await response.json();
-
         setStatisticAM((prev) => ({
             ...prev,
             data: [
@@ -182,6 +208,7 @@ const Index = ({ statisticGeneralProp, usersProp }) => {
                     options={usersProp}
                     placeholder="Pilih User"
                     filter
+                    showClear
                     valueTemplate={selectedOptionTemplate}
                     itemTemplate={optionTemplate}
                     className="w-[30%] flex justify-center dark:bg-slate-900 dark:text-gray-400 dark:border-b-slate-600 focus: rounded-none border-t-0 border-r-0 border-l-0 border-b-[1px] border-b-slate-200"
@@ -360,7 +387,7 @@ const Index = ({ statisticGeneralProp, usersProp }) => {
                 <div className="card flex flex-col -mt-7 w-full md:max-h-[320px] md:flex-row mx-auto justify-between gap-7">
                     <div className="flex flex-col text-center md:w-[50%] justify-center border p-8 bg-white dark:bg-slate-900 dark:border-none dark:text-gray-400  shadow-md rounded-lg">
                         <h1 className="mb-2 font-semibold">
-                            Presentase Status Partner AM
+                            Presentase Status Partner User
                         </h1>
                         <Doughnut
                             className="mx-auto"
@@ -457,7 +484,7 @@ const Index = ({ statisticGeneralProp, usersProp }) => {
                                         label:
                                             statiscticAM.partnersByProvince
                                                 ?.length > 0
-                                                ? "Jumlah Partner Tiap Provinsi By AM"
+                                                ? "Jumlah Partner Tiap Provinsi By User"
                                                 : "Jumlah Partner Tiap Provinsi",
                                         data:
                                             statiscticAM.partnersByProvince

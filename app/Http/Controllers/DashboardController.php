@@ -53,16 +53,16 @@ class DashboardController extends Controller
 
     public function getPartnerByUser($id)
     {
-        $partners = Partner::with('sales', 'account_manager', 'createdBy', 'status')->where('created_by', $id)->get();
+        $partners = Partner::with('sales', 'account_manager', 'createdBy', 'status')->where('sales_id', $id)->orWhere('account_manager_id', $id)->orwhere('created_by', $id)->get();
         $partnersByProvince = DB::table('partners')
             ->select('province->name as province_name', DB::raw('count(*) as total'))
-            ->groupBy('province_name')->where('created_by', $id)
+            ->groupBy('province_name')->where('sales_id', $id)->orWhere('account_manager_id', $id)->orwhere('created_by', $id)
             ->get();
 
         $statusNames = ['proses', 'aktif', 'clbk', 'cancel', 'non aktif'];
         $statuses = Status::whereIn('name', $statusNames)->get()->keyBy('name');
 
-        $counts = Partner::where('created_by', $id)
+        $counts = Partner::where('sales_id', $id)->orWhere('account_manager_id', $id)->orwhere('created_by', $id)
             ->select('status_id', DB::raw('count(*) as total'))
             ->groupBy('status_id')
             ->get()
@@ -89,5 +89,45 @@ class DashboardController extends Controller
         ];
 
         return response()->json([$statisticAM]);
+    }
+
+    public function apiGetStatGeneral()
+    {
+
+        $partners = Partner::with('sales', 'account_manager', 'status')->get();
+        $partnersByProvince = DB::table('partners')
+            ->select('province->name as province_name', DB::raw('count(*) as total'))
+            ->groupBy('province_name')
+            ->get();
+
+        $statusNames = ['proses', 'aktif', 'clbk', 'cancel', 'non aktif'];
+        $statuses = Status::whereIn('name', $statusNames)->get()->keyBy('name');
+
+        $totalPartner = Partner::count();
+        $counts = Partner::select('status_id', DB::raw('count(*) as total'))
+            ->groupBy('status_id')
+            ->get()
+            ->pluck('total', 'status_id')
+            ->toArray();
+
+        $totalProses = $counts[$statuses['proses']->id] ?? 0;
+        $totalAktif = $counts[$statuses['aktif']->id] ?? 0;
+        $totalCLBK = $counts[$statuses['clbk']->id] ?? 0;
+        $totalCancel = $counts[$statuses['cancel']->id] ?? 0;
+        $totalNonaktif = $counts[$statuses['non aktif']->id] ?? 0;
+
+        $statisticGeneral = [
+            "partners" => $partners,
+            "totalPartner" => $totalPartner,
+            "totalProses" => $totalProses,
+            "totalAktif" => $totalAktif,
+            "totalCLBK" => $totalCLBK,
+            "totalCancel" => $totalCancel,
+            "totalNonaktif" => $totalNonaktif,
+            "partnersByProvince" => $partnersByProvince
+        ];
+
+        // return Inertia::render('Dashboard/Index', compact('statisticGeneralProp', 'usersProp'));
+        return response()->json($statisticGeneral);
     }
 }
