@@ -275,6 +275,20 @@ export const DatatablePartner = memo(
                     }}
                 ></Column>
                 <Column
+                    field="password"
+                    body={(rowData) => {
+                        return rowData.password ? rowData.password : "-";
+                    }}
+                    className="dark:border-none"
+                    headerClassName="dark:border-none dark:bg-transparent dark:text-gray-300"
+                    header="Password"
+                    align="left"
+                    style={{
+                        width: "max-content",
+                        whiteSpace: "nowrap",
+                    }}
+                ></Column>
+                <Column
                     field="phone_number"
                     body={(rowData) => {
                         return rowData.phone_number

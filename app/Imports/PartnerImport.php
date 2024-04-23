@@ -69,9 +69,6 @@ class PartnerImport implements ToCollection, WithValidation, SkipsEmptyRows, Wit
             'nama_partner' => [
                 'required',
             ],
-            'password' => [
-                'required',
-            ],
             'nomor_telepon_lembaga' => [
                 'required',
             ],
