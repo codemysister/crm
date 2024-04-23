@@ -69,9 +69,6 @@ class PartnerImport implements ToCollection, WithValidation, SkipsEmptyRows, Wit
             'nama_partner' => [
                 'required',
             ],
-            'npwp' => [
-                'required',
-            ],
             'password' => [
                 'required',
             ],
@@ -138,6 +135,8 @@ class PartnerImport implements ToCollection, WithValidation, SkipsEmptyRows, Wit
                     continue;
                 }
 
+                $sales = User::where('name', $row['sales'])->first();
+                $account_manager = User::where('name', $row['after_sales'])->first();
 
                 $regency = $this->kabupaten->filter(function ($kabupaten) use ($row) {
                     if ($row['kabkota'] === 'Kab. OKU Timur') {
@@ -189,6 +188,8 @@ class PartnerImport implements ToCollection, WithValidation, SkipsEmptyRows, Wit
                     'name' => $row["nama_partner"],
                     'phone_number' => $row["nomor_telepon_lembaga"],
                     'npwp' => $row['npwp'],
+                    'sales_id' => $sales ? $sales->id : null,
+                    'account_manager_id' => $account_manager ? $account_manager->id : null,
                     'password' => $row['password'],
                     'onboarding_date' => $tanggal_onboarding,
                     'live_date' => $tanggal_live,

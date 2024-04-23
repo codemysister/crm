@@ -36,40 +36,124 @@ class UserSeeder extends Seeder
         $ceo->assignRole("ceo");
 
         // AE
-        for ($i = 1; $i <= 5; $i++) {
-            $sales = User::create([
-                "name" => "Account Executive $i",
-                "email" => "account_executive$i@gmail.com",
-                "number" => "085178612434",
-                "password" => bcrypt("ae123")
-            ]);
+        $sales = User::create([
+            "name" => "Sales",
+            "email" => "sales@gmail.com",
+            "number" => "085178612434",
+            "password" => bcrypt("sales123")
+        ]);
+        $sales->assignRole("account executive");
 
-            $sales->assignRole("account executive");
-        }
+        $sales = User::create([
+            "name" => "Hari",
+            "email" => "hari@cazh.id",
+            "number" => "085178612434",
+            "password" => bcrypt("sales123")
+        ]);
+        $sales->assignRole("account executive");
+
+        $sales = User::create([
+            "name" => "Soep",
+            "email" => "soep@cazh.id",
+            "number" => "085178612434",
+            "password" => bcrypt("sales123")
+        ]);
+        $sales->assignRole("account executive");
+
+        $sales = User::create([
+            "name" => "Roni",
+            "email" => "roni@cazh.id",
+            "number" => "085178612434",
+            "password" => bcrypt("sales123")
+        ]);
+        $sales->assignRole("account executive");
+
+        $sales = User::create([
+            "name" => "Wida",
+            "email" => "wida@cazh.id",
+            "number" => "085178612434",
+            "password" => bcrypt("sales123")
+        ]);
+        $sales->assignRole("account executive");
+
+        $sales = User::create([
+            "name" => "Kamil",
+            "email" => "kamil@cazh.id",
+            "number" => "085178612434",
+            "password" => bcrypt("sales123")
+        ]);
+        $sales->assignRole("account executive");
+
+        $sales = User::create([
+            "name" => "Yoga",
+            "email" => "yoga@cazh.id",
+            "number" => "085178612434",
+            "password" => bcrypt("sales123")
+        ]);
+        $sales->assignRole("account executive");
+
+        $sales = User::create([
+            "name" => "Meta",
+            "email" => "meta@cazh.id",
+            "number" => "085178612434",
+            "password" => bcrypt("sales123")
+        ]);
+        $sales->assignRole("account executive");
+
+        $sales = User::create([
+            "name" => "Prihtin",
+            "email" => "prihtin@cazh.id",
+            "number" => "085178612434",
+            "password" => bcrypt("sales123")
+        ]);
+        $sales->assignRole("account executive");
+
+        $sales = User::create([
+            "name" => "Damas",
+            "email" => "damas@cazh.id",
+            "number" => "085178612434",
+            "password" => bcrypt("sales123")
+        ]);
+        $sales->assignRole("account executive");
+
+
 
         // Account Manager
-        for ($i = 1; $i <= 5; $i++) {
-            $am = User::create([
-                "name" => "Account Manager $i",
-                "email" => "account_manager$i@gmail.com",
-                "number" => "085178612434",
-                "password" => bcrypt("am123")
-            ]);
+        $am = User::create([
+            "name" => "Account Manager",
+            "email" => "account_manager@gmail.com",
+            "number" => "085178612434",
+            "password" => bcrypt("am123")
+        ]);
+        $am->assignRole("account manager");
 
-            $am->assignRole("account manager");
-        }
+        $am = User::create([
+            "name" => "Dita",
+            "email" => "dita@cazh.id",
+            "number" => "085178612434",
+            "password" => bcrypt("am123")
+        ]);
+        $am->assignRole("account manager");
+
+        $am = User::create([
+            "name" => "Imam",
+            "email" => "imam@cazh.id",
+            "number" => "085178612434",
+            "password" => bcrypt("am123")
+        ]);
+        $am->assignRole("account manager");
+
 
         // Account Representative
-        for ($i = 1; $i <= 2; $i++) {
-            $am = User::create([
-                "name" => "Account Representative $i",
-                "email" => "account_representative$i@gmail.com",
-                "number" => "085178612434",
-                "password" => bcrypt("ar123")
-            ]);
+        $am = User::create([
+            "name" => "Account Representative",
+            "email" => "account_representative@gmail.com",
+            "number" => "085178612434",
+            "password" => bcrypt("ar123")
+        ]);
 
-            $am->assignRole("account representative");
-        }
+        $am->assignRole("account representative");
+
 
 
         // Admin
@@ -92,16 +176,15 @@ class UserSeeder extends Seeder
         $designer->assignRole("graphics designer");
 
         // Referral
-        for ($i = 1; $i <= 5; $i++) {
-            $referral = User::create([
-                "name" => "Referral $i",
-                "email" => "referral$i@gmail.com",
-                "number" => "085178612434",
-                "password" => bcrypt("referral123")
-            ]);
+        $referral = User::create([
+            "name" => "Referral",
+            "email" => "referral@gmail.com",
+            "number" => "085178612434",
+            "password" => bcrypt("referral123")
+        ]);
 
-            $referral->assignRole("referral");
-        }
+        $referral->assignRole("referral");
+
 
     }
 }
