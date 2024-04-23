@@ -5,7 +5,9 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Auth;
 use Spatie\Activitylog\LogOptions;
+use Spatie\Activitylog\Models\Activity;
 use Spatie\Activitylog\Traits\LogsActivity;
 
 class SPH extends Model
@@ -13,11 +15,12 @@ class SPH extends Model
     use HasFactory, SoftDeletes, LogsActivity;
     protected $table = 'sphs';
     protected $guarded = [];
+    protected static $recordEvents = ['created', 'updated'];
 
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()
-            ->logOnly(['partner_name', 'partner_pic', 'sales_name', 'sales_wa', 'sales_email', 'signature_name'])
+            ->logOnly(['code', 'partner_name', 'partner_pic', 'sales_name', 'sales_wa', 'sales_email', 'signature_name'])
             ->dontLogIfAttributesChangedOnly(['deleted_at', 'updated_at'])
             ->setDescriptionForEvent(function (string $eventName) {
                 $modelName = strtolower(class_basename($this));
