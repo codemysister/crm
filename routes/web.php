@@ -81,6 +81,7 @@ Route::get('clear', function () {
 
 Route::middleware('auth')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    Route::get('api/dashboard', [DashboardController::class, 'apiGetStatGeneral'])->name('api.dashboard');
     Route::get('api/dashboard/{account_manager:id}', [DashboardController::class, 'getPartnerByUser'])->name('getByUser');
 
     // Wilayah
@@ -263,6 +264,9 @@ Route::middleware('auth')->group(function () {
     Route::post('/mou/{mou:uuid}', [MOUController::class, 'update'])->name('mou.update')->middleware(['can:edit mou']);
     Route::delete('/mou/{mou:uuid}', [MOUController::class, 'destroy'])->name('mou.destroy')->middleware(['can:hapus mou']);
     Route::get('/api/mou', [MOUController::class, 'apiGetmou'])->name('api.mou');
+    Route::get('/api/mou/logs', [MOUController::class, 'apiGetLogs'])->name('api.mou.logs');
+    Route::delete('/mou/logs', [MOUController::class, 'destroyLogs'])->name('mou.log.destroy')->middleware(['can:hapus mou']);
+    Route::post('/mou/logs/filter', [MOUController::class, 'logFilter'])->name('mou.log.filter')->middleware(['can:tambah mou']);
 
     // SLA
     Route::get('/sla', [SLAController::class, 'index'])->name('sla.view')->middleware(['can:lihat sla']);
