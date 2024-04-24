@@ -71,7 +71,7 @@ Route::get('/tes', function () {
 });
 
 Route::get('migrate', function () {
-    Artisan::call('migrate:fresh --seed --force');
+    Artisan::call('migrate');
 });
 
 Route::get('clear', function () {
