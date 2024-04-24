@@ -256,12 +256,19 @@ Route::middleware('auth')->group(function () {
 
     // Memo
     Route::get('/memo', [MemoController::class, 'index'])->name('memo.view')->middleware(['can:lihat memo']);
-    Route::get('/memo/create', [MemoController::class, 'create'])->name('memo.create')->middleware(['can:tambah memo']);
+    Route::get('/memo/create', [MemoController::class, 'create'])->name('memo.create');
     Route::post('/memo', [MemoController::class, 'store'])->name('memo.store')->middleware(['can:tambah memo']);
     Route::get('/memo/{memo:uuid}', [MemoController::class, 'edit'])->name('memo.edit')->middleware(['can:edit memo']);
     Route::put('/memo/{memo:uuid}', [MemoController::class, 'update'])->name('memo.update')->middleware(['can:edit memo']);
+    Route::delete('/memo/logs', [MemoController::class, 'destroyLogs'])->name('memo.log.destroy')->middleware(['can:hapus memo']);
+    Route::put('/memo/{memo:uuid}/restore', [MemoController::class, 'restore'])->name('memo.restore');
+    Route::delete('/memo/{memo:uuid}/force', [MemoController::class, 'destroyForce'])->name('memo.destroy.force')->middleware(['can:hapus memo']);
     Route::delete('/memo/{memo:uuid}', [MemoController::class, 'destroy'])->name('memo.destroy')->middleware(['can:hapus memo']);
     Route::get('/api/memo', [MemoController::class, 'apiGetMemo'])->name('api.memo');
+    Route::get('/api/memo/logs', [MemoController::class, 'apiGetLogs'])->name('api.memo.logs');
+    Route::get('api/memo/arsip', [MemoController::class, 'apiGetArsip'])->name('memo.arsip');
+    Route::post('/memo/logs/filter', [MemoController::class, 'logFilter'])->name('memo.log.filter');
+
 
     // MOU
     Route::get('/mou', [MOUController::class, 'index'])->name('mou.view')->middleware(['can:lihat mou']);

@@ -22,10 +22,14 @@ import { OverlayPanel } from "primereact/overlaypanel";
 import getViewportSize from "../../Utils/getViewportSize";
 import { Calendar } from "primereact/calendar";
 import { TabPanel, TabView } from "primereact/tabview";
+import { formatNPWP } from "../../Utils/formatNPWP";
+import LogComponent from "@/Components/LogComponent";
+import { formateDate } from "@/Utils/formatDate";
+import ArsipComponent from "@/Components/ArsipComponent";
 
 export default function Index({ auth, memosDefault, usersProp }) {
     const [memos, setMemos] = useState(memosDefault);
-    const [selectedSph, setSelectedSph] = useState(null);
+    const [selectedData, setSelectedData] = useState(null);
     const [users, setUsers] = useState(usersProp);
     const viewportSize = getViewportSize();
     const isMobile = viewportSize.width < 992;
@@ -121,7 +125,7 @@ export default function Index({ auth, memosDefault, usersProp }) {
                 <i
                     className="pi pi-ellipsis-h pointer cursor-pointer"
                     onClick={(event) => {
-                        setSelectedSph(rowData);
+                        setSelectedData(rowData);
                         action.current.toggle(event);
                     }}
                 ></i>
@@ -148,8 +152,8 @@ export default function Index({ auth, memosDefault, usersProp }) {
         });
     };
 
-    const handleDeleteMemo = (memo) => {
-        destroy("memo/" + memo.uuid, {
+    const handleDeleteMemo = () => {
+        destroy("memo/" + selectedData.uuid, {
             onSuccess: () => {
                 getMemos();
                 showSuccess("Hapus");
@@ -201,7 +205,7 @@ export default function Index({ auth, memosDefault, usersProp }) {
                     },
                 },
                 Tanggal_Pembuatan: formateDate(data.created_at),
-                Diinput_Oleh: data.user.name,
+                Diinput_Oleh: data.created_by.name,
             };
         });
 
@@ -237,10 +241,7 @@ export default function Index({ auth, memosDefault, usersProp }) {
 
     const header = () => {
         return (
-            <HeaderDatatable
-                globalFilterValue={globalFilterValue}
-                onGlobalFilterChange={onGlobalFilterChange}
-            >
+            <HeaderDatatable filters={filters} setFilters={setFilters}>
                 <Button
                     className="shadow-md w-[10px] lg:w-[90px] border border-slate-600 bg-transparent text-slate-600 dark:bg-slate-700 dark:text-slate-300 rounded-lg"
                     onClick={() => setSidebarFilter(true)}
@@ -306,6 +307,154 @@ export default function Index({ auth, memosDefault, usersProp }) {
         setSidebarFilter(false);
         setIsLoadingData(false);
     };
+
+    const objectKeyToIndo = (key) => {
+        let keyIndo;
+        const keySplit = key.split(".");
+        const firstKey = keySplit[0];
+        if (firstKey == "partner_name") {
+            keyIndo = "Lembaga";
+        } else if (firstKey == "price_card") {
+            keyIndo = "Harga Kartu";
+        } else if (firstKey == "price_e_card") {
+            keyIndo = "Harga E-Card";
+        } else if (firstKey == "price_subscription") {
+            keyIndo = "Harga Langganan";
+        } else if (firstKey == "consideration") {
+            keyIndo = "Pertimbangan";
+        } else if (firstKey == "signature_name") {
+            keyIndo = "Tanda Tangan";
+        } else if (firstKey == "code") {
+            keyIndo = "Kode";
+        }
+
+        return keyIndo;
+    };
+
+    const globalFilterFields = ["partner_name", "code", "created_by.name"];
+
+    const columns = [
+        {
+            field: "code",
+            header: "Kode",
+            frozen: !isMobile,
+            style: !isMobile
+                ? {
+                      width: "max-content",
+                      whiteSpace: "nowrap",
+                  }
+                : null,
+        },
+
+        {
+            field: "memoable",
+            header: "Lembaga",
+            frozen: !isMobile,
+            style: !isMobile
+                ? {
+                      width: "max-content",
+                      whiteSpace: "nowrap",
+                  }
+                : null,
+            body: (rowData) => (
+                <button
+                    onClick={() => handleSelectedDetailPartner(rowData)}
+                    className="hover:text-blue-700 text-left"
+                >
+                    {rowData.memoable.name}
+                </button>
+            ),
+        },
+
+        {
+            field: "npwp",
+            header: "NPWP",
+            frozen: !isMobile,
+            style: !isMobile
+                ? {
+                      width: "max-content",
+                      whiteSpace: "nowrap",
+                  }
+                : null,
+            body: (rowData) => {
+                if (rowData.memoable?.npwp == undefined) {
+                    return "-";
+                } else {
+                    return rowData.memoable.npwp !== null
+                        ? formatNPWP(rowData.memoable.npwp)
+                        : "-";
+                }
+            },
+        },
+
+        {
+            field: "memo_doc",
+            header: "Dokumen",
+            frozen: !isMobile,
+            style: !isMobile
+                ? {
+                      width: "max-content",
+                      whiteSpace: "nowrap",
+                  }
+                : null,
+            body: (rowData) => {
+                return (
+                    <div className="flex w-full h-full items-center justify-center">
+                        <a
+                            href={rowData.memo_doc}
+                            download={`SPH_${rowData.partner_name}`}
+                            class="font-bold  w-full h-full text-center rounded-full "
+                        >
+                            <i
+                                className="pi pi-file-pdf"
+                                style={{
+                                    width: "100%",
+                                    height: "100%",
+                                    fontSize: "1.5rem",
+                                }}
+                            ></i>
+                        </a>
+                    </div>
+                );
+            },
+        },
+
+        {
+            field: "price_card",
+            header: "Harga Kartu",
+            style: {
+                width: "max-content",
+                whiteSpace: "nowrap",
+            },
+        },
+
+        {
+            field: "price_e_card",
+            header: "Harga E-Card",
+            style: {
+                width: "max-content",
+                whiteSpace: "nowrap",
+            },
+        },
+
+        {
+            field: "price_subscription",
+            header: "Harga Langganan",
+            style: {
+                width: "max-content",
+                whiteSpace: "nowrap",
+            },
+        },
+
+        {
+            field: "consideration",
+            header: "Pertimbangan",
+            style: {
+                width: "max-content",
+                whiteSpace: "nowrap",
+            },
+        },
+    ];
 
     if (preRenderLoad) {
         return <SkeletonDatatable auth={auth} />;
@@ -451,7 +600,7 @@ export default function Index({ auth, memosDefault, usersProp }) {
                             label="edit"
                             className="bg-transparent hover:bg-slate-200 w-full text-slate-500 border-b-2 border-slate-400"
                             onClick={() => {
-                                router.get("/memo/" + selectedSph.uuid);
+                                router.get("/memo/" + selectedData.uuid);
                             }}
                         />
                     )}
@@ -510,12 +659,9 @@ export default function Index({ auth, memosDefault, usersProp }) {
                                         paginatorClassName="dark:bg-transparent paginator-custome dark:text-gray-300 rounded-b-lg"
                                         header={header}
                                         value={memos}
-                                        globalFilterFields={[
-                                            "partner_name",
-                                            "code",
-                                            "date",
-                                        ]}
+                                        globalFilterFields={globalFilterFields}
                                         dataKey="id"
+                                        scrollable
                                     >
                                         <Column
                                             header="Aksi"
@@ -529,186 +675,46 @@ export default function Index({ auth, memosDefault, usersProp }) {
                                             className="dark:border-none bg-white"
                                             headerClassName="dark:border-none bg-white dark:bg-slate-900 dark:text-gray-300"
                                         ></Column>
+                                        {columns.map((col) => {
+                                            return (
+                                                <Column
+                                                    field={col.field}
+                                                    header={col.header}
+                                                    body={col.body}
+                                                    style={col.style}
+                                                    frozen={col.frozen}
+                                                    align="left"
+                                                    className="dark:border-none bg-white"
+                                                    headerClassName="dark:border-none bg-white dark:bg-slate-900 dark:text-gray-300"
+                                                ></Column>
+                                            );
+                                        })}
+
                                         <Column
-                                            field="code"
+                                            field="created_at"
                                             className="dark:border-none bg-white lg:whitespace-nowrap lg:w-max"
                                             headerClassName="dark:border-none bg-white dark:bg-slate-900 dark:text-gray-300"
-                                            header="Kode"
+                                            header="Tanggal Input"
                                             align="left"
-                                            frozen={!isMobile}
-                                            style={
-                                                !isMobile
-                                                    ? {
-                                                          width: "max-content",
-                                                          whiteSpace: "nowrap",
-                                                      }
-                                                    : null
-                                            }
-                                        ></Column>
-
-                                        <Column
-                                            header="Nama"
-                                            body={(rowData) => (
-                                                <button
-                                                    onClick={() =>
-                                                        handleSelectedDetailPartner(
-                                                            rowData
-                                                        )
-                                                    }
-                                                    className="hover:text-blue-700 text-left"
-                                                >
-                                                    {rowData.memoable.name}
-                                                </button>
-                                            )}
-                                            className="dark:border-none bg-white lg:whitespace-nowrap lg:w-max"
-                                            headerClassName="dark:border-none bg-white dark:bg-slate-900 dark:text-gray-300"
-                                            align="left"
-                                            frozen={!isMobile}
-                                            style={
-                                                !isMobile
-                                                    ? {
-                                                          width: "max-content",
-                                                          whiteSpace: "nowrap",
-                                                      }
-                                                    : null
-                                            }
-                                        ></Column>
-
-                                        <Column
-                                            header="NPWP"
                                             body={(rowData) => {
-                                                if (
-                                                    rowData.memoable.npwp ==
-                                                    undefined
-                                                ) {
-                                                    return "-";
-                                                } else {
-                                                    return rowData.memoable
-                                                        .npwp !== null
-                                                        ? formatNPWP(
-                                                              rowData.memoable
-                                                                  .npwp
-                                                          )
-                                                        : "-";
-                                                }
-                                            }}
-                                            className="dark:border-none"
-                                            headerClassName="dark:border-none  dark:bg-slate-900 dark:text-gray-300"
-                                            align="left"
-                                            frozen={!isMobile}
-                                            style={
-                                                !isMobile
-                                                    ? {
-                                                          width: "max-content",
-                                                          whiteSpace: "nowrap",
-                                                      }
-                                                    : null
-                                            }
-                                        ></Column>
-
-                                        <Column
-                                            body={(rowData) => {
-                                                return new Date(
-                                                    rowData.date
-                                                ).toLocaleDateString("id");
-                                            }}
-                                            className="dark:border-none"
-                                            headerClassName="dark:border-none  bg-transparent dark:bg-transparent dark:text-gray-300"
-                                            align="left"
-                                            header="Tanggal"
-                                            style={{
-                                                width: "max-content",
-                                                whiteSpace: "nowrap",
-                                            }}
-                                        ></Column>
-
-                                        <Column
-                                            field="price_card"
-                                            className="dark:border-none"
-                                            headerClassName="dark:border-none  bg-transparent dark:bg-transparent dark:text-gray-300"
-                                            align="left"
-                                            header="Harga Kartu"
-                                            style={{
-                                                width: "max-content",
-                                                whiteSpace: "nowrap",
-                                            }}
-                                        ></Column>
-
-                                        <Column
-                                            field="price_e_card"
-                                            className="dark:border-none"
-                                            headerClassName="dark:border-none  bg-transparent dark:bg-transparent dark:text-gray-300"
-                                            align="left"
-                                            header="Harga E-Card"
-                                            style={{
-                                                width: "max-content",
-                                                whiteSpace: "nowrap",
-                                            }}
-                                        ></Column>
-
-                                        <Column
-                                            field="price_subscription"
-                                            className="dark:border-none"
-                                            headerClassName="dark:border-none  bg-transparent dark:bg-transparent dark:text-gray-300"
-                                            align="left"
-                                            header="Biaya Langganan"
-                                            style={{
-                                                width: "max-content",
-                                                whiteSpace: "nowrap",
-                                            }}
-                                        ></Column>
-
-                                        <Column
-                                            field="consideration"
-                                            className="dark:border-none"
-                                            headerClassName="dark:border-none  bg-transparent dark:bg-transparent dark:text-gray-300"
-                                            align="left"
-                                            header="Pertimbangan"
-                                            style={{
-                                                width: "max-content",
-                                                whiteSpace: "nowrap",
-                                            }}
-                                        ></Column>
-                                        <Column
-                                            body={(rowData) => {
-                                                return rowData.memo_doc ==
-                                                    null ? (
-                                                    <ProgressSpinner
-                                                        style={{
-                                                            width: "30px",
-                                                            height: "30px",
-                                                        }}
-                                                        strokeWidth="8"
-                                                        fill="var(--surface-ground)"
-                                                        animationDuration=".5s"
-                                                    />
-                                                ) : (
-                                                    <div className="flex w-full h-full items-center justify-center">
-                                                        <a
-                                                            href={
-                                                                "/" +
-                                                                rowData.memo_doc
-                                                            }
-                                                            download={`${rowData.code}_${rowData.partner_name}`}
-                                                            class="font-bold  w-full h-full text-center rounded-full "
-                                                        >
-                                                            <i
-                                                                className="pi pi-file-pdf"
-                                                                style={{
-                                                                    width: "100%",
-                                                                    height: "100%",
-                                                                    fontSize:
-                                                                        "1.5rem",
-                                                                }}
-                                                            ></i>
-                                                        </a>
-                                                    </div>
+                                                return formateDate(
+                                                    rowData.created_at
                                                 );
                                             }}
-                                            className="dark:border-none"
-                                            headerClassName="dark:border-none  bg-transparent dark:bg-transparent dark:text-gray-300"
+                                            style={{
+                                                width: "max-content",
+                                                whiteSpace: "nowrap",
+                                            }}
+                                        ></Column>
+                                        <Column
+                                            field="created_by"
+                                            className="dark:border-none bg-white lg:whitespace-nowrap lg:w-max"
+                                            headerClassName="dark:border-none bg-white dark:bg-slate-900 dark:text-gray-300"
+                                            header="Diinput Oleh"
                                             align="left"
-                                            header="Dokumen"
+                                            body={(rowData) => {
+                                                return rowData.created_by.name;
+                                            }}
                                             style={{
                                                 width: "max-content",
                                                 whiteSpace: "nowrap",
@@ -723,8 +729,12 @@ export default function Index({ auth, memosDefault, usersProp }) {
 
                 <TabPanel header="Log">
                     {activeIndexTab == 1 && (
-                        <Log
+                        <LogComponent
                             auth={auth}
+                            fetchUrl={"/api/memo/logs"}
+                            filterUrl={"/memo/logs/filter"}
+                            deleteUrl={"/memo/logs"}
+                            objectKeyToIndo={objectKeyToIndo}
                             users={users}
                             showSuccess={showSuccess}
                             showError={showError}
@@ -734,10 +744,17 @@ export default function Index({ auth, memosDefault, usersProp }) {
 
                 <TabPanel header="Arsip">
                     {activeIndexTab == 2 && (
-                        <Arsip
+                        <ArsipComponent
                             auth={auth}
+                            users={users}
+                            fetchUrl={"/api/memo/arsip"}
+                            forceDeleteUrl={"/memo/{id}/force"}
+                            restoreUrl={"/memo/{id}/restore"}
+                            filterUrl={"/memo/arsip/filter"}
+                            columns={columns}
                             showSuccess={showSuccess}
                             showError={showError}
+                            globalFilterFields={globalFilterFields}
                         />
                     )}
                 </TabPanel>
