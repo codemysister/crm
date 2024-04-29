@@ -137,14 +137,21 @@ class MemoController extends Controller
             return $map[$number - 1];
         }
 
-        $totalDataPerMonth = Memo::withTrashed()->whereYear('created_at', $currentYear)
-            ->whereMonth('created_at', $currentMonth)
-            ->count();
+        $lastDataCurrentMonth = Memo::withTrashed()->whereYear('created_at', $currentYear)
+            ->whereMonth('created_at', $currentMonth)->latest()->first();
+
+        $code = null;
+        if ($lastDataCurrentMonth == null) {
+            $code = "0000";
+        } else {
+            $parts = explode("/", $lastDataCurrentMonth->code);
+            $code = $parts[1];
+        }
+        $codeInteger = intval($code) + 1;
+        $latestCode = str_pad($codeInteger, strlen($code), "0", STR_PAD_LEFT);
+
         $romanMonth = intToRoman($currentMonth);
-        $latestData = "MDH/000/$romanMonth/$currentYear";
-        $lastCode = $latestData ? explode('/', $latestData)[1] : 0;
-        $newCode = str_pad((int) $lastCode + $totalDataPerMonth + 1, 3, '0', STR_PAD_LEFT);
-        $newCode = "MDH/$newCode/$romanMonth/$currentYear";
+        $newCode = "MDH/$latestCode/$romanMonth/$currentYear";
         return $newCode;
     }
 
