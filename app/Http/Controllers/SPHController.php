@@ -121,9 +121,13 @@ class SPHController extends Controller
         $lastDataCurrentMonth = SPH::withTrashed()->whereYear('created_at', $currentYear)
             ->whereMonth('created_at', $currentMonth)->latest()->first();
 
-
-        $parts = explode("/", $lastDataCurrentMonth->code);
-        $code = $parts[1];
+        $code = null;
+        if ($lastDataCurrentMonth == null) {
+            $code = "0000";
+        } else {
+            $parts = explode("/", $lastDataCurrentMonth->code);
+            $code = $parts[1];
+        }
         $codeInteger = intval($code) + 1;
         $latestCode = str_pad($codeInteger, strlen($code), "0", STR_PAD_LEFT);
 
@@ -157,12 +161,10 @@ class SPHController extends Controller
 
     public function store(SPHRequest $request)
     {
-
         DB::beginTransaction();
 
         try {
             $code = $this->generateCode();
-
             $sph = new SPH();
             $sph->uuid = Str::uuid();
             $sph->code = $code;
@@ -304,7 +306,7 @@ class SPHController extends Controller
 
     public function apiGetSPH()
     {
-        $sphsDefault = SPH::with('createdBy', 'sphable', 'partner', 'lead')->latest()->get();
+        $sphsDefault = SPH::with('createdBy', 'partner', 'lead')->latest()->get();
         return response()->json($sphsDefault);
     }
 
@@ -377,7 +379,7 @@ class SPHController extends Controller
 
     public function arsipFilter(Request $request)
     {
-        $arsip = SPH::withTrashed()->with(['createdBy', 'sphable'])->whereNotNull('deleted_at');
+        $arsip = SPH::withTrashed()->with(['createdBy', 'lead', 'partner'])->whereNotNull('deleted_at');
 
         if ($request->user) {
             $arsip->where('created_by', '=', $request->user['id']);
