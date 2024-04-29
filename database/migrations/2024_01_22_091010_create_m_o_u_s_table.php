@@ -16,7 +16,8 @@ return new class extends Migration {
             $table->string('code');
             $table->string('day');
             $table->date('date');
-            $table->morphs('mouable');
+            $table->foreignId('partner_id')->nullable()->constrained()->onDelete('cascade');
+            $table->foreignId('lead_id')->nullable()->constrained('leads')->onDelete('cascade');
             $table->string('partner_name');
             $table->string('partner_pic');
             $table->string('partner_pic_position');

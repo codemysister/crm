@@ -125,8 +125,8 @@
                                 </tr>
                                 <tr>
                                     <td style="width: 20%;">Lokasi</td>
-                                    <td>: <b>{{json_decode($mou->partner_regency)->name}},
-                                            {{json_decode($mou->partner_province)->name}}</b></td>
+                                    <td>: <b>{{ucwords(strtolower(json_decode($mou->partner_regency)->name))}},
+                                            {{ucwords(strtolower(json_decode($mou->partner_province)->name))}}</b></td>
                                 </tr>
                                 <tr>
                                     <td colspan="2">Selanjutnya disebut sebagai “Pihak Pertama”.</td>

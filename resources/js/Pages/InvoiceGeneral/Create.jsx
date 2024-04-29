@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { Button } from "primereact/button";
 import { DataTable } from "primereact/datatable";
 import { Dialog } from "primereact/dialog";
-import { Head, Link, useForm } from "@inertiajs/react";
+import { Head, Link, router, useForm } from "@inertiajs/react";
 import { Column } from "primereact/column";
 import { useRef } from "react";
 import { FilterMatchMode } from "primereact/api";
@@ -12,8 +12,13 @@ import { Dropdown } from "primereact/dropdown";
 import React from "react";
 import { Toast } from "primereact/toast";
 import { Badge } from "primereact/badge";
-import { InputNumber } from "primereact/inputnumber";
+
 import { Calendar } from "primereact/calendar";
+import DialogInstitution from "@/Components/DialogInstitution";
+import InputError from "@/Components/InputError";
+import { InputNumber } from "primereact/inputnumber";
+import { getRegencys } from "@/Services/getRegency";
+import { getProvince } from "@/Services/getProvince";
 // import "../../../css/app.css";
 
 const BASE_URL = import.meta.env.VITE_BASE_URL;
@@ -27,10 +32,12 @@ const Create = ({
 }) => {
     const [users, setUsers] = useState(usersProp);
     const [partners, setPartners] = useState(partnersProp);
+    const [leads, setLeads] = useState(null);
     const [sales, setSales] = useState(salesProp);
     const [signatures, setSignatures] = useState(signaturesProp);
     const [products, setProducts] = useState(productsProp);
     const [dialogVisible, setDialogVisible] = useState(false);
+    const [regencyName, setRegencyName] = useState(null);
     const [dialogProductVisible, setDialogProductVisible] = useState(false);
     const [rowClick, setRowClick] = useState(true);
     const [selectedProducts, setSelectedProducts] = useState([]);
@@ -38,7 +45,26 @@ const Create = ({
     const partnerScrollRef = useRef(null);
     const [provinces, setProvinces] = useState([]);
     const [regencys, setRegencys] = useState([]);
-    const [codeProvince, setcodeProvince] = useState(null);
+    const [provinceName, setProvinceName] = useState(null);
+    const [selectedPartner, setSelectedPartner] = useState(null);
+    const [dialogInstitutionVisible, setDialogInstitutionVisible] =
+        useState(false);
+    const [isLoadingData, setIsLoadingData] = useState(false);
+    const [filters, setFilters] = useState({
+        global: { value: null, matchMode: FilterMatchMode.CONTAINS },
+    });
+
+    const [globalFilterValue, setGlobalFilterValue] = useState("");
+
+    const onGlobalFilterChange = (e) => {
+        const value = e.target.value;
+        let _filters = { ...filters };
+
+        _filters["global"].value = value;
+
+        setFilters(_filters);
+        setGlobalFilterValue(value);
+    };
 
     const [theme, setTheme] = useState(localStorage.theme);
     useEffect(() => {
@@ -86,7 +112,7 @@ const Create = ({
             name: null,
             province: null,
             regency: null,
-            number: null,
+            phone_number: null,
             pic: null,
         },
         date: null,
@@ -105,7 +131,8 @@ const Create = ({
 
     useEffect(() => {
         const fetchData = async () => {
-            await getProvince();
+            let response = await getProvince();
+            setProvinces((prev) => (prev = response));
         };
 
         fetchData();
@@ -113,10 +140,25 @@ const Create = ({
     }, []);
 
     useEffect(() => {
-        if (codeProvince) {
-            getRegencys(codeProvince);
+        const fetch = async () => {
+            if (provinceName) {
+                let response = await getRegencys(provinceName);
+                setRegencys((prev) => (prev = response));
+            }
+            if (regencyName && provinceName) {
+                let response = await getSubdistricts(regencyName);
+                setSubdistricts((prev) => (prev = response));
+            }
+        };
+
+        fetch();
+    }, [provinceName, regencyName]);
+
+    useEffect(() => {
+        if (provinceName) {
+            getRegencys(provinceName);
         }
-    }, [codeProvince]);
+    }, [provinceName]);
 
     useEffect(() => {
         handleTotalInvoice();
@@ -164,85 +206,6 @@ const Create = ({
         const hasilFormat = `${hari}-${bulan}-${tahun}`;
 
         return hasilFormat;
-    };
-
-    const getProvince = async () => {
-        const options = {
-            method: "GET",
-            url: `/api/wilayah/provinsi/`,
-            headers: {
-                "Content-Type": "application/json",
-            },
-        };
-
-        try {
-            const response = await axios.request(options);
-            const dataArray = Object.entries(response.data).map(
-                ([key, value]) => ({
-                    code: key,
-                    name: value
-                        .toLowerCase()
-                        .split(" ")
-                        .map(
-                            (word) =>
-                                word.charAt(0).toUpperCase() + word.slice(1)
-                        )
-                        .join(" "),
-                })
-            );
-            setProvinces((prev) => (prev = dataArray));
-        } catch (error) {
-            console.log(error);
-        }
-    };
-
-    const getRegencys = async (code) => {
-        let url = code
-            ? `/api/wilayah/kabupaten?provinsi=${code}`
-            : `/api/wilayah/kabupaten`;
-        const options = {
-            method: "GET",
-            url: url,
-            headers: {
-                "Content-Type": "application/json",
-            },
-        };
-
-        try {
-            const response = await axios.request(options);
-            const dataArray = Object.entries(response.data).map(
-                ([key, value]) => ({
-                    code: key,
-                    name: value
-                        .toLowerCase()
-                        .split(" ")
-                        .map(
-                            (word) =>
-                                word.charAt(0).toUpperCase() + word.slice(1)
-                        )
-                        .join(" "),
-                })
-            );
-            setRegencys((prev) => (prev = dataArray));
-        } catch (error) {
-            console.log(error);
-        }
-    };
-
-    const [filters, setFilters] = useState({
-        global: { value: null, matchMode: FilterMatchMode.CONTAINS },
-    });
-
-    const [globalFilterValue, setGlobalFilterValue] = useState("");
-
-    const onGlobalFilterChange = (e) => {
-        const value = e.target.value;
-        let _filters = { ...filters };
-
-        _filters["global"].value = value;
-
-        setFilters(_filters);
-        setGlobalFilterValue(value);
     };
 
     document.querySelector("body").classList.add("overflow-hidden");
@@ -418,7 +381,7 @@ const Create = ({
         post("/invoice_generals", {
             onSuccess: () => {
                 showSuccess("Tambah");
-                window.location = "/invoice_generals";
+                router.get("/invoice_generals");
                 // reset("name", "category", "price", "unit", "description");
             },
 
@@ -479,72 +442,47 @@ const Create = ({
 
                                 <div className="flex flex-col mt-3">
                                     <label htmlFor="lembaga">Lembaga *</label>
-                                    <Dropdown
-                                        value={data.partner}
-                                        dataKey="id"
-                                        onChange={(e) => {
-                                            setData("partner", {
-                                                ...data.partner,
-                                                id: e.target.value.id,
-                                                name: e.target.value.name,
-                                                province:
-                                                    e.target.value.province,
-                                                regency: e.target.value.regency,
-                                                number: e.target.value
-                                                    .phone_number,
-                                                pic: e.target.value.pics[0]
-                                                    ?.name,
-                                            });
-                                            if (e.target.value.province) {
-                                                setcodeProvince(
-                                                    (prev) =>
-                                                        (prev = JSON.parse(
-                                                            e.target.value
-                                                                .province
-                                                        ).code)
-                                                );
-                                            }
-                                        }}
+                                    <InputText
+                                        value={data.partner.name}
                                         onFocus={() => {
                                             triggerInputFocus(
                                                 animatePartnerNameRef
                                             );
                                         }}
-                                        onShow={() => {
-                                            triggerInputFocus(
-                                                animatePartnerNameRef
-                                            );
-                                        }}
-                                        onHide={() => {
+                                        onBlur={() => {
                                             stopAnimateInputFocus(
                                                 animatePartnerNameRef
                                             );
                                         }}
-                                        options={partners}
-                                        optionLabel="name"
-                                        placeholder="Pilih Lembaga"
-                                        filter
-                                        valueTemplate={selectedOptionTemplate}
-                                        itemTemplate={optionTemplate}
-                                        className="w-full md:w-14rem"
+                                        onClick={() => {
+                                            setDialogInstitutionVisible(true);
+                                        }}
+                                        placeholder="Pilih lembaga"
+                                        className="dark:bg-gray-300 cursor-pointer"
+                                        id="partner"
+                                        aria-describedby="partner-help"
+                                    />
+                                    <InputError
+                                        message={errors["partner.name"]}
+                                        className="mt-2"
                                     />
                                 </div>
 
                                 <div className="flex flex-col mt-3">
-                                    <label htmlFor="number">
+                                    <label htmlFor="phone_number">
                                         Nomor Telepon *
                                     </label>
                                     <InputText
-                                        value={data.partner.number}
+                                        value={data.partner.phone_number}
                                         onChange={(e) =>
                                             setData("partner", {
                                                 ...data.partner,
-                                                number: e.target.value,
+                                                phone_number: e.target.value,
                                             })
                                         }
                                         className="dark:bg-gray-300"
-                                        id="number"
-                                        aria-describedby="number-help"
+                                        id="phone_number"
+                                        aria-describedby="phone_number-help"
                                         onFocus={() => {
                                             triggerInputFocus(
                                                 animatePartnerNumberRef
@@ -563,7 +501,7 @@ const Create = ({
                                     <label htmlFor="province">Provinsi *</label>
 
                                     <Dropdown
-                                        dataKey="name"
+                                        dataKey="code"
                                         value={
                                             data.partner.province
                                                 ? JSON.parse(
@@ -572,7 +510,7 @@ const Create = ({
                                                 : null
                                         }
                                         onChange={(e) => {
-                                            setcodeProvince(
+                                            setProvinceName(
                                                 (prev) =>
                                                     (prev = e.target.value.code)
                                             );
@@ -611,7 +549,7 @@ const Create = ({
                                 <div className="flex flex-col mt-3">
                                     <label htmlFor="regency">Kabupaten *</label>
                                     <Dropdown
-                                        dataKey="name"
+                                        dataKey="code"
                                         value={
                                             data.partner.regency
                                                 ? JSON.parse(
@@ -1241,7 +1179,8 @@ const Create = ({
                                 </span>
                             </h1>
                             <h1 ref={animatePartnerNumberRef}>
-                                {data.partner.number ?? "{{nomor hp partner}}"}
+                                {data.partner.phone_number ??
+                                    "{{nomor hp partner}}"}
                             </h1>
                         </div>
 
@@ -1433,6 +1372,21 @@ const Create = ({
                     </div>
                 </div>
             </div>
+            <DialogInstitution
+                dialogInstitutionVisible={dialogInstitutionVisible}
+                setDialogInstitutionVisible={setDialogInstitutionVisible}
+                filters={filters}
+                setFilters={setFilters}
+                isLoadingData={isLoadingData}
+                setIsLoadingData={setIsLoadingData}
+                leads={leads}
+                setLeads={setLeads}
+                partners={partners}
+                setPartners={setPartners}
+                data={data}
+                setData={setData}
+                setProvinceName={setProvinceName}
+            />
         </>
     );
 };

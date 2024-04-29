@@ -55,7 +55,6 @@ class GenerateMOUJob implements ShouldQueue
             Storage::put("public/$path", $pdf);
 
         } catch (\Exception $exception) {
-            // Tangkap pengecualian dan laporkan error
             $this->report($exception);
         }
     }
