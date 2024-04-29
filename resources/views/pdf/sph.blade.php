@@ -11,12 +11,7 @@
 
 
     <style>
-        @page {
-            margin-left: 2.5cm;
-            margin-top: 2cm;
-            margin-right: 2.5cm;
-            margin-bottom: 2cm;
-        }
+       
 
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap');
 
@@ -28,6 +23,8 @@
             font-family: 'Inter', sans-serif;
 
         }
+
+
     </style>
 </head>
 
@@ -103,8 +100,8 @@
         </table>
     </div>
 
-    <div class="mt-3">
-    <div style="text-align: left; font-size: 10px; width:100%;">*) Harga produk/layanan tidak termasuk biaya admin transaksi <span style="font-style:italic;">user</span> aplikasi <span style="font-style:italic;">mobile</span>.</div>
+    <div class="mt-6">
+    <div style="text-align: left; width:100%;" class="text-sm">*) Harga yang tertera belum termasuk PPN sebesar 11%.</div>
     </div>
 
     <div class="mt-6">
@@ -138,6 +135,7 @@
         @endif
     </div>
 
+ 
 
 </body>
 

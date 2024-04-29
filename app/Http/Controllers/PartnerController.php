@@ -26,7 +26,7 @@ class PartnerController extends Controller
 {
     public function index(Request $request)
     {
-        $uuid = $request->query('uuid');
+        $uuid = $request->query('detail');
         $usersProp = User::with('roles')->get();
         $partner = null;
         if ($uuid) {

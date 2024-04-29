@@ -1160,6 +1160,13 @@ const Create = ({
                                 </table>
                             </div>
 
+                            <div class="mt-6">
+                                <div class="text-sm text-left w-full">
+                                    *) Harga yang tertera belum termasuk PPN
+                                    sebesar 11%.
+                                </div>
+                            </div>
+
                             <div className="mt-5">
                                 <h1>
                                     Untuk konfirmasi persetujuan silakan hubungi

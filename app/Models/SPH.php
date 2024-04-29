@@ -15,7 +15,7 @@ class SPH extends Model
     use HasFactory, SoftDeletes, LogsActivity;
     protected $table = 'sphs';
     protected $guarded = [];
-    protected static $recordEvents = ['created', 'updated'];
+    protected static $recordEvents = ['created', 'updated', 'restored'];
 
     public function getActivitylogOptions(): LogOptions
     {
@@ -29,7 +29,7 @@ class SPH extends Model
                 } elseif ($eventName === 'updated') {
                     return "memperbarui data {$modelName}";
                 } elseif ($eventName === 'deleted') {
-                    return "menghapus data {$modelName}";
+                    return "meng data {$modelName}";
                 } elseif ($eventName === 'restored') {
                     return "memulihkan data {$modelName}";
                 } else {
@@ -37,17 +37,20 @@ class SPH extends Model
                 }
             });
     }
+
     public function createdBy()
     {
         return $this->hasOne(User::class, 'id', 'created_by');
     }
-
-    public function sphable()
+    public function lead()
     {
-        return $this->morphTo()->withTrashed();
+        return $this->belongsTo(Lead::class);
     }
 
-
+    public function partner()
+    {
+        return $this->belongsTo(Partner::class);
+    }
 
     public function products()
     {

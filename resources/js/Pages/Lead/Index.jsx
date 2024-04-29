@@ -31,14 +31,25 @@ import Arsip from "./Arsip";
 import DetailLead from "./DetailLead/DetailLead";
 import getViewportSize from "../../Utils/getViewportSize";
 import { formateDate } from "../../Utils/formatDate";
+import ArsipComponent from "@/Components/ArsipComponent";
+import { useCallback } from "react";
 registerPlugin(FilePondPluginFileValidateSize);
 
-export default function Index({ auth, usersProp, statusProp }) {
+export default function Index({
+    auth,
+    leadDetail,
+    usersProp,
+    statusProp,
+    salesProp,
+    referralProp,
+}) {
     const [activeIndexTab, setActiveIndexTab] = useState(0);
     const [leads, setLeads] = useState(null);
     const [detailLead, setDetailLead] = useState(null);
     const [users, setUsers] = useState(usersProp);
     const [status, setStatus] = useState(statusProp);
+    const [sales, setSales] = useState(salesProp);
+    const [referrals, setReferrals] = useState(referralProp);
     const [confirmIsVisible, setConfirmIsVisible] = useState(false);
     const [selectedLead, setSelectedLead] = useState(null);
     const [isLoadingData, setIsLoadingData] = useState(false);
@@ -59,63 +70,6 @@ export default function Index({ auth, usersProp, statusProp }) {
     const [filters, setFilters] = useState({
         global: { value: null, matchMode: FilterMatchMode.CONTAINS },
     });
-
-    // const [totalRecords, setTotalRecords] = useState(0);
-    // const [lazyState, setlazyState] = useState({
-    //     first: 0,
-    //     rows: 10,
-    //     page: 1,
-    //     sortField: null,
-    //     sortOrder: null,
-    //     filters: {
-    //         global: { value: null, matchMode: FilterMatchMode.CONTAINS },
-    //         name: { value: "", matchMode: "contains" },
-    //     },
-    // });
-
-    // let networkTimeout = null;
-
-    // useEffect(() => {
-    //     loadLazyData();
-    // }, [lazyState]);
-
-    // const loadLazyData = () => {
-    //     setIsLoadingData(true);
-
-    //     if (networkTimeout) {
-    //         clearTimeout(networkTimeout);
-    //     }
-    //     networkTimeout = setTimeout(() => {
-    //         axios
-    //             .get(
-    //                 `/api/leads?first=${lazyState.first}&rows=${lazyState.rows}`
-    //             )
-    //             .then((response) => {
-    //                 const { totalRecords, leads } = response.data;
-    //                 console.log(leads);
-    //                 setTotalRecords(totalRecords);
-    //                 setLeads(leads);
-    //                 setIsLoadingData(false);
-    //             })
-    //             .catch((error) => {
-    //                 console.error("Error fetching leads:", error);
-    //                 setIsLoadingData(false);
-    //             });
-    //     }, Math.random() * 1000 + 250);
-    // };
-
-    // const onPage = (event) => {
-    //     setlazyState(event);
-    // };
-
-    // const onSort = (event) => {
-    //     setlazyState(event);
-    // };
-
-    // const onFilter = (event) => {
-    //     event["first"] = 0;
-    //     setlazyState(event);
-    // };
 
     const {
         data,
@@ -180,6 +134,10 @@ export default function Index({ auth, usersProp, statusProp }) {
     };
 
     useEffect(() => {
+        if (leadDetail) {
+            getSelectedDetailLead(leadDetail);
+            setActiveIndexTab(3);
+        }
         const fetchData = async () => {
             setPreRenderLoad((prev) => (prev = false));
             await getLeads();
@@ -231,6 +189,8 @@ export default function Index({ auth, usersProp, statusProp }) {
             uuid: lead.uuid,
             name: lead.name,
             pic: lead.pic,
+            sales: lead.sales,
+            referral: lead.referral,
             phone_number: lead.phone_number,
             address: lead.address,
             total_members: lead.total_members,
@@ -481,6 +441,102 @@ export default function Index({ auth, usersProp, statusProp }) {
         });
     };
 
+    const globalFilterFields = [
+        ["name", "status.name", "address", "phone_number", "pic"],
+    ];
+
+    const columns = [
+        {
+            field: "name",
+            header: "Lembaga",
+            frozen: !isMobile,
+            style: {
+                width: "max-content",
+                whiteSpace: "nowrap",
+            },
+            body: (rowData) => {
+                return (
+                    <button
+                        onClick={() => handleSelectedDetailLead(rowData)}
+                        className="hover:text-blue-700 text-left"
+                    >
+                        {rowData.name}
+                    </button>
+                );
+            },
+        },
+
+        {
+            field: "status",
+            header: "Status",
+            frozen: !isMobile,
+            style: {
+                width: "max-content",
+                whiteSpace: "nowrap",
+            },
+            body: (rowData) => {
+                return (
+                    <Badge
+                        value={rowData.status.name}
+                        className="text-white"
+                        style={{
+                            backgroundColor: "#" + rowData.status.color,
+                        }}
+                    ></Badge>
+                );
+            },
+        },
+
+        {
+            field: "sales",
+            header: "Sales",
+            style: {
+                width: "max-content",
+                whiteSpace: "nowrap",
+            },
+            body: (rowData) => {
+                return rowData.sales ? rowData.sales.name : "-";
+            },
+        },
+        {
+            field: "referral",
+            header: "Referral",
+            style: {
+                width: "max-content",
+                whiteSpace: "nowrap",
+            },
+            body: (rowData) => {
+                return rowData.referral ? rowData.referral.name : "-";
+            },
+        },
+
+        {
+            field: "phone_number",
+            header: "Nomor Telepon",
+            style: {
+                width: "max-content",
+                whiteSpace: "nowrap",
+            },
+        },
+
+        {
+            field: "address",
+            header: "Alamat",
+            style: {
+                width: "max-content",
+                whiteSpace: "nowrap",
+            },
+        },
+
+        {
+            field: "pic",
+            header: "PIC",
+            style: {
+                width: "max-content",
+                whiteSpace: "nowrap",
+            },
+        },
+    ];
     if (preRenderLoad) {
         return <SkeletonDatatable auth={auth} />;
     }
@@ -720,104 +776,21 @@ export default function Index({ auth, usersProp, statusProp }) {
                                             className="dark:border-none"
                                             headerClassName="dark:border-none  bg-transparent dark:bg-transparent dark:text-gray-300"
                                         ></Column>
-                                        <Column
-                                            field="uuid"
-                                            hidden
-                                            className="dark:border-none"
-                                            headerClassName="dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300"
-                                            header="Nama"
-                                            align="left"
-                                            style={{
-                                                width: "max-content",
-                                                whiteSpace: "nowrap",
-                                            }}
-                                        ></Column>
-                                        <Column
-                                            field="name"
-                                            className="dark:border-none"
-                                            headerClassName="dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300"
-                                            header="Nama"
-                                            align="left"
-                                            style={{
-                                                width: "max-content",
-                                                whiteSpace: "nowrap",
-                                            }}
-                                            body={(rowData) => {
-                                                return (
-                                                    <button
-                                                        onClick={() =>
-                                                            handleSelectedDetailLead(
-                                                                rowData
-                                                            )
-                                                        }
-                                                        className="hover:text-blue-700 text-left"
-                                                    >
-                                                        {rowData.name}
-                                                    </button>
-                                                );
-                                            }}
-                                        ></Column>
-                                        <Column
-                                            field="status"
-                                            className="dark:border-none"
-                                            headerClassName="dark:border-none  bg-transparent dark:bg-transparent dark:text-gray-300"
-                                            align="left"
-                                            header="Status"
-                                            body={(rowData) => {
-                                                return (
-                                                    <Badge
-                                                        value={
-                                                            rowData.status.name
-                                                        }
-                                                        className="text-white"
-                                                        style={{
-                                                            backgroundColor:
-                                                                "#" +
-                                                                rowData.status
-                                                                    .color,
-                                                        }}
-                                                    ></Badge>
-                                                );
-                                            }}
-                                            style={{
-                                                width: "max-content",
-                                                whiteSpace: "nowrap",
-                                            }}
-                                        ></Column>
-                                        <Column
-                                            field="phone_number"
-                                            className="dark:border-none"
-                                            headerClassName="dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300"
-                                            header="Nomor Telepon"
-                                            align="left"
-                                            style={{
-                                                width: "max-content",
-                                                whiteSpace: "nowrap",
-                                            }}
-                                        ></Column>
-                                        <Column
-                                            field="address"
-                                            className="dark:border-none"
-                                            headerClassName="dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300"
-                                            header="Alamat"
-                                            align="left"
-                                            style={{
-                                                width: "max-content",
-                                                whiteSpace: "nowrap",
-                                            }}
-                                        ></Column>
-                                        <Column
-                                            field="pic"
-                                            className="dark:border-none"
-                                            headerClassName="dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300"
-                                            header="PIC"
-                                            align="left"
-                                            style={{
-                                                width: "max-content",
-                                                whiteSpace: "nowrap",
-                                            }}
-                                        ></Column>
 
+                                        {columns.map((col) => {
+                                            return (
+                                                <Column
+                                                    field={col.field}
+                                                    header={col.header}
+                                                    body={col.body}
+                                                    style={col.style}
+                                                    frozen={col.frozen}
+                                                    align="left"
+                                                    className="dark:border-none bg-white"
+                                                    headerClassName="dark:border-none bg-white dark:bg-slate-900 dark:text-gray-300"
+                                                ></Column>
+                                            );
+                                        })}
                                         <Column
                                             field="created_by"
                                             className="dark:border-none"
@@ -852,10 +825,17 @@ export default function Index({ auth, usersProp, statusProp }) {
 
                 <TabPanel header="Arsip">
                     {activeIndexTab == 2 && (
-                        <Arsip
+                        <ArsipComponent
                             auth={auth}
+                            users={users}
+                            fetchUrl={"/api/leads/arsip"}
+                            forceDeleteUrl={"/leads/{id}/force"}
+                            restoreUrl={"/leads/{id}/restore"}
+                            filterUrl={"/leads/arsip/filter"}
+                            columns={columns}
                             showSuccess={showSuccess}
                             showError={showError}
+                            globalFilterFields={globalFilterFields}
                         />
                     )}
                 </TabPanel>
@@ -889,7 +869,7 @@ export default function Index({ auth, usersProp, statusProp }) {
                     <form onSubmit={(e) => handleSubmitForm(e, "tambah")}>
                         <div className="flex flex-col justify-around gap-4 mt-3">
                             <div className="flex flex-col">
-                                <label htmlFor="name">Nama *</label>
+                                <label htmlFor="name">Lembaga *</label>
                                 <InputText
                                     value={data.name}
                                     onChange={(e) =>
@@ -920,6 +900,42 @@ export default function Index({ auth, usersProp, statusProp }) {
                                 <InputError
                                     message={errors["pic"]}
                                     className="mt-2"
+                                />
+                            </div>
+
+                            <div className="flex flex-col">
+                                <label htmlFor="sales">Pilih Sales *</label>
+                                <Dropdown
+                                    value={data.sales}
+                                    onChange={(e) =>
+                                        setData("sales", e.target.value)
+                                    }
+                                    options={sales}
+                                    dataKey="id"
+                                    optionLabel="name"
+                                    placeholder="Pilih Sales"
+                                    filter
+                                    valueTemplate={selectedOptionTemplate}
+                                    itemTemplate={optionTemplate}
+                                    className="w-full md:w-14rem"
+                                />
+                            </div>
+
+                            <div className="flex flex-col">
+                                <label htmlFor="referral">Referral</label>
+                                <Dropdown
+                                    dataKey="name"
+                                    value={data.referral}
+                                    onChange={(e) =>
+                                        setData("referral", e.target.value)
+                                    }
+                                    options={referrals}
+                                    optionLabel="name"
+                                    placeholder="Pilih Referral"
+                                    filter
+                                    valueTemplate={selectedOptionTemplate}
+                                    itemTemplate={optionTemplate}
+                                    className="w-full md:w-14rem"
                                 />
                             </div>
 
@@ -1050,6 +1066,41 @@ export default function Index({ auth, usersProp, statusProp }) {
                                 <InputError
                                     message={errors["pic"]}
                                     className="mt-2"
+                                />
+                            </div>
+
+                            <div className="flex flex-col">
+                                <label htmlFor="sales">Pilih Sales *</label>
+                                <Dropdown
+                                    value={data.sales}
+                                    onChange={(e) =>
+                                        setData("sales", e.target.value)
+                                    }
+                                    options={sales}
+                                    optionLabel="name"
+                                    placeholder="Pilih Sales"
+                                    filter
+                                    valueTemplate={selectedOptionTemplate}
+                                    itemTemplate={optionTemplate}
+                                    className="w-full md:w-14rem"
+                                />
+                            </div>
+
+                            <div className="flex flex-col">
+                                <label htmlFor="referral">Referral</label>
+                                <Dropdown
+                                    dataKey="name"
+                                    value={data.referral}
+                                    onChange={(e) =>
+                                        setData("referral", e.target.value)
+                                    }
+                                    options={referrals}
+                                    optionLabel="name"
+                                    placeholder="Pilih Referral"
+                                    filter
+                                    valueTemplate={selectedOptionTemplate}
+                                    itemTemplate={optionTemplate}
+                                    className="w-full md:w-14rem"
                                 />
                             </div>
 

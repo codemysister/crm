@@ -92,13 +92,13 @@ const Edit = ({
         )}/CAZH-SPH/X/${new Date().getFullYear()}`,
         products: [],
         partner: {
-            id: sph.sphable.id,
-            uuid: sph.sphable.uuid,
+            id: sph.partner == undefined ? sph.lead.id : sph.partner.id,
+            uuid: sph.partner == undefined ? sph.lead.uuid : sph.partner.uuid,
             name: sph.partner_name,
             province: sph.partner_province,
             regency: sph.partner_regency,
             pic: sph.partner_pic,
-            type: sph.sphable.province ? "partner" : "lead",
+            type: sph.partner == undefined ? "lead" : "partner",
         },
         sales: {
             name: sph.sales_name,
@@ -1028,6 +1028,13 @@ const Edit = ({
                                         })}
                                     </tbody>
                                 </table>
+                            </div>
+
+                            <div class="mt-6">
+                                <div class="text-sm text-left w-full">
+                                    *) Harga yang tertera belum termasuk PPN
+                                    sebesar 11%.
+                                </div>
                             </div>
 
                             <div className="mt-5">

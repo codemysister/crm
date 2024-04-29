@@ -35,6 +35,9 @@ import { DatatablePartner } from "./Component/DatatablePartner.jsx";
 import { memo } from "react";
 import { useCallback } from "react";
 import { useMemo } from "react";
+import { getProvince } from "@/Services/getProvince.js";
+import { getRegencys } from "@/Services/getRegency.js";
+import { getSubdistricts } from "@/Services/getSubdistrict.js";
 registerPlugin(FilePondPluginFileValidateSize);
 
 export default function Index({
@@ -179,7 +182,8 @@ export default function Index({
     useEffect(() => {
         const fetchData = async () => {
             await getPartners();
-            await getProvince();
+            let response = await getProvince();
+            setProvinces((prev) => (prev = response));
             setPreRenderLoad((prev) => (prev = false));
         };
 
@@ -187,12 +191,18 @@ export default function Index({
     }, [activeIndexTab]);
 
     useEffect(() => {
-        if (ProvinceName) {
-            getRegencys(ProvinceName);
-        }
-        if (RegencyName && ProvinceName) {
-            getSubdistricts(RegencyName);
-        }
+        const fetch = async () => {
+            if (ProvinceName) {
+                let response = await getRegencys(ProvinceName);
+                setRegencys((prev) => (prev = response));
+            }
+            if (RegencyName && ProvinceName) {
+                let response = await getSubdistricts(RegencyName);
+                setSubdistricts((prev) => (prev = response));
+            }
+        };
+
+        fetch();
     }, [ProvinceName, RegencyName]);
 
     const fetchData = async (fnc) => {
@@ -227,90 +237,6 @@ export default function Index({
         }));
 
         setIsLoadingData(false);
-    };
-
-    const getProvince = async () => {
-        const options = {
-            method: "GET",
-            url: `/api/wilayah/provinsi/`,
-            headers: {
-                "Content-Type": "application/json",
-            },
-        };
-
-        try {
-            const response = await axios.request(options);
-            const dataArray = Object.entries(response.data).map(
-                ([key, value]) => ({
-                    code: key,
-                    name: value
-                        .toLowerCase()
-                        .split(" ")
-                        .map(
-                            (word) =>
-                                word.charAt(0).toUpperCase() + word.slice(1)
-                        )
-                        .join(" "),
-                })
-            );
-            setProvinces((prev) => (prev = dataArray));
-        } catch (error) {
-            console.log(error);
-        }
-    };
-
-    const getRegencys = async (code) => {
-        let url = `regencys?province=${code}`;
-        const options = {
-            method: "GET",
-            url: url,
-            headers: {
-                "Content-Type": "application/json",
-            },
-        };
-
-        try {
-            const response = await axios.request(options);
-            const dataArray = response.data.map((e) => ({
-                ...e,
-                code: e.code,
-                name: e.name
-                    .toLowerCase()
-                    .split(" ")
-                    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-                    .join(" "),
-            }));
-            setRegencys((prev) => (prev = dataArray));
-        } catch (error) {
-            console.log(error);
-        }
-    };
-
-    const getSubdistricts = async (regencyName) => {
-        let url = `subdistricts?regency=${regencyName}`;
-        const options = {
-            method: "GET",
-            url: url,
-            headers: {
-                "Content-Type": "application/json",
-            },
-        };
-
-        try {
-            const response = await axios.request(options);
-            const dataArray = response.data.map((e) => ({
-                ...e,
-                code: e.code,
-                name: e.name
-                    .toLowerCase()
-                    .split(" ")
-                    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-                    .join(" "),
-            }));
-            setSubdistricts((prev) => (prev = dataArray));
-        } catch (error) {
-            console.log(error);
-        }
     };
 
     const {

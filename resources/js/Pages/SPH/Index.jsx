@@ -28,6 +28,7 @@ import { formatNPWP } from "../../Utils/formatNPWP";
 import { formateDate } from "../../Utils/formatDate";
 import LogComponent from "@/Components/LogComponent";
 import ArsipComponent from "@/Components/ArsipComponent";
+import { handleSelectedDetailInstitution } from "@/Utils/handleSelectedDetailInstitution";
 
 export default function Index({
     auth,
@@ -193,16 +194,12 @@ export default function Index({
         );
     };
 
-    const handleSelectedDetailPartner = (partner) => {
-        router.get(`/partners?detail=${partner.uuid}`);
-    };
-
     const exportExcel = () => {
         const exports = sphs.map((data) => {
             return {
                 Kode: data.code ?? "-",
-                Lembaga: data.sphable ? data.sphable.name : "-",
-                NPWP: data.sphable ? data.sphable.npwp : "-",
+                Lembaga: data.partner_name ?? "-",
+                NPWP: data.lead == undefined ? data.partner.npwp : "-",
                 Link_Dokumen: {
                     v: window.location.origin + "/" + data.sph_doc ?? "-",
                     h: "link",
@@ -213,7 +210,7 @@ export default function Index({
                     },
                 },
                 Tanggal_Pembuatan: formateDate(data.created_at),
-                Diinput_Oleh: data.user.name,
+                Diinput_Oleh: data.created_by.name,
             };
         });
 
@@ -268,21 +265,18 @@ export default function Index({
         },
 
         {
-            field: "sphable",
             header: "Lembaga",
             frozen: !isMobile,
-            style: !isMobile
-                ? {
-                      width: "max-content",
-                      whiteSpace: "nowrap",
-                  }
-                : null,
+            style: {
+                width: "max-content",
+                whiteSpace: "nowrap",
+            },
             body: (rowData) => (
                 <button
-                    onClick={() => handleSelectedDetailPartner(rowData)}
+                    onClick={() => handleSelectedDetailInstitution(rowData)}
                     className="hover:text-blue-700 text-left"
                 >
-                    {rowData.sphable.name}
+                    {rowData.partner_name}
                 </button>
             ),
         },
@@ -298,11 +292,11 @@ export default function Index({
                   }
                 : null,
             body: (rowData) => {
-                if (rowData.sphable?.npwp == undefined) {
+                if (rowData.lead != undefined) {
                     return "-";
                 } else {
-                    return rowData.sphable.npwp !== null
-                        ? formatNPWP(rowData.sphable.npwp)
+                    return rowData.partner?.npwp !== null
+                        ? formatNPWP(rowData.partner.npwp)
                         : "-";
                 }
             },

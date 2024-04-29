@@ -118,15 +118,17 @@ class SPHController extends Controller
             return $map[$number - 1];
         }
 
-        $totalDataPerMonth = SPH::whereYear('created_at', $currentYear)
-            ->whereMonth('created_at', $currentMonth)
-            ->count();
+        $lastDataCurrentMonth = SPH::withTrashed()->whereYear('created_at', $currentYear)
+            ->whereMonth('created_at', $currentMonth)->latest()->first();
+
+
+        $parts = explode("/", $lastDataCurrentMonth->code);
+        $code = $parts[1];
+        $codeInteger = intval($code) + 1;
+        $latestCode = str_pad($codeInteger, strlen($code), "0", STR_PAD_LEFT);
 
         $romanMonth = intToRoman($currentMonth);
-        $latestData = "SPH/0000/$romanMonth/$currentYear";
-        $lastCode = $latestData ? explode('/', $latestData)[1] : 0;
-        $newCode = str_pad((int) $lastCode + $totalDataPerMonth + 1, 4, '0', STR_PAD_LEFT);
-        $newCode = "SPH/$newCode/$romanMonth/$currentYear";
+        $newCode = "SPH/$latestCode/$romanMonth/$currentYear";
 
         return $newCode;
     }
@@ -140,8 +142,12 @@ class SPHController extends Controller
         $html = view('pdf.sph', ["sph" => $sph, 'products' => $products])->render();
 
         $pdf = Browsershot::html($html)
+            ->margins("2.5", "2", "2.5", "2", "cm")
             ->setIncludedPath(config('services.browsershot.included_path'))
             ->showBackground()
+            ->showBrowserHeaderAndFooter()
+            ->headerHtml('<div></div>')
+            ->footerHtml('<div style="text-align: left; font-size: 10px; width:100%; margin-left: 2.5cm; margin-bottom: 1cm;">*) Harga produk/layanan tidak termasuk biaya admin transaksi <span style="font-style:italic;">user</span> aplikasi <span style="font-style:italic;">mobile</span>.</div>')
             ->pdf();
 
         Storage::put("public/$path", $pdf);
@@ -155,20 +161,19 @@ class SPHController extends Controller
         DB::beginTransaction();
 
         try {
-            if ($request['partner']['type'] == 'partner') {
-                $partnerExists = Partner::where('uuid', $request['partner']["uuid"])->first();
-            } else {
-                $partnerExists = Lead::where('uuid', $request['partner']["uuid"])->first();
-            }
-
             $code = $this->generateCode();
 
             $sph = new SPH();
             $sph->uuid = Str::uuid();
             $sph->code = $code;
             $sph->date = Carbon::now();
-            $sph->sphable_id = $partnerExists->id;
-            $sph->sphable_type = get_class($partnerExists);
+            if ($request['partner']['type'] == 'partner') {
+                $partnerExist = Partner::where('uuid', $request['partner']["uuid"])->first();
+                $sph->partner_id = $partnerExist->id;
+            } else {
+                $leadExist = Lead::where('uuid', $request['partner']["uuid"])->first();
+                $sph->lead_id = $leadExist->id;
+            }
             $sph->partner_name = $request['partner']['name'];
             $sph->partner_pic = $request['partner']['pic'];
             $sph->partner_province = $request['partner']['province'];
@@ -226,7 +231,7 @@ class SPHController extends Controller
         $productsProp = Product::all(['uuid', 'name', 'price', 'category']);
         $salesProp = User::role('account executive')->get();
 
-        $sph = SPH::with('products', 'sphable')->where('uuid', '=', $uuid)->first();
+        $sph = SPH::with('products', 'partner', 'lead')->where('uuid', '=', $uuid)->first();
         $signaturesProp = Signature::all();
         return Inertia::render('SPH/Edit', compact('usersProp', 'partnersProp', 'productsProp', 'salesProp', 'sph', 'signaturesProp'));
     }
@@ -236,16 +241,15 @@ class SPHController extends Controller
         DB::beginTransaction();
 
         try {
-            if ($request['partner']['type'] == 'partner') {
-                $partnerExists = Partner::where('uuid', $request['partner']["uuid"])->first();
-            } else {
-                $partnerExists = Lead::where('uuid', $request['partner']["uuid"])->first();
-            }
-
             $sph = SPH::where('uuid', $uuid)->first();
 
-            $sph->sphable_id = $partnerExists->id;
-            $sph->sphable_type = get_class($partnerExists);
+            if ($request['partner']['type'] == 'partner') {
+                $partnerExist = Partner::where('uuid', $request['partner']["uuid"])->first();
+                $sph->partner_id = $partnerExist->id;
+            } else {
+                $leadExist = Lead::where('uuid', $request['partner']["uuid"])->first();
+                $sph->lead_id = $leadExist->id;
+            }
             $sph->partner_name = $request['partner']['name'];
             $sph->partner_pic = $request['partner']['pic'];
             $sph->partner_province = $request['partner']['province'];
@@ -256,6 +260,7 @@ class SPHController extends Controller
             $sph->signature_name = $request['signature']['name'] ?? null;
             $sph->signature_position = $request['signature']['position'] ?? null;
             $sph->signature_image = $request['signature']['image'] ?? null;
+
             $sph = $this->generateSPH($sph, $request->products);
             $sph->save();
 
@@ -277,30 +282,29 @@ class SPHController extends Controller
 
     public function filter(Request $request)
     {
-        $sphs = SPH::with(['createdBy', 'sphable']);
+        $sphs = SPH::with(['createdBy', 'lead', 'partner']);
 
         if ($request->user) {
             $sphs->where('created_by', $request->user['id']);
         }
         if ($request->institution_type == 'Lead') {
-            $sphs->whereMorphedTo('sphable', Lead::class);
+            $sphs->orWhereHas('lead');
         } else if ($request->institution_type == 'Partner') {
-            $sphs->whereMorphedTo('sphable', Partner::class);
+            $sphs->orWhereHas('partner');
         }
 
         if ($request->input_date['start'] && $request->input_date['end']) {
-            $sphs->whereBetween('created_at', [$request->input_date['start'], $request->input_date['end']]);
+            $sphs->whereBetween('created_at', [Carbon::parse($request->input_date['start'])->setTimezone('GMT+7')->startOfDay(), Carbon::parse($request->input_date['end'])->setTimezone('GMT+7')->endOfDay()]);
         }
 
         $sphs = $sphs->get();
-        dd($sphs);
 
         return response()->json($sphs);
     }
 
     public function apiGetSPH()
     {
-        $sphsDefault = SPH::with('createdBy', 'sphable')->latest()->get();
+        $sphsDefault = SPH::with('createdBy', 'sphable', 'partner', 'lead')->latest()->get();
         return response()->json($sphsDefault);
     }
 
@@ -312,7 +316,7 @@ class SPHController extends Controller
             $sph = SPH::where('uuid', '=', $uuid)->first();
             Activity::create([
                 'log_name' => 'deleted',
-                'description' => 'hapus data sph',
+                'description' => 'menghapus data sph',
                 'subject_type' => get_class($sph),
                 'subject_id' => $sph->id,
                 'causer_type' => get_class(Auth::user()),
@@ -336,11 +340,11 @@ class SPHController extends Controller
         $logs = Activity::with(['causer', 'subject'])->whereMorphedTo('subject', SPH::class);
 
         if ($request->user) {
-            $logs->whereMorphRelation('causer', User::class, 'causer_id', '=', $request->user['id']);
+            $logs->where('created_by', $request->user['id']);
         }
 
         if ($request->date['start'] && $request->date['end']) {
-            $logs->whereBetween('created_at', [$request->date['start'], $request->date['end']]);
+            $logs->whereBetween('created_at', [Carbon::parse($request->input_date['start'])->setTimezone('GMT+7')->startOfDay(), Carbon::parse($request->input_date['end'])->setTimezone('GMT+7')->endOfDay()]);
         }
 
         $logs = $logs->get();
@@ -366,7 +370,8 @@ class SPHController extends Controller
 
     public function apiGetArsip()
     {
-        $arsip = SPH::withTrashed()->with(['createdBy', 'sphable'])->whereNotNull('deleted_at')->get();
+        $arsip = SPH::withTrashed()->with(['createdBy', 'lead', 'partner'])->whereNotNull('deleted_at')->get();
+
         return response()->json($arsip);
     }
 
@@ -379,7 +384,7 @@ class SPHController extends Controller
         }
 
         if ($request->delete_date['start'] && $request->delete_date['end']) {
-            $arsip->whereBetween('deleted_at', [$request->delete_date['start'], $request->delete_date['end']]);
+            $arsip->whereBetween('deleted_at', [Carbon::parse($request->delete_date['start'])->setTimezone('GMT+7')->startOfDay(), Carbon::parse($request->delete_date['end'])->setTimezone('GMT+7')->endOfDay()]);
         }
 
         $arsip = $arsip->get();
@@ -409,15 +414,14 @@ class SPHController extends Controller
         DB::beginTransaction();
         try {
             $sph = SPH::withTrashed()->where('uuid', '=', $uuid)->first();
-            unlink($sph->sph_doc);
             Activity::create([
-                'log_name' => 'deleted_force',
-                'description' => 'hapus permanen data sph',
+                'log_name' => 'force',
+                'description' => 'menghapus permanen data sph',
                 'subject_type' => get_class($sph),
                 'subject_id' => $sph->id,
                 'causer_type' => get_class(Auth::user()),
                 'causer_id' => Auth::user()->id,
-                "event" => "deleted_force",
+                "event" => "force",
                 'properties' => ["old" => ["code" => $sph->code, "partner_name" => $sph->partner_name, "partner_pic" => $sph->partner_pic, "sales_name" => $sph->sales_name, "sales_wa" => $sph->sales_wa, "sales_email" => $sph->sales_email]]
             ]);
             $sph->forceDelete();
