@@ -82,12 +82,17 @@ class MOUController extends Controller
             return $map[$number - 1];
         }
 
+
         $lastDataCurrentMonth = MOU::withTrashed()->whereYear('created_at', $currentYear)
             ->whereMonth('created_at', $currentMonth)
             ->latest()->first();
 
-        $parts = explode("/", $lastDataCurrentMonth->code);
-        $code = $parts[1];
+        if ($lastDataCurrentMonth == null) {
+            $code = "0000";
+        } else {
+            $parts = explode("/", $lastDataCurrentMonth->code);
+            $code = $parts[1];
+        }
         $codeInteger = intval($code) + 1;
         $latestCode = str_pad($codeInteger, strlen($code), "0", STR_PAD_LEFT);
         $romanMonth = intToRoman($currentMonth);
