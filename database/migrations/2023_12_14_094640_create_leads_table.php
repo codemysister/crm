@@ -15,6 +15,8 @@ return new class extends Migration {
             $table->uuid('uuid');
             $table->foreignId('created_by')->nullable()->constrained('users', 'id')->onDelete('cascade');
             $table->foreignId('status_id')->constrained('statuses', 'id')->onDelete('cascade');
+            $table->foreignId('sales_id')->constrained('users', 'id')->onDelete('cascade');
+            $table->foreignId('referral_id')->nullable()->constrained('users', 'id')->onDelete('cascade');
             $table->string('name')->unique();
             $table->integer('total_members');
             $table->string('phone_number');

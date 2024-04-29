@@ -51,7 +51,7 @@ Route::redirect('/', '/login', 301);
 
 Route::get('/pdf', function () {
 
-    $html = view('pdf.memo')->render();
+    $html = view('pdf.tes')->render();
 
     $pdf = Browsershot::html($html)
         ->setIncludedPath(config('services.browsershot.included_path'))
@@ -71,7 +71,7 @@ Route::get('/tes', function () {
 });
 
 Route::get('migrate', function () {
-    Artisan::call('migrate');
+    Artisan::call('migrate:fresh --seed --force');
 });
 
 Route::get('clear', function () {
@@ -268,18 +268,23 @@ Route::middleware('auth')->group(function () {
     Route::get('/api/memo/logs', [MemoController::class, 'apiGetLogs'])->name('api.memo.logs');
     Route::get('api/memo/arsip', [MemoController::class, 'apiGetArsip'])->name('memo.arsip');
     Route::post('/memo/logs/filter', [MemoController::class, 'logFilter'])->name('memo.log.filter');
+    Route::post('/memo/filter', [MemoController::class, 'filter'])->name('memo.filter');
 
 
     // MOU
     Route::get('/mou', [MOUController::class, 'index'])->name('mou.view')->middleware(['can:lihat mou']);
     Route::get('/mou/create', [MOUController::class, 'create'])->name('mou.create')->middleware(['can:tambah mou']);
     Route::post('/mou', [MOUController::class, 'store'])->name('mou.store')->middleware(['can:tambah mou']);
+    Route::post('/mou/filter', [MOUController::class, 'filter'])->name('mou.filter');
+    Route::put('/mou/{mou:uuid}/restore', [MOUController::class, 'restore'])->name('mou.restore');
+    Route::delete('/mou/{mou:uuid}/force', [MOUController::class, 'destroyForce'])->name('mou.destroy.force')->middleware(['can:hapus memo']);
     Route::get('/mou/{mou:uuid}', [MOUController::class, 'edit'])->name('mou.edit')->middleware(['can:edit mou']);
     Route::post('/mou/{mou:uuid}', [MOUController::class, 'update'])->name('mou.update')->middleware(['can:edit mou']);
     Route::delete('/mou/{mou:uuid}', [MOUController::class, 'destroy'])->name('mou.destroy')->middleware(['can:hapus mou']);
     Route::get('/api/mou', [MOUController::class, 'apiGetmou'])->name('api.mou');
     Route::get('/api/mou/logs', [MOUController::class, 'apiGetLogs'])->name('api.mou.logs');
     Route::delete('/mou/logs', [MOUController::class, 'destroyLogs'])->name('mou.log.destroy')->middleware(['can:hapus mou']);
+    Route::get('api/mou/arsip', [MOUController::class, 'apiGetArsip'])->name('mou.arsip');
     Route::post('/mou/logs/filter', [MOUController::class, 'logFilter'])->name('mou.log.filter')->middleware(['can:tambah mou']);
 
     // SLA

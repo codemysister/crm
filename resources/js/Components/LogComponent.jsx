@@ -408,7 +408,7 @@ const LogComponent = ({
                                 event = "onboarding";
                                 color = "blue";
                                 severity = "info";
-                            } else if (rowData.event == "deleted_force") {
+                            } else if (rowData.event == "force") {
                                 event = "hapus permanent";
                                 color = "red";
                                 severity = "error";
@@ -634,7 +634,7 @@ const LogComponent = ({
                     ) : null}
 
                     {selectedLog?.event == "deleted" ||
-                    selectedLog?.event == "deleted_force" ? (
+                    selectedLog?.event == "force" ? (
                         <div className="flex-1 ">
                             <Message
                                 className={`bg-red-300 text-red-800 rounded-md w-full`}

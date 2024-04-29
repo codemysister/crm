@@ -37,14 +37,6 @@ class UserSeeder extends Seeder
 
         // AE
         $sales = User::create([
-            "name" => "Sales",
-            "email" => "sales@gmail.com",
-            "number" => "085178612434",
-            "password" => bcrypt("sales123")
-        ]);
-        $sales->assignRole("account executive");
-
-        $sales = User::create([
             "name" => "Hari",
             "email" => "hari@cazh.id",
             "number" => "085178612434",
@@ -119,14 +111,6 @@ class UserSeeder extends Seeder
 
 
         // Account Manager
-        $am = User::create([
-            "name" => "Account Manager",
-            "email" => "account_manager@gmail.com",
-            "number" => "085178612434",
-            "password" => bcrypt("am123")
-        ]);
-        $am->assignRole("account manager");
-
         $am = User::create([
             "name" => "Dita",
             "email" => "dita@cazh.id",

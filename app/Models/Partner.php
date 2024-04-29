@@ -18,6 +18,23 @@ class Partner extends Authenticatable
 
     protected $guarded = [];
 
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::deleting(function ($lead) {
+            if ($lead->isForceDeleting()) {
+                $lead->sph()->forceDelete();
+                $lead->memo()->forceDelete();
+                $lead->mou()->forceDelete();
+            } else {
+                $lead->sph()->delete();
+                $lead->memo()->delete();
+                $lead->mou()->delete();
+            }
+        });
+    }
+
     public function tapActivity(Activity $activity, string $eventName)
     {
         $activity->note_status = $this->note_status;
@@ -28,7 +45,7 @@ class Partner extends Authenticatable
     {
         return LogOptions::defaults()
             ->logOnly(['name', 'npwp', 'password', 'phone_number', 'status.name', 'status.color', 'sales.name', 'referral_name', 'account_manager.name', 'onboarding_date', 'live_date', 'monitoring_date_after_3_month_live', 'province', 'regency', 'address', 'payment_metode', 'period'])
-            ->dontLogIfAttributesChangedOnly(['onboarding_age', 'live_age'])
+            ->dontLogIfAttributesChangedOnly(['deleted_at', 'updated_at'])
             ->setDescriptionForEvent(function (string $eventName) {
                 $modelName = class_basename($this);
                 if ($eventName === 'created') {
@@ -89,7 +106,15 @@ class Partner extends Authenticatable
 
     public function sph()
     {
-        return $this->morphOne(SPH::class, 'sphable');
+        return $this->hasOne(SPH::class, 'lead_id', 'id')->withTrashed();
+    }
+    public function memo()
+    {
+        return $this->morphOne(Memo::class, 'memoable');
+    }
+    public function mou()
+    {
+        return $this->morphOne(MOU::class, 'mouable');
     }
 
     public function status()
