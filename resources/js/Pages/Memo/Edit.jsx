@@ -92,17 +92,17 @@ const Edit = ({ partnersProp, signaturesProp, memo }) => {
         price_e_card: memo.price_e_card,
         price_subscription: memo.price_subscription,
         consideration: memo.consideration,
-        signature_first: {
-            name: memo.signature_first_name,
-            image: memo.signature_first_image,
+        signature_applicant: {
+            name: memo.signature_applicant_name,
+            image: memo.signature_applicant_image,
         },
-        signature_second: {
-            name: memo.signature_second_name,
-            image: memo.signature_second_image,
+        signature_acknowledges: {
+            name: memo.signature_acknowledges_name,
+            image: memo.signature_acknowledges_image,
         },
-        signature_third: {
-            name: memo.signature_third_name,
-            image: memo.signature_third_image,
+        signature_agrees: {
+            name: memo.signature_agrees_name,
+            image: memo.signature_agrees_image,
         },
     });
 
@@ -400,11 +400,11 @@ const Edit = ({ partnersProp, signaturesProp, memo }) => {
                                         </label>
                                         <Dropdown
                                             dataKey="name"
-                                            value={data.signature_first}
+                                            value={data.signature_applicant}
                                             onChange={(e) => {
                                                 setData({
                                                     ...data,
-                                                    signature_first: {
+                                                    signature_applicant: {
                                                         name: e.target.value
                                                             .name,
                                                         image: e.target.value
@@ -436,7 +436,9 @@ const Edit = ({ partnersProp, signaturesProp, memo }) => {
                                         />
                                         <InputError
                                             message={
-                                                errors["signature_first.image"]
+                                                errors[
+                                                    "signature_applicant.image"
+                                                ]
                                             }
                                             className="mt-2"
                                         />
@@ -448,11 +450,11 @@ const Edit = ({ partnersProp, signaturesProp, memo }) => {
                                         </label>
                                         <Dropdown
                                             dataKey="name"
-                                            value={data.signature_second}
+                                            value={data.signature_acknowledges}
                                             onChange={(e) => {
                                                 setData({
                                                     ...data,
-                                                    signature_second: {
+                                                    signature_acknowledges: {
                                                         name: e.target.value
                                                             .name,
                                                         image: e.target.value
@@ -484,7 +486,9 @@ const Edit = ({ partnersProp, signaturesProp, memo }) => {
                                         />
                                         <InputError
                                             message={
-                                                errors["signature_second.image"]
+                                                errors[
+                                                    "signature_acknowledges.image"
+                                                ]
                                             }
                                             className="mt-2"
                                         />
@@ -496,11 +500,11 @@ const Edit = ({ partnersProp, signaturesProp, memo }) => {
                                         </label>
                                         <Dropdown
                                             dataKey="name"
-                                            value={data.signature_third}
+                                            value={data.signature_agrees}
                                             onChange={(e) => {
                                                 setData({
                                                     ...data,
-                                                    signature_third: {
+                                                    signature_agrees: {
                                                         name: e.target.value
                                                             .name,
                                                         image: e.target.value
@@ -532,7 +536,7 @@ const Edit = ({ partnersProp, signaturesProp, memo }) => {
                                         />
                                         <InputError
                                             message={
-                                                errors["signature_third.image"]
+                                                errors["signature_agrees.image"]
                                             }
                                             className="mt-2"
                                         />
@@ -680,11 +684,11 @@ const Edit = ({ partnersProp, signaturesProp, memo }) => {
                                     ref={animateSignatureFirstRef}
                                 >
                                     <p>Yang Mengajukan</p>
-                                    {data.signature_first.image ? (
+                                    {data.signature_applicant.image ? (
                                         <>
                                             <div className="h-[100px] w-[170px] mx-auto py-2">
                                                 <img
-                                                    src={`/storage/${data.signature_first.image}`}
+                                                    src={`/storage/${data.signature_applicant.image}`}
                                                     alt=""
                                                     className="min-h-20 w-full h-full object-fill"
                                                 />
@@ -695,18 +699,18 @@ const Edit = ({ partnersProp, signaturesProp, memo }) => {
                                             style={{ minHeight: "100px" }}
                                         ></div>
                                     )}
-                                    <p>{data.signature_first.name}</p>
+                                    <p>{data.signature_applicant.name}</p>
                                 </div>
                                 <div
                                     className="text-center w-[33%]"
                                     ref={animateSignatureSecondRef}
                                 >
                                     <p>Mengetahui</p>
-                                    {data.signature_second.image ? (
+                                    {data.signature_acknowledges.image ? (
                                         <>
                                             <div className="h-[100px] w-[170px] mx-auto py-2">
                                                 <img
-                                                    src={`/storage/${data.signature_second.image}`}
+                                                    src={`/storage/${data.signature_acknowledges.image}`}
                                                     alt=""
                                                     className="min-h-20 w-full h-full object-fill"
                                                 />
@@ -717,18 +721,18 @@ const Edit = ({ partnersProp, signaturesProp, memo }) => {
                                             style={{ minHeight: "100px" }}
                                         ></div>
                                     )}
-                                    <p>{data.signature_second.name}</p>
+                                    <p>{data.signature_acknowledges.name}</p>
                                 </div>
                                 <div
                                     className="text-center w-[33%]"
                                     ref={animateSignatureThirdRef}
                                 >
                                     <p>Menyetujui</p>
-                                    {data.signature_third.image ? (
+                                    {data.signature_agrees.image ? (
                                         <>
                                             <div className="h-[100px] w-[170px] mx-auto py-2">
                                                 <img
-                                                    src={`/storage/${data.signature_third.image}`}
+                                                    src={`/storage/${data.signature_agrees.image}`}
                                                     alt=""
                                                     className="min-h-20 w-full h-full object-fill"
                                                 />
@@ -739,7 +743,7 @@ const Edit = ({ partnersProp, signaturesProp, memo }) => {
                                             style={{ minHeight: "100px" }}
                                         ></div>
                                     )}
-                                    <p>{data.signature_third.name}</p>
+                                    <p>{data.signature_agrees.name}</p>
                                 </div>
                             </div>
                         </div>

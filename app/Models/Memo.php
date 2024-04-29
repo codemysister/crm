@@ -42,8 +42,13 @@ class Memo extends Model
         return $this->belongsTo(User::class, 'created_by', 'id');
     }
 
-    public function memoable()
+    public function lead()
     {
-        return $this->morphTo();
+        return $this->belongsTo(Lead::class);
+    }
+
+    public function partner()
+    {
+        return $this->belongsTo(Partner::class);
     }
 }

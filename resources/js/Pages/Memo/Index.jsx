@@ -26,6 +26,7 @@ import { formatNPWP } from "../../Utils/formatNPWP";
 import LogComponent from "@/Components/LogComponent";
 import { formateDate } from "@/Utils/formatDate";
 import ArsipComponent from "@/Components/ArsipComponent";
+import { handleSelectedDetailInstitution } from "@/Utils/handleSelectedDetailInstitution";
 
 export default function Index({ auth, memosDefault, usersProp }) {
     const [memos, setMemos] = useState(memosDefault);
@@ -184,17 +185,12 @@ export default function Index({ auth, memosDefault, usersProp }) {
         );
     };
 
-    const handleSelectedDetailPartner = (partner) => {
-        const newUrl = `/partners?uuid=${partner.uuid}`;
-        window.location = newUrl;
-    };
-
     const exportExcel = () => {
         const exports = memos.map((data) => {
             return {
                 Kode: data.code ?? "-",
-                Lembaga: data.memoable ? data.memoable.name : "-",
-                NPWP: data.memoable ? data.memoable.npwp : "-",
+                Lembaga: data.partner_name ?? "-",
+                NPWP: data.lead == undefined ? data.partner.npwp : "-",
                 Link_Dokumen: {
                     v: window.location.origin + "/" + data.memo_doc ?? "-",
                     h: "link",
@@ -303,7 +299,7 @@ export default function Index({ auth, memosDefault, usersProp }) {
             },
         });
         const data = response.data;
-        setSphs(data);
+        setMemos(data);
         setSidebarFilter(false);
         setIsLoadingData(false);
     };
@@ -347,21 +343,18 @@ export default function Index({ auth, memosDefault, usersProp }) {
         },
 
         {
-            field: "memoable",
             header: "Lembaga",
             frozen: !isMobile,
-            style: !isMobile
-                ? {
-                      width: "max-content",
-                      whiteSpace: "nowrap",
-                  }
-                : null,
+            style: {
+                width: "max-content",
+                whiteSpace: "nowrap",
+            },
             body: (rowData) => (
                 <button
-                    onClick={() => handleSelectedDetailPartner(rowData)}
+                    onClick={() => handleSelectedDetailInstitution(rowData)}
                     className="hover:text-blue-700 text-left"
                 >
-                    {rowData.memoable.name}
+                    {rowData.partner_name}
                 </button>
             ),
         },
@@ -377,11 +370,11 @@ export default function Index({ auth, memosDefault, usersProp }) {
                   }
                 : null,
             body: (rowData) => {
-                if (rowData.memoable?.npwp == undefined) {
+                if (rowData.lead != undefined) {
                     return "-";
                 } else {
-                    return rowData.memoable.npwp !== null
-                        ? formatNPWP(rowData.memoable.npwp)
+                    return rowData.partner?.npwp !== null
+                        ? formatNPWP(rowData.partner.npwp)
                         : "-";
                 }
             },

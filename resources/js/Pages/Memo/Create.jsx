@@ -91,9 +91,9 @@ const Create = ({ partnersProp, signaturesProp }) => {
         price_e_card: null,
         price_subscription: null,
         consideration: null,
-        signature_first: { name: null, image: null },
-        signature_second: { name: null, image: null },
-        signature_third: { name: null, image: null },
+        signature_applicant: { name: null, image: null },
+        signature_acknowledges: { name: null, image: null },
+        signature_agrees: { name: null, image: null },
     });
 
     useEffect(() => {
@@ -363,11 +363,11 @@ const Create = ({ partnersProp, signaturesProp }) => {
                                         </label>
                                         <Dropdown
                                             dataKey="name"
-                                            value={data.signature_first}
+                                            value={data.signature_applicant}
                                             onChange={(e) => {
                                                 setData({
                                                     ...data,
-                                                    signature_first: {
+                                                    signature_applicant: {
                                                         name: e.target.value
                                                             .name,
                                                         image: e.target.value
@@ -401,7 +401,9 @@ const Create = ({ partnersProp, signaturesProp }) => {
                                         />
                                         <InputError
                                             message={
-                                                errors["signature_first.image"]
+                                                errors[
+                                                    "signature_applicant.image"
+                                                ]
                                             }
                                             className="mt-2"
                                         />
@@ -413,11 +415,11 @@ const Create = ({ partnersProp, signaturesProp }) => {
                                         </label>
                                         <Dropdown
                                             dataKey="name"
-                                            value={data.signature_second}
+                                            value={data.signature_acknowledges}
                                             onChange={(e) => {
                                                 setData({
                                                     ...data,
-                                                    signature_second: {
+                                                    signature_acknowledges: {
                                                         name: e.target.value
                                                             .name,
                                                         image: e.target.value
@@ -453,7 +455,9 @@ const Create = ({ partnersProp, signaturesProp }) => {
                                         />
                                         <InputError
                                             message={
-                                                errors["signature_second.image"]
+                                                errors[
+                                                    "signature_acknowledges.image"
+                                                ]
                                             }
                                             className="mt-2"
                                         />
@@ -465,11 +469,11 @@ const Create = ({ partnersProp, signaturesProp }) => {
                                         </label>
                                         <Dropdown
                                             dataKey="name"
-                                            value={data.signature_third}
+                                            value={data.signature_agrees}
                                             onChange={(e) => {
                                                 setData({
                                                     ...data,
-                                                    signature_third: {
+                                                    signature_agrees: {
                                                         name: e.target.value
                                                             .name,
                                                         image: e.target.value
@@ -503,7 +507,7 @@ const Create = ({ partnersProp, signaturesProp }) => {
                                         />
                                         <InputError
                                             message={
-                                                errors["signature_third.image"]
+                                                errors["signature_agrees.image"]
                                             }
                                             className="mt-2"
                                         />
@@ -651,11 +655,11 @@ const Create = ({ partnersProp, signaturesProp }) => {
                                     ref={animateSignatureFirstRef}
                                 >
                                     <p>Yang Mengajukan</p>
-                                    {data.signature_first.image ? (
+                                    {data.signature_applicant.image ? (
                                         <>
                                             <div className="h-[100px] w-[170px] mx-auto py-2">
                                                 <img
-                                                    src={`/storage/${data.signature_first.image}`}
+                                                    src={`/storage/${data.signature_applicant.image}`}
                                                     alt=""
                                                     className="min-h-20 h-full w-full object-fill"
                                                 />
@@ -666,7 +670,7 @@ const Create = ({ partnersProp, signaturesProp }) => {
                                             style={{ minHeight: "80px" }}
                                         ></div>
                                     )}
-                                    <p>{data.signature_first.name}</p>
+                                    <p>{data.signature_applicant.name}</p>
                                 </div>
                                 <div
                                     className="text-center w-[33%]"
@@ -674,11 +678,11 @@ const Create = ({ partnersProp, signaturesProp }) => {
                                 >
                                     <p>Mengetahui</p>
 
-                                    {data.signature_second.image ? (
+                                    {data.signature_acknowledges.image ? (
                                         <>
                                             <div className="h-[100px] w-[170px] mx-auto py-2">
                                                 <img
-                                                    src={`/storage/${data.signature_second.image}`}
+                                                    src={`/storage/${data.signature_acknowledges.image}`}
                                                     alt=""
                                                     className="min-h-20 h-full w-full object-fill"
                                                 />
@@ -689,18 +693,18 @@ const Create = ({ partnersProp, signaturesProp }) => {
                                             style={{ minHeight: "100px" }}
                                         ></div>
                                     )}
-                                    <p>{data.signature_second.name}</p>
+                                    <p>{data.signature_acknowledges.name}</p>
                                 </div>
                                 <div
                                     className="text-center w-[33%]"
                                     ref={animateSignatureThirdRef}
                                 >
                                     <p>Menyetujui</p>
-                                    {data.signature_third.image ? (
+                                    {data.signature_agrees.image ? (
                                         <>
                                             <div className="h-[100px] w-[170px] mx-auto py-2">
                                                 <img
-                                                    src={`/storage/${data.signature_third.image}`}
+                                                    src={`/storage/${data.signature_agrees.image}`}
                                                     alt=""
                                                     className="min-h-20 w-full h-full object-fill"
                                                 />
@@ -711,7 +715,7 @@ const Create = ({ partnersProp, signaturesProp }) => {
                                             style={{ minHeight: "100px" }}
                                         ></div>
                                     )}
-                                    <p>{data.signature_third.name}</p>
+                                    <p>{data.signature_agrees.name}</p>
                                 </div>
                             </div>
                         </div>

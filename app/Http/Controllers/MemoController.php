@@ -40,7 +40,7 @@ class MemoController extends Controller
     {
         $signaturesProp = Signature::all();
         $partnersProp = Partner::with('status')->get();
-        $memo = Memo::with('memoable')->where('uuid', '=', $uuid)->first();
+        $memo = Memo::with('partner', 'lead')->where('uuid', '=', $uuid)->first();
         return Inertia::render('Memo/Edit', compact('signaturesProp', 'partnersProp', 'memo'));
     }
 
@@ -53,20 +53,25 @@ class MemoController extends Controller
             $memo = new Memo();
             $memo->uuid = Str::uuid();
             $memo->code = $this->generateCode();
-            $memo->memoable_id = $request['partner']['id'];
-            $memo->memoable_type = $request['partner']['type'] == 'partner' ? Partner::class : Lead::class;
+            if ($request['partner']['type'] == 'partner') {
+                $partnerExist = Partner::where('uuid', $request['partner']["uuid"])->first();
+                $memo->partner_id = $partnerExist->id;
+            } else {
+                $leadExist = Lead::where('uuid', $request['partner']["uuid"])->first();
+                $memo->lead_id = $leadExist->id;
+            }
             $memo->partner_name = $request['partner']['name'];
             $memo->date = Carbon::now();
             $memo->price_card = $request['price_card'];
             $memo->price_e_card = $request['price_e_card'];
             $memo->price_subscription = $request['price_subscription'];
             $memo->consideration = $request['consideration'];
-            $memo->signature_first_name = $request['signature_first']['name'];
-            $memo->signature_first_image = $request['signature_first']['image'];
-            $memo->signature_second_name = $request['signature_second']['name'];
-            $memo->signature_second_image = $request['signature_second']['image'];
-            $memo->signature_third_name = $request['signature_third']['name'];
-            $memo->signature_third_image = $request['signature_third']['image'];
+            $memo->signature_applicant_name = $request['signature_applicant']['name'];
+            $memo->signature_applicant_image = $request['signature_applicant']['image'];
+            $memo->signature_acknowledges_name = $request['signature_acknowledges']['name'];
+            $memo->signature_acknowledges_image = $request['signature_acknowledges']['image'];
+            $memo->signature_agrees_name = $request['signature_agrees']['name'];
+            $memo->signature_agrees_image = $request['signature_agrees']['image'];
             $memo->created_by = Auth::user()->id;
             $memo = $this->generateMemo($memo);
             $memo->save();
@@ -90,19 +95,24 @@ class MemoController extends Controller
 
             $memo = Memo::where('uuid', '=', $uuid)->first();
 
-            $memo->memoable_id = $request['partner']['id'];
-            $memo->memoable_type = $request['partner']['type'] == 'partner' ? Partner::class : Lead::class;
+            if ($request['partner']['type'] == 'partner') {
+                $partnerExist = Partner::where('uuid', $request['partner']["uuid"])->first();
+                $memo->partner_id = $partnerExist->id;
+            } else {
+                $leadExist = Lead::where('uuid', $request['partner']["uuid"])->first();
+                $memo->lead_id = $leadExist->id;
+            }
             $memo->partner_name = $request['partner']['name'];
             $memo->price_card = $request['price_card'];
             $memo->price_e_card = $request['price_e_card'];
             $memo->price_subscription = $request['price_subscription'];
             $memo->consideration = $request['consideration'];
-            $memo->signature_first_name = $request['signature_first']['name'];
-            $memo->signature_first_image = $request['signature_first']['image'];
-            $memo->signature_second_name = $request['signature_second']['name'];
-            $memo->signature_second_image = $request['signature_second']['image'];
-            $memo->signature_third_name = $request['signature_third']['name'];
-            $memo->signature_third_image = $request['signature_third']['image'];
+            $memo->signature_applicant_name = $request['signature_applicant']['name'];
+            $memo->signature_applicant_image = $request['signature_applicant']['image'];
+            $memo->signature_acknowledges_name = $request['signature_acknowledges']['name'];
+            $memo->signature_acknowledges_image = $request['signature_acknowledges']['image'];
+            $memo->signature_agrees_name = $request['signature_agrees']['name'];
+            $memo->signature_agrees_image = $request['signature_agrees']['image'];
             $memo = $this->generateMemo($memo);
             $memo->save();
 
@@ -186,7 +196,7 @@ class MemoController extends Controller
 
     public function apiGetMemo()
     {
-        $memo = Memo::with('memoable', 'createdBy')->latest()->get();
+        $memo = Memo::with('partner', 'lead', 'createdBy')->latest()->get();
         return response()->json($memo);
     }
 
@@ -226,13 +236,35 @@ class MemoController extends Controller
 
     public function apiGetArsip()
     {
-        $arsip = Memo::withTrashed()->with(['createdBy', 'memoable'])->whereNotNull('deleted_at')->latest()->get();
+        $arsip = Memo::withTrashed()->with(['createdBy', 'partner', 'lead'])->whereNotNull('deleted_at')->latest()->get();
         return response()->json($arsip);
+    }
+
+    public function filter(Request $request)
+    {
+        $memos = Memo::with(['createdBy', 'lead', 'partner']);
+
+        if ($request->user) {
+            $memos->where('created_by', $request->user['id']);
+        }
+        if ($request->institution_type == 'Lead') {
+            $memos->orWhereHas('lead');
+        } else if ($request->institution_type == 'Partner') {
+            $memos->orWhereHas('partner');
+        }
+
+        if ($request->input_date['start'] && $request->input_date['end']) {
+            $memos->whereBetween('created_at', [Carbon::parse($request->input_date['start'])->setTimezone('GMT+7')->startOfDay(), Carbon::parse($request->input_date['end'])->setTimezone('GMT+7')->endOfDay()]);
+        }
+
+        $memos = $memos->get();
+
+        return response()->json($memos);
     }
 
     public function arsipFilter(Request $request)
     {
-        $arsip = Memo::withTrashed()->with(['createdBy', 'memoable'])->whereNotNull('deleted_at');
+        $arsip = Memo::withTrashed()->with(['createdBy', 'partner', 'lead'])->whereNotNull('deleted_at');
 
         if ($request->user) {
             $arsip->where('created_by', '=', $request->user['id']);
@@ -271,13 +303,13 @@ class MemoController extends Controller
             $memo = Memo::withTrashed()->where('uuid', '=', $uuid)->first();
             unlink($memo->memo_doc);
             Activity::create([
-                'log_name' => 'deleted force',
+                'log_name' => 'force',
                 'description' => 'hapus permanen data memo',
                 'subject_type' => get_class($memo),
                 'subject_id' => $memo->id,
                 'causer_type' => get_class(Auth::user()),
                 'causer_id' => Auth::user()->id,
-                "event" => "deleted_force",
+                "event" => "force",
                 'properties' => ["old" => ["code" => $memo->code, "partner_name" => $memo->partner_name, "price_card" => $memo->price_card, "price_e_card" => $memo->price_e_card, "price_subscription" => $memo->price_subscription, "consideration" => $memo->consideration]]
             ]);
             $memo->forceDelete();
