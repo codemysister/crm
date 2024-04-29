@@ -23,7 +23,16 @@ class LeadController extends Controller
     {
         $usersProp = User::with('roles')->get();
         $statusProp = Status::where('category', 'lead')->get();
-        return Inertia::render("Lead/Index", compact('usersProp', 'statusProp'));
+        $salesProp = User::role('account executive')->get();
+        $referralProp = User::role('referral')->get();
+
+        $uuid = $request->query('detail');
+        $leadDetail = null;
+        if ($uuid) {
+            $leadDetail = Lead::with(['status', 'createdBy', 'sales', 'referral'])->where('uuid', '=', $uuid)->first();
+        }
+
+        return Inertia::render("Lead/Index", compact('usersProp', 'leadDetail', 'statusProp', 'salesProp', 'referralProp'));
     }
 
     public function store(LeadRequest $request)
@@ -32,6 +41,8 @@ class LeadController extends Controller
             $lead = Lead::create([
                 'uuid' => Str::uuid(),
                 'name' => $request->name,
+                'sales_id' => $request->sales['id'],
+                'referral_id' => $request->referral['id'],
                 'pic' => $request->pic,
                 'phone_number' => $request->phone_number,
                 'address' => $request->address,
@@ -53,6 +64,8 @@ class LeadController extends Controller
 
         $lead->update([
             'name' => $request->name,
+            'sales_id' => $request->sales['id'] ?? null,
+            'referral_id' => $request->referral['id'] ?? null,
             'pic' => $request->pic,
             'phone_number' => $request->phone_number,
             'address' => $request->address,
@@ -81,7 +94,7 @@ class LeadController extends Controller
 
     public function apiGetLeads()
     {
-        $leads = Lead::with(['status', 'createdBy'])
+        $leads = Lead::with(['status', 'createdBy', 'sales', 'referral'])
             ->latest()
             ->get();
 
