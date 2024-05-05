@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
+use Spatie\Activitylog\Models\Activity;
 
 class PartnerSubscriptionController extends Controller
 {
@@ -74,6 +75,18 @@ class PartnerSubscriptionController extends Controller
         return response()->json($subscriptions);
     }
 
+
+    public function apiGetLogs($partner_id)
+    {
+        $logs = Activity::with(['causer', 'subject'])
+            ->whereHasMorph('subject', [PartnerSubscription::class], function ($query) use ($partner_id) {
+                $query->where('partner_id', $partner_id);
+            })
+            ->latest()
+            ->get();
+
+        return response()->json($logs);
+    }
 
     public function destroy($uuid)
     {
