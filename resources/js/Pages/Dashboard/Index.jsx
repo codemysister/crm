@@ -74,25 +74,6 @@ const Index = ({ statisticGeneralProp, usersProp }) => {
 
     const getStatGeneral = async () => {
         let response = await fetch("/api/dashboard");
-        let data = await response.json();
-        // setStatisticAM((prev) => ({
-        //     ...prev,
-        //     data: [
-        //         data.totalProses,
-        //         data.totalAktif,
-        //         data.totalNonaktif,
-        //         data.totalCancel,
-        //         data.totalCLBK,
-        //     ],
-        //     totalPartner: data.totalPartner,
-        //     totalAktif: data.totalAktif,
-        //     totalCLBK: data.totalCLBK,
-        //     totalCancel: data.totalCancel,
-        //     totalProses: data.totalProses,
-        //     totalNonaktif: data.totalNonaktif,
-        //     partnersByProvince: data.partnersByProvince,
-        //     partners: data.partners,
-        // }));
         statisticGeneralProp = data;
         setStatisticAM((prev) => (prev = { data: [0, 0, 0, 0, 0] }));
     };
