@@ -1,3 +1,4 @@
+import LogDetailPartnerComponents from "@/Components/LogDetailPartnerComponent";
 import { useForm } from "@inertiajs/react";
 import { Button } from "primereact/button";
 import { Dialog } from "primereact/dialog";
@@ -12,6 +13,7 @@ const DetailPIC = ({
     showError,
 }) => {
     const [modalEditPicIsVisible, setModalEditPicIsVisible] = useState(false);
+    const [modalLogIsVisible, setModalLogIsVisible] = useState(false);
 
     const {
         data: dataPIC,
@@ -30,26 +32,6 @@ const DetailPIC = ({
         position: "",
         email: "",
     });
-
-    const optionTemplate = (option) => {
-        return (
-            <div className="flex align-items-center">
-                <div>{option.name}</div>
-            </div>
-        );
-    };
-
-    const selectedOptionTemplate = (option, props) => {
-        if (option) {
-            return (
-                <div className="flex align-items-center">
-                    <div>{option.name}</div>
-                </div>
-            );
-        }
-
-        return <span>{props.placeholder}</span>;
-    };
 
     const handleEditPIC = (pic) => {
         setDataPIC((data) => ({
@@ -81,9 +63,27 @@ const DetailPIC = ({
             },
         });
     };
+
+    const objectKeyToIndo = (key) => {
+        let keyIndo;
+        if (key == "partner.name") {
+            keyIndo = "Lembaga";
+        } else if (key == "name") {
+            keyIndo = "Nama";
+        } else if (key == "number") {
+            keyIndo = "Nomor Telepon";
+        } else if (key == "email") {
+            keyIndo = "Email";
+        } else if (key == "position") {
+            keyIndo = "Posisi";
+        }
+
+        return keyIndo;
+    };
+
     return (
         <>
-            {partner.pics[0] !== undefined ? (
+            {partner.pic !== undefined ? (
                 <>
                     <table class="w-full dark:text-slate-300 dark:bg-slate-700">
                         <tr class="border-b">
@@ -92,7 +92,7 @@ const DetailPIC = ({
                             </td>
                             <td class="pt-2 pb-1  text-base w-[2%]">:</td>
                             <td class="pt-2 pb-1  text-base w-7/12">
-                                {partner.pics[0].name}
+                                {partner.pic.name}
                             </td>
                         </tr>
                         <tr class="border-b">
@@ -101,7 +101,7 @@ const DetailPIC = ({
                             </td>
                             <td class="pt-2 pb-1  text-base w-[2%]">:</td>
                             <td class="pt-2 pb-1  text-base w-7/12">
-                                {partner.pics[0].position}
+                                {partner.pic.position}
                             </td>
                         </tr>
                         <tr class="border-b">
@@ -110,7 +110,7 @@ const DetailPIC = ({
                             </td>
                             <td class="pt-2 pb-1  text-base w-[2%]">:</td>
                             <td class="pt-2 pb-1  text-base w-7/12">
-                                {partner.pics[0].number ?? "-"}
+                                {partner.pic.number ?? "-"}
                             </td>
                         </tr>
                         <tr class="border-b">
@@ -119,7 +119,23 @@ const DetailPIC = ({
                             </td>
                             <td class="pt-2 pb-1  text-base w-[2%]">:</td>
                             <td class="pt-2 pb-1  text-base w-7/12">
-                                {partner.pics[0].email ?? "-"}
+                                {partner.pic.email ?? "-"}
+                            </td>
+                        </tr>
+                        <tr class="border-b">
+                            <td class="pt-2 pb-1  text-base font-bold w-1/5">
+                                Log
+                            </td>
+                            <td class="pt-2 pb-1  text-base w-[2%]">:</td>
+                            <td class="pt-2 pb-1  text-base w-7/12">
+                                <Button
+                                    onClick={() => {
+                                        setModalLogIsVisible(true);
+                                    }}
+                                    className="bg-transparent p-0 cursor-pointer text-blue-700 underline "
+                                >
+                                    logs
+                                </Button>
                             </td>
                         </tr>
                         <tr class="border-b">
@@ -131,9 +147,7 @@ const DetailPIC = ({
                                 <Button
                                     label="edit"
                                     className="p-0 underline bg-transparent text-blue-700 text-left"
-                                    onClick={() =>
-                                        handleEditPIC(partner.pics[0])
-                                    }
+                                    onClick={() => handleEditPIC(partner.pic)}
                                 />
                             </td>
                         </tr>
@@ -240,6 +254,24 @@ const DetailPIC = ({
                     <p class="text-center">Tidak ada data PIC</p>
                 </div>
             )}
+
+            <Dialog
+                header="Log PIC"
+                visible={modalLogIsVisible}
+                maximizable
+                className="w-[90vw] lg:w-[50vw]"
+                onHide={() => {
+                    setModalLogIsVisible(false);
+                }}
+            >
+                {modalLogIsVisible && (
+                    <LogDetailPartnerComponents
+                        selectedData={partner.pic}
+                        fetchUrl={"/api/pics/{partner:id}/logs"}
+                        objectKeyToIndo={objectKeyToIndo}
+                    />
+                )}
+            </Dialog>
         </>
     );
 };

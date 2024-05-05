@@ -123,10 +123,14 @@ class PartnerPicController extends Controller
     }
 
 
-    public function apiGetLogs()
+    public function apiGetLogs($partner_id)
     {
         $logs = Activity::with(['causer', 'subject'])
-            ->whereMorphedTo('subject', PartnerPIC::class)->latest()->get();
+            ->whereHasMorph('subject', [PartnerPIC::class], function ($query) use ($partner_id) {
+                $query->where('partner_id', $partner_id);
+            })
+            ->latest()
+            ->get();
 
         return response()->json($logs);
     }
