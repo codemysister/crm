@@ -38,6 +38,10 @@ import { useMemo } from "react";
 import { getProvince } from "@/Services/getProvince.js";
 import { getRegencys } from "@/Services/getRegency.js";
 import { getSubdistricts } from "@/Services/getSubdistrict.js";
+import { handleSelectedDetailInstitution } from "@/Utils/handleSelectedDetailInstitution.js";
+import { upperCaseEachWord } from "@/Utils/UppercaseEachWord.js";
+import LogComponent from "@/Components/LogComponent.jsx";
+import ArsipComponent from "@/Components/ArsipComponent.jsx";
 registerPlugin(FilePondPluginFileValidateSize);
 
 export default function Index({
@@ -82,62 +86,6 @@ export default function Index({
     const { roles, permissions } = auth.user;
     const [preRenderLoad, setPreRenderLoad] = useState(true);
 
-    // const [totalRecords, setTotalRecords] = useState(0);
-    // const [lazyState, setlazyState] = useState({
-    //     first: 0,
-    //     rows: 200,
-    //     page: 1,
-    //     sortField: null,
-    //     sortOrder: null,
-    //     filters: {
-    //         global: { value: null, matchMode: FilterMatchMode.CONTAINS },
-    //         name: { value: "", matchMode: "contains" },
-    //     },
-    // });
-
-    // let networkTimeout = null;
-
-    // useEffect(() => {
-    //     loadLazyData();
-    // }, [lazyState]);
-
-    // const loadLazyData = () => {
-    //     setIsLoadingData(true);
-
-    //     if (networkTimeout) {
-    //         clearTimeout(networkTimeout);
-    //     }
-    //     networkTimeout = setTimeout(() => {
-    //         axios
-    //             .get(
-    //                 `/api/partners?first=${lazyState.first}&rows=${lazyState.rows}`
-    //             )
-    //             .then((response) => {
-    //                 const { totalRecords, partners } = response.data;
-    //                 setTotalRecords(totalRecords);
-    //                 setPartners(partners);
-    //                 setIsLoadingData(false);
-    //             })
-    //             .catch((error) => {
-    //                 console.error("Error fetching partners:", error);
-    //                 setIsLoadingData(false);
-    //             });
-    //     }, Math.random() * 1000 + 250);
-    // };
-
-    // const onPage = (event) => {
-    //     setlazyState(event);
-    // };
-
-    // const onSort = (event) => {
-    //     setlazyState(event);
-    // };
-
-    // const onFilter = (event) => {
-    //     event["first"] = 0;
-    //     setlazyState(event);
-    // };
-
     const [filters, setFilters] = useState({
         global: { value: null, matchMode: FilterMatchMode.CONTAINS },
     });
@@ -154,7 +102,7 @@ export default function Index({
 
     useEffect(() => {
         if (partner) {
-            setActiveIndexTab(1);
+            setActiveIndexTab(3);
         }
 
         if (queryParamsProp.onboarding) {
@@ -387,31 +335,11 @@ export default function Index({
         });
     };
 
-    const showError = (message) => {
+    const showError = (type) => {
         toast.current.show({
             severity: "error",
             summary: "Error",
-            detail: message,
-            content: (props) => {
-                return (
-                    <div className="flex w-full flex-col">
-                        <div className="flex align-items-center gap-2">
-                            <span className="font-bold text-900">Error</span>
-                        </div>
-                        <div className="w-[90%] my-3 text-900">
-                            <ul className="text-base list-inside list-disc">
-                                {Object.values(props.message.detail).map(
-                                    (error) => {
-                                        return (
-                                            <li className="my-2">{error}</li>
-                                        );
-                                    }
-                                )}
-                            </ul>
-                        </div>
-                    </div>
-                );
-            },
+            detail: `${type} data gagal`,
             life: 3000,
         });
     };
@@ -427,7 +355,7 @@ export default function Index({
                 npwp: partner.npwp,
                 password: partner.password,
                 total_members: partner.total_members,
-                pic: partner.pics[0].name,
+                pic: partner.pic.name,
                 logo: partner.logo ?? null,
                 phone_number: partner.phone_number,
                 sales: partner.sales,
@@ -496,6 +424,310 @@ export default function Index({
         );
     };
 
+    const columns = [
+        {
+            field: "name",
+            header: "Lembaga",
+            frozen: !isMobile,
+            style: {
+                width: "max-content",
+                whiteSpace: "nowrap",
+            },
+            body: (rowData) => {
+                return (
+                    <button
+                        onClick={() => handleSelectedDetailPartner(rowData)}
+                        className="hover:text-blue-700 text-left"
+                    >
+                        {rowData.name}
+                    </button>
+                );
+            },
+        },
+
+        {
+            field: "status",
+            header: "Status",
+            frozen: !isMobile,
+            style: {
+                width: "max-content",
+                whiteSpace: "nowrap",
+            },
+            body: (rowData) => {
+                return (
+                    <Badge
+                        value={rowData.status.name}
+                        className="text-white"
+                        style={{
+                            backgroundColor: "#" + rowData.status.color,
+                        }}
+                    ></Badge>
+                );
+            },
+        },
+        {
+            field: "npwp",
+            header: "NPWP",
+            frozen: !isMobile,
+            style: {
+                width: "max-content",
+                whiteSpace: "nowrap",
+            },
+            body: (rowData) => {
+                return rowData.npwp !== null ? formatNPWP(rowData.npwp) : "-";
+            },
+        },
+
+        {
+            field: "pic",
+            header: "PIC",
+            style: {
+                width: "max-content",
+                whiteSpace: "nowrap",
+            },
+            body: (rowData) => {
+                return rowData.pic ? rowData.pic.name : "-";
+            },
+        },
+        {
+            field: "sales",
+            header: "Sales",
+            style: {
+                width: "max-content",
+                whiteSpace: "nowrap",
+            },
+            body: (rowData) => {
+                return rowData.sales ? rowData.sales.name : "-";
+            },
+        },
+        {
+            field: "account_manager",
+            header: "Account Manager",
+            style: {
+                width: "max-content",
+                whiteSpace: "nowrap",
+            },
+            body: (rowData) => {
+                return rowData.account_manager
+                    ? rowData.account_manager.name
+                    : "-";
+            },
+        },
+        {
+            field: "referral",
+            header: "Referral",
+            style: {
+                width: "max-content",
+                whiteSpace: "nowrap",
+            },
+            body: (rowData) => {
+                return rowData.referral ? rowData.referral.name : "-";
+            },
+        },
+
+        {
+            field: "province",
+            header: "Provinsi",
+            style: {
+                width: "max-content",
+                whiteSpace: "nowrap",
+            },
+            body: (rowData) => {
+                return rowData.province
+                    ? upperCaseEachWord(JSON.parse(rowData.province).name)
+                    : "belum diiisi";
+            },
+        },
+        {
+            field: "regency",
+            header: "Kabupaten",
+            style: {
+                width: "max-content",
+                whiteSpace: "nowrap",
+            },
+            body: (rowData) => {
+                return rowData.regency
+                    ? upperCaseEachWord(JSON.parse(rowData.regency).name)
+                    : "-";
+            },
+        },
+        {
+            field: "subdistrict",
+            header: "Kecamatan",
+            style: {
+                width: "max-content",
+                whiteSpace: "nowrap",
+            },
+            body: (rowData) => {
+                return rowData.subdistrict
+                    ? JSON.parse(rowData.subdistrict).name
+                    : "-";
+            },
+        },
+
+        {
+            field: "onboarding_date",
+            header: "Tanggal Onboarding",
+            style: {
+                width: "max-content",
+                whiteSpace: "nowrap",
+            },
+            body: (rowData) => {
+                return rowData.onboarding_date
+                    ? new Date(rowData.onboarding_date).toLocaleDateString("id")
+                    : "-";
+            },
+        },
+        {
+            field: "live_date",
+            header: "Tanggal Live",
+            style: {
+                width: "max-content",
+                whiteSpace: "nowrap",
+            },
+            body: (rowData) => {
+                return rowData.live_date !== null
+                    ? new Date(rowData.live_date).toLocaleDateString("id")
+                    : "-";
+            },
+        },
+
+        {
+            field: "monitoring_date_after_3_month_live",
+            header: "Tanggal Monitoring (3 bulan setelah live)",
+            style: {
+                width: "max-content",
+                whiteSpace: "nowrap",
+            },
+            body: (rowData) => {
+                return rowData.live_date !== null
+                    ? new Date(rowData.live_date).toLocaleDateString("id")
+                    : "-";
+            },
+        },
+
+        {
+            field: "onboarding_age",
+            header: "Umur Onboarding",
+            style: {
+                width: "max-content",
+                whiteSpace: "nowrap",
+            },
+            body: (rowData) => {
+                return rowData.onboarding_age !== null
+                    ? rowData.onboarding_age + " hari"
+                    : "-";
+            },
+        },
+
+        {
+            field: "live_age",
+            header: "Umur Onboarding",
+            style: {
+                width: "max-content",
+                whiteSpace: "nowrap",
+            },
+            body: (rowData) => {
+                return rowData.live_age !== null
+                    ? rowData.live_age + " hari"
+                    : "-";
+            },
+        },
+
+        {
+            field: "total_members",
+            header: "Jumlah Member",
+            style: {
+                width: "max-content",
+                whiteSpace: "nowrap",
+            },
+        },
+
+        {
+            field: "password",
+            header: "Password",
+            style: {
+                width: "max-content",
+                whiteSpace: "nowrap",
+            },
+            body: (rowData) => {
+                return rowData.password ?? "-";
+            },
+        },
+
+        {
+            field: "phone_number",
+            header: "Nomor Telepon",
+            style: {
+                width: "max-content",
+                whiteSpace: "nowrap",
+            },
+        },
+    ];
+
+    const objectKeyToIndo = (key) => {
+        let keyIndo;
+        if (key == "name") {
+            keyIndo = "Lembaga";
+        } else if (key == "pic.name") {
+            keyIndo = "PIC";
+        } else if (key == "bank.bank") {
+            keyIndo = "Bank";
+        } else if (key == "bank.account_bank_number") {
+            keyIndo = "Nomor Rekening";
+        } else if (key == "bank.account_bank_name") {
+            keyIndo = "Atas Nama Bank";
+        } else if (key == "status.name") {
+            keyIndo = "Status";
+        } else if (key == "password") {
+            keyIndo = "Password";
+        } else if (key == "phone_number") {
+            keyIndo = "Nomor Telepon";
+        } else if (key == "sales.name") {
+            keyIndo = "Sales";
+        } else if (key == "referral.name") {
+            keyIndo = "Referral";
+        } else if (key == "account_manager.name") {
+            keyIndo = "Account Manager";
+        } else if (key == "npwp") {
+            keyIndo = "NPWP";
+        } else if (key == "province") {
+            keyIndo = "Provinsi";
+        } else if (key == "regency") {
+            keyIndo = "Kabupaten";
+        } else if (key == "subdistrict") {
+            keyIndo = "Kecamatan";
+        } else if (key == "onboarding_date") {
+            keyIndo = "Tanggal Onboarding";
+        } else if (key == "live_date") {
+            keyIndo = "Tanggal Live";
+        } else if (key == "monitoring_date_after_3_month_live") {
+            keyIndo = "Tanggal Monitoring";
+        } else if (key == "total_members") {
+            keyIndo = "Jumlah Member";
+        } else if (key == "payment_metode") {
+            keyIndo = "Metode Pembayaran";
+        } else if (key == "period") {
+            keyIndo = "Periode Langganan";
+        } else if (key == "address") {
+            keyIndo = "Alamat";
+        }
+
+        return keyIndo;
+    };
+
+    const globalFilterFields = [
+        "name",
+        "status",
+        "province",
+        "regency",
+        "onboarding_date",
+        "live_date",
+        "monitoring_date_after_3_month_live",
+        "sales.name",
+        "account_manager.name",
+    ];
+
     function formatNPWP(input) {
         let digitsOnly = input.replace(/\D/g, "");
 
@@ -535,9 +767,8 @@ export default function Index({
                 Account_Manager: data.account_manager
                     ? data.account_manager.name
                     : "-",
-                PIC: data.pics.length !== 0 ? data.pics[0].name : "-",
-                Nomor_Telepon_PIC:
-                    data.pics.length !== 0 ? data.pics[0].number : "-",
+                PIC: data.pic ? data.pic.name : "-",
+                Nomor_Telepon_PIC: data.pic ? data.pic.number : "-",
                 Provinsi: data.province ? JSON.parse(data.province).name : "-",
                 Kabupaten: data.regency ? JSON.parse(data.regency).name : "-",
                 Tanggal_Onboarding: data.onboarding_date
@@ -659,7 +890,7 @@ export default function Index({
                     reset("partner");
                 },
                 onError: (errors) => {
-                    showError(errors);
+                    showError("Tambah");
                 },
             });
         } else {
@@ -671,7 +902,7 @@ export default function Index({
                     reset("partner", "pic", "subscription");
                 },
                 onError: (errors) => {
-                    showError(errors);
+                    showError("Update");
                 },
             });
         }
@@ -681,15 +912,13 @@ export default function Index({
         e.preventDefault();
         post("/partners/import", {
             onSuccess: () => {
-                showSuccess("Tambah");
+                showSuccess("Import");
                 setModalImportPartnerIsVisible((prev) => false);
                 getPartners();
                 reset();
-
-                setActiveIndex((prev) => (prev = 0));
             },
             onError: (errors) => {
-                showError(errors);
+                showError("Import");
             },
         });
     };
@@ -705,7 +934,7 @@ export default function Index({
     const handleSelectedDetailPartner = useCallback(
         (partner) => {
             getSelectedDetailPartner(partner);
-            setActiveIndexTab(1);
+            setActiveIndexTab(3);
         },
         [partner]
     );
@@ -2487,9 +2716,6 @@ export default function Index({
                                 <DatatablePartner
                                     partners={partners}
                                     isLoadingData={isLoadingData}
-                                    handleSelectedDetailPartner={
-                                        handleSelectedDetailPartner
-                                    }
                                     setSelectedPartner={setSelectedPartner}
                                     action={action}
                                     setSidebarFilter={setSidebarFilter}
@@ -2499,28 +2725,62 @@ export default function Index({
                     </div>
                 </TabPanel>
 
+                <TabPanel header="Log">
+                    {activeIndexTab == 1 && (
+                        <LogComponent
+                            auth={auth}
+                            fetchUrl={"/api/partners/logs"}
+                            filterUrl={"/partners/logs/filter"}
+                            deleteUrl={"/partners/logs"}
+                            objectKeyToIndo={objectKeyToIndo}
+                            users={users}
+                            showSuccess={showSuccess}
+                            showError={showError}
+                        />
+                    )}
+                </TabPanel>
+
+                <TabPanel header="Arsip">
+                    {activeIndexTab == 2 && (
+                        <ArsipComponent
+                            auth={auth}
+                            users={users}
+                            fetchUrl={"/api/partners/arsip"}
+                            forceDeleteUrl={"/partners/{id}/force"}
+                            restoreUrl={"/partners/{id}/restore"}
+                            filterUrl={"/partners/arsip/filter"}
+                            columns={columns}
+                            showSuccess={showSuccess}
+                            showError={showError}
+                            globalFilterFields={globalFilterFields}
+                        />
+                    )}
+                </TabPanel>
+
                 <TabPanel header="Detail Partner">
-                    <DetailPartner
-                        partners={partners}
-                        detailPartner={detailPartner}
-                        handleSelectedDetailPartner={
-                            handleSelectedDetailPartner
-                        }
-                        sales={sales}
-                        account_managers={account_managers}
-                        referrals={referrals}
-                        status={status}
-                        isLoading={isLoading}
-                        provinces={provinces}
-                        regencys={regencys}
-                        subdistricts={subdistricts}
-                        ProvinceName={ProvinceName}
-                        RegencyName={RegencyName}
-                        setProvinceName={setProvinceName}
-                        setRegencyName={setRegencyName}
-                        showSuccess={showSuccess}
-                        showError={showError}
-                    />
+                    {activeIndexTab == 3 && (
+                        <DetailPartner
+                            partners={partners}
+                            detailPartner={detailPartner}
+                            handleSelectedDetailPartner={
+                                handleSelectedDetailPartner
+                            }
+                            sales={sales}
+                            account_managers={account_managers}
+                            referrals={referrals}
+                            status={status}
+                            isLoading={isLoading}
+                            provinces={provinces}
+                            regencys={regencys}
+                            subdistricts={subdistricts}
+                            ProvinceName={ProvinceName}
+                            RegencyName={RegencyName}
+                            setProvinceName={setProvinceName}
+                            setRegencyName={setRegencyName}
+                            showSuccess={showSuccess}
+                            showError={showError}
+                        />
+                    )}
                 </TabPanel>
             </TabView>
         </DashboardLayout>

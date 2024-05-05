@@ -35,18 +35,11 @@ class PartnerController extends Controller
                 'referral',
                 'status',
                 'account_manager',
-                'pics' => function ($query) {
-                    $query->latest();
-                },
-                'subscriptions' => function ($query) {
-                    $query->latest();
-                },
-                'banks' => function ($query) {
-                    $query->latest();
-                },
-                'sph' => function ($query) {
-                    $query->with(['user', 'products'])->latest();
-                },
+                'pic',
+                'subscription',
+                'bank',
+                'price_list',
+                'createdBy'
             ])->where('uuid', '=', $uuid)->first();
         }
 
@@ -63,16 +56,11 @@ class PartnerController extends Controller
             'referral',
             'status',
             'account_manager',
-            'pics' => function ($query) {
-                $query->latest();
-            },
-            'subscriptions' => function ($query) {
-                $query->latest();
-            },
-            'banks' => function ($query) {
-                $query->latest();
-            },
+            'pic',
+            'subscription',
+            'bank',
             'price_list',
+            'createdBy'
         ]);
 
         if ($request->user) {
@@ -224,9 +212,7 @@ class PartnerController extends Controller
         ]);
 
         $partner = Partner::with([
-            'pics' => function ($query) {
-                return $query->latest()->first();
-            }
+            'pic'
         ])->where('uuid', $uuid)->first();
         $pathLogo = null;
 
@@ -277,10 +263,11 @@ class PartnerController extends Controller
                 'address' => $request['partner']['address'],
                 'payment_metode' => $request['partner']['payment_metode'],
                 'period' => $request['partner']['period']['name'] ?? $request['partner']['period'],
-                'note_status' => $request['partner']['note_status']
+                'note_status' => $request['partner']['note_status'],
+                'created_at' => now()
             ]);
 
-            $partner->pics->first()->update([
+            $partner->pic->first()->update([
                 'name' => $request['partner']['pic']
             ]);
 
@@ -353,7 +340,62 @@ class PartnerController extends Controller
 
     public function destroy($uuid)
     {
-        Partner::where('uuid', $uuid)->delete();
+        $partner = Partner::with([
+            'sales',
+            'referral',
+            'status',
+            'account_manager',
+            'pic',
+            'subscription',
+            'bank',
+            'price_list',
+            'createdBy'
+        ])->where('uuid', $uuid)->first();
+
+        Activity::create([
+            'log_name' => 'deleted',
+            'description' => 'menghapus data partner',
+            'subject_type' => get_class($partner),
+            'subject_id' => $partner->id,
+            'causer_type' => get_class(Auth::user()),
+            'causer_id' => Auth::user()->id,
+            "event" => "deleted",
+            'properties' => ["old" => ['name' => $partner->name, 'npwp' => $partner->npwp, 'password' => $partner->password, 'phone_number' => $partner->phone_number, 'status.name' => $partner->status->name, 'status.color' => $partner->status->color, 'pic.name' => $partner->pic->name, 'bank.bank' => $partner->bank ? $partner->bank->bank : null, 'bank.account_bank_name' => $partner->bank ? $partner->bank->account_bank_name : null, 'bank.account_bank_number' => $partner->bank ? $partner->bank->account_bank_number : null, 'sales.name' => $partner->sales->name, 'referral.name' => $partner->referral ? $partner->referral->name : null, 'account_manager.name' => $partner->account_manager ? $partner->account_manager->name : null, 'onboarding_date' => $partner->onboarding_date, 'live_date' => $partner->live_date, 'monitoring_date_after_3_month_live' => $partner->monitoring_date_after_3_month_live, 'province' => $partner->province, 'regency' => $partner->regency, 'address' => $partner->address, 'payment_metode' => $partner->payment_metode, 'period' => $partner->period]]
+        ]);
+        $partner->delete();
+    }
+
+    public function restore($uuid)
+    {
+        $partner = Partner::withTrashed()->where('uuid', '=', $uuid)->first();
+        $partner->restore();
+    }
+
+    public function destroyForce($uuid)
+    {
+        $partner = Partner::withTrashed()->with([
+            'sales',
+            'referral',
+            'status',
+            'account_manager',
+            'pic',
+            'subscription',
+            'bank',
+            'price_list',
+            'createdBy'
+        ])->where('uuid', $uuid)->first();
+
+        Activity::create([
+            'log_name' => 'force',
+            'description' => 'menghapus data partner',
+            'subject_type' => get_class($partner),
+            'subject_id' => $partner->id,
+            'causer_type' => get_class(Auth::user()),
+            'causer_id' => Auth::user()->id,
+            "event" => "force",
+            'properties' => ["old" => ['name' => $partner->name, 'npwp' => $partner->npwp, 'password' => $partner->password, 'phone_number' => $partner->phone_number, 'status.name' => $partner->status->name, 'status.color' => $partner->status->color, 'pic.name' => $partner->pic->name, 'bank.bank' => $partner->bank ? $partner->bank->bank : null, 'bank.account_bank_name' => $partner->bank ? $partner->bank->account_bank_name : null, 'bank.account_bank_number' => $partner->bank ? $partner->bank->account_bank_number : null, 'sales.name' => $partner->sales->name, 'referral.name' => $partner->referral ? $partner->referral->name : null, 'account_manager.name' => $partner->account_manager ? $partner->account_manager->name : null, 'onboarding_date' => $partner->onboarding_date, 'live_date' => $partner->live_date, 'monitoring_date_after_3_month_live' => $partner->monitoring_date_after_3_month_live, 'province' => $partner->province, 'regency' => $partner->regency, 'address' => $partner->address, 'payment_metode' => $partner->payment_metode, 'period' => $partner->period]]
+        ]);
+        $partner->forceDelete();
     }
 
     public function apiGetPartners()
@@ -363,17 +405,11 @@ class PartnerController extends Controller
             'referral',
             'status',
             'account_manager',
-            'pics' => function ($query) {
-                $query->latest();
-            },
-            'subscriptions' => function ($query) {
-                $query->latest();
-            },
-            'banks' => function ($query) {
-                $query->latest();
-            },
+            'pic',
+            'subscription',
+            'bank',
             'price_list',
-
+            'createdBy'
         ])->latest()->get();
         $salesDefault = User::role('account executive')->get();
         $accountManagerDefault = User::role('account manager')->get();
@@ -392,14 +428,10 @@ class PartnerController extends Controller
             'referral',
             'status',
             'account_manager',
-            'pics' => function ($query) {
-                $query->latest();
-            },
-            'subscriptions'
+            'pic',
+            'subscription'
             ,
-            'banks' => function ($query) {
-                $query->latest();
-            },
+            'bank',
             'sph' => function ($query) {
                 $query->with(['user', 'products'])->latest();
             },
@@ -424,6 +456,29 @@ class PartnerController extends Controller
         return response()->json($logs);
     }
 
+    public function logFilter(Request $request)
+    {
+        $logs = Activity::with(['causer', 'subject'])->whereMorphedTo('subject', Partner::class);
+
+        if ($request->user) {
+            $logs->whereMorphRelation('causer', User::class, 'causer_id', '=', $request->user['id']);
+        }
+
+        if ($request->date['start'] && $request->date['end']) {
+            $logs->whereBetween('created_at', [$request->date['start'], $request->date['end']]);
+        }
+
+        $logs = $logs->latest()->get();
+
+        return response()->json($logs);
+    }
+
+    public function destroyLogs(Request $request)
+    {
+        $ids = explode(",", $request->query('ids'));
+        Activity::whereIn('id', $ids)->delete();
+    }
+
     public function apiGetStatusLogs()
     {
         $logs = Activity::with(['causer', 'subject'])
@@ -433,6 +488,50 @@ class PartnerController extends Controller
             ->latest()
             ->get();
         return response()->json($logs);
+    }
+
+
+    public function apiGetArsip()
+    {
+        $arsip = Partner::withTrashed()->with(
+            'sales',
+            'referral',
+            'status',
+            'account_manager',
+            'pic',
+            'subscription',
+            'bank',
+            'price_list',
+            'createdBy'
+        )->whereNotNull('deleted_at')->get();
+        return response()->json($arsip);
+    }
+
+    public function arsipFilter(Request $request)
+    {
+        $arsip = Partner::withTrashed()->with(
+            'sales',
+            'referral',
+            'status',
+            'account_manager',
+            'pic',
+            'subscription',
+            'bank',
+            'price_list',
+            'createdBy'
+        )->whereNotNull('deleted_at');
+
+        if ($request->user) {
+            $arsip->where('created_by', '=', $request->user['id']);
+        }
+
+        if ($request->delete_date['start'] && $request->delete_date['end']) {
+            $arsip->whereBetween('deleted_at', [Carbon::parse($request->delete_date['start'])->setTimezone('GMT+7')->startOfDay(), Carbon::parse($request->delete_date['end'])->setTimezone('GMT+7')->endOfDay()]);
+        }
+
+        $arsip = $arsip->get();
+
+        return response()->json($arsip);
     }
 
 

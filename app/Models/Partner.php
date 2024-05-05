@@ -4,8 +4,10 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Auth;
 use Laravel\Sanctum\HasApiTokens;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Models\Activity;
@@ -14,23 +16,81 @@ use Spatie\Permission\Traits\HasRoles;
 
 class Partner extends Authenticatable
 {
-    use HasApiTokens, HasFactory, Notifiable, HasRoles, LogsActivity;
+    use HasApiTokens, HasFactory, Notifiable, HasRoles, SoftDeletes, LogsActivity;
 
     protected $guarded = [];
+
+    protected static $recordEvents = ['created', 'updated', 'restored'];
 
     protected static function boot()
     {
         parent::boot();
 
         static::deleting(function ($lead) {
+
             if ($lead->isForceDeleting()) {
-                $lead->sph()->forceDelete();
-                $lead->memo()->forceDelete();
-                $lead->mou()->forceDelete();
+                $lead->sph()->get()->each(function ($sph) {
+                    unlink($sph->sph_doc);
+                    Activity::create([
+                        'log_name' => 'force',
+                        'description' => 'menghapus permanen data sph',
+                        'subject_type' => get_class($sph),
+                        'subject_id' => $sph->id,
+                        'causer_type' => get_class(Auth::user()),
+                        'causer_id' => Auth::user()->id,
+                        "event" => "force",
+                        'properties' => ["old" => ["code" => $sph->code, "partner_name" => $sph->partner_name, "partner_pic" => $sph->partner_pic, "sales_name" => $sph->sales_name, "sales_wa" => $sph->sales_wa, "sales_email" => $sph->sales_email]]
+                    ]);
+                    $sph->forceDelete();
+                });
+                $lead->memo()->get()->each(function ($memo) {
+                    unlink($memo->memo_doc);
+                    Activity::create([
+                        'log_name' => 'force',
+                        'description' => 'menghapus permanen data memo',
+                        'subject_type' => get_class($memo),
+                        'subject_id' => $memo->id,
+                        'causer_type' => get_class(Auth::user()),
+                        'causer_id' => Auth::user()->id,
+                        "event" => "force",
+                        'properties' => ["old" => ["code" => $memo->code, "partner_name" => $memo->partner_name, "price_card" => $memo->price_card, "price_e_card" => $memo->price_e_card, "price_subscription" => $memo->price_subscription, "consideration" => $memo->consideration, 'signature_applicant_name' => $memo->signature_applicant_name, 'signature_acknowledges_name' => $memo->signature_acknowledges_name, 'signature_agrees_name' => $memo->signature_agrees_name]]
+                    ]);
+                    $memo->forceDelete();
+                });
+                $lead->mou()->get()->each(function ($mou) {
+                    $mou->forceDelete();
+                });
             } else {
-                $lead->sph()->delete();
-                $lead->memo()->delete();
-                $lead->mou()->delete();
+                $lead->sph()->get()->each(function ($sph) {
+                    Activity::create([
+                        'log_name' => 'deleted',
+                        'description' => 'menghapus data sph',
+                        'subject_type' => get_class($sph),
+                        'subject_id' => $sph->id,
+                        'causer_type' => get_class(Auth::user()),
+                        'causer_id' => Auth::user()->id,
+                        "event" => "deleted",
+                        'properties' => ["old" => ["code" => $sph->code, "partner_name" => $sph->partner_name, "partner_pic" => $sph->partner_pic, "sales_name" => $sph->sales_name, "sales_wa" => $sph->sales_wa, "sales_email" => $sph->sales_email]]
+                    ]);
+
+                    $sph->delete();
+                });
+                $lead->memo()->get()->each(function ($memo) {
+                    Activity::create([
+                        'log_name' => 'deleted',
+                        'description' => 'menghapus permanen data memo',
+                        'subject_type' => get_class($memo),
+                        'subject_id' => $memo->id,
+                        'causer_type' => get_class(Auth::user()),
+                        'causer_id' => Auth::user()->id,
+                        "event" => "deleted",
+                        'properties' => ["old" => ["code" => $memo->code, "partner_name" => $memo->partner_name, "price_card" => $memo->price_card, "price_e_card" => $memo->price_e_card, "price_subscription" => $memo->price_subscription, "consideration" => $memo->consideration, 'signature_applicant_name' => $memo->signature_applicant_name, 'signature_acknowledges_name' => $memo->signature_acknowledges_name, 'signature_agrees_name' => $memo->signature_agrees_name]]
+                    ]);
+                    $memo->delete();
+                });
+                $lead->mou()->get()->each(function ($mou) {
+                    $mou->delete();
+                });
             }
         });
     }
@@ -38,13 +98,13 @@ class Partner extends Authenticatable
     public function tapActivity(Activity $activity, string $eventName)
     {
         $activity->note_status = $this->note_status;
-    }
 
+    }
 
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()
-            ->logOnly(['name', 'npwp', 'password', 'phone_number', 'status.name', 'status.color', 'sales.name', 'referral_name', 'account_manager.name', 'onboarding_date', 'live_date', 'monitoring_date_after_3_month_live', 'province', 'regency', 'address', 'payment_metode', 'period'])
+            ->logOnly(['name', 'npwp', 'password', 'phone_number', 'status.name', 'status.color', 'pic.name', 'bank.bank', 'bank.account_bank_name', 'bank.account_bank_number', 'sales.name', 'referral.name', 'account_manager.name', 'onboarding_date', 'live_date', 'monitoring_date_after_3_month_live', 'province', 'regency', 'address', 'payment_metode', 'period'])
             ->dontLogIfAttributesChangedOnly(['deleted_at', 'updated_at'])
             ->setDescriptionForEvent(function (string $eventName) {
                 $modelName = class_basename($this);
@@ -79,24 +139,25 @@ class Partner extends Authenticatable
         return $this->belongsTo(User::class, 'account_manager_id', 'id');
     }
 
-    public function pics()
+
+    public function pic()
     {
-        return $this->hasMany(PartnerPIC::class, 'partner_id', 'id');
+        return $this->hasOne(PartnerPIC::class, 'partner_id', 'id');
     }
 
-    public function banks()
+    public function bank()
     {
-        return $this->hasMany(PartnerBank::class, 'partner_id', 'id');
+        return $this->hasOne(PartnerBank::class, 'partner_id', 'id');
     }
 
-    public function accounts()
+    public function account()
     {
-        return $this->hasMany(PartnerAccountSetting::class, 'partner_id', 'id');
+        return $this->hasOne(PartnerAccountSetting::class, 'partner_id', 'id');
     }
 
-    public function subscriptions()
+    public function subscription()
     {
-        return $this->hasMany(PartnerSubscription::class);
+        return $this->hasOne(PartnerSubscription::class);
     }
 
     public function price_list()
@@ -106,15 +167,15 @@ class Partner extends Authenticatable
 
     public function sph()
     {
-        return $this->hasOne(SPH::class, 'lead_id', 'id')->withTrashed();
+        return $this->hasOne(SPH::class, 'partner_id', 'id')->withTrashed();
     }
     public function memo()
     {
-        return $this->morphOne(Memo::class, 'memoable');
+        return $this->hasOne(Memo::class, 'partner_id', 'id')->withTrashed();
     }
     public function mou()
     {
-        return $this->morphOne(MOU::class, 'mouable');
+        return $this->hasOne(MOU::class, 'partner_id', 'id')->withTrashed();
     }
 
     public function status()
