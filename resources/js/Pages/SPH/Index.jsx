@@ -29,6 +29,7 @@ import { formateDate } from "../../Utils/formatDate";
 import LogComponent from "@/Components/LogComponent";
 import ArsipComponent from "@/Components/ArsipComponent";
 import { handleSelectedDetailInstitution } from "@/Utils/handleSelectedDetailInstitution";
+import PermissionErrorDialog from "@/Components/PermissionErrorDialog";
 
 export default function Index({
     auth,
@@ -53,7 +54,9 @@ export default function Index({
     const windowEscapeRef = useRef(null);
     const [preRenderLoad, setPreRenderLoad] = useState(true);
     const toast = useRef(null);
-    const { roles, permissions } = auth.user;
+    const [permissionErrorIsVisible, setPermissionErrorIsVisible] =
+        useState(false);
+    const { roles, permissions, currentUser } = auth.user;
 
     const [filters, setFilters] = useState({
         global: { value: null, matchMode: FilterMatchMode.CONTAINS },
@@ -337,10 +340,7 @@ export default function Index({
 
     const header = () => {
         return (
-            <HeaderDatatable
-                globalFilterValue={globalFilterValue}
-                onGlobalFilterChange={onGlobalFilterChange}
-            >
+            <HeaderDatatable filters={filters} setFilters={setFilters}>
                 <Button
                     className="shadow-md w-[10px] lg:w-[90px] border border-slate-600 bg-transparent text-slate-600 dark:bg-slate-700 dark:text-slate-300 rounded-lg"
                     onClick={() => setSidebarFilter(true)}
@@ -437,7 +437,10 @@ export default function Index({
     return (
         <DashboardLayout auth={auth.user} className="">
             <Toast ref={toast} />
-
+            <PermissionErrorDialog
+                dialogIsVisible={permissionErrorIsVisible}
+                setDialogVisible={setPermissionErrorIsVisible}
+            />
             <HeaderModule title="Surat Penawaran Harga">
                 {permissions.includes("tambah sph") && (
                     <Link
@@ -568,26 +571,41 @@ export default function Index({
                 ref={action}
             >
                 <div className="flex flex-col flex-wrap w-full">
-                    {permissions.includes("edit sph") && (
-                        <Button
-                            icon="pi pi-pencil"
-                            label="edit"
-                            className="bg-transparent hover:bg-slate-200 w-full text-slate-500 border-b-2 border-slate-400"
-                            onClick={() => {
+                    <Button
+                        icon="pi pi-pencil"
+                        label="edit"
+                        className="bg-transparent hover:bg-slate-200 w-full text-slate-500 border-b-2 border-slate-400"
+                        onClick={() => {
+                            if (
+                                permissions.includes("edit sph") &&
+                                selectedSph.created_by.id == currentUser.id
+                            ) {
                                 router.get("/sph/" + selectedSph.uuid);
-                            }}
-                        />
-                    )}
-                    {permissions.includes("hapus sph") && (
-                        <Button
-                            icon="pi pi-trash"
-                            label="hapus"
-                            className="bg-transparent hover:bg-slate-200 w-full text-slate-500 border-b-2 border-slate-400"
-                            onClick={() => {
+                            } else {
+                                setPermissionErrorIsVisible(
+                                    (prev) => (prev = true)
+                                );
+                            }
+                        }}
+                    />
+
+                    <Button
+                        icon="pi pi-trash"
+                        label="hapus"
+                        className="bg-transparent hover:bg-slate-200 w-full text-slate-500 border-b-2 border-slate-400"
+                        onClick={() => {
+                            if (
+                                permissions.includes("hapus sph") &&
+                                selectedSph.created_by.id == currentUser.id
+                            ) {
                                 confirmDeleteSph();
-                            }}
-                        />
-                    )}
+                            } else {
+                                setPermissionErrorIsVisible(
+                                    (prev) => (prev = true)
+                                );
+                            }
+                        }}
+                    />
                 </div>
             </OverlayPanel>
 

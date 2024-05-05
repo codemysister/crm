@@ -423,6 +423,7 @@ const Edit = ({
                                                     province: JSON.stringify(
                                                         e.target.value
                                                     ),
+                                                    regency: null,
                                                 });
                                             }}
                                             dataKey="code"

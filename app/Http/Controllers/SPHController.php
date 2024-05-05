@@ -48,7 +48,7 @@ class SPHController extends Controller
             return $user;
         });
         $partnersProp = Partner::with([
-            'pics',
+            'pic',
             'status'
         ])->get();
         $productsProp = Product::all();
@@ -227,7 +227,7 @@ class SPHController extends Controller
             return $user;
         });
         $partnersProp = Partner::with([
-            'pics',
+            'pic',
             'status'
         ])->get();
         $productsProp = Product::all(['uuid', 'name', 'price', 'category']);
@@ -318,7 +318,7 @@ class SPHController extends Controller
             $sph = SPH::where('uuid', '=', $uuid)->first();
             Activity::create([
                 'log_name' => 'deleted',
-                'description' => 'menghapus data sph',
+                'description' => Auth::user()->name . ' menghapus data sph',
                 'subject_type' => get_class($sph),
                 'subject_id' => $sph->id,
                 'causer_type' => get_class(Auth::user()),
@@ -342,11 +342,11 @@ class SPHController extends Controller
         $logs = Activity::with(['causer', 'subject'])->whereMorphedTo('subject', SPH::class);
 
         if ($request->user) {
-            $logs->where('created_by', $request->user['id']);
+            $logs->whereMorphRelation('causer', User::class, 'causer_id', '=', $request->user['id']);
         }
 
         if ($request->date['start'] && $request->date['end']) {
-            $logs->whereBetween('created_at', [Carbon::parse($request->input_date['start'])->setTimezone('GMT+7')->startOfDay(), Carbon::parse($request->input_date['end'])->setTimezone('GMT+7')->endOfDay()]);
+            $logs->whereBetween('created_at', [Carbon::parse($request->date['start'])->setTimezone('GMT+7')->startOfDay(), Carbon::parse($request->date['end'])->setTimezone('GMT+7')->endOfDay()]);
         }
 
         $logs = $logs->get();

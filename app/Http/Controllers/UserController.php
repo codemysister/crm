@@ -32,6 +32,7 @@ class UserController extends Controller
                 'number' => $user->number,
                 'role' => $role->name,
                 'role_id' => $role->id,
+                'created_at' => $user->created_at
             ];
         });
 

@@ -512,6 +512,7 @@ const Create = ({
                                                     province: JSON.stringify(
                                                         e.target.value
                                                     ),
+                                                    regency: null,
                                                 });
                                             }}
                                             dataKey="code"
