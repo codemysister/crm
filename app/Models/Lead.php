@@ -15,6 +15,8 @@ class Lead extends Model
     use HasFactory, SoftDeletes, LogsActivity;
 
     protected $guarded = [];
+    protected static $recordEvents = ['created', 'updated', 'restored'];
+
 
     protected static function boot()
     {
@@ -104,11 +106,11 @@ class Lead extends Model
                 $modelName = strtolower(class_basename($this));
                 if ($eventName === 'created') {
                     return "menambah data {$modelName} baru";
-                } elseif ($eventName === 'updated') {
+                } else if ($eventName === 'updated') {
                     return "memperbarui data {$modelName}";
-                } elseif ($eventName === 'deleted') {
+                } else if ($eventName === 'deleted') {
                     return "menghapus data {$modelName}";
-                } elseif ($eventName === 'restored') {
+                } else if ($eventName === 'restored') {
                     return "memulihkan data {$modelName}";
                 } else {
                     return "melakukan aksi {$eventName} pada data {$modelName}";
@@ -148,6 +150,6 @@ class Lead extends Model
 
     public function mou()
     {
-        return $this->morphOne(MOU::class, 'mouable');
+        return $this->hasOne(MOU::class, 'lead_id', 'id')->withTrashed();
     }
 }

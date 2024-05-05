@@ -33,6 +33,9 @@ import getViewportSize from "../../Utils/getViewportSize";
 import { formateDate } from "../../Utils/formatDate";
 import ArsipComponent from "@/Components/ArsipComponent";
 import { useCallback } from "react";
+import { DatatableLead } from "./Component/DatatableLead";
+import { Calendar } from "primereact/calendar";
+import LogComponent from "@/Components/LogComponent";
 registerPlugin(FilePondPluginFileValidateSize);
 
 export default function Index({
@@ -287,38 +290,6 @@ export default function Index({
         );
     };
 
-    const headerLead = () => {
-        return (
-            <HeaderDatatable filters={filters} setFilters={setFilters}>
-                <Button
-                    className="shadow-md w-[10px] lg:w-[90px] border border-slate-600 bg-transparent text-slate-600 dark:bg-slate-700 dark:text-slate-300 rounded-lg"
-                    onClick={() => setSidebarFilter(true)}
-                >
-                    <span className="w-full flex justify-center items-center gap-1">
-                        <i
-                            className="pi pi-filter"
-                            style={{ fontSize: "0.7rem" }}
-                        ></i>{" "}
-                        {!isMobile && <span>filter</span>}
-                    </span>
-                </Button>
-                <Button
-                    className="shadow-md w-[10px] lg:w-[90px] bg-transparent text-slate-600 dark:bg-slate-700 dark:text-slate-300 dark:border rounded-lg"
-                    onClick={exportExcel}
-                    data-pr-tooltip="XLS"
-                >
-                    <span className="w-full flex items-center justify-center gap-1">
-                        <i
-                            className="pi pi-file-excel"
-                            style={{ fontSize: "0.8rem" }}
-                        ></i>{" "}
-                        {!isMobile && <span>export</span>}
-                    </span>
-                </Button>
-            </HeaderDatatable>
-        );
-    };
-
     const showSuccess = (type) => {
         toast.current.show({
             severity: "success",
@@ -328,31 +299,11 @@ export default function Index({
         });
     };
 
-    const showError = (message) => {
+    const showError = (type) => {
         toast.current.show({
             severity: "error",
             summary: "Error",
-            detail: message,
-            content: (props) => {
-                return (
-                    <div className="flex w-full flex-col">
-                        <div className="flex align-items-center gap-2">
-                            <span className="font-bold text-900">Error</span>
-                        </div>
-                        <div className="w-[90%] my-3 text-900">
-                            <ul className="text-base list-inside list-disc">
-                                {Object.values(props.message.detail).map(
-                                    (error) => {
-                                        return (
-                                            <li className="my-2">{error}</li>
-                                        );
-                                    }
-                                )}
-                            </ul>
-                        </div>
-                    </div>
-                );
-            },
+            detail: `${type} data gagal`,
             life: 3000,
         });
     };
@@ -408,7 +359,7 @@ export default function Index({
                     setActiveIndexTab((prev) => (prev = 0));
                 },
                 onError: (e) => {
-                    showError(e);
+                    showError("Tambah");
                 },
             });
         } else {
@@ -420,7 +371,7 @@ export default function Index({
                     reset();
                 },
                 onError: (e) => {
-                    showError(e);
+                    showError("Update");
                 },
             });
         }
@@ -430,13 +381,13 @@ export default function Index({
         e.preventDefault();
         post("/leads/import", {
             onSuccess: () => {
-                showSuccess("Tambah");
+                showSuccess("Import");
                 setModalImportLeadIsVisible((prev) => (prev = false));
                 getLeads();
                 reset();
             },
             onError: (e) => {
-                showError(e);
+                showError("Import");
             },
         });
     };
@@ -537,6 +488,30 @@ export default function Index({
             },
         },
     ];
+
+    const objectKeyToIndo = (key) => {
+        let keyIndo;
+        if (key == "name") {
+            keyIndo = "Lembaga";
+        } else if (key == "status.name") {
+            keyIndo = "Status";
+        } else if (key == "pic") {
+            keyIndo = "PIC";
+        } else if (key == "sales.name") {
+            keyIndo = "Sales";
+        } else if (key == "referral.name") {
+            keyIndo = "Referral.name";
+        } else if (key == "npwp") {
+            keyIndo = "NPWP";
+        } else if (key == "total_members") {
+            keyIndo = "Jumlah Member";
+        } else if (key == "address") {
+            keyIndo = "Alamat";
+        }
+
+        return keyIndo;
+    };
+
     if (preRenderLoad) {
         return <SkeletonDatatable auth={auth} />;
     }
@@ -691,6 +666,47 @@ export default function Index({
                         />
                     </div>
 
+                    <div className="flex flex-col mt-3">
+                        <label htmlFor="">Tanggal Input</label>
+                        <div className="flex items-center gap-2">
+                            <Calendar
+                                value={
+                                    dataFilter.input_date.start
+                                        ? new Date(dataFilter.input_date.start)
+                                        : null
+                                }
+                                style={{ height: "35px" }}
+                                onChange={(e) => {
+                                    setDataFilter("input_date", {
+                                        ...dataFilter.input_date,
+                                        start: e.target.value,
+                                    });
+                                }}
+                                placeholder="mulai"
+                                showIcon
+                                dateFormat="dd/mm/yy"
+                            />
+                            <span>-</span>
+                            <Calendar
+                                value={
+                                    dataFilter.input_date.end
+                                        ? new Date(dataFilter.input_date.end)
+                                        : null
+                                }
+                                style={{ height: "35px" }}
+                                onChange={(e) => {
+                                    setDataFilter("input_date", {
+                                        ...dataFilter.input_date,
+                                        end: e.target.value,
+                                    });
+                                }}
+                                placeholder="selesai"
+                                showIcon
+                                dateFormat="dd/mm/yy"
+                            />
+                        </div>
+                    </div>
+
                     <div className="flex flex-row mt-5">
                         <Button
                             ref={btnFilterRef}
@@ -733,7 +749,7 @@ export default function Index({
 
                             <div className="flex mx-auto flex-col justify-center mt-5 gap-5">
                                 <div className="card p-fluid w-full h-full flex justify-center rounded-lg">
-                                    <DataTable
+                                    {/* <DataTable
                                         loading={isLoadingData}
                                         className="w-full h-auto rounded-lg dark:glass border-none text-center shadow-md"
                                         pt={{
@@ -805,7 +821,15 @@ export default function Index({
                                                 return rowData.created_by.name;
                                             }}
                                         ></Column>
-                                    </DataTable>
+                                    </DataTable> */}
+
+                                    <DatatableLead
+                                        leads={leads}
+                                        isLoadingData={isLoadingData}
+                                        setSelectedLead={setSelectedLead}
+                                        action={action}
+                                        setSidebarFilter={setSidebarFilter}
+                                    />
                                 </div>
                             </div>
                         </>
@@ -814,8 +838,12 @@ export default function Index({
 
                 <TabPanel header="Log">
                     {activeIndexTab == 1 && (
-                        <Log
+                        <LogComponent
                             auth={auth}
+                            fetchUrl={"/api/leads/logs"}
+                            filterUrl={"/leads/logs/filter"}
+                            deleteUrl={"/leads/logs"}
+                            objectKeyToIndo={objectKeyToIndo}
                             users={users}
                             showSuccess={showSuccess}
                             showError={showError}
@@ -915,6 +943,7 @@ export default function Index({
                                     optionLabel="name"
                                     placeholder="Pilih Sales"
                                     filter
+                                    showClear
                                     valueTemplate={selectedOptionTemplate}
                                     itemTemplate={optionTemplate}
                                     className="w-full md:w-14rem"
@@ -933,6 +962,7 @@ export default function Index({
                                     optionLabel="name"
                                     placeholder="Pilih Referral"
                                     filter
+                                    showClear
                                     valueTemplate={selectedOptionTemplate}
                                     itemTemplate={optionTemplate}
                                     className="w-full md:w-14rem"

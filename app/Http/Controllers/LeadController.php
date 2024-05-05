@@ -8,6 +8,7 @@ use App\Models\Lead;
 use App\Models\Partner;
 use App\Models\Status;
 use App\Models\User;
+use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -31,7 +32,6 @@ class LeadController extends Controller
         if ($uuid) {
             $leadDetail = Lead::with(['status', 'createdBy', 'sales', 'referral'])->where('uuid', '=', $uuid)->first();
         }
-
         return Inertia::render("Lead/Index", compact('usersProp', 'leadDetail', 'statusProp', 'salesProp', 'referralProp'));
     }
 
@@ -42,7 +42,7 @@ class LeadController extends Controller
                 'uuid' => Str::uuid(),
                 'name' => $request->name,
                 'sales_id' => $request->sales['id'],
-                'referral_id' => $request->referral['id'],
+                'referral_id' => $request->referral['id'] ?? null,
                 'pic' => $request->pic,
                 'phone_number' => $request->phone_number,
                 'address' => $request->address,
@@ -83,7 +83,17 @@ class LeadController extends Controller
 
     public function destroy($uuid)
     {
-        $lead = Lead::where('uuid', $uuid)->first();
+        $lead = Lead::with('status')->where('uuid', $uuid)->first();
+        Activity::create([
+            'log_name' => 'deleted',
+            'description' => Auth::user()->name . ' menghapus data lead',
+            'subject_type' => get_class($lead),
+            'subject_id' => $lead->id,
+            'causer_type' => get_class(Auth::user()),
+            'causer_id' => Auth::user()->id,
+            "event" => "deleted",
+            'properties' => ["old" => ['name' => $lead->name, 'address' => $lead->address, 'pic' => $lead->pic, 'total_members' => $lead->total_members, 'status.name' => $lead->status->name, 'status.color' => $lead->status->color]]
+        ]);
         $lead->delete();
     }
     public function destroyLogs(Request $request)
@@ -131,7 +141,7 @@ class LeadController extends Controller
         }
 
         if ($request->input_date['start'] && $request->input_date['end']) {
-            $leads->whereBetween('created_at', [$request->input_date['start'], $request->input_date['end']]);
+            $leads->whereBetween('created_at', [Carbon::parse($request->input_date['start'])->setTimezone('GMT+7')->startOfDay(), Carbon::parse($request->input_date['end'])->setTimezone('GMT+7')->endOfDay()]);
         }
 
 
@@ -149,10 +159,10 @@ class LeadController extends Controller
         }
 
         if ($request->date['start'] && $request->date['end']) {
-            $logs->whereBetween('created_at', [$request->date['start'], $request->date['end']]);
+            $logs->whereBetween('created_at', [Carbon::parse($request->date['start'])->setTimezone('GMT+7')->startOfDay(), Carbon::parse($request->date['end'])->setTimezone('GMT+7')->endOfDay()]);
         }
 
-        $logs = $logs->get();
+        $logs = $logs->latest()->get();
 
         return response()->json($logs);
     }
@@ -165,7 +175,17 @@ class LeadController extends Controller
 
     public function destroyForce($uuid)
     {
-        $lead = Lead::withTrashed()->where('uuid', '=', $uuid)->first();
+        $lead = Lead::withTrashed()->with('status')->where('uuid', '=', $uuid)->first();
+        Activity::create([
+            'log_name' => 'force',
+            'description' => Auth::user()->name . ' menghapus permanen data lead',
+            'subject_type' => get_class($lead),
+            'subject_id' => $lead->id,
+            'causer_type' => get_class(Auth::user()),
+            'causer_id' => Auth::user()->id,
+            "event" => "force",
+            'properties' => ["old" => ['name' => $lead->name, 'address' => $lead->address, 'pic' => $lead->pic, 'total_members' => $lead->total_members, 'status.name' => $lead->status->name, 'status.color' => $lead->status->color]]
+        ]);
         $lead->forceDelete();
     }
 
@@ -185,7 +205,24 @@ class LeadController extends Controller
 
     public function apiGetLeadArsip()
     {
-        $arsip = Lead::withTrashed()->with(['createdBy', 'status'])->whereNotNull('deleted_at')->get();
+        $arsip = Lead::withTrashed()->with(['createdBy', 'status', 'sales', 'referral'])->whereNotNull('deleted_at')->get();
+        return response()->json($arsip);
+    }
+
+    public function arsipFilter(Request $request)
+    {
+        $arsip = Lead::withTrashed()->with(['createdBy', 'status', 'sales', 'referral'])->whereNotNull('deleted_at');
+
+        if ($request->user) {
+            $arsip->where('created_by', '=', $request->user['id']);
+        }
+
+        if ($request->delete_date['start'] && $request->delete_date['end']) {
+            $arsip->whereBetween('deleted_at', [Carbon::parse($request->delete_date['start'])->setTimezone('GMT+7')->startOfDay(), Carbon::parse($request->delete_date['end'])->setTimezone('GMT+7')->endOfDay()]);
+        }
+
+        $arsip = $arsip->get();
+
         return response()->json($arsip);
     }
 
