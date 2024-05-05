@@ -69,22 +69,22 @@
                     <tr>
                         <td class="w-1/6">Nama Lembaga</td>
                         <td style="width: 1%">:</td>
-                        <td class="w-7/12">{{$sla->partner_name}}
+                        <td class="w-7/12">{{$sla->lead_name}}
 
                         </td>
                     </tr>
                     <tr>
                         <td class="w-1/6">Alamat Lembaga</td>
                         <td style="width: 1%">:</td>
-                        <td class="w-7/12">{{json_decode($sla->partner_regency)->name}},
-                            {{json_decode($sla->partner_province)->name}}
+                        <td class="w-7/12">{{json_decode($sla->lead_regency)->name}},
+                            {{json_decode($sla->lead_province)->name}}
 
                         </td>
                     </tr>
                     <tr>
                         <td class="w-1/6">Nomor Telepon Lembaga</td>
                         <td style="width: 1%">:</td>
-                        <td class="w-7/12">{{$sla->partner_phone_number}}
+                        <td class="w-7/12">{{$sla->lead_phone_number}}
 
                         </td>
                     </tr>
@@ -92,21 +92,21 @@
                     <tr>
                         <td class="w-1/6">Penanggungjawab</td>
                         <td style="width: 1%">:</td>
-                        <td class="w-7/12">{{$sla->partner_pic}}
+                        <td class="w-7/12">{{$sla->lead_pic}}
 
                         </td>
                     </tr>
                     <tr>
                         <td class="w-1/6">Email Penanggungjawab</td>
                         <td style="width: 1%">:</td>
-                        <td class="w-7/12">{{$sla->partner_pic_email}}
+                        <td class="w-7/12">{{$sla->lead_pic_email}}
 
                         </td>
                     </tr>
                     <tr>
                         <td class="w-1/6">Nomor HP Penanggungjawab</td>
                         <td style="width: 1%">:</td>
-                        <td class="w-7/12">{{$sla->partner_pic_number}}
+                        <td class="w-7/12">{{$sla->lead_pic_number}}
 
                         </td>
                     </tr>
@@ -157,24 +157,26 @@
             <div class="w-[30%]" style="width: 30%; height: 30%;">
                 <p>Pihak Pertama</p>
                 <div style="width: 170px; height: 100px; overflow: hidden;" class="py-2">
-
+                @if($sla->signature_name)
                 <img src="{{ public_path("storage/$sla->signature_image") }}" alt="" class="min-h-20 w-full"
                     style="object-fit: fill; width: 100%; height: 100%;" />
+                @endif
             </div>
                 <p>{{$sla->signature_name}}</p>
             </div>
             <div class="w-[30%]" style="width: 30%; height: 30%;">
                 <p>Pihak Kedua</p>
-                @if($sla->partner_pic_signature)
+                @if($sla->lead_pic_signature)
                 <div style="width: 170px; height: 100px; overflow: hidden;" class="py-2">
-                <img src='{{ public_path("storage/$sla->partner_pic_signature") }}' alt="" class="min-h-20 w-full"
+                <img src='{{ public_path("storage/$sla->lead_pic_signature") }}' alt="" class="min-h-20 w-full"
                     style="object-fit: fill; width: 100%; height: 100%;" />
                 </div>
+                <p>{{$sla->lead_pic}}</p>
                 @else
                 <div style="min-height: 100px"></div>
+                <p>{{$sla->lead_pic}}</p>
                 @endif
 
-                <p>{{$sla->partner_pic}}</p>
             </div>
             @if($sla->referral)
             <div class="w-[30%]" style="width: 30%; height: 30%;">
