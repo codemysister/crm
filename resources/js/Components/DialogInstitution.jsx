@@ -87,26 +87,24 @@ const DialogInstitution = ({
                                         selectedInstitution.phone_number,
                                     province: selectedInstitution.province,
                                     regency: selectedInstitution.regency,
-                                    pic: selectedInstitution.pics
-                                        ? selectedInstitution.pics[0].name
+                                    pic: selectedInstitution.pic
+                                        ? selectedInstitution.pic.name
                                         : null,
-                                    pic_position: selectedInstitution.pics.lgn
-                                        ? selectedInstitution.pics[0].position
+                                    pic_position: selectedInstitution.pic.lgn
+                                        ? selectedInstitution.pic.position
                                         : null,
-                                    bank:
-                                        selectedInstitution.banks.length > 0
-                                            ? selectedInstitution.banks[0].bank
-                                            : null,
+                                    bank: selectedInstitution.bank
+                                        ? selectedInstitution.bank.bank
+                                        : null,
                                     account_bank_number:
-                                        selectedInstitution.banks.length > 0
-                                            ? selectedInstitution.banks[0]
+                                        selectedInstitution.bank
+                                            ? selectedInstitution.bank
                                                   .account_bank_number
                                             : null,
-                                    account_bank_name:
-                                        selectedInstitution.banks.length > 0
-                                            ? selectedInstitution.banks[0]
-                                                  .account_bank_name
-                                            : null,
+                                    account_bank_name: selectedInstitution.bank
+                                        ? selectedInstitution.bank
+                                              .account_bank_name
+                                        : null,
 
                                     type: institutionType,
                                 },
