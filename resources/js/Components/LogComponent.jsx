@@ -77,7 +77,6 @@ const LogComponent = ({
         let response = await fetch(fetchUrl);
         // let response = await fetch("/api/leads/logs");
         let data = await response.json();
-
         setLogs((prev) => (prev = data));
 
         setIsLoadingData(false);
@@ -461,7 +460,7 @@ const LogComponent = ({
             </div>
 
             <OverlayPanel
-                className="w-[40%] md:max-w-[50%] shadow-md dark:bg-slate-900 dark:text-gray-300"
+                className="w-[80%] md:max-w-[60%] shadow-md dark:bg-slate-900 dark:text-gray-300"
                 ref={op}
                 showCloseIcon
             >
@@ -494,17 +493,6 @@ const LogComponent = ({
                                                           return null;
                                                       }
 
-                                                      console.log(
-                                                          selectedLog.properties
-                                                              .attributes[key]
-                                                      );
-                                                      console.log(
-                                                          selectedLog.properties
-                                                              .attributes[
-                                                              key
-                                                          ] !== null
-                                                      );
-
                                                       if (
                                                           selectedLog.properties
                                                               .attributes[
@@ -525,13 +513,23 @@ const LogComponent = ({
                                                                           key
                                                                       )}{" "}
                                                                       :{" "}
-                                                                      {
-                                                                          selectedLog
-                                                                              .properties
-                                                                              .attributes[
-                                                                              key
-                                                                          ]
-                                                                      }
+                                                                      {key ===
+                                                                          "province" ||
+                                                                      key ===
+                                                                          "regency"
+                                                                          ? JSON.parse(
+                                                                                selectedLog
+                                                                                    .properties
+                                                                                    .attributes[
+                                                                                    key
+                                                                                ]
+                                                                            )
+                                                                                .name
+                                                                          : selectedLog
+                                                                                .properties
+                                                                                .attributes[
+                                                                                key
+                                                                            ]}
                                                                   </p>
                                                               )}
                                                               <hr className="w-full bg-slate-300" />
@@ -546,6 +544,14 @@ const LogComponent = ({
                                                       selectedLog.properties
                                                           .attributes
                                                   ).map((key) => {
+                                                      if (
+                                                          selectedLog.properties
+                                                              .attributes[
+                                                              key
+                                                          ] === null
+                                                      ) {
+                                                          return null;
+                                                      }
                                                       return (
                                                           selectedLog.properties
                                                               .attributes[
@@ -560,13 +566,23 @@ const LogComponent = ({
                                                                           key
                                                                       )}{" "}
                                                                       :{" "}
-                                                                      {
-                                                                          selectedLog
-                                                                              .properties
-                                                                              .attributes[
-                                                                              key
-                                                                          ]
-                                                                      }
+                                                                      {key ===
+                                                                          "province" ||
+                                                                      key ===
+                                                                          "regency"
+                                                                          ? JSON.parse(
+                                                                                selectedLog
+                                                                                    .properties
+                                                                                    .attributes[
+                                                                                    key
+                                                                                ]
+                                                                            )
+                                                                                .name
+                                                                          : selectedLog
+                                                                                .properties
+                                                                                .attributes[
+                                                                                key
+                                                                            ]}
                                                                   </p>
                                                                   <hr className="w-full bg-slate-300" />
                                                               </>
@@ -598,6 +614,14 @@ const LogComponent = ({
                                                       ) {
                                                           return null;
                                                       }
+                                                      if (
+                                                          selectedLog.properties
+                                                              .attributes[
+                                                              key
+                                                          ] === null
+                                                      ) {
+                                                          return null;
+                                                      }
                                                       return (
                                                           selectedLog.properties
                                                               .attributes[
@@ -612,13 +636,23 @@ const LogComponent = ({
                                                                           key
                                                                       )}{" "}
                                                                       :{" "}
-                                                                      {
-                                                                          selectedLog
-                                                                              .properties
-                                                                              .old[
-                                                                              key
-                                                                          ]
-                                                                      }
+                                                                      {key ===
+                                                                          "province" ||
+                                                                      key ===
+                                                                          "regency"
+                                                                          ? JSON.parse(
+                                                                                selectedLog
+                                                                                    .properties
+                                                                                    .old[
+                                                                                    key
+                                                                                ]
+                                                                            )
+                                                                                .name
+                                                                          : selectedLog
+                                                                                .properties
+                                                                                .old[
+                                                                                key
+                                                                            ]}
                                                                   </p>
                                                                   <hr className=" w-full bg-slate-300" />
                                                               </>
@@ -648,6 +682,13 @@ const LogComponent = ({
                                                 if (key === "status.color") {
                                                     return null;
                                                 }
+                                                if (
+                                                    selectedLog.properties.old[
+                                                        key
+                                                    ] === null
+                                                ) {
+                                                    return null;
+                                                }
                                                 return (
                                                     <>
                                                         <p>
@@ -655,11 +696,19 @@ const LogComponent = ({
                                                                 key
                                                             )}{" "}
                                                             :{" "}
-                                                            {
-                                                                selectedLog
-                                                                    .properties
-                                                                    .old[key]
-                                                            }
+                                                            {key ===
+                                                                "province" ||
+                                                            key === "regency"
+                                                                ? JSON.parse(
+                                                                      selectedLog
+                                                                          .properties
+                                                                          .old[
+                                                                          key
+                                                                      ]
+                                                                  ).name
+                                                                : selectedLog
+                                                                      .properties
+                                                                      .old[key]}
                                                         </p>
                                                         <hr className=" w-full bg-slate-300" />
                                                     </>
