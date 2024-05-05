@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
+use Spatie\Activitylog\Models\Activity;
 
 class PartnerBankController extends Controller
 {
@@ -26,6 +27,18 @@ class PartnerBankController extends Controller
         $partnerBanks = PartnerBank::with('partner')
             ->latest()->get();
         return response()->json($partnerBanks);
+    }
+
+    public function apiGetLogs($partner_id)
+    {
+        $logs = Activity::with(['causer', 'subject'])
+            ->whereHasMorph('subject', [PartnerBank::class], function ($query) use ($partner_id) {
+                $query->where('partner_id', $partner_id);
+            })
+            ->latest()
+            ->get();
+
+        return response()->json($logs);
     }
 
     public function store(PartnerBankRequest $request)
