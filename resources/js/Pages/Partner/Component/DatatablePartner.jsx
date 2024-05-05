@@ -9,15 +9,15 @@ import { Column } from "primereact/column";
 import { DataTable } from "primereact/datatable";
 import { useState } from "react";
 import { memo } from "react";
-import { useDebounce } from "primereact/hooks";
-import { useMemo } from "react";
+import { formateDate } from "@/Utils/formatDate";
+import { handleSelectedDetailInstitution } from "@/Utils/handleSelectedDetailInstitution";
 
 export const DatatablePartner = memo(
     ({
         children,
         isLoadingData,
-        handleSelectedDetailPartner,
         partners,
+        handleSelectedDetailPartner,
         action,
         setSelectedPartner,
         setSidebarFilter,
@@ -113,6 +113,253 @@ export const DatatablePartner = memo(
             );
         };
 
+        const columns = [
+            {
+                field: "name",
+                header: "Lembaga",
+                frozen: !isMobile,
+                style: {
+                    width: "max-content",
+                    whiteSpace: "nowrap",
+                },
+                body: (rowData) => {
+                    return (
+                        <button
+                            onClick={() =>
+                                handleSelectedDetailInstitution(rowData)
+                            }
+                            className="hover:text-blue-700 text-left"
+                        >
+                            {rowData.name}
+                        </button>
+                    );
+                },
+            },
+
+            {
+                field: "status",
+                header: "Status",
+                frozen: !isMobile,
+                style: {
+                    width: "max-content",
+                    whiteSpace: "nowrap",
+                },
+                body: (rowData) => {
+                    return (
+                        <Badge
+                            value={rowData.status.name}
+                            className="text-white"
+                            style={{
+                                backgroundColor: "#" + rowData.status.color,
+                            }}
+                        ></Badge>
+                    );
+                },
+            },
+            {
+                field: "npwp",
+                header: "NPWP",
+                frozen: !isMobile,
+                style: {
+                    width: "max-content",
+                    whiteSpace: "nowrap",
+                },
+                body: (rowData) => {
+                    return rowData.npwp !== null
+                        ? formatNPWP(rowData.npwp)
+                        : "-";
+                },
+            },
+
+            {
+                field: "pic",
+                header: "PIC",
+                style: {
+                    width: "max-content",
+                    whiteSpace: "nowrap",
+                },
+                body: (rowData) => {
+                    return rowData.pic ? rowData.pic.name : "-";
+                },
+            },
+            {
+                field: "sales",
+                header: "Sales",
+                style: {
+                    width: "max-content",
+                    whiteSpace: "nowrap",
+                },
+                body: (rowData) => {
+                    return rowData.sales ? rowData.sales.name : "-";
+                },
+            },
+            {
+                field: "account_manager",
+                header: "Account Manager",
+                style: {
+                    width: "max-content",
+                    whiteSpace: "nowrap",
+                },
+                body: (rowData) => {
+                    return rowData.account_manager
+                        ? rowData.account_manager.name
+                        : "-";
+                },
+            },
+            {
+                field: "referral",
+                header: "Referral",
+                style: {
+                    width: "max-content",
+                    whiteSpace: "nowrap",
+                },
+                body: (rowData) => {
+                    return rowData.referral ? rowData.referral.name : "-";
+                },
+            },
+
+            {
+                field: "province",
+                header: "Provinsi",
+                style: {
+                    width: "max-content",
+                    whiteSpace: "nowrap",
+                },
+                body: (rowData) => {
+                    return rowData.province
+                        ? upperCaseEachWord(JSON.parse(rowData.province).name)
+                        : "belum diiisi";
+                },
+            },
+            {
+                field: "regency",
+                header: "Kabupaten",
+                style: {
+                    width: "max-content",
+                    whiteSpace: "nowrap",
+                },
+                body: (rowData) => {
+                    return rowData.regency
+                        ? upperCaseEachWord(JSON.parse(rowData.regency).name)
+                        : "-";
+                },
+            },
+            {
+                field: "subdistrict",
+                header: "Kecamatan",
+                style: {
+                    width: "max-content",
+                    whiteSpace: "nowrap",
+                },
+                body: (rowData) => {
+                    return rowData.subdistrict
+                        ? JSON.parse(rowData.subdistrict).name
+                        : "-";
+                },
+            },
+
+            {
+                field: "onboarding_date",
+                header: "Tanggal Onboarding",
+                style: {
+                    width: "max-content",
+                    whiteSpace: "nowrap",
+                },
+                body: (rowData) => {
+                    return rowData.onboarding_date
+                        ? new Date(rowData.onboarding_date).toLocaleDateString(
+                              "id"
+                          )
+                        : "-";
+                },
+            },
+            {
+                field: "live_date",
+                header: "Tanggal Live",
+                style: {
+                    width: "max-content",
+                    whiteSpace: "nowrap",
+                },
+                body: (rowData) => {
+                    return rowData.live_date !== null
+                        ? new Date(rowData.live_date).toLocaleDateString("id")
+                        : "-";
+                },
+            },
+
+            {
+                field: "monitoring_date_after_3_month_live",
+                header: "Tanggal Monitoring (3 bulan setelah live)",
+                style: {
+                    width: "max-content",
+                    whiteSpace: "nowrap",
+                },
+                body: (rowData) => {
+                    return rowData.live_date !== null
+                        ? new Date(rowData.live_date).toLocaleDateString("id")
+                        : "-";
+                },
+            },
+
+            {
+                field: "onboarding_age",
+                header: "Umur Onboarding",
+                style: {
+                    width: "max-content",
+                    whiteSpace: "nowrap",
+                },
+                body: (rowData) => {
+                    return rowData.onboarding_age !== null
+                        ? rowData.onboarding_age + " hari"
+                        : "-";
+                },
+            },
+
+            {
+                field: "live_age",
+                header: "Umur Onboarding",
+                style: {
+                    width: "max-content",
+                    whiteSpace: "nowrap",
+                },
+                body: (rowData) => {
+                    return rowData.live_age !== null
+                        ? rowData.live_age + " hari"
+                        : "-";
+                },
+            },
+
+            {
+                field: "total_members",
+                header: "Jumlah Member",
+                style: {
+                    width: "max-content",
+                    whiteSpace: "nowrap",
+                },
+            },
+
+            {
+                field: "password",
+                header: "Password",
+                style: {
+                    width: "max-content",
+                    whiteSpace: "nowrap",
+                },
+                body: (rowData) => {
+                    return rowData.password ?? "-";
+                },
+            },
+
+            {
+                field: "phone_number",
+                header: "Nomor Telepon",
+                style: {
+                    width: "max-content",
+                    whiteSpace: "nowrap",
+                },
+            },
+        ];
+
         const header = () => {
             return (
                 <HeaderDatatable filters={filters} setFilters={setFilters}>
@@ -190,279 +437,46 @@ export const DatatablePartner = memo(
                     className="dark:border-none lg:w-max lg:whitespace-nowrap"
                     headerClassName="dark:border-none dark:bg-slate-900 dark:text-gray-300"
                 ></Column>
+                {columns.map((col) => {
+                    return (
+                        <Column
+                            field={col.field}
+                            header={col.header}
+                            body={col.body}
+                            style={col.style}
+                            frozen={col.frozen}
+                            align="left"
+                            className="dark:border-none bg-white"
+                            headerClassName="dark:border-none bg-white dark:bg-slate-900 dark:text-gray-300"
+                        ></Column>
+                    );
+                })}
                 <Column
-                    header="Nama"
-                    body={(rowData) => (
-                        <button
-                            onClick={() => handleSelectedDetailPartner(rowData)}
-                            className="hover:text-blue-700 text-left"
-                        >
-                            {rowData.name}
-                        </button>
-                    )}
-                    className="dark:border-none bg-white lg:whitespace-nowrap lg:w-max"
-                    headerClassName="dark:border-none bg-white dark:bg-slate-900 dark:text-gray-300"
+                    field="created_by"
+                    className="dark:border-none"
+                    headerClassName="dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300"
+                    header="Diinput Oleh"
                     align="left"
-                    frozen={!isMobile}
-                    style={
-                        !isMobile
-                            ? {
-                                  width: "max-content",
-                                  whiteSpace: "nowrap",
-                              }
-                            : null
-                    }
-                ></Column>
-                <Column
-                    header="Status"
+                    style={{
+                        width: "max-content",
+                        whiteSpace: "nowrap",
+                    }}
                     body={(rowData) => {
-                        return (
-                            <Badge
-                                value={rowData.status.name}
-                                className="text-white"
-                                style={{
-                                    backgroundColor: "#" + rowData.status.color,
-                                }}
-                            ></Badge>
-                        );
+                        return rowData.created_by.name;
                     }}
-                    className="dark:border-none bg-white lg:w-max lg:whitespace-nowrap"
-                    headerClassName="dark:border-none bg-white dark:bg-slate-900 dark:text-gray-300"
-                    align="left"
-                    frozen={!isMobile}
-                    style={
-                        !isMobile
-                            ? {
-                                  width: "max-content",
-                                  whiteSpace: "nowrap",
-                              }
-                            : null
-                    }
                 ></Column>
                 <Column
-                    header="NPWP"
-                    body={(rowData) =>
-                        rowData.npwp !== null ? formatNPWP(rowData.npwp) : "-"
-                    }
-                    className="dark:border-none bg-white lg:w-max lg:whitespace-nowrap"
-                    headerClassName="dark:border-none bg-white dark:bg-slate-900 dark:text-gray-300"
+                    field="created_at"
+                    className="dark:border-none"
+                    headerClassName="dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300"
+                    header="Diinput Pada"
                     align="left"
-                    frozen={!isMobile}
-                    style={
-                        !isMobile
-                            ? {
-                                  width: "max-content",
-                                  whiteSpace: "nowrap",
-                              }
-                            : null
-                    }
-                ></Column>
-
-                <Column
-                    field="total_members"
+                    style={{
+                        width: "max-content",
+                        whiteSpace: "nowrap",
+                    }}
                     body={(rowData) => {
-                        return rowData.total_members
-                            ? rowData.total_members
-                            : "-";
-                    }}
-                    className="dark:border-none"
-                    headerClassName="dark:border-none dark:bg-transparent dark:text-gray-300"
-                    header="Jumlah Member"
-                    align="left"
-                    style={{
-                        width: "max-content",
-                        whiteSpace: "nowrap",
-                    }}
-                ></Column>
-                <Column
-                    field="password"
-                    body={(rowData) => {
-                        return rowData.password ? rowData.password : "-";
-                    }}
-                    className="dark:border-none"
-                    headerClassName="dark:border-none dark:bg-transparent dark:text-gray-300"
-                    header="Password"
-                    align="left"
-                    style={{
-                        width: "max-content",
-                        whiteSpace: "nowrap",
-                    }}
-                ></Column>
-                <Column
-                    field="phone_number"
-                    body={(rowData) => {
-                        return rowData.phone_number
-                            ? rowData.phone_number
-                            : "-";
-                    }}
-                    className="dark:border-none"
-                    headerClassName="dark:border-none dark:bg-transparent dark:text-gray-300"
-                    header="No. Telepon"
-                    align="left"
-                    style={{
-                        width: "max-content",
-                        whiteSpace: "nowrap",
-                    }}
-                ></Column>
-                <Column
-                    header="Sales"
-                    body={(rowData) => {
-                        return rowData.sales ? rowData.sales.name : "-";
-                    }}
-                    className="dark:border-none"
-                    headerClassName="dark:border-none  dark:bg-transparent dark:text-gray-300"
-                    align="left"
-                    style={{
-                        width: "max-content",
-                        whiteSpace: "nowrap",
-                    }}
-                ></Column>
-                <Column
-                    header="Account Manager"
-                    body={(rowData) =>
-                        rowData.account_manager !== null
-                            ? rowData.account_manager.name
-                            : "-"
-                    }
-                    className="dark:border-none"
-                    headerClassName="dark:border-none  dark:bg-transparent dark:text-gray-300"
-                    align="left"
-                    style={{
-                        width: "max-content",
-                        whiteSpace: "nowrap",
-                    }}
-                ></Column>
-                <Column
-                    field="province"
-                    className="dark:border-none"
-                    headerClassName="dark:border-none  dark:bg-transparent dark:text-gray-300"
-                    header="Provinsi"
-                    body={(rowData) => {
-                        return rowData.province
-                            ? upperCaseEachWord(
-                                  JSON.parse(rowData.province).name
-                              )
-                            : "belum diiisi";
-                    }}
-                    align="left"
-                    style={{
-                        width: "max-content",
-                        whiteSpace: "nowrap",
-                    }}
-                ></Column>
-                <Column
-                    field="regency"
-                    className="dark:border-none"
-                    headerClassName="dark:border-none dark:bg-transparent dark:text-gray-300"
-                    header="Kabupaten"
-                    body={(rowData) => {
-                        return rowData.regency
-                            ? upperCaseEachWord(
-                                  JSON.parse(rowData.regency).name
-                              )
-                            : "-";
-                    }}
-                    align="left"
-                    style={{
-                        width: "max-content",
-                        whiteSpace: "nowrap",
-                    }}
-                ></Column>
-                <Column
-                    field="subdistrict"
-                    className="dark:border-none"
-                    headerClassName="dark:border-none dark:bg-transparent dark:text-gray-300"
-                    header="Kecamatan"
-                    body={(rowData) => {
-                        return rowData.subdistrict
-                            ? JSON.parse(rowData.subdistrict).name
-                            : "-";
-                    }}
-                    align="left"
-                    style={{
-                        width: "max-content",
-                        whiteSpace: "nowrap",
-                    }}
-                ></Column>
-                <Column
-                    header="Tanggal onboarding"
-                    body={(rowData) => {
-                        return rowData.onboarding_date
-                            ? new Date(
-                                  rowData.onboarding_date
-                              ).toLocaleDateString("id")
-                            : "-";
-                    }}
-                    className="dark:border-none"
-                    headerClassName="dark:border-none  dark:bg-transparent dark:text-gray-300"
-                    align="left"
-                    style={{
-                        width: "max-content",
-                        whiteSpace: "nowrap",
-                    }}
-                ></Column>
-                <Column
-                    header="Tanggal live"
-                    body={(rowData) =>
-                        rowData.live_date !== null
-                            ? new Date(rowData.live_date).toLocaleDateString(
-                                  "id"
-                              )
-                            : "-"
-                    }
-                    className="dark:border-none"
-                    headerClassName="dark:border-none  dark:bg-transparent dark:text-gray-300"
-                    align="left"
-                    style={{
-                        width: "max-content",
-                        whiteSpace: "nowrap",
-                    }}
-                ></Column>
-                <Column
-                    header="Tanggal Monitoring (3 bulan setelah live)"
-                    body={(rowData) =>
-                        rowData.monitoring_date_after_3_month_live !== null
-                            ? new Date(
-                                  rowData.monitoring_date_after_3_month_live
-                              ).toLocaleDateString("id")
-                            : "-"
-                    }
-                    className="dark:border-none"
-                    headerClassName="dark:border-none  dark:bg-transparent dark:text-gray-300"
-                    align="left"
-                    style={{
-                        width: "max-content",
-                        whiteSpace: "nowrap",
-                    }}
-                ></Column>
-                <Column
-                    header="Umur Onboarding"
-                    body={(rowData) =>
-                        rowData.onboarding_age !== null
-                            ? rowData.onboarding_age + " hari"
-                            : "-"
-                    }
-                    className="dark:border-none"
-                    headerClassName="dark:border-none  dark:bg-transparent dark:text-gray-300"
-                    align="left"
-                    style={{
-                        width: "max-content",
-                        whiteSpace: "nowrap",
-                    }}
-                ></Column>
-                <Column
-                    header="Umur Live"
-                    body={(rowData) =>
-                        rowData.live_age !== null
-                            ? rowData.live_age + " hari"
-                            : "-"
-                    }
-                    className="dark:border-none"
-                    headerClassName="dark:border-none  dark:bg-transparent dark:text-gray-300"
-                    align="left"
-                    style={{
-                        width: "max-content",
-                        whiteSpace: "nowrap",
+                        return formateDate(rowData.created_at);
                     }}
                 ></Column>
             </DataTable>

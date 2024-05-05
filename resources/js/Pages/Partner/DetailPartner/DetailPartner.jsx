@@ -650,6 +650,7 @@ const DetailPartner = ({
                                         {activeMenu === "price_list" && (
                                             <DetailPriceList
                                                 partner={partner}
+                                                partners={partners}
                                                 handleSelectedDetailPartner={
                                                     handleSelectedDetailPartner
                                                 }
