@@ -1,14 +1,13 @@
 import { router } from "@inertiajs/react";
 
 export function handleSelectedDetailInstitution(data){
-    let leadOrPartner = data.partner == null
-    ? data.lead
-    : data.partner
-    let url = ''
-    if(leadOrPartner.live_date == undefined){
-        url = `/leads?detail=${leadOrPartner.uuid}`
+    let url = null;
+    if(data.onboarding_date == undefined){
+        const uuid = data.lead ? data.lead.uuid : data.uuid;
+        url = `/leads?detail=${uuid}`
     }else{
-        url = `/partners?detail=${partner.uuid}`
+        const uuid = data.partner ? data.partner.uuid : data.uuid;
+        url = `/partners?detail=${uuid}`
     }
     return router.get(url);
 }
