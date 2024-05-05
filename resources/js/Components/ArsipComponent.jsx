@@ -101,10 +101,7 @@ const ArsipComponent = ({
 
     const headerArsip = () => {
         return (
-            <HeaderDatatable
-                globalFilterValue={globalFilterValue}
-                onGlobalFilterChange={onGlobalFilterChange}
-            >
+            <HeaderDatatable filters={filters} setFilters={setFilters}>
                 <Button
                     className="shadow-md w-[10px] lg:w-[90px] border border-slate-600 bg-transparent text-slate-600 dark:bg-slate-700 dark:text-slate-300 rounded-lg"
                     onClick={() => setSidebarFilter(true)}
@@ -373,7 +370,7 @@ const ArsipComponent = ({
                         currentPageReportTemplate="{first} - {last} dari {totalRecords}"
                         rows={10}
                         filters={filters}
-                        emptyMessage="Lead tidak ditemukan."
+                        emptyMessage="Data tidak ditemukan."
                         paginatorClassName="dark:bg-transparent paginator-custome dark:text-gray-300 rounded-b-lg"
                         header={headerArsip}
                         globalFilterFields={globalFilterFields}
