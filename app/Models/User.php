@@ -51,6 +51,11 @@ class User extends Authenticatable
         return $this->hasMany(Partner::class);
     }
 
+    public function slaActivity()
+    {
+        return $this->hasMany(SlaActivity::class, 'user_id', 'id');
+    }
+
     public function position()
     {
         return $this->roles;

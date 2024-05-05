@@ -8,15 +8,42 @@ import HeaderModule from "@/Components/HeaderModule";
 import { Dialog } from "primereact/dialog";
 import { InputText } from "primereact/inputtext";
 import { Dropdown } from "primereact/dropdown";
-import { InputTextarea } from "primereact/inputtextarea";
 import { useForm } from "@inertiajs/react";
-import { ConfirmDialog, confirmDialog } from "primereact/confirmdialog";
+import {
+    ConfirmDialog,
+    ConfirmDialog as ConfirmDialog2,
+    confirmDialog,
+} from "primereact/confirmdialog";
 import { Password } from "primereact/password";
-import { Skeleton } from "primereact/skeleton";
 import { FilterMatchMode } from "primereact/api";
+import HeaderDatatable from "@/Components/HeaderDatatable";
+import getViewportSize from "@/Utils/getViewportSize";
+import SkeletonDatatable from "@/Components/SkeletonDatatable";
+import { Sidebar } from "primereact/sidebar";
+import { OverlayPanel } from "primereact/overlaypanel";
+import { Calendar } from "primereact/calendar";
+import { TabPanel, TabView } from "primereact/tabview";
+import { formateDate } from "@/Utils/formatDate";
 
 export default function Index({ auth }) {
     const [users, setUsers] = useState("");
+    const [selectedData, setSelectedData] = useState(null);
+    const viewportSize = getViewportSize();
+    const isMobile = viewportSize.width < 992;
+    const [isLoadingData, setIsLoadingData] = useState(false);
+    const [confirmIsVisible, setConfirmIsVisible] = useState(false);
+    const [activeIndexTab, setActiveIndexTab] = useState(0);
+    const action = useRef(null);
+    const btnFilterRef = useRef(null);
+    const [sidebarFilter, setSidebarFilter] = useState(null);
+    const windowEscapeRef = useRef(null);
+    const [preRenderLoad, setPreRenderLoad] = useState(true);
+    const [modalUserIsVisible, setModalUserIsVisible] = useState(false);
+    const [modalEditUserIsVisible, setModalEditUserIsVisible] = useState(false);
+    const toast = useRef(null);
+    const [filters, setFilters] = useState({
+        global: { value: null, matchMode: FilterMatchMode.CONTAINS },
+    });
     const [roles, setRoles] = useState("");
     const { roles: roleAuth, permissions: permissionAuth } = auth.user;
 
@@ -41,14 +68,14 @@ export default function Index({ auth }) {
         new_password: null,
     });
 
-    const dummyArray = Array.from({ length: 5 }, (v, i) => i);
-    const [isLoadingData, setIsLoadingData] = useState(false);
-    const [preRenderLoad, setPreRenderLoad] = useState(true);
-    const [modalUserIsVisible, setModalUserIsVisible] = useState(false);
-    const [modalEditUserIsVisible, setModalEditUserIsVisible] = useState(false);
-    const toast = useRef(null);
-    const [filters, setFilters] = useState({
-        global: { value: null, matchMode: FilterMatchMode.CONTAINS },
+    const {
+        data: dataFilter,
+        setData: setDataFilter,
+        reset: resetFilter,
+    } = useForm({
+        user: null,
+        input_date: { start: null, end: null },
+        institution_type: null,
     });
 
     const [globalFilterValue, setGlobalFilterValue] = useState("");
@@ -88,34 +115,6 @@ export default function Index({ auth }) {
         fetchData();
     }, []);
 
-    const actionBodyTemplate = (rowData) => {
-        return (
-            <React.Fragment>
-                {permissionAuth.includes("edit user") && (
-                    <Button
-                        icon="pi pi-pencil"
-                        rounded
-                        outlined
-                        className="mr-2"
-                        onClick={() => handleEditProduct(rowData)}
-                    />
-                )}
-
-                {permissionAuth.includes("hapus user") && (
-                    <Button
-                        icon="pi pi-trash"
-                        rounded
-                        outlined
-                        severity="danger"
-                        onClick={() => {
-                            handleDeleteProduct(rowData);
-                        }}
-                    />
-                )}
-            </React.Fragment>
-        );
-    };
-
     // fungsi toast
     const showSuccess = (type) => {
         toast.current.show({
@@ -144,7 +143,27 @@ export default function Index({ auth }) {
         );
     };
 
-    const handleEditProduct = (user) => {
+    const selectedOptionTemplate = (option, props) => {
+        if (option) {
+            return (
+                <div className="flex align-items-center">
+                    <div>{option.name}</div>
+                </div>
+            );
+        }
+
+        return <span>{props.placeholder}</span>;
+    };
+
+    const optionTemplate = (option) => {
+        return (
+            <div className="flex align-items-center">
+                <div>{option.name}</div>
+            </div>
+        );
+    };
+
+    const handleEditData = (user) => {
         setData((data) => ({
             ...data,
             id: user.id,
@@ -157,45 +176,178 @@ export default function Index({ auth }) {
         setModalEditUserIsVisible(true);
     };
 
-    const handleDeleteProduct = (user) => {
-        confirmDialog({
-            message: "Apakah Anda yakin untuk menghapus ini?",
-            header: "Konfirmasi hapus",
-            icon: "pi pi-info-circle",
-            acceptClassName: "p-button-danger",
-            accept: async () => {
-                destroy("users/" + user.id, {
-                    onSuccess: () => {
-                        getUsers();
-                        showSuccess("Hapus");
-                    },
-                    onError: () => {
-                        showError("Hapus");
-                    },
-                });
+    const handleDeleteData = () => {
+        destroy("users/" + selectedData.id, {
+            onSuccess: () => {
+                getUsers();
+                showSuccess("Hapus");
+            },
+            onError: () => {
+                showError("Hapus");
             },
         });
     };
 
-    const renderHeader = () => {
+    const globalFilterFields = ["name", "role", "email", "number"];
+
+    const columns = [
+        {
+            field: "name",
+            header: "Nama",
+            style: {
+                width: "max-content",
+                whiteSpace: "nowrap",
+            },
+        },
+        {
+            field: "role",
+            header: "Role",
+            style: {
+                width: "max-content",
+                whiteSpace: "nowrap",
+            },
+        },
+        {
+            field: "number",
+            header: "Nomor",
+            style: {
+                width: "max-content",
+                whiteSpace: "nowrap",
+            },
+        },
+        {
+            field: "email",
+            header: "Email",
+            style: {
+                width: "max-content",
+                whiteSpace: "nowrap",
+            },
+        },
+    ];
+
+    const handleFilter = async (e) => {
+        e.preventDefault();
+        setIsLoadingData(true);
+        const formData = {
+            user: dataFilter.user,
+            input_date: dataFilter.input_date,
+            institution_type: dataFilter.institution_type,
+        };
+
+        const csrfToken = document
+            .querySelector('meta[name="csrf-token"]')
+            .getAttribute("content");
+
+        const response = await axios.post("/sph/filter", formData, {
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRF-TOKEN": csrfToken,
+            },
+        });
+        const data = response.data;
+        setSphs(data);
+        setSidebarFilter(false);
+        setIsLoadingData(false);
+    };
+
+    const header = () => {
         return (
-            <div className="flex flex-row justify-left gap-2 align-items-center items-end">
-                <div className="w-[30%]">
-                    <span className="p-input-icon-left">
-                        <i className="pi pi-search dark:text-white" />
-                        <InputText
-                            className="dark:bg-transparent dark:placeholder-white"
-                            value={globalFilterValue}
-                            onChange={onGlobalFilterChange}
-                            placeholder="Keyword Search"
-                        />
+            <HeaderDatatable
+                globalFilterValue={globalFilterValue}
+                onGlobalFilterChange={onGlobalFilterChange}
+            >
+                <Button
+                    className="shadow-md w-[10px] lg:w-[90px] border border-slate-600 bg-transparent text-slate-600 dark:bg-slate-700 dark:text-slate-300 rounded-lg"
+                    onClick={() => setSidebarFilter(true)}
+                >
+                    <span className="w-full flex justify-center items-center gap-1">
+                        <i
+                            className="pi pi-filter"
+                            style={{ fontSize: "0.7rem" }}
+                        ></i>{" "}
+                        {!isMobile && <span>filter</span>}
                     </span>
-                </div>
-            </div>
+                </Button>
+                <Button
+                    className="shadow-md w-[10px] lg:w-[90px] bg-transparent text-slate-600 dark:bg-slate-700 dark:text-slate-300 dark:border rounded-lg"
+                    onClick={exportExcel}
+                    data-pr-tooltip="XLS"
+                >
+                    <span className="w-full flex items-center justify-center gap-1">
+                        <i
+                            className="pi pi-file-excel"
+                            style={{ fontSize: "0.8rem" }}
+                        ></i>{" "}
+                        {!isMobile && <span>export</span>}
+                    </span>
+                </Button>
+            </HeaderDatatable>
         );
     };
 
-    const header = renderHeader();
+    const actionBodyTemplate = (rowData) => {
+        return (
+            <React.Fragment>
+                <i
+                    className="pi pi-ellipsis-h pointer cursor-pointer"
+                    onClick={(event) => {
+                        setSelectedData(rowData);
+                        action.current.toggle(event);
+                    }}
+                ></i>
+            </React.Fragment>
+        );
+    };
+
+    const exportExcel = () => {
+        const exports = sphs.map((data) => {
+            return {
+                Kode: data.code ?? "-",
+                Lembaga: data.partner_name ?? "-",
+                NPWP: data.lead == undefined ? data.partner.npwp : "-",
+                Link_Dokumen: {
+                    v: window.location.origin + "/" + data.sph_doc ?? "-",
+                    h: "link",
+                    l: {
+                        Target:
+                            window.location.origin + "/" + data.sph_doc ?? "-",
+                        Tooltip: "Klik untuk membuka dokumen",
+                    },
+                },
+                Tanggal_Pembuatan: formateDate(data.created_at),
+                Diinput_Oleh: data.created_by.name,
+            };
+        });
+
+        import("xlsx").then((xlsx) => {
+            const worksheet = xlsx.utils.json_to_sheet(exports);
+            const workbook = {
+                Sheets: { data: worksheet },
+                SheetNames: ["data"],
+            };
+            const excelBuffer = xlsx.write(workbook, {
+                bookType: "xlsx",
+                type: "array",
+            });
+
+            saveAsExcelFile(excelBuffer, "sph_" + formateDate(new Date()));
+        });
+    };
+
+    const saveAsExcelFile = (buffer, fileName) => {
+        import("file-saver").then((module) => {
+            if (module && module.default) {
+                let EXCEL_TYPE =
+                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8";
+                let EXCEL_EXTENSION = ".xlsx";
+                const data = new Blob([buffer], {
+                    type: EXCEL_TYPE,
+                });
+
+                module.default.saveAs(data, fileName + EXCEL_EXTENSION);
+            }
+        });
+    };
 
     const handleSubmitForm = (e, type) => {
         e.preventDefault();
@@ -227,52 +379,164 @@ export default function Index({ auth }) {
         }
     };
 
+    const confirmDeleteSph = () => {
+        confirmDialog({
+            message: "Apakah Anda yakin untuk menghapus ini?",
+            header: "Konfirmasi hapus",
+            icon: "pi pi-info-circle",
+            acceptClassName: "p-button-danger",
+            accept: () => {
+                setConfirmIsVisible(true);
+            },
+        });
+    };
+
     if (preRenderLoad) {
-        return (
-            <>
-                <DashboardLayout auth={auth.user} className="">
-                    <div className="card my-5">
-                        <DataTable
-                            value={dummyArray}
-                            className="p-datatable-striped dark:bg-slate-900"
-                            pt={{
-                                bodyRow:
-                                    "dark:bg-transparent bg-transparent dark:text-gray-300",
-                                table: "dark:bg-transparent bg-white dark:text-gray-300",
-                                header: "dark:bg-transparent",
-                            }}
-                        >
-                            <Column
-                                style={{ width: "25%" }}
-                                body={<Skeleton />}
-                                headerClassName="dark:border-none pl-6 bg-transparent dark:bg-transparent dark:text-gray-300"
-                            ></Column>
-                            <Column
-                                style={{ width: "25%" }}
-                                body={<Skeleton />}
-                                headerClassName="dark:border-none pl-6 bg-transparent dark:bg-transparent dark:text-gray-300"
-                            ></Column>
-                            <Column
-                                style={{ width: "25%" }}
-                                body={<Skeleton />}
-                                headerClassName="dark:border-none pl-6 bg-transparent dark:bg-transparent dark:text-gray-300"
-                            ></Column>
-                            <Column
-                                style={{ width: "25%" }}
-                                body={<Skeleton />}
-                                headerClassName="dark:border-none pl-6 bg-transparent dark:bg-transparent dark:text-gray-300"
-                            ></Column>
-                        </DataTable>
-                    </div>
-                </DashboardLayout>
-            </>
-        );
+        return <SkeletonDatatable auth={auth} />;
     }
 
     return (
         <DashboardLayout auth={auth.user} className="">
             <Toast ref={toast} />
             <ConfirmDialog />
+
+            {/* Sidebar filter */}
+            <Sidebar
+                header="Filter"
+                visible={sidebarFilter}
+                className="w-full md:w-[30%] px-3 dark:glass dark:text-white"
+                position="right"
+                onHide={() => setSidebarFilter(false)}
+            >
+                <form onSubmit={handleFilter}>
+                    <div className="flex flex-col mt-3">
+                        <label htmlFor="name">Berdasarkan penginput</label>
+                        <Dropdown
+                            optionLabel="name"
+                            dataKey="id"
+                            value={dataFilter.user}
+                            onChange={(e) =>
+                                setDataFilter("user", e.target.value)
+                            }
+                            options={users}
+                            placeholder="Pilih User"
+                            filter
+                            showClear
+                            valueTemplate={selectedOptionTemplate}
+                            itemTemplate={optionTemplate}
+                            className="flex justify-center  dark:text-gray-400   "
+                        />
+                    </div>
+
+                    <div className="flex flex-col mt-3">
+                        <label htmlFor="institution_type">Tipe Lembaga</label>
+                        <Dropdown
+                            value={dataFilter.institution_type}
+                            onChange={(e) =>
+                                setDataFilter(
+                                    "institution_type",
+                                    e.target.value
+                                )
+                            }
+                            showClear
+                            options={[{ name: "Lead" }, { name: "Partner" }]}
+                            optionLabel="name"
+                            optionValue="name"
+                            placeholder="Pilih tipe"
+                            className="w-full md:w-14rem"
+                        />
+                    </div>
+
+                    <div className="flex flex-col mt-3">
+                        <label htmlFor="">Tanggal Input</label>
+                        <div className="flex items-center gap-2">
+                            <Calendar
+                                value={
+                                    dataFilter.input_date.start
+                                        ? new Date(dataFilter.input_date.start)
+                                        : null
+                                }
+                                style={{ height: "35px" }}
+                                onChange={(e) => {
+                                    setDataFilter("input_date", {
+                                        ...dataFilter.input_date,
+                                        start: e.target.value,
+                                    });
+                                }}
+                                placeholder="mulai"
+                                showIcon
+                                dateFormat="dd/mm/yy"
+                            />
+                            <span>-</span>
+                            <Calendar
+                                value={
+                                    dataFilter.input_date.end
+                                        ? new Date(dataFilter.input_date.end)
+                                        : null
+                                }
+                                style={{ height: "35px" }}
+                                onChange={(e) => {
+                                    setDataFilter("input_date", {
+                                        ...dataFilter.input_date,
+                                        end: e.target.value,
+                                    });
+                                }}
+                                placeholder="selesai"
+                                showIcon
+                                dateFormat="dd/mm/yy"
+                            />
+                        </div>
+                    </div>
+
+                    <div className="flex flex-row mt-5">
+                        <Button
+                            ref={btnFilterRef}
+                            label="Terapkan"
+                            className="bg-purple-600 text-sm shadow-md rounded-lg mr-2"
+                        />
+                        <Button
+                            type="button"
+                            label="Reset"
+                            onClick={(e) => {
+                                resetFilter();
+                                setTimeout(() => {
+                                    btnFilterRef.current.click();
+                                }, 500);
+                            }}
+                            className="outline-purple-600 outline-1 outline-dotted bg-transparent text-slate-700  text-sm shadow-md rounded-lg mr-2"
+                        />
+                    </div>
+                </form>
+            </Sidebar>
+
+            {/* Tombol Aksi */}
+            <OverlayPanel
+                className=" shadow-md p-1 dark:bg-slate-800 dark:text-gray-300"
+                ref={action}
+            >
+                <div className="flex flex-col flex-wrap w-full">
+                    {permissionAuth.includes("edit sph") && (
+                        <Button
+                            icon="pi pi-pencil"
+                            label="edit"
+                            className="bg-transparent hover:bg-slate-200 w-full text-slate-500 border-b-2 border-slate-400"
+                            onClick={() => {
+                                handleEditData(selectedData);
+                            }}
+                        />
+                    )}
+                    {permissionAuth.includes("hapus sph") && (
+                        <Button
+                            icon="pi pi-trash"
+                            label="hapus"
+                            className="bg-transparent hover:bg-slate-200 w-full text-slate-500 border-b-2 border-slate-400"
+                            onClick={() => {
+                                confirmDeleteSph();
+                            }}
+                        />
+                    )}
+                </div>
+            </OverlayPanel>
 
             <HeaderModule title="User">
                 {permissionAuth.includes("tambah user") && (
@@ -289,6 +553,144 @@ export default function Index({ auth }) {
                     />
                 )}
             </HeaderModule>
+
+            <TabView
+                activeIndex={activeIndexTab}
+                onTabChange={(e) => {
+                    setActiveIndexTab(e.index);
+                }}
+                className="mt-2"
+            >
+                <TabPanel header="Semua User">
+                    {activeIndexTab == 0 && (
+                        <>
+                            <ConfirmDialog />
+                            <ConfirmDialog2
+                                group="declarative"
+                                visible={confirmIsVisible}
+                                onHide={() => setConfirmIsVisible(false)}
+                                message="Konfirmasi kembali jika anda yakin!"
+                                header="Konfirmasi kembali"
+                                icon="pi pi-info-circle"
+                                accept={handleDeleteData}
+                            />
+
+                            <div
+                                className="flex  mx-auto flex-col justify-center mt-5 gap-5"
+                                ref={windowEscapeRef}
+                            >
+                                <div className="card p-fluid w-full h-full flex justify-center rounded-lg">
+                                    <div className="card  p-fluid w-full h-full flex justify-center rounded-lg">
+                                        <DataTable
+                                            loading={isLoadingData}
+                                            className="w-full h-auto rounded-lg dark:glass border-none text-center shadow-md"
+                                            pt={{
+                                                bodyRow:
+                                                    "dark:bg-transparent  dark:text-gray-300",
+                                                table: "dark:bg-transparent bg-white dark:text-gray-300",
+                                            }}
+                                            paginator
+                                            rowsPerPageOptions={[
+                                                10, 25, 50, 100,
+                                            ]}
+                                            paginatorTemplate="RowsPerPageDropdown FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink"
+                                            currentPageReportTemplate="{first} - {last} dari {totalRecords}"
+                                            filters={filters}
+                                            rows={10}
+                                            emptyMessage="Surat penawaran harga tidak ditemukan."
+                                            paginatorClassName="dark:bg-transparent paginator-custome dark:text-gray-300 rounded-b-lg"
+                                            header={header}
+                                            globalFilterFields={
+                                                globalFilterFields
+                                            }
+                                            scrollable
+                                            value={users}
+                                            dataKey="id"
+                                        >
+                                            <Column
+                                                header="Aksi"
+                                                body={actionBodyTemplate}
+                                                style={{
+                                                    width: "max-content",
+                                                    whiteSpace: "nowrap",
+                                                }}
+                                                frozen
+                                                align="center"
+                                                className="dark:border-none bg-white"
+                                                headerClassName="dark:border-none bg-white dark:bg-slate-900 dark:text-gray-300"
+                                            ></Column>
+
+                                            {columns.map((col) => {
+                                                return (
+                                                    <Column
+                                                        field={col.field}
+                                                        header={col.header}
+                                                        body={col.body}
+                                                        style={col.style}
+                                                        frozen={col.frozen}
+                                                        align="left"
+                                                        className="dark:border-none bg-white"
+                                                        headerClassName="dark:border-none bg-white dark:bg-slate-900 dark:text-gray-300"
+                                                    ></Column>
+                                                );
+                                            })}
+
+                                            <Column
+                                                field="created_at"
+                                                className="dark:border-none bg-white lg:whitespace-nowrap lg:w-max"
+                                                headerClassName="dark:border-none bg-white dark:bg-slate-900 dark:text-gray-300"
+                                                header="Tanggal Input"
+                                                align="left"
+                                                body={(rowData) => {
+                                                    return formateDate(
+                                                        rowData.created_at
+                                                    );
+                                                }}
+                                                style={{
+                                                    width: "max-content",
+                                                    whiteSpace: "nowrap",
+                                                }}
+                                            ></Column>
+                                        </DataTable>
+                                    </div>
+                                </div>
+                            </div>
+                        </>
+                    )}
+                </TabPanel>
+
+                <TabPanel header="Log">
+                    {activeIndexTab == 1 && (
+                        <LogComponent
+                            auth={auth}
+                            fetchUrl={"/api/sph/logs"}
+                            filterUrl={"/sph/logs/filter"}
+                            deleteUrl={"/sph/logs"}
+                            objectKeyToIndo={objectKeyToIndo}
+                            users={users}
+                            showSuccess={showSuccess}
+                            showError={showError}
+                        />
+                    )}
+                </TabPanel>
+
+                <TabPanel header="Arsip">
+                    {activeIndexTab == 2 && (
+                        <ArsipComponent
+                            auth={auth}
+                            users={users}
+                            fetchUrl={"/api/sph/arsip"}
+                            forceDeleteUrl={"/sph/{id}/force"}
+                            restoreUrl={"/sph/{id}/restore"}
+                            filterUrl={"/sph/arsip/filter"}
+                            columns={columns}
+                            showSuccess={showSuccess}
+                            showError={showError}
+                            globalFilterFields={globalFilterFields}
+                        />
+                    )}
+                </TabPanel>
+            </TabView>
 
             {/* Modal tambah user */}
             <div className="card flex justify-content-center">
@@ -395,10 +797,10 @@ export default function Index({ auth }) {
                 </Dialog>
             </div>
 
-            {/* Modal edit produk */}
+            {/* Modal edit user */}
             <div className="card flex justify-content-center">
                 <Dialog
-                    header="Produk"
+                    header="User"
                     headerClassName="dark:glass shadow-md dark:text-white"
                     className="bg-white w-[80%] md:w-[60%] lg:w-[30%] dark:glass dark:text-white"
                     contentClassName="dark:glass dark:text-white"
@@ -465,7 +867,7 @@ export default function Index({ auth }) {
                                 <Password
                                     inputClassName="w-full dark:bg-gray-300"
                                     className="flex justify-center items-center align-middle justify-items-center"
-                                    value={data.password}
+                                    value={data.new_password}
                                     onChange={(e) =>
                                         setData("new_password", e.target.value)
                                     }
@@ -483,84 +885,6 @@ export default function Index({ auth }) {
                         </div>
                     </form>
                 </Dialog>
-            </div>
-
-            <div className="flex mx-auto flex-col justify-center mt-5 gap-5">
-                <div className="card p-fluid w-full h-full flex justify-center rounded-lg">
-                    <DataTable
-                        className="w-full h-auto rounded-lg dark:glass border-none text-center shadow-md"
-                        pt={{
-                            bodyRow:
-                                "dark:bg-transparent bg-transparent dark:text-gray-300",
-                            table: " dark:bg-transparent bg-white rounded-lg dark:text-gray-300",
-                            header: "",
-                        }}
-                        paginator
-                        rows={5}
-                        loading={isLoadingData}
-                        filters={filters}
-                        header={header}
-                        globalFilterFields={["name", "role", "email"]}
-                        emptyMessage="User tidak ditemukan."
-                        paginatorClassName="dark:bg-transparent paginator-custome dark:text-gray-300 rounded-b-lg"
-                        value={users}
-                        dataKey="id"
-                    >
-                        <Column
-                            header="No"
-                            body={(_, { rowIndex }) => rowIndex + 1}
-                            className="dark:border-none pl-6"
-                            headerClassName="pl-6 dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300"
-                        />
-                        <Column
-                            field="name"
-                            className="dark:border-none"
-                            headerClassName="dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300"
-                            header="Nama"
-                            align="left"
-                            style={{ minWidth: "8rem" }}
-                        ></Column>
-                        <Column
-                            field="number"
-                            className="dark:border-none"
-                            headerClassName="dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300"
-                            header="Whatsapp"
-                            align="left"
-                            body={(rowData) => {
-                                return rowData.number
-                                    ? rowData.number
-                                    : "belum diisi";
-                            }}
-                            style={{ minWidth: "8rem" }}
-                        ></Column>
-                        <Column
-                            field="role"
-                            className="dark:border-none"
-                            headerClassName="dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300"
-                            header="Divisi"
-                            align="left"
-                            style={{ minWidth: "8rem" }}
-                        ></Column>
-                        <Column
-                            field="email"
-                            className="dark:border-none"
-                            headerClassName="dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300"
-                            header="Email"
-                            align="left"
-                            style={{ minWidth: "8rem" }}
-                        ></Column>
-                        {(permissionAuth.includes("edit user") ||
-                            permissionAuth.includes("hapus user")) && (
-                            <Column
-                                header="Aksi"
-                                body={actionBodyTemplate}
-                                style={{ minWidth: "12rem" }}
-                                className="dark:border-none"
-                                headerClassName="dark:border-none  bg-transparent dark:bg-transparent dark:text-gray-300"
-                            ></Column>
-                        )}
-                    </DataTable>
-                </div>
             </div>
         </DashboardLayout>
     );
