@@ -538,6 +538,7 @@ const Create = ({ usersProp, partnersProp, signaturesProp, referralsProp }) => {
                                                     province: JSON.stringify(
                                                         e.target.value
                                                     ),
+                                                    regency: null,
                                                 });
                                             }}
                                             dataKey="code"

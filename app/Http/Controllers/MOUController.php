@@ -487,7 +487,7 @@ class MOUController extends Controller
         }
 
         if ($request->date['start'] && $request->date['end']) {
-            $logs->whereBetween('created_at', [Carbon::parse($request->input_date['start'])->setTimezone('GMT+7')->startOfDay(), Carbon::parse($request->input_date['end'])->setTimezone('GMT+7')->endOfDay()]);
+            $logs->whereBetween('created_at', [Carbon::parse($request->date['start'])->setTimezone('GMT+7')->startOfDay(), Carbon::parse($request->date['end'])->setTimezone('GMT+7')->endOfDay()]);
         }
 
         $logs = $logs->get();

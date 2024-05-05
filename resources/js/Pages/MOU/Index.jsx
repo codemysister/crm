@@ -27,6 +27,7 @@ import LogComponent from "@/Components/LogComponent";
 import { handleSelectedDetailInstitution } from "@/Utils/handleSelectedDetailInstitution";
 import { formateDate } from "@/Utils/formatDate";
 import ArsipComponent from "@/Components/ArsipComponent";
+import PermissionErrorDialog from "@/Components/PermissionErrorDialog";
 
 export default function Index({ auth, usersProp }) {
     const [mous, setMous] = useState();
@@ -51,7 +52,9 @@ export default function Index({ auth, usersProp }) {
     const [sidebarFilter, setSidebarFilter] = useState(null);
     const windowEscapeRef = useRef(null);
     const toast = useRef(null);
-    const { roles, permissions } = auth.user;
+    const { roles, permissions, currentUser } = auth.user;
+    const [permissionErrorIsVisible, setPermissionErrorIsVisible] =
+        useState(false);
     const [filters, setFilters] = useState({
         global: { value: null, matchMode: FilterMatchMode.CONTAINS },
     });
@@ -557,10 +560,7 @@ export default function Index({ auth, usersProp }) {
 
     const header = () => {
         return (
-            <HeaderDatatable
-                globalFilterValue={globalFilterValue}
-                onGlobalFilterChange={onGlobalFilterChange}
-            >
+            <HeaderDatatable filters={filters} setFilters={setFilters}>
                 <Button
                     className="shadow-md w-[10px] lg:w-[90px] border border-slate-600 bg-transparent text-slate-600 dark:bg-slate-700 dark:text-slate-300 rounded-lg"
                     onClick={() => setSidebarFilter(true)}
@@ -597,7 +597,10 @@ export default function Index({ auth, usersProp }) {
     return (
         <DashboardLayout auth={auth.user} className="">
             <Toast ref={toast} />
-
+            <PermissionErrorDialog
+                dialogIsVisible={permissionErrorIsVisible}
+                setDialogVisible={setPermissionErrorIsVisible}
+            />
             <HeaderModule title="Mou">
                 {permissions.includes("tambah mou") && (
                     <Link
@@ -728,26 +731,41 @@ export default function Index({ auth, usersProp }) {
                 ref={action}
             >
                 <div className="flex flex-col flex-wrap w-full">
-                    {permissions.includes("edit mou") && (
-                        <Button
-                            icon="pi pi-pencil"
-                            label="edit"
-                            className="bg-transparent hover:bg-slate-200 w-full text-slate-500 border-b-2 border-slate-400"
-                            onClick={() => {
+                    <Button
+                        icon="pi pi-pencil"
+                        label="edit"
+                        className="bg-transparent hover:bg-slate-200 w-full text-slate-500 border-b-2 border-slate-400"
+                        onClick={() => {
+                            if (
+                                permissions.includes("edit mou") &&
+                                selectedData.created_by.id == currentUser.id
+                            ) {
                                 router.get("/mou/" + selectedData.uuid);
-                            }}
-                        />
-                    )}
-                    {permissions.includes("hapus mou") && (
-                        <Button
-                            icon="pi pi-trash"
-                            label="hapus"
-                            className="bg-transparent hover:bg-slate-200 w-full text-slate-500 border-b-2 border-slate-400"
-                            onClick={() => {
+                            } else {
+                                setPermissionErrorIsVisible(
+                                    (prev) => (prev = true)
+                                );
+                            }
+                        }}
+                    />
+
+                    <Button
+                        icon="pi pi-trash"
+                        label="hapus"
+                        className="bg-transparent hover:bg-slate-200 w-full text-slate-500 border-b-2 border-slate-400"
+                        onClick={() => {
+                            if (
+                                permissions.includes("hapus mou") &&
+                                selectedData.created_by.id == currentUser.id
+                            ) {
                                 confirmDeleteMou();
-                            }}
-                        />
-                    )}
+                            } else {
+                                setPermissionErrorIsVisible(
+                                    (prev) => (prev = true)
+                                );
+                            }
+                        }}
+                    />
                 </div>
             </OverlayPanel>
             <TabView

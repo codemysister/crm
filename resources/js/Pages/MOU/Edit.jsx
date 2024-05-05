@@ -564,6 +564,7 @@ const Edit = ({ usersProp, partnersProp, mou, signaturesProp }) => {
                                                     province: JSON.stringify(
                                                         e.target.value
                                                     ),
+                                                    regency: null,
                                                 });
                                             }}
                                             dataKey="code"
