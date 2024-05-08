@@ -420,7 +420,7 @@ class InvoiceGeneralController extends Controller
 
             Activity::create([
                 'log_name' => 'updated',
-                'description' => Auth::user()->name . ' mengubah data Invoice Umum',
+                'description' => Auth::user()->name . ' mengubah data invoice umum',
                 'subject_type' => get_class($invoice_general),
                 'subject_id' => $invoice_general->id,
                 'causer_type' => get_class(Auth::user()),
@@ -456,7 +456,6 @@ class InvoiceGeneralController extends Controller
             $invoice_general->xendit_link = $request->xendit_link;
             $invoice_general = $this->generateInvoiceGeneral($invoice_general, $request->products);
             $invoice_general->save();
-
 
             $this->updateProducts($invoice_general, $invoice_general->products, $request->products);
             $rest_of_bill = $this->calculateRestOfBill($invoice_general);
@@ -497,6 +496,23 @@ class InvoiceGeneralController extends Controller
         return response()->json($invoice_generals);
     }
 
+    public function arsipFilter(Request $request)
+    {
+        $arsip = InvoiceGeneral::withTrashed()->with(['createdBy', 'lead', 'status', 'partner'])->whereNotNull('deleted_at');
+
+        if ($request->user) {
+            $arsip->where('created_by', '=', $request->user['id']);
+        }
+
+        if ($request->delete_date['start'] && $request->delete_date['end']) {
+            $arsip->whereBetween('deleted_at', [Carbon::parse($request->delete_date['start'])->setTimezone('GMT+7')->startOfDay(), Carbon::parse($request->delete_date['end'])->setTimezone('GMT+7')->endOfDay()]);
+        }
+
+        $arsip = $arsip->get();
+
+        return response()->json($arsip);
+    }
+
     public function updateXendit(Request $request, $uuid)
     {
         $invoice_general = InvoiceGeneral::where('uuid', '=', $uuid)->first();
@@ -518,7 +534,7 @@ class InvoiceGeneralController extends Controller
             $invoice_general = InvoiceGeneral::where('uuid', '=', $uuid)->first();
             Activity::create([
                 'log_name' => 'deleted',
-                'description' => Auth::user()->name . ' menghapus data Invoice Umum',
+                'description' => Auth::user()->name . ' menghapus data invoice umum',
                 'subject_type' => get_class($invoice_general),
                 'subject_id' => $invoice_general->id,
                 'causer_type' => get_class(Auth::user()),
@@ -555,7 +571,7 @@ class InvoiceGeneralController extends Controller
             $invoice_general = InvoiceGeneral::withTrashed()->where('uuid', '=', $uuid)->first();
             Activity::create([
                 'log_name' => 'force',
-                'description' => Auth::user()->name . ' menghapus permanen data Invoice Umum',
+                'description' => Auth::user()->name . ' menghapus permanen data invoice umum',
                 'subject_type' => get_class($invoice_general),
                 'subject_id' => $invoice_general->id,
                 'causer_type' => get_class(Auth::user()),

@@ -9,21 +9,26 @@ use App\Jobs\GenerateInvoiceSubscriptionJob;
 use App\Models\InvoiceSubscription;
 use App\Models\InvoiceSubscriptionBill;
 use App\Models\InvoiceSubscriptionBundle;
+use App\Models\InvoiceSubscriptionTransaction;
 use App\Models\Partner;
 use App\Models\Signature;
 use App\Models\Status;
 use App\Models\User;
 use App\Utils\ExtendedTemplateProcessor;
 use Carbon\Carbon;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\File;
 use Maatwebsite\Excel\Facades\Excel;
 use PhpOffice\PhpWord\Element\TextRun;
+use Spatie\Activitylog\Models\Activity;
 use Spatie\Browsershot\Browsershot;
 use PhpOffice\PhpWord\Element\Table;
 use PhpOffice\PhpWord\SimpleType\TblWidth;
@@ -35,7 +40,7 @@ class InvoiceSubscriptionController extends Controller
     public function editInvoice(Request $request, $uuid)
     {
         $invoiceSubscriptionProp = InvoiceSubscription::with('bills', 'partner', 'status')->where('uuid', '=', $uuid)->first();
-        $partnersProp = Partner::with('sales', 'account_manager', 'status', 'subscriptions')->get();
+        $partnersProp = Partner::with('sales', 'account_manager', 'status', 'subscription')->get();
         $signaturesProp = Signature::all();
         return Inertia::render('InvoiceSubscription/Edit', compact('invoiceSubscriptionProp', 'partnersProp', 'signaturesProp'));
 
@@ -51,12 +56,12 @@ class InvoiceSubscriptionController extends Controller
 
     public function create()
     {
-        $partnersProp = Partner::with('sales', 'account_manager', 'status', 'subscriptions')->get();
+        $partnersProp = Partner::with('sales', 'account_manager', 'status', 'subscription')->get();
         $signaturesProp = Signature::all();
         return Inertia::render('InvoiceSubscription/Create', compact('partnersProp', 'signaturesProp'));
     }
 
-    public function generateInvoiceSubscription($invoice_subscription, $bundle_uuid = null)
+    public function generateInvoiceSubscriptionWord($invoice_subscription, $bundle_uuid = null)
     {
         $templateInvoice = 'assets/template/invoice_umum.docx';
 
@@ -219,6 +224,24 @@ class InvoiceSubscriptionController extends Controller
 
     }
 
+    public function generateInvoiceSubscription($invoice_subscription, $bills)
+    {
+        $path = "invoice_langganan/invoice_langganan-" . $invoice_subscription->uuid . ".pdf";
+
+        $invoice_subscription->invoice_subscription_doc = 'storage/' . $path;
+
+        $html = view('pdf.invoice_subscription', ["invoice_subscription" => $invoice_subscription, "bills" => $bills])->render();
+
+        $pdf = Browsershot::html($html)
+            ->setIncludedPath(config('services.browsershot.included_path'))
+            ->showBackground()
+            ->pdf();
+
+        Storage::put("public/$path", $pdf);
+
+        return $invoice_subscription;
+    }
+
     public function generateInvoiceSubscriptionPdf($invoice_subscription, $bundle_uuid = null)
     {
         $path = $bundle_uuid ? "invoice_langganan/$bundle_uuid/" . str_replace(' ', '_', $invoice_subscription->partner_name) . '_' . str_replace('/', '_', $invoice_subscription->code) . ".pdf" : "invoice_langganan/" . str_replace(' ', '_', $invoice_subscription->partner_name) . '_' . str_replace('/', '_', $invoice_subscription->code) . ".pdf";
@@ -248,21 +271,27 @@ class InvoiceSubscriptionController extends Controller
         $currentMonth = date('n');
         $currentYear = date('Y');
 
-        $totalDataPerMonth = InvoiceSubscription::whereYear('created_at', $currentYear)
-            ->whereMonth('created_at', $currentMonth)
-            ->count();
-
         function intToRoman($number)
         {
             $map = array('I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII');
             return $map[$number - 1];
         }
-        $romanMonth = intToRoman($currentMonth);
-        $latestData = "$currentYear/$romanMonth/INV/0000";
-        $lastCode = $latestData ? explode('/', $latestData)[3] : 0;
-        $newCode = str_pad((int) $lastCode + $totalDataPerMonth + 1, 4, '0', STR_PAD_LEFT);
 
-        $newCode = "$currentYear/$romanMonth/INV/$newCode";
+        $lastDataCurrentMonth = InvoiceSubscription::withTrashed()->whereYear('created_at', $currentYear)
+            ->whereMonth('created_at', $currentMonth)->latest()->first();
+
+        $code = null;
+        if ($lastDataCurrentMonth == null) {
+            $code = "0000";
+        } else {
+            $parts = explode("/", $lastDataCurrentMonth->code);
+            $code = $parts[1];
+        }
+        $codeInteger = intval($code) + 1;
+        $latestCode = str_pad($codeInteger, strlen($code), "0", STR_PAD_LEFT);
+        $romanMonth = intToRoman($currentMonth);
+
+        $newCode = "#INV/$latestCode/$romanMonth/$currentYear";
 
         return $newCode;
     }
@@ -270,81 +299,93 @@ class InvoiceSubscriptionController extends Controller
 
     public function store(InvoiceSubscriptionRequest $request)
     {
-        $lastCode = $this->generateCode();
+        DB::beginTransaction();
 
-        $date = Carbon::parse($request->date)->setTimezone('GMT+7')->format('Y-m-d H:i:s');
-        $due_date = Carbon::parse($request->due_date)->setTimezone('GMT+7')->format('Y-m-d H:i:s');
-        $date_now = Carbon::now()->setTimezone('GMT+7');
-        $invoice_age = $date_now->diffInDays($date, false) + 1;
+        try {
+            $lastCode = $this->generateCode();
 
-        $rest_of_bill = $request->total_bill - $request->paid_off;
+            $date = Carbon::parse($request->date)->setTimezone('GMT+7')->format('Y-m-d H:i:s');
+            $due_date = Carbon::parse($request->due_date)->setTimezone('GMT+7')->format('Y-m-d H:i:s');
+            $date_now = Carbon::now()->setTimezone('GMT+7');
+            $invoice_age = $date_now->diffInDays($date, false) + 1;
 
-        $statusBelumBayar = Status::where('name', 'belum bayar')->where('category', 'invoice')->first();
+            $rest_of_bill = $request->total_bill - $request->paid_off;
 
-        $invoice_subscription = InvoiceSubscription::create([
-            'uuid' => Str::uuid(),
-            'partner_id' => $request->partner['id'],
-            'status_id' => $statusBelumBayar->id,
-            'code' => $lastCode,
-            'date' => $date,
-            'period' => Carbon::parse($date)->locale('id')->isoFormat('DD MMMM YYYY'),
-            'due_date' => $due_date,
-            'invoice_age' => $invoice_age,
-            'partner_name' => $request->partner['name'],
-            'partner_province' => $request->partner['province'],
-            'partner_regency' => $request->partner['regency'],
-            'signature_name' => $request->signature['name'],
-            'signature_image' => $request->signature['image'],
-            'total_nominal' => $request->total_nominal,
-            'total_ppn' => $request->total_ppn,
-            'total_bill' => $request->total_bill,
-            'rest_of_bill' => $rest_of_bill,
-            'rest_of_bill_locked' => $rest_of_bill,
-            'paid_off' => $request->paid_off,
-            'payment_metode' => $request['payment_metode'],
-            'xendit_link' => $request->xendit_link,
-            'created_by' => Auth()->user()->id,
-        ]);
+            $statusBelumBayar = Status::where('name', 'belum bayar')->where('category', 'invoice')->first();
 
-        foreach ($request->bills as $bill) {
+            $invoice_subscription = new InvoiceSubscription();
+            $invoice_subscription->uuid = Str::uuid();
+            $invoice_subscription->partner_id = $request->partner['id'];
+            $invoice_subscription->status_id = $statusBelumBayar->id;
+            $invoice_subscription->code = $lastCode;
+            $invoice_subscription->date = $date;
+            $invoice_subscription->period = Carbon::parse($date)->locale('id')->isoFormat('DD MMMM YYYY');
+            $invoice_subscription->due_date = $due_date;
+            $invoice_subscription->invoice_age = $invoice_age;
+            $invoice_subscription->partner_name = $request->partner['name'];
+            $invoice_subscription->partner_province = $request->partner['province'];
+            $invoice_subscription->partner_regency = $request->partner['regency'];
+            $invoice_subscription->signature_name = $request->signature['name'];
+            $invoice_subscription->signature_image = $request->signature['image'];
+            $invoice_subscription->total_nominal = $request->total_nominal;
+            $invoice_subscription->total_ppn = $request->total_ppn;
+            $invoice_subscription->total_bill = $request->total_bill;
+            $invoice_subscription->rest_of_bill = $rest_of_bill;
+            $invoice_subscription->rest_of_bill_locked = $rest_of_bill;
+            $invoice_subscription->paid_off = $request->paid_off;
+            $invoice_subscription->payment_metode = $request['payment_metode'];
+            $invoice_subscription->xendit_link = $request->xendit_link;
+            $invoice_subscription->created_by = Auth()->user()->id;
+            $invoice_subscription = $this->generateInvoiceSubscription($invoice_subscription, $request->bills);
+            $invoice_subscription->save();
 
-            if (strpos(strtolower($bill['bill']), 'langganan bulan') !== false) {
-                $date = new \DateTime();
-                $monthIndex = $date->format('n') - 1;
-                $monthNames = [
-                    "Januari",
-                    "Februari",
-                    "Maret",
-                    "April",
-                    "Mei",
-                    "Juni",
-                    "Juli",
-                    "Agustus",
-                    "September",
-                    "Oktober",
-                    "November",
-                    "Desember",
-                ];
-                $monthName = $monthNames[$monthIndex];
 
-                $year = $date->format('Y');
+            foreach ($request->bills as $bill) {
 
-                $bill['bill'] .= " " . $monthName . " " . $year;
+                if (strpos(strtolower($bill['bill']), 'langganan bulan') !== false) {
+                    $date = new \DateTime();
+                    $monthIndex = $date->format('n') - 1;
+                    $monthNames = [
+                        "Januari",
+                        "Februari",
+                        "Maret",
+                        "April",
+                        "Mei",
+                        "Juni",
+                        "Juli",
+                        "Agustus",
+                        "September",
+                        "Oktober",
+                        "November",
+                        "Desember",
+                    ];
+                    $monthName = $monthNames[$monthIndex];
+
+                    $year = $date->format('Y');
+
+                    $bill['bill'] .= " " . $monthName . " " . $year;
+                }
+
+                InvoiceSubscriptionBill::create([
+                    'uuid' => Str::uuid(),
+                    'invoice_subscription_id' => $invoice_subscription->id,
+                    'bill' => $bill['bill'],
+                    'nominal' => $bill['nominal'],
+                    'total_ppn' => $bill['total_ppn'],
+                    'ppn' => $bill['ppn'],
+                    'total_bill' => $bill['total_bill'],
+                ]);
             }
 
-            InvoiceSubscriptionBill::create([
-                'uuid' => Str::uuid(),
-                'invoice_subscription_id' => $invoice_subscription->id,
-                'bill' => $bill['bill'],
-                'nominal' => $bill['nominal'],
-                'total_ppn' => $bill['total_ppn'],
-                'ppn' => $bill['ppn'],
-                'total_bill' => $bill['total_bill'],
+            DB::commit();
+
+        } catch (Exception $e) {
+            DB::rollback();
+            Log::error('Error tambah invoice langganan: ' . $e->getMessage());
+            return redirect()->back()->withErrors([
+                'error' => $e->getMessage()
             ]);
         }
-
-
-        GenerateInvoiceSubscriptionJob::dispatch($invoice_subscription, $request->bills);
 
     }
 
@@ -436,34 +477,47 @@ class InvoiceSubscriptionController extends Controller
             $status = $status->where('name', 'sebagian')->first();
         }
 
-        $invoice_subscription->update([
-            'date' => $date,
-            'status_id' => $status->id,
-            'period' => Carbon::parse($date)->locale('id')->isoFormat('DD MMMM YYYY'),
-            'due_date' => $due_date,
-            'invoice_age' => $invoice_age,
-            'partner_name' => $request->partner['name'],
-            'partner_province' => $request->partner['province'],
-            'partner_regency' => $request->partner['regency'],
-            'signature_name' => $request->signature['name'],
-            'signature_image' => $request->signature['image'],
-            'total_nominal' => $request->total_nominal,
-            'total_ppn' => $request->total_ppn,
-            'total_bill' => $request->total_bill,
-            'rest_of_bill' => $rest_of_bill,
-            'rest_of_bill_locked' => $request->total_bill,
-            'paid_off' => $request->paid_off,
-            'payment_metode' => $request['payment_metode'],
-            'xendit_link' => $request->xendit_link,
-        ]);
+        DB::beginTransaction();
 
-        $invoice_subscription = InvoiceSubscription::with('bills')->where('uuid', '=', $uuid)->first();
+        try {
 
-        $this->updateBills($invoice_subscription, $invoice_subscription->bills, $request->bills);
-        if ($invoice_subscription->invoice_subscription_doc !== null) {
-            Storage::delete('public/' . $invoice_subscription->invoice_subscription_doc);
+            $invoice_subscription->date = $date;
+            $invoice_subscription->status_id = $status->id;
+            $invoice_subscription->period = Carbon::parse($date)->locale('id')->isoFormat('DD MMMM YYYY');
+            $invoice_subscription->due_date = $due_date;
+            $invoice_subscription->invoice_age = $invoice_age;
+            $invoice_subscription->partner_name = $request->partner['name'];
+            $invoice_subscription->partner_province = $request->partner['province'];
+            $invoice_subscription->partner_regency = $request->partner['regency'];
+            $invoice_subscription->signature_name = $request->signature['name'];
+            $invoice_subscription->signature_image = $request->signature['image'];
+            $invoice_subscription->total_nominal = $request->total_nominal;
+            $invoice_subscription->total_ppn = $request->total_ppn;
+            $invoice_subscription->total_bill = $request->total_bill;
+            $invoice_subscription->rest_of_bill = $rest_of_bill;
+            $invoice_subscription->rest_of_bill_locked = $request->total_bill;
+            $invoice_subscription->paid_off = $request->paid_off;
+            $invoice_subscription->payment_metode = $request['payment_metode'];
+            $invoice_subscription->xendit_link = $request->xendit_link;
+            $invoice_subscription = $this->generateInvoiceSubscription($invoice_subscription, $request->bills);
+            $invoice_subscription->save();
+
+            $invoice_subscription = InvoiceSubscription::with('bills')->where('uuid', '=', $uuid)->first();
+
+            $this->updateBills($invoice_subscription, $invoice_subscription->bills, $request->bills);
+            if ($invoice_subscription->invoice_subscription_doc !== null) {
+                Storage::delete('public/' . $invoice_subscription->invoice_subscription_doc);
+            }
+
+            DB::commit();
+
+        } catch (Exception $e) {
+            DB::rollback();
+            Log::error('Error update invoice langganan: ' . $e->getMessage());
+            return redirect()->back()->withErrors([
+                'error' => $e->getMessage()
+            ]);
         }
-        GenerateInvoiceSubscriptionJob::dispatch($invoice_subscription, $request->bills);
 
     }
 
@@ -502,16 +556,71 @@ class InvoiceSubscriptionController extends Controller
         return response()->json(['zip_blob' => $base64Zip]);
     }
 
+    public function restore($uuid)
+    {
+        $invoice_subscription = InvoiceSubscription::withTrashed()->where('uuid', '=', $uuid)->first();
+        $invoice_subscription->restore();
+    }
+
     public function destroy($uuid)
     {
-        $invoice_subscription = InvoiceSubscription::where('uuid', '=', $uuid)->first();
-        Storage::delete('public/' . $invoice_subscription->invoice_subscription_doc);
-        $invoice_subscription->delete();
+        try {
+            $invoice_subscription = InvoiceSubscription::where('uuid', '=', $uuid)->first();
+            Activity::create([
+                'log_name' => 'deleted',
+                'description' => Auth::user()->name . ' menghapus data invoice langganan',
+                'subject_type' => get_class($invoice_subscription),
+                'subject_id' => $invoice_subscription->id,
+                'causer_type' => get_class(Auth::user()),
+                'causer_id' => Auth::user()->id,
+                "event" => "deleted",
+                'properties' => ["old" => ["code" => $invoice_subscription->code, "partner_name" => $invoice_subscription->partner_name, "partner_npwp" => $invoice_subscription->partner_npwp, "date" => $invoice_subscription->date, "due_date" => $invoice_subscription->due_date, "invoice_age" => $invoice_subscription->invoice_age, "bill_date" => $invoice_subscription->bill_date, 'total' => $invoice_subscription->total, 'total_all_ppn' => $invoice_subscription->total_all_ppn, 'paid_off' => $invoice_subscription->paid_off, 'rest_of_bill' => $invoice_subscription->rest_of_bill, 'signature_name' => $invoice_subscription->signature_name]]
+            ]);
+            $invoice_subscription->delete();
+            DB::commit();
+
+        } catch (Exception $e) {
+            DB::rollback();
+            Log::error('Error hapus invoice langganan: ' . $e->getMessage());
+            return redirect()->back()->withErrors([
+                'error' => $e->getMessage()
+            ]);
+        }
+    }
+
+    public function destroyForce($uuid)
+    {
+        try {
+            $invoice_subscription = InvoiceSubscription::withTrashed()->where('uuid', '=', $uuid)->first();
+            Activity::create([
+                'log_name' => 'force',
+                'description' => Auth::user()->name . ' menghapus permanen data invoice langganan',
+                'subject_type' => get_class($invoice_subscription),
+                'subject_id' => $invoice_subscription->id,
+                'causer_type' => get_class(Auth::user()),
+                'causer_id' => Auth::user()->id,
+                "event" => "force",
+                'properties' => ["old" => ["code" => $invoice_subscription->code, "partner_name" => $invoice_subscription->partner_name, "partner_npwp" => $invoice_subscription->partner_npwp, "date" => $invoice_subscription->date, "due_date" => $invoice_subscription->due_date, "invoice_age" => $invoice_subscription->invoice_age, "bill_date" => $invoice_subscription->bill_date, 'total' => $invoice_subscription->total, 'total_all_ppn' => $invoice_subscription->total_all_ppn, 'paid_off' => $invoice_subscription->paid_off, 'rest_of_bill' => $invoice_subscription->rest_of_bill, 'signature_name' => $invoice_subscription->signature_name]]
+            ]);
+
+            unlink($invoice_subscription->invoice_subscription_doc);
+            $invoice_subscription->forceDelete();
+
+            DB::commit();
+
+        } catch (Exception $e) {
+            DB::rollback();
+            Log::error('Error hapus invoice langganan: ' . $e->getMessage());
+            return redirect()->back()->withErrors([
+                'error' => $e->getMessage()
+            ]);
+        }
+
     }
 
     public function filter(Request $request)
     {
-        $invoice_subscriptions = InvoiceSubscription::with(['partner', 'products', 'transactions.user', 'status']);
+        $invoice_subscriptions = InvoiceSubscription::with(['bills', 'user', 'partner', 'transactions.user', 'status']);
 
         if ($request->user) {
             $invoice_subscriptions->where('created_by', $request->user['id']);
@@ -528,16 +637,73 @@ class InvoiceSubscriptionController extends Controller
         }
 
 
-        $invoice_subscriptions = $invoice_subscriptions->get();
+        $invoice_subscriptions = $invoice_subscriptions->orderBy('code', 'desc')->get();
 
         return response()->json($invoice_subscriptions);
     }
 
     public function apiGetInvoiceSubscriptions()
     {
-        $invoice_subscriptions = InvoiceSubscription::with('bills', 'user', 'partner', 'transactions.user', 'status')->latest()->get();
+        $invoice_subscriptions = InvoiceSubscription::with('bills', 'user', 'partner', 'transactions.user', 'status')->orderBy('code', 'desc')->get();
 
         return response()->json($invoice_subscriptions);
+    }
+
+    public function logFilter(Request $request)
+    {
+        $logs = Activity::with(['causer', 'subject'])->whereMorphedTo('subject', InvoiceSubscription::class);
+
+        if ($request->user) {
+            $logs->whereMorphRelation('causer', User::class, 'causer_id', '=', $request->user['id']);
+        }
+
+        if ($request->date['start'] && $request->date['end']) {
+            $logs->whereBetween('created_at', [Carbon::parse($request->date['start'])->setTimezone('GMT+7')->startOfDay(), Carbon::parse($request->date['end'])->setTimezone('GMT+7')->endOfDay()]);
+        }
+
+        $logs = $logs->latest()->get();
+
+        return response()->json($logs);
+    }
+
+    public function apiGetLogs()
+    {
+        $logs = Activity::with(['causer', 'subject'])
+            ->whereMorphedTo('subject', InvoiceSubscription::class)->orWhereMorphedTo('subject', InvoiceSubscriptionTransaction::class);
+
+        $logs = $logs->latest()->get();
+
+        return response()->json($logs);
+    }
+
+    public function destroyLogs(Request $request)
+    {
+        $ids = explode(",", $request->query('ids'));
+        Activity::whereIn('id', $ids)->delete();
+    }
+
+    public function apiGetArsip()
+    {
+        $arsip = InvoiceSubscription::withTrashed()->with(['bills', 'user', 'partner', 'transactions.user', 'status'])->whereNotNull('deleted_at')->latest()->get();
+
+        return response()->json($arsip);
+    }
+
+    public function arsipFilter(Request $request)
+    {
+        $arsip = InvoiceSubscription::withTrashed()->with(['bills', 'user', 'partner', 'transactions.user', 'status'])->whereNotNull('deleted_at');
+
+        if ($request->user) {
+            $arsip->where('created_by', '=', $request->user['id']);
+        }
+
+        if ($request->delete_date['start'] && $request->delete_date['end']) {
+            $arsip->whereBetween('deleted_at', [Carbon::parse($request->delete_date['start'])->setTimezone('GMT+7')->startOfDay(), Carbon::parse($request->delete_date['end'])->setTimezone('GMT+7')->endOfDay()]);
+        }
+
+        $arsip = $arsip->get();
+
+        return response()->json($arsip);
     }
 
 }

@@ -7,12 +7,16 @@ use App\Models\InvoiceSubscription;
 use App\Models\InvoiceSubscriptionTransaction;
 use App\Models\Status;
 use Carbon\Carbon;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
+use Spatie\Activitylog\Models\Activity;
+use Spatie\Browsershot\Browsershot;
 
 class InvoiceSubscriptionTransactionController extends Controller
 {
@@ -37,54 +41,105 @@ class InvoiceSubscriptionTransactionController extends Controller
             return $map[$number - 1];
         }
 
+        $lastDataCurrentMonth = InvoiceSubscriptionTransaction::whereYear('created_at', $currentYear)
+            ->whereMonth('created_at', $currentMonth)->latest()->first();
+
+        $code = null;
+        if ($lastDataCurrentMonth == null) {
+            $code = "000";
+        } else {
+            $parts = explode("/", $lastDataCurrentMonth->code);
+            $code = $parts[1];
+        }
+        $codeInteger = intval($code) + 1;
+        $latestCode = str_pad($codeInteger, strlen($code), "0", STR_PAD_LEFT);
         $romanMonth = intToRoman($currentMonth);
-        $latestData = InvoiceSubscriptionTransaction::latest()->first() ?? "#KW/000/$romanMonth/$currentYear";
-        $lastCode = $latestData ? explode('/', $latestData->code ?? $latestData)[1] : 0;
-        $newCode = str_pad((int) $lastCode + 1, 3, '0', STR_PAD_LEFT);
-        $newCode = "#KW/$newCode/$romanMonth/$currentYear";
+
+        $newCode = "#KW/$latestCode/$romanMonth/$currentYear";
         return $newCode;
+    }
+
+    public function generateReceipt($receipt)
+    {
+        $path = "kwitansi/kwitansi-" . $receipt->uuid . ".pdf";
+
+        $receipt->receipt_doc = $path;
+
+        $html = view('pdf.receipt', ["receipt" => $receipt])->render();
+
+        $pdf = Browsershot::html($html)
+            ->setIncludedPath(config('services.browsershot.included_path'))
+            ->showBackground()
+            ->showBrowserHeaderAndFooter()
+            ->headerHtml('<div></div>')
+            ->footerHtml('<div style="text-align: left; font-size: 10px; width:100%; margin-left: 2.5cm; margin-bottom: 1cm;">*) Harga produk/layanan tidak termasuk biaya admin transaksi <span style="font-style:italic;">user</span> aplikasi <span style="font-style:italic;">mobile</span>.</div>')
+            ->pdf();
+
+
+        Storage::put("public/$path", $pdf);
+
+        return $receipt;
     }
 
     public function store(Request $request)
     {
-        $invoice_subscription = InvoiceSubscription::with('transactions')->where('uuid', '=', $request->dataTransaction['invoice_subscription'])->first();
-        $rest_of_bill = $this->calculateRestOfBill($invoice_subscription);
-        if ($rest_of_bill < $request->dataTransaction['nominal']) {
+        try {
+            $invoice_subscription = InvoiceSubscription::with('transactions')->where('uuid', '=', $request->dataTransaction['invoice_subscription'])->first();
+            $rest_of_bill = $this->calculateRestOfBill($invoice_subscription);
+            if ($rest_of_bill < $request->dataTransaction['nominal']) {
 
-            return response()->json(['error' => 'Pembayaran melebihi sisa tagihan']);
+                return response()->json(['error' => 'Pembayaran melebihi sisa tagihan']);
 
+            }
+            $rest_of_bill = $rest_of_bill - $request->dataTransaction['nominal'];
+            $status = Status::where('category', 'invoice');
+            if ($rest_of_bill != 0) {
+                $status = $status->where('name', 'sebagian')->first();
+            } else {
+                $status = $status->where('name', 'lunas')->first();
+            }
+
+            $transaction = new InvoiceSubscriptionTransaction();
+            $transaction->uuid = Str::uuid();
+            $transaction->code = $this->generateCode();
+            $transaction->invoice_id = $invoice_subscription->id;
+            $transaction->partner_id = $request->dataTransaction['partner']['id'];
+            $transaction->partner_name = $request->dataTransaction['partner']['name'];
+            $transaction->date = Carbon::parse($request->dataTransaction['date'])->setTimezone('GMT+7')->format('Y-m-d H:i:s');
+            $transaction->nominal = $request->dataTransaction['nominal'];
+            $transaction->money = $request->dataTransaction['money'];
+            $transaction->metode = $request->dataTransaction['metode']['name'];
+            $transaction->payment_for = $request->dataTransaction['payment_for'];
+            $transaction->receipt_doc = '';
+            $transaction->signature_name = $request->dataTransaction['signature']['name'];
+            $transaction->signature_image = $request->dataTransaction['signature']['image'];
+            $transaction->created_by = Auth::user()->id;
+            $transaction = $this->generateReceipt($transaction);
+            $transaction->save();
+
+            Activity::create([
+                'log_name' => 'payment',
+                'description' => Auth::user()->name . ' menambah pembayaran invoice langganan',
+                'subject_type' => get_class($transaction),
+                'subject_id' => $transaction->id,
+                'causer_type' => get_class(Auth::user()),
+                'causer_id' => Auth::user()->id,
+                "event" => "payment",
+                'properties' => ["attributes" => ["code" => $invoice_subscription->code, "partner_name" => $transaction->partner_name, "date" => $transaction->date, "nominal" => $transaction->nominal, "money" => $transaction->money, 'method' => $transaction->method, 'payment_for' => $transaction->payment_for, 'signature_name' => $transaction->signature_name]]
+            ]);
+
+            $invoice_subscription->update(['rest_of_bill' => $rest_of_bill, 'status_id' => $status->id, 'bill_date' => Carbon::parse($request->dataTransaction['date'])->setTimezone('GMT+7')->format('Y-m-d H:i:s')]);
+
+            DB::commit();
+            return response()->json(['rest_of_bill' => $rest_of_bill]);
+
+        } catch (Exception $e) {
+            DB::rollback();
+            Log::error('Error tambah pembayaran invoice langganan: ' . $e->getMessage());
+            return redirect()->back()->withErrors([
+                'error' => $e->getMessage()
+            ]);
         }
-        $rest_of_bill = $rest_of_bill - $request->dataTransaction['nominal'];
-        $status = Status::where('category', 'invoice');
-        if ($rest_of_bill != 0) {
-            $status = $status->where('name', 'sebagian')->first();
-        } else {
-            $status = $status->where('name', 'lunas')->first();
-        }
-
-        $transaction = InvoiceSubscriptionTransaction::create([
-            'uuid' => Str::uuid(),
-            'code' => $this->generateCode(),
-            'invoice_id' => $invoice_subscription->id,
-            'partner_id' => $request->dataTransaction['partner']['id'],
-            'partner_name' => $request->dataTransaction['partner']['name'],
-            'date' => Carbon::parse($request->dataTransaction['date'])->setTimezone('GMT+7')->format('Y-m-d H:i:s'),
-            'nominal' => $request->dataTransaction['nominal'],
-            'money' => $request->dataTransaction['money'],
-            'metode' => $request->dataTransaction['metode']['name'],
-            'payment_for' => $request->dataTransaction['payment_for'],
-            'receipt_doc' => '',
-            'signature_name' => $request->dataTransaction['signature']['name'],
-            'signature_image' => $request->dataTransaction['signature']['image'],
-            'created_by' => Auth::user()->id
-        ]);
-
-
-        $invoice_subscription->update(['rest_of_bill' => $rest_of_bill, 'status_id' => $status->id, 'bill_date' => Carbon::parse($request->dataTransaction['date'])->setTimezone('GMT+7')->format('Y-m-d H:i:s')]);
-
-        GenerateReceiptJob::dispatch($transaction);
-
-        return response()->json(['rest_of_bill' => $rest_of_bill]);
     }
 
     public function update(Request $request, $uuid)
@@ -92,20 +147,20 @@ class InvoiceSubscriptionTransactionController extends Controller
         DB::beginTransaction();
         try {
             $transaction = InvoiceSubscriptionTransaction::where('uuid', '=', $uuid)->first();
-            $transaction->update([
-                'invoice_id' => $request->dataTransaction['invoice_subscription'],
-                'partner_id' => $request->dataTransaction['partner']['id'],
-                'partner_name' => $request->dataTransaction['partner']['name'],
-                'date' => Carbon::parse($request->dataTransaction['date'])->setTimezone('GMT+7')->format('Y-m-d H:i:s'),
-                'nominal' => $request->dataTransaction['nominal'],
-                'money' => $request->dataTransaction['money'],
-                'metode' => $request->dataTransaction['metode']['name'] ?? $request->dataTransaction['metode'],
-                'payment_for' => $request->dataTransaction['payment_for'],
-                'receipt_doc' => '',
-                'signature_name' => $request->dataTransaction['signature']['name'],
-                'signature_image' => $request->dataTransaction['signature']['image'],
-                'created_by' => Auth::user()->id
-            ]);
+            $transaction->invoice_id = $request->dataTransaction['invoice_subscription'];
+            $transaction->partner_id = $request->dataTransaction['partner']['id'];
+            $transaction->partner_name = $request->dataTransaction['partner']['name'];
+            $transaction->date = Carbon::parse($request->dataTransaction['date'])->setTimezone('GMT+7')->format('Y-m-d H:i:s');
+            $transaction->nominal = $request->dataTransaction['nominal'];
+            $transaction->money = $request->dataTransaction['money'];
+            $transaction->metode = $request->dataTransaction['metode']['name'] ?? $request->dataTransaction['metode'];
+            $transaction->payment_for = $request->dataTransaction['payment_for'];
+            $transaction->receipt_doc = '';
+            $transaction->signature_name = $request->dataTransaction['signature']['name'];
+            $transaction->signature_image = $request->dataTransaction['signature']['image'];
+            $transaction->created_by = Auth::user()->id;
+            $transaction = $this->generateReceipt($transaction);
+            $transaction->save();
 
             $transaction = InvoiceSubscriptionTransaction::where('uuid', '=', $uuid)->first();
             $invoice_subscription = InvoiceSubscription::with([
@@ -113,7 +168,6 @@ class InvoiceSubscriptionTransactionController extends Controller
                     $query->latest();
                 }
             ])->where('id', '=', $request->dataTransaction['invoice_subscription'])->first();
-
 
             $rest_of_bill = $this->calculateRestOfBill($invoice_subscription);
 
@@ -124,27 +178,26 @@ class InvoiceSubscriptionTransactionController extends Controller
                 ]);
             }
 
+            $status = Status::where('category', 'invoice');
+            if ($rest_of_bill != 0 && count($invoice_subscription->transactions) > 0) {
+                $status = $status->where('name', 'sebagian')->first();
+            } else {
+                $status = $status->where('name', 'lunas')->first();
+            }
+
+            Storage::delete('public/' . $transaction->receipt_doc);
+
+            $invoice_subscription->update(['rest_of_bill' => $rest_of_bill, 'status_id' => $status->id, 'bill_date' => Carbon::parse($invoice_subscription->transactions->first()->date)->setTimezone('GMT+7')->format('Y-m-d H:i:s')]);
+
             DB::commit();
+
+            return response()->json(['rest_of_bill' => $rest_of_bill]);
 
         } catch (\Exception $e) {
             DB::rollBack();
             return response()->json(['error' => $e->getMessage()], 500);
         }
 
-        $status = Status::where('category', 'invoice');
-        if ($rest_of_bill != 0 && count($invoice_subscription->transactions) > 0) {
-            $status = $status->where('name', 'sebagian')->first();
-        } else {
-            $status = $status->where('name', 'lunas')->first();
-        }
-
-        Storage::delete('public/' . $transaction->receipt_doc);
-
-        $invoice_subscription->update(['rest_of_bill' => $rest_of_bill, 'status_id' => $status->id, 'bill_date' => Carbon::parse($invoice_subscription->transactions->first()->date)->setTimezone('GMT+7')->format('Y-m-d H:i:s')]);
-
-        GenerateReceiptJob::dispatch($transaction);
-
-        return response()->json(['rest_of_bill' => $rest_of_bill]);
 
     }
 

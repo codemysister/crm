@@ -41,11 +41,21 @@ class InvoiceGeneralTransactionController extends Controller
             return $map[$number - 1];
         }
 
+        $lastDataCurrentMonth = InvoiceGeneralTransaction::whereYear('created_at', $currentYear)
+            ->whereMonth('created_at', $currentMonth)->latest()->first();
+
+        $code = null;
+        if ($lastDataCurrentMonth == null) {
+            $code = "000";
+        } else {
+            $parts = explode("/", $lastDataCurrentMonth->code);
+            $code = $parts[1];
+        }
+        $codeInteger = intval($code) + 1;
+        $latestCode = str_pad($codeInteger, strlen($code), "0", STR_PAD_LEFT);
         $romanMonth = intToRoman($currentMonth);
-        $latestData = InvoiceGeneralTransaction::latest()->first() ?? "#KW/000/$romanMonth/$currentYear";
-        $lastCode = $latestData ? explode('/', $latestData->code ?? $latestData)[1] : 0;
-        $newCode = str_pad((int) $lastCode + 1, 3, '0', STR_PAD_LEFT);
-        $newCode = "#KW/$newCode/$romanMonth/$currentYear";
+
+        $newCode = "#KW/$latestCode/$romanMonth/$currentYear";
         return $newCode;
     }
 
@@ -121,7 +131,6 @@ class InvoiceGeneralTransactionController extends Controller
 
             $invoice_general->update(['rest_of_bill' => $rest_of_bill, 'status_id' => $status->id, 'bill_date' => Carbon::parse($request->date)->setTimezone('GMT+7')->format('Y-m-d H:i:s')]);
 
-            // GenerateReceiptJob::dispatch($transaction);
             DB::commit();
             return response()->json(['rest_of_bill' => $rest_of_bill]);
 

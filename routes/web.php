@@ -345,12 +345,18 @@ Route::middleware('auth')->group(function () {
     Route::get('/invoice_subscriptions', [InvoiceSubscriptionController::class, 'index'])->name('invoice_subscriptions.view')->middleware(['can:lihat invoice langganan']);
     Route::get('/invoice_subscriptions/create', [InvoiceSubscriptionController::class, 'create'])->name('invoice_subscriptions.create');
     Route::post('/invoice_subscriptions/filter', [InvoiceSubscriptionController::class, 'filter'])->name('invoice_subscriptions.filter')->middleware(['can:tambah invoice langganan']);
+    Route::post('/invoice_subscriptions/logs/filter', [InvoiceSubscriptionController::class, 'logFilter'])->name('invoice_subscriptions.log.filter');
     Route::post('/invoice_subscriptions', [InvoiceSubscriptionController::class, 'store'])->name('invoice_subscriptions.store')->middleware(['can:tambah invoice langganan']);
     Route::post('/invoice_subscriptions/batch', [InvoiceSubscriptionController::class, 'storeBatch'])->name('invoice_subscriptions.store.batch')->middleware(['can:tambah invoice langganan']);
     Route::post('/invoice_subscriptions/zip', [InvoiceSubscriptionController::class, 'zipAll'])->name('invoice_subscriptions.zip')->middleware(['can:lihat invoice langganan']);
-    Route::put('/invoice_subscriptions/{invoice_subscriptions:uuid}', [InvoiceSubscriptionController::class, 'update'])->name('invoice_subscriptions.update')->middleware(['can:hapus invoice langganan']);
+    Route::put('/invoice_subscriptions/{invoice_subscriptions:uuid}/restore', [InvoiceSubscriptionController::class, 'restore'])->name('invoice_subscriptions.restore');
+    Route::put('/invoice_subscriptions/{invoice_subscriptions:uuid}', [InvoiceSubscriptionController::class, 'update'])->name('invoice_subscriptions.update')->middleware(['can:edit invoice langganan']);
+    Route::delete('/invoice_subscriptions/logs', [InvoiceSubscriptionController::class, 'destroyLogs'])->name('invoice_subscriptions.logs.destroy');
+    Route::delete('/invoice_subscriptions/{invoice_subscriptions:uuid}/force', [InvoiceSubscriptionController::class, 'destroyForce'])->name('invoice_subscriptions.destroy.force')->middleware(['can:hapus sla']);
     Route::delete('/invoice_subscriptions/{invoice_subscriptions:uuid}', [InvoiceSubscriptionController::class, 'destroy'])->name('invoice_subscriptions.destroy')->middleware(['can:hapus invoice langganan']);
+    Route::get('/api/invoice_subscriptions/logs', [InvoiceSubscriptionController::class, 'apiGetLogs'])->name('api.invoice_subscriptions.logs');
     Route::get('/api/invoice_subscriptions/bundle', [InvoiceSubscriptionController::class, 'apiGetInvoiceSubscriptionsWithBundle'])->name('api.invoice_subscriptions.bundle');
+    Route::get('api/invoice_subscriptions/arsip', [InvoiceSubscriptionController::class, 'apiGetArsip'])->name('invoice_subscriptions.arsip');
     Route::get('/api/invoice_subscriptions', [InvoiceSubscriptionController::class, 'apiGetInvoiceSubscriptions'])->name('api.invoice_subscriptions');
     Route::get('/invoice_langganan/{uuid}', [InvoiceSubscriptionController::class, 'editInvoice']);
 

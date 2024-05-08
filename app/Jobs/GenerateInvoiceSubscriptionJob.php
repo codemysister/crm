@@ -36,7 +36,7 @@ class GenerateInvoiceSubscriptionJob implements ShouldQueue
             $path = "invoice_langganan/invoice_langganan-" . $this->invoice_subscription->uuid . ".pdf";
 
             $this->invoice_subscription->update([
-                "invoice_subscription_doc" => $path
+                "invoice_subscription_doc" => "storage/" . $path
             ]);
 
             $html = view('pdf.invoice_subscription', ["invoice_subscription" => $this->invoice_subscription, "bills" => $this->bills])->render();

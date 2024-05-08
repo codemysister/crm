@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { Button } from "primereact/button";
 import { DataTable } from "primereact/datatable";
 import { Dialog } from "primereact/dialog";
-import { Head, Link, useForm } from "@inertiajs/react";
+import { Head, Link, router, useForm } from "@inertiajs/react";
 import { Column } from "primereact/column";
 import { useRef } from "react";
 import { FilterMatchMode } from "primereact/api";
@@ -14,6 +14,9 @@ import { Toast } from "primereact/toast";
 import { Badge } from "primereact/badge";
 import { InputNumber } from "primereact/inputnumber";
 import { Calendar } from "primereact/calendar";
+import { upperCaseEachWord } from "@/Utils/UppercaseEachWord";
+import LoadingDocument from "@/Components/LoadingDocument";
+import { BlockUI } from "primereact/blockui";
 
 const BASE_URL = import.meta.env.VITE_BASE_URL;
 
@@ -29,6 +32,7 @@ const Edit = ({
     const [signatures, setSignatures] = useState(signaturesProp);
     const [bills, setBills] = useState([]);
     const [dialogVisible, setDialogVisible] = useState(false);
+    const [blocked, setBlocked] = useState(false);
 
     const [theme, setTheme] = useState(localStorage.theme);
     useEffect(() => {
@@ -98,6 +102,14 @@ const Edit = ({
     useEffect(() => {
         calculateTotal();
     }, [data.partner, dialogVisible, data.paid_off]);
+
+    useEffect(() => {
+        if (processing) {
+            setBlocked(true);
+        } else {
+            setBlocked(false);
+        }
+    }, [processing]);
 
     const [filters, setFilters] = useState({
         global: { value: null, matchMode: FilterMatchMode.CONTAINS },
@@ -277,7 +289,7 @@ const Edit = ({
         put("/invoice_subscriptions/" + data.uuid, {
             onSuccess: () => {
                 showSuccess("Tambah");
-                window.location = "/invoice_subscriptions";
+                router.get("/invoice_subscriptions");
             },
 
             onError: () => {
@@ -290,854 +302,915 @@ const Edit = ({
         <>
             <Head title="Invoice Langganan"></Head>
             <Toast ref={toast} />
-            <div className="h-screen max-h-screen overflow-y-hidden">
-                <div className="flex flex-col h-screen max-h-screen overflow-hidden md:flex-row z-40 relative gap-5">
-                    <div className="md:w-[35%] overflow-y-auto h-screen max-h-screen p-5">
-                        <Card>
-                            <div className="flex justify-between items-center mb-4">
-                                <h1 className="font-bold text-2xl">
-                                    Invoice Langganan
-                                </h1>
-                                <Link href="/invoice_subscriptions">
-                                    <svg
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        fill="none"
-                                        viewBox="0 0 24 24"
-                                        stroke-width="1.5"
-                                        stroke="currentColor"
-                                        class="w-6 h-6"
-                                    >
-                                        <path
-                                            stroke-linecap="round"
-                                            stroke-linejoin="round"
-                                            d="M8.25 9V5.25A2.25 2.25 0 0 1 10.5 3h6a2.25 2.25 0 0 1 2.25 2.25v13.5A2.25 2.25 0 0 1 16.5 21h-6a2.25 2.25 0 0 1-2.25-2.25V15m-3 0-3-3m0 0 3-3m-3 3H15"
-                                        />
-                                    </svg>
-                                </Link>
-                            </div>
-                            <div className="flex flex-col">
-                                <Button
-                                    label="Tambah Tagihan"
-                                    icon="pi pi-external-link"
-                                    onClick={() => setDialogVisible(true)}
-                                />
-
-                                <div className="flex flex-col mt-3">
-                                    <InputText
-                                        value={data.code}
-                                        onChange={(e) =>
-                                            setData("code", e.target.value)
-                                        }
-                                        className="dark:bg-gray-300"
-                                        id="code"
-                                        aria-describedby="code-help"
-                                        hidden
-                                    />
+            <BlockUI blocked={blocked} template={LoadingDocument}>
+                <div className="h-screen max-h-screen overflow-y-hidden">
+                    <div className="flex flex-col h-screen max-h-screen overflow-hidden md:flex-row z-40 relative gap-5">
+                        <div className="md:w-[35%] overflow-y-auto h-screen max-h-screen p-5">
+                            <Card>
+                                <div className="flex justify-between items-center mb-4">
+                                    <h1 className="font-bold text-2xl">
+                                        Invoice Langganan
+                                    </h1>
+                                    <Link href="/invoice_subscriptions">
+                                        <svg
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            fill="none"
+                                            viewBox="0 0 24 24"
+                                            stroke-width="1.5"
+                                            stroke="currentColor"
+                                            class="w-6 h-6"
+                                        >
+                                            <path
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                d="M8.25 9V5.25A2.25 2.25 0 0 1 10.5 3h6a2.25 2.25 0 0 1 2.25 2.25v13.5A2.25 2.25 0 0 1 16.5 21h-6a2.25 2.25 0 0 1-2.25-2.25V15m-3 0-3-3m0 0 3-3m-3 3H15"
+                                            />
+                                        </svg>
+                                    </Link>
                                 </div>
-
-                                <div className="flex flex-col mt-3">
-                                    <label htmlFor="lembaga">Lembaga *</label>
-                                    <Dropdown
-                                        value={data.partner}
-                                        dataKey="id"
-                                        onChange={(e) => {
-                                            setData((data) => ({
-                                                ...data,
-                                                partner: {
-                                                    ...data.partner,
-                                                    id: e.target.value.id,
-                                                    name: e.target.value.name,
-                                                    province:
-                                                        e.target.value.province,
-                                                    regency:
-                                                        e.target.value.regency,
-                                                },
-                                            }));
-                                        }}
-                                        onFocus={() => {
-                                            triggerInputFocus(
-                                                animatePartnerNameRef
-                                            );
-                                        }}
-                                        onShow={() => {
-                                            triggerInputFocus(
-                                                animatePartnerNameRef
-                                            );
-                                        }}
-                                        onHide={() => {
-                                            stopAnimateInputFocus(
-                                                animatePartnerNameRef
-                                            );
-                                        }}
-                                        options={partners}
-                                        optionLabel="name"
-                                        placeholder="Pilih Lembaga"
-                                        filter
-                                        valueTemplate={selectedOptionTemplate}
-                                        itemTemplate={optionTemplate}
-                                        className="w-full md:w-14rem"
+                                <div className="flex flex-col">
+                                    <Button
+                                        label="Tambah Tagihan"
+                                        icon="pi pi-external-link"
+                                        onClick={() => setDialogVisible(true)}
                                     />
-                                </div>
 
-                                <div className="flex flex-col mt-3">
-                                    <label htmlFor="date">Tanggal *</label>
-                                    <Calendar
-                                        value={
-                                            data.date
-                                                ? new Date(data.date)
-                                                : null
-                                        }
-                                        style={{ height: "35px" }}
-                                        onChange={(e) => {
-                                            setData("date", e.target.value);
-                                        }}
-                                        onFocus={() => {
-                                            triggerInputFocus(animateDateRef);
-                                        }}
-                                        onShow={() => {
-                                            triggerInputFocus(animateDateRef);
-                                        }}
-                                        onHide={() => {
-                                            stopAnimateInputFocus(
-                                                animateDateRef
-                                            );
-                                        }}
-                                        onBlur={() => {
-                                            stopAnimateInputFocus(
-                                                animateDateRef
-                                            );
-                                        }}
-                                        showIcon
-                                        dateFormat="dd-mm-yy"
-                                        className={`w-full md:w-14rem ${
-                                            errors.due_date && "p-invalid"
-                                        }`}
-                                    />
-                                </div>
-                                <div className="flex flex-col mt-3">
-                                    <label htmlFor="due_date">
-                                        Jatuh Tempo *
-                                    </label>
-                                    <Calendar
-                                        value={
-                                            data.due_date
-                                                ? new Date(data.due_date)
-                                                : null
-                                        }
-                                        style={{ height: "35px" }}
-                                        onChange={(e) => {
-                                            setData("due_date", e.target.value);
-                                        }}
-                                        onFocus={() => {
-                                            triggerInputFocus(
-                                                animateDueDateRef
-                                            );
-                                        }}
-                                        onShow={() => {
-                                            triggerInputFocus(
-                                                animateDueDateRef
-                                            );
-                                        }}
-                                        onHide={() => {
-                                            stopAnimateInputFocus(
-                                                animateDueDateRef
-                                            );
-                                        }}
-                                        onBlur={() => {
-                                            stopAnimateInputFocus(
-                                                animateDueDateRef
-                                            );
-                                        }}
-                                        showIcon
-                                        dateFormat="dd-mm-yy"
-                                        className={`w-full md:w-14rem ${
-                                            errors.due_date && "p-invalid"
-                                        }`}
-                                    />
-                                </div>
-
-                                <div className="flex flex-col mt-3">
-                                    <label htmlFor="paid_off">
-                                        Terbayarkan *
-                                    </label>
-                                    <InputNumber
-                                        value={data.paid_off}
-                                        onChange={(e) => {
-                                            setData((data) => ({
-                                                ...data,
-                                                paid_off: e.value,
-                                            }));
-                                        }}
-                                        onFocus={() => {
-                                            triggerInputFocus(
-                                                animatePaidOffRef
-                                            );
-                                        }}
-                                        onBlur={() => {
-                                            stopAnimateInputFocus(
-                                                animatePaidOffRef
-                                            );
-                                        }}
-                                        defaultValue={0}
-                                        className="dark:bg-gray-300"
-                                        id="partner_address"
-                                        aria-describedby="partner_address-help"
-                                        locale="id-ID"
-                                    />
-                                </div>
-
-                                <div className="flex flex-col mt-3">
-                                    <label htmlFor="payment_metode">
-                                        Metode Pembayaran *
-                                    </label>
-                                    <Dropdown
-                                        value={data.payment_metode}
-                                        onChange={(e) => {
-                                            setData(
-                                                "payment_metode",
-                                                e.target.value
-                                            );
-                                        }}
-                                        onFocus={() => {
-                                            triggerInputFocus(
-                                                animatePaymentMetodeRef
-                                            );
-                                        }}
-                                        onBlur={() => {
-                                            stopAnimateInputFocus(
-                                                animatePaymentMetodeRef
-                                            );
-                                        }}
-                                        options={[
-                                            { name: "cazhbox" },
-                                            { name: "payment link" },
-                                        ]}
-                                        optionLabel="name"
-                                        optionValue="name"
-                                        placeholder="Pilih Metode Pembayaran"
-                                        valueTemplate={selectedOptionTemplate}
-                                        itemTemplate={optionTemplate}
-                                        className="w-full md:w-14rem"
-                                        editable
-                                    />
-                                </div>
-
-                                {data.payment_metode === "payment link" && (
                                     <div className="flex flex-col mt-3">
-                                        <label htmlFor="partner_address">
-                                            Link Xendit *
-                                        </label>
                                         <InputText
-                                            value={data.xendit_link}
+                                            value={data.code}
                                             onChange={(e) =>
-                                                setData(
-                                                    "xendit_link",
-                                                    e.target.value
-                                                )
+                                                setData("code", e.target.value)
                                             }
+                                            className="dark:bg-gray-300"
+                                            id="code"
+                                            aria-describedby="code-help"
+                                            hidden
+                                        />
+                                    </div>
+
+                                    <div className="flex flex-col mt-3">
+                                        <label htmlFor="lembaga">
+                                            Lembaga *
+                                        </label>
+                                        <Dropdown
+                                            value={data.partner}
+                                            dataKey="id"
+                                            onChange={(e) => {
+                                                let oldBills =
+                                                    data.bills.filter(
+                                                        (data) => {
+                                                            return !(
+                                                                "id" in data
+                                                            );
+                                                        }
+                                                    );
+
+                                                let newBills =
+                                                    e.target.value.subscription;
+
+                                                let bills = [...oldBills];
+                                                if (newBills) {
+                                                    bills = [
+                                                        newBills,
+                                                        ...oldBills,
+                                                    ];
+                                                }
+                                                setData((data) => ({
+                                                    ...data,
+                                                    partner: {
+                                                        ...data.partner,
+                                                        id: e.target.value.id,
+                                                        name: e.target.value
+                                                            .name,
+                                                        province:
+                                                            e.target.value
+                                                                .province,
+                                                        regency:
+                                                            e.target.value
+                                                                .regency,
+                                                    },
+                                                    bills: bills,
+                                                }));
+                                            }}
+                                            onFocus={() => {
+                                                triggerInputFocus(
+                                                    animatePartnerNameRef
+                                                );
+                                            }}
+                                            onShow={() => {
+                                                triggerInputFocus(
+                                                    animatePartnerNameRef
+                                                );
+                                            }}
+                                            onHide={() => {
+                                                stopAnimateInputFocus(
+                                                    animatePartnerNameRef
+                                                );
+                                            }}
+                                            options={partners}
+                                            optionLabel="name"
+                                            placeholder="Pilih Lembaga"
+                                            filter
+                                            valueTemplate={
+                                                selectedOptionTemplate
+                                            }
+                                            itemTemplate={optionTemplate}
+                                            className="w-full md:w-14rem"
+                                        />
+                                    </div>
+
+                                    <div className="flex flex-col mt-3">
+                                        <label htmlFor="date">Tanggal *</label>
+                                        <Calendar
+                                            value={
+                                                data.date
+                                                    ? new Date(data.date)
+                                                    : null
+                                            }
+                                            style={{ height: "35px" }}
+                                            onChange={(e) => {
+                                                setData("date", e.target.value);
+                                            }}
+                                            onFocus={() => {
+                                                triggerInputFocus(
+                                                    animateDateRef
+                                                );
+                                            }}
+                                            onShow={() => {
+                                                triggerInputFocus(
+                                                    animateDateRef
+                                                );
+                                            }}
+                                            onHide={() => {
+                                                stopAnimateInputFocus(
+                                                    animateDateRef
+                                                );
+                                            }}
+                                            onBlur={() => {
+                                                stopAnimateInputFocus(
+                                                    animateDateRef
+                                                );
+                                            }}
+                                            showIcon
+                                            dateFormat="dd-mm-yy"
+                                            className={`w-full md:w-14rem ${
+                                                errors.due_date && "p-invalid"
+                                            }`}
+                                        />
+                                    </div>
+                                    <div className="flex flex-col mt-3">
+                                        <label htmlFor="due_date">
+                                            Jatuh Tempo *
+                                        </label>
+                                        <Calendar
+                                            value={
+                                                data.due_date
+                                                    ? new Date(data.due_date)
+                                                    : null
+                                            }
+                                            style={{ height: "35px" }}
+                                            onChange={(e) => {
+                                                setData(
+                                                    "due_date",
+                                                    e.target.value
+                                                );
+                                            }}
+                                            onFocus={() => {
+                                                triggerInputFocus(
+                                                    animateDueDateRef
+                                                );
+                                            }}
+                                            onShow={() => {
+                                                triggerInputFocus(
+                                                    animateDueDateRef
+                                                );
+                                            }}
+                                            onHide={() => {
+                                                stopAnimateInputFocus(
+                                                    animateDueDateRef
+                                                );
+                                            }}
+                                            onBlur={() => {
+                                                stopAnimateInputFocus(
+                                                    animateDueDateRef
+                                                );
+                                            }}
+                                            showIcon
+                                            dateFormat="dd-mm-yy"
+                                            className={`w-full md:w-14rem ${
+                                                errors.due_date && "p-invalid"
+                                            }`}
+                                        />
+                                    </div>
+
+                                    <div className="flex flex-col mt-3">
+                                        <label htmlFor="paid_off">
+                                            Terbayarkan *
+                                        </label>
+                                        <InputNumber
+                                            value={data.paid_off}
+                                            onChange={(e) => {
+                                                setData((data) => ({
+                                                    ...data,
+                                                    paid_off: e.value,
+                                                }));
+                                            }}
+                                            onFocus={() => {
+                                                triggerInputFocus(
+                                                    animatePaidOffRef
+                                                );
+                                            }}
+                                            onBlur={() => {
+                                                stopAnimateInputFocus(
+                                                    animatePaidOffRef
+                                                );
+                                            }}
+                                            defaultValue={0}
                                             className="dark:bg-gray-300"
                                             id="partner_address"
                                             aria-describedby="partner_address-help"
+                                            locale="id-ID"
                                         />
                                     </div>
-                                )}
 
-                                <div className="flex flex-col mt-3">
-                                    <label htmlFor="signature">
-                                        Tanda Tangan *
-                                    </label>
-                                    <Dropdown
-                                        value={data.signature}
-                                        onChange={(e) => {
-                                            setData("signature", {
-                                                ...data.signature,
-                                                name: e.target.value.name,
-                                                position:
-                                                    e.target.value.position,
-                                                image: e.target.value.image,
-                                            });
-                                        }}
-                                        dataKey="name"
-                                        options={signatures}
-                                        optionLabel="name"
-                                        placeholder="Pilih Tanda Tangan"
-                                        filter
-                                        valueTemplate={selectedOptionTemplate}
-                                        itemTemplate={optionSignatureTemplate}
-                                        className="w-full md:w-14rem"
-                                        onShow={() => {
-                                            triggerInputFocus(
-                                                animateSignatureNameRef
-                                            );
-                                        }}
-                                        onHide={() => {
-                                            stopAnimateInputFocus(
-                                                animateSignatureNameRef
-                                            );
-                                        }}
-                                    />
-                                </div>
-
-                                <div className="flex-flex-col mt-3">
-                                    <form onSubmit={handleSubmitForm}>
-                                        <Button className="mx-auto justify-center block">
-                                            Submit
-                                        </Button>
-                                    </form>
-                                </div>
-                            </div>
-                        </Card>
-                    </div>
-
-                    <Dialog
-                        header="Input Produk"
-                        visible={dialogVisible}
-                        style={{ width: "85vw" }}
-                        maximizable
-                        modal
-                        contentStyle={{ height: "550px" }}
-                        onHide={() => setDialogVisible(false)}
-                        footer={dialogFooterTemplate}
-                    >
-                        <div className="flex my-5 gap-3">
-                            <Button
-                                label="Tambah Inputan Tagihan"
-                                icon="pi pi-plus"
-                                onClick={() => {
-                                    let inputNew = {
-                                        bill: null,
-                                        nominal: 0,
-                                        ppn: 0,
-                                        total_ppn: 0,
-                                        total_bill: 0,
-                                    };
-
-                                    let updatedbills = [
-                                        ...data.bills,
-                                        inputNew,
-                                    ];
-
-                                    setBills((prev) => (prev = inputNew));
-                                    setData("bills", updatedbills);
-                                }}
-                            />
-                        </div>
-
-                        {data.bills?.map((bill, index) => {
-                            const no = index + 1;
-                            return (
-                                <div
-                                    className="flex gap-5 mt-2 items-center"
-                                    key={bill + index}
-                                >
-                                    <div>
-                                        <Badge value={no} size="large"></Badge>
-                                    </div>
-
-                                    <div className="flex flex-col">
-                                        <label htmlFor="partner_address">
-                                            Tagihan *
+                                    <div className="flex flex-col mt-3">
+                                        <label htmlFor="payment_metode">
+                                            Metode Pembayaran *
                                         </label>
-                                        <InputText
-                                            value={bill.bill}
-                                            onChange={(e) =>
-                                                handleInputChange(
-                                                    index,
-                                                    "bill",
+                                        <Dropdown
+                                            value={data.payment_metode}
+                                            onChange={(e) => {
+                                                setData(
+                                                    "payment_metode",
                                                     e.target.value
-                                                )
+                                                );
+                                            }}
+                                            onFocus={() => {
+                                                triggerInputFocus(
+                                                    animatePaymentMetodeRef
+                                                );
+                                            }}
+                                            onBlur={() => {
+                                                stopAnimateInputFocus(
+                                                    animatePaymentMetodeRef
+                                                );
+                                            }}
+                                            options={[
+                                                { name: "cazhbox" },
+                                                { name: "payment link" },
+                                            ]}
+                                            optionLabel="name"
+                                            optionValue="name"
+                                            placeholder="Pilih Metode Pembayaran"
+                                            valueTemplate={
+                                                selectedOptionTemplate
                                             }
-                                            className="dark:bg-gray-300"
-                                            id="bill"
-                                            aria-describedby="bill-help"
+                                            itemTemplate={optionTemplate}
+                                            className="w-full md:w-14rem"
+                                            editable
                                         />
                                     </div>
 
-                                    <div className="flex">
-                                        <div className="flex flex-col">
-                                            <label htmlFor="nominal">
-                                                Nominal *
+                                    {data.payment_metode === "payment link" && (
+                                        <div className="flex flex-col mt-3">
+                                            <label htmlFor="partner_address">
+                                                Link Xendit *
                                             </label>
-                                            <InputNumber
-                                                value={bill.nominal}
+                                            <InputText
+                                                value={data.xendit_link}
                                                 onChange={(e) =>
-                                                    handleInputChange(
-                                                        index,
-                                                        "nominal",
-                                                        e.value
+                                                    setData(
+                                                        "xendit_link",
+                                                        e.target.value
                                                     )
                                                 }
                                                 className="dark:bg-gray-300"
-                                                id="nominal"
-                                                aria-describedby="nominal-help"
-                                                locale="id-ID"
+                                                id="partner_address"
+                                                aria-describedby="partner_address-help"
                                             />
                                         </div>
+                                    )}
+
+                                    <div className="flex flex-col mt-3">
+                                        <label htmlFor="signature">
+                                            Tanda Tangan *
+                                        </label>
+                                        <Dropdown
+                                            value={data.signature}
+                                            onChange={(e) => {
+                                                setData("signature", {
+                                                    ...data.signature,
+                                                    name: e.target.value.name,
+                                                    position:
+                                                        e.target.value.position,
+                                                    image: e.target.value.image,
+                                                });
+                                            }}
+                                            dataKey="name"
+                                            options={signatures}
+                                            optionLabel="name"
+                                            placeholder="Pilih Tanda Tangan"
+                                            filter
+                                            valueTemplate={
+                                                selectedOptionTemplate
+                                            }
+                                            itemTemplate={
+                                                optionSignatureTemplate
+                                            }
+                                            className="w-full md:w-14rem"
+                                            onShow={() => {
+                                                triggerInputFocus(
+                                                    animateSignatureNameRef
+                                                );
+                                            }}
+                                            onHide={() => {
+                                                stopAnimateInputFocus(
+                                                    animateSignatureNameRef
+                                                );
+                                            }}
+                                        />
                                     </div>
 
-                                    <div className="flex">
+                                    <div className="flex-flex-col mt-3">
+                                        <form onSubmit={handleSubmitForm}>
+                                            <Button className="mx-auto justify-center block">
+                                                Submit
+                                            </Button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </Card>
+                        </div>
+
+                        <Dialog
+                            header="Input Produk"
+                            visible={dialogVisible}
+                            style={{ width: "85vw" }}
+                            maximizable
+                            modal
+                            contentStyle={{ height: "550px" }}
+                            onHide={() => setDialogVisible(false)}
+                            footer={dialogFooterTemplate}
+                        >
+                            <div className="flex my-5 gap-3">
+                                <Button
+                                    label="Tambah Inputan Tagihan"
+                                    icon="pi pi-plus"
+                                    onClick={() => {
+                                        let inputNew = {
+                                            bill: null,
+                                            nominal: 0,
+                                            ppn: 0,
+                                            total_ppn: 0,
+                                            total_bill: 0,
+                                        };
+
+                                        let updatedbills = [
+                                            ...data.bills,
+                                            inputNew,
+                                        ];
+
+                                        setBills((prev) => (prev = inputNew));
+                                        setData("bills", updatedbills);
+                                    }}
+                                />
+                            </div>
+
+                            {data.bills?.map((bill, index) => {
+                                const no = index + 1;
+                                return (
+                                    <div
+                                        className="flex gap-5 mt-2 items-center"
+                                        key={bill + index}
+                                    >
+                                        <div>
+                                            <Badge
+                                                value={no}
+                                                size="large"
+                                            ></Badge>
+                                        </div>
+
                                         <div className="flex flex-col">
                                             <label htmlFor="partner_address">
-                                                Pajak (%)
+                                                Tagihan *
                                             </label>
-                                            <InputNumber
-                                                value={bill.ppn}
+                                            <InputText
+                                                value={bill.bill}
                                                 onChange={(e) =>
                                                     handleInputChange(
                                                         index,
-                                                        "ppn",
-                                                        e.value
+                                                        "bill",
+                                                        e.target.value
                                                     )
                                                 }
                                                 className="dark:bg-gray-300"
-                                                id="ppn"
-                                                aria-describedby="ppn-help"
-                                                keyfilter="int"
-                                                locale="id-ID"
+                                                id="bill"
+                                                aria-describedby="bill-help"
+                                            />
+                                        </div>
+
+                                        <div className="flex">
+                                            <div className="flex flex-col">
+                                                <label htmlFor="nominal">
+                                                    Nominal *
+                                                </label>
+                                                <InputNumber
+                                                    value={bill.nominal}
+                                                    onChange={(e) =>
+                                                        handleInputChange(
+                                                            index,
+                                                            "nominal",
+                                                            e.value
+                                                        )
+                                                    }
+                                                    className="dark:bg-gray-300"
+                                                    id="nominal"
+                                                    aria-describedby="nominal-help"
+                                                    locale="id-ID"
+                                                />
+                                            </div>
+                                        </div>
+
+                                        <div className="flex">
+                                            <div className="flex flex-col">
+                                                <label htmlFor="partner_address">
+                                                    Pajak (%)
+                                                </label>
+                                                <InputNumber
+                                                    value={bill.ppn}
+                                                    onChange={(e) =>
+                                                        handleInputChange(
+                                                            index,
+                                                            "ppn",
+                                                            e.value
+                                                        )
+                                                    }
+                                                    className="dark:bg-gray-300"
+                                                    id="ppn"
+                                                    aria-describedby="ppn-help"
+                                                    keyfilter="int"
+                                                    locale="id-ID"
+                                                />
+                                            </div>
+                                        </div>
+
+                                        <div className="flex">
+                                            <div className="flex flex-col">
+                                                <label htmlFor="total_bill">
+                                                    Total PPN *
+                                                </label>
+                                                <InputNumber
+                                                    value={bill.total_ppn}
+                                                    className="dark:bg-gray-300"
+                                                    id="total_bill"
+                                                    aria-describedby="total_bill-help"
+                                                    locale="id-ID"
+                                                    disabled
+                                                />
+                                            </div>
+                                        </div>
+                                        <div className="flex">
+                                            <div className="flex flex-col">
+                                                <label htmlFor="total_bill">
+                                                    Jumlah *
+                                                </label>
+                                                <InputNumber
+                                                    value={bill.total_bill}
+                                                    className="dark:bg-gray-300"
+                                                    id="total_bill"
+                                                    aria-describedby="total_bill-help"
+                                                    locale="id-ID"
+                                                    disabled
+                                                />
+                                            </div>
+                                        </div>
+
+                                        <div className="flex self-center pt-4 ">
+                                            <Button
+                                                className="bg-red-500 h-1 w-1 shadow-md rounded-full "
+                                                icon={() => (
+                                                    <i
+                                                        className="pi pi-minus"
+                                                        style={{
+                                                            fontSize: "0.7rem",
+                                                        }}
+                                                    ></i>
+                                                )}
+                                                onClick={() => {
+                                                    const updatedbills = [
+                                                        ...data.bills,
+                                                    ];
+
+                                                    updatedbills.splice(
+                                                        index,
+                                                        1
+                                                    );
+
+                                                    setData((prevData) => ({
+                                                        ...prevData,
+                                                        bills: updatedbills,
+                                                    }));
+                                                }}
+                                                aria-controls="popup_menu_right"
+                                                aria-haspopup
                                             />
                                         </div>
                                     </div>
+                                );
+                            })}
+                        </Dialog>
 
-                                    <div className="flex">
-                                        <div className="flex flex-col">
-                                            <label htmlFor="total_bill">
-                                                Total PPN *
-                                            </label>
-                                            <InputNumber
-                                                value={bill.total_ppn}
-                                                className="dark:bg-gray-300"
-                                                id="total_bill"
-                                                aria-describedby="total_bill-help"
-                                                locale="id-ID"
-                                                disabled
-                                            />
-                                        </div>
-                                    </div>
-                                    <div className="flex">
-                                        <div className="flex flex-col">
-                                            <label htmlFor="total_bill">
-                                                Jumlah *
-                                            </label>
-                                            <InputNumber
-                                                value={bill.total_bill}
-                                                className="dark:bg-gray-300"
-                                                id="total_bill"
-                                                aria-describedby="total_bill-help"
-                                                locale="id-ID"
-                                                disabled
-                                            />
-                                        </div>
-                                    </div>
-
-                                    <div className="flex self-center pt-4 ">
-                                        <Button
-                                            className="bg-red-500 h-1 w-1 shadow-md rounded-full "
-                                            icon={() => (
-                                                <i
-                                                    className="pi pi-minus"
-                                                    style={{
-                                                        fontSize: "0.7rem",
-                                                    }}
-                                                ></i>
-                                            )}
-                                            onClick={() => {
-                                                const updatedbills = [
-                                                    ...data.bills,
-                                                ];
-
-                                                updatedbills.splice(index, 1);
-
-                                                setData((prevData) => ({
-                                                    ...prevData,
-                                                    bills: updatedbills,
-                                                }));
-                                            }}
-                                            aria-controls="popup_menu_right"
-                                            aria-haspopup
+                        <div className="md:w-[65%] hidden md:block text-sm h-screen max-h-screen overflow-y-auto p-5">
+                            <header>
+                                <div className="flex justify-between items-center">
+                                    <div className="w-full">
+                                        <img
+                                            src="/assets/img/cazh.png"
+                                            alt=""
+                                            className="float-left w-1/3 h-1/3"
                                         />
                                     </div>
+                                    <div className="w-full text-right text-xs">
+                                        <h2 className="font-bold">
+                                            PT CAZH TEKNOLOGI INOVASI
+                                        </h2>
+                                        <p>
+                                            Bonavida Park D1, Jl. Raya
+                                            Karanggintung
+                                        </p>
+                                        <p>Kec. Sumbang, Kab. Banyumas,</p>
+                                        <p>Jawa Tengah 53183</p>
+                                        <p>hello@cazh.id</p>
+                                    </div>
                                 </div>
-                            );
-                        })}
-                    </Dialog>
+                            </header>
 
-                    <div className="md:w-[65%] hidden md:block text-sm h-screen max-h-screen overflow-y-auto p-5">
-                        <header>
-                            <div className="flex justify-between items-center">
-                                <div className="w-full">
-                                    <img
-                                        src="/assets/img/cazh.png"
-                                        alt=""
-                                        className="float-left w-1/3 h-1/3"
-                                    />
-                                </div>
-                                <div className="w-full text-right text-xs">
-                                    <h2 className="font-bold">
-                                        PT CAZH TEKNOLOGI INOVASI
-                                    </h2>
-                                    <p>
-                                        Bonavida Park D1, Jl. Raya Karanggintung
-                                    </p>
-                                    <p>Kec. Sumbang, Kab. Banyumas,</p>
-                                    <p>Jawa Tengah 53183</p>
-                                    <p>hello@cazh.id</p>
-                                </div>
-                            </div>
-                        </header>
-
-                        <hr
-                            className="my-[1rem] h-[1px]"
-                            style={{
-                                backgroundColor: "#718096",
-                                border: "none",
-                            }}
-                        />
-
-                        <div class="flex flex-col justify-center mt-10 text-center">
-                            <div
-                                class="font-bold text-purple-800"
-                                style={{ fontSize: "18pt" }}
-                            >
-                                INVOICE LANGGANAN
-                            </div>
-                        </div>
-
-                        <div class="flex justify-between items-center mt-10">
-                            <div className="w-[60%]">
-                                <p class="underline">Ditagihkan Kepada:</p>
-                                <p
-                                    ref={animatePartnerNameRef}
-                                    class="font-bold"
-                                >
-                                    {data.partner.name ?? "{{lembaga}}"}
-                                </p>
-                                <p class="font-bold">
-                                    <span ref={animatePartnerRegencyRef}>
-                                        {data.partner.regency
-                                            ? JSON.parse(data.partner.regency)
-                                                  .name
-                                            : "{{kabupaten}}"}
-                                    </span>
-                                    ,{" "}
-                                    <span ref={animatePartnerProvinceRef}>
-                                        {data.partner.province
-                                            ? JSON.parse(data.partner.province)
-                                                  .name
-                                            : "{{provinsi}}"}
-                                    </span>{" "}
-                                </p>
-                            </div>
-                            <div className="w-[40%]">
-                                <div class="flex flex-row">
-                                    <p className="w-[40%]">Nomor</p>
-                                    <p className="w-[3%]">:</p>
-                                    <p class="font-bold">2024/I/INV/0001</p>
-                                </div>
-                                <div class="flex flex-row">
-                                    <p className="w-[40%]">Tanggal</p>
-                                    <p className="w-[3%]">:</p>
-                                    <p ref={animateDateRef}>
-                                        {data.date
-                                            ? formatDate(data.date)
-                                            : "{{Tanggal}}"}
-                                    </p>
-                                </div>
-                                <div class="flex flex-row">
-                                    <p className="w-[40%]">Jatuh Tempo</p>
-                                    <p className="w-[3%]">:</p>
-                                    <p ref={animateDueDateRef}>
-                                        {data.due_date
-                                            ? formatDate(data.due_date)
-                                            : "{{Jatuh Tempo}}"}
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="w-full mt-10">
-                            <table
+                            <hr
+                                className="my-[1rem] h-[1px]"
                                 style={{
-                                    borderCollapse: "collapse",
-                                    width: "100%",
+                                    backgroundColor: "#718096",
+                                    border: "none",
                                 }}
-                            >
-                                <thead
-                                    style={{
-                                        padding: "10px 10px",
-                                    }}
-                                    className="bg-[#D9D2E9] dark:bg-[#D1D5DB] dark:text-gray-600"
-                                >
-                                    <tr>
-                                        <th
-                                            style={{
-                                                width: "5%",
-                                                border: "1px solid #ded8ee",
-                                                padding: "8px",
-                                                textAlign: "center",
-                                            }}
-                                        >
-                                            No.
-                                        </th>
-                                        <th
-                                            style={{
-                                                width: "35%",
-                                                border: "1px solid #ded8ee",
-                                                padding: "8px",
-                                                textAlign: "center",
-                                            }}
-                                        >
-                                            Tagihan
-                                        </th>
-                                        <th
-                                            style={{
-                                                width: "20%",
-                                                border: "1px solid #ded8ee",
-                                                padding: "8px",
-                                                textAlign: "center",
-                                            }}
-                                        >
-                                            Harga
-                                        </th>
-                                        <th
-                                            style={{
-                                                width: "20%",
-                                                border: "1px solid #ded8ee",
-                                                padding: "8px",
-                                                textAlign: "center",
-                                            }}
-                                        >
-                                            Pajak
-                                        </th>
-                                        <th
-                                            style={{
-                                                width: "20%",
-                                                border: "1px solid #ded8ee",
-                                                padding: "8px",
-                                                textAlign: "center",
-                                            }}
-                                        >
-                                            Jumlah
-                                        </th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {data.bills?.map((bill, key) => {
-                                        return (
-                                            <tr key={key}>
-                                                <td
-                                                    style={{
-                                                        width: "5%",
-                                                        textAlign: "center",
-                                                        border: "1px solid #ded8ee",
-                                                        padding: "8px",
-                                                    }}
-                                                >
-                                                    {key + 1}
-                                                </td>
-                                                <td
-                                                    style={{
-                                                        width: "35%",
-                                                        border: "1px solid #ded8ee",
-                                                        padding: "8px",
-                                                    }}
-                                                >
-                                                    {bill.bill}
-                                                </td>
-                                                <td
-                                                    style={{
-                                                        width: "20%",
-                                                        border: "1px solid #ded8ee",
-                                                        padding: "8px",
-                                                    }}
-                                                >
-                                                    Rp
-                                                    {bill.nominal
-                                                        ? bill.nominal.toLocaleString(
-                                                              "id"
-                                                          )
-                                                        : 0}
-                                                </td>
-                                                <td
-                                                    style={{
-                                                        width: "20%",
-                                                        border: "1px solid #ded8ee",
-                                                        padding: "8px",
-                                                    }}
-                                                >
-                                                    Rp
-                                                    {bill.total_ppn
-                                                        ? bill.total_ppn.toLocaleString(
-                                                              "id"
-                                                          )
-                                                        : 0}
-                                                </td>
-                                                <td
-                                                    style={{
-                                                        width: "20%",
-                                                        border: "1px solid #ded8ee",
-                                                        padding: "8px",
-                                                    }}
-                                                >
-                                                    Rp
-                                                    {bill.total_bill
-                                                        ? bill.total_bill.toLocaleString(
-                                                              "id"
-                                                          )
-                                                        : 0}
-                                                </td>
-                                            </tr>
-                                        );
-                                    })}
+                            />
 
-                                    <tr>
-                                        <td
-                                            colSpan="4"
-                                            style={{
-                                                textAlign: "right",
-                                                padding: "8px",
-                                            }}
-                                        >
-                                            Sub Total
-                                        </td>
-                                        <td
-                                            style={{
-                                                width: "35%",
-                                                border: "1px solid #ded8ee",
-                                                padding: "8px",
-                                            }}
-                                        >
-                                            Rp
-                                            {data.total_nominal
-                                                ? data.total_nominal.toLocaleString(
-                                                      "id"
+                            <div class="flex flex-col justify-center mt-10 text-center">
+                                <div
+                                    class="font-bold text-purple-800"
+                                    style={{ fontSize: "18pt" }}
+                                >
+                                    INVOICE LANGGANAN
+                                </div>
+                            </div>
+
+                            <div class="flex justify-between items-center mt-10">
+                                <div className="w-[60%]">
+                                    <p class="underline">Ditagihkan Kepada:</p>
+                                    <p
+                                        ref={animatePartnerNameRef}
+                                        class="font-bold"
+                                    >
+                                        {data.partner.name ?? "{{lembaga}}"}
+                                    </p>
+                                    <p class="font-bold">
+                                        <span ref={animatePartnerRegencyRef}>
+                                            {data.partner.regency
+                                                ? upperCaseEachWord(
+                                                      JSON.parse(
+                                                          data.partner.regency
+                                                      ).name
                                                   )
-                                                : 0}
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td
-                                            colSpan="4"
-                                            style={{
-                                                textAlign: "right",
-                                                padding: "8px",
-                                            }}
-                                        >
-                                            Diskon/Uang Muka
-                                        </td>
-                                        <td
-                                            style={{
-                                                width: "35%",
-                                                border: "1px solid #ded8ee",
-                                                padding: "8px",
-                                            }}
-                                        >
-                                            <span ref={animatePaidOffRef}>
+                                                : "{{kabupaten}}"}
+                                        </span>
+                                        ,{" "}
+                                        <span ref={animatePartnerProvinceRef}>
+                                            {data.partner.province
+                                                ? upperCaseEachWord(
+                                                      JSON.parse(
+                                                          data.partner.province
+                                                      ).name
+                                                  )
+                                                : "{{provinsi}}"}
+                                        </span>{" "}
+                                    </p>
+                                </div>
+                                <div className="w-[40%]">
+                                    <div class="flex flex-row">
+                                        <p className="w-[40%]">Nomor</p>
+                                        <p className="w-[3%]">:</p>
+                                        <p class="font-bold">2024/I/INV/0001</p>
+                                    </div>
+                                    <div class="flex flex-row">
+                                        <p className="w-[40%]">Tanggal</p>
+                                        <p className="w-[3%]">:</p>
+                                        <p ref={animateDateRef}>
+                                            {data.date
+                                                ? formatDate(data.date)
+                                                : "{{Tanggal}}"}
+                                        </p>
+                                    </div>
+                                    <div class="flex flex-row">
+                                        <p className="w-[40%]">Jatuh Tempo</p>
+                                        <p className="w-[3%]">:</p>
+                                        <p ref={animateDueDateRef}>
+                                            {data.due_date
+                                                ? formatDate(data.due_date)
+                                                : "{{Jatuh Tempo}}"}
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="w-full mt-10">
+                                <table
+                                    style={{
+                                        borderCollapse: "collapse",
+                                        width: "100%",
+                                    }}
+                                >
+                                    <thead
+                                        style={{
+                                            padding: "10px 10px",
+                                        }}
+                                        className="bg-[#D9D2E9] dark:bg-[#D1D5DB] dark:text-gray-600"
+                                    >
+                                        <tr>
+                                            <th
+                                                style={{
+                                                    width: "5%",
+                                                    border: "1px solid #ded8ee",
+                                                    padding: "8px",
+                                                    textAlign: "center",
+                                                }}
+                                            >
+                                                No.
+                                            </th>
+                                            <th
+                                                style={{
+                                                    width: "35%",
+                                                    border: "1px solid #ded8ee",
+                                                    padding: "8px",
+                                                    textAlign: "center",
+                                                }}
+                                            >
+                                                Tagihan
+                                            </th>
+                                            <th
+                                                style={{
+                                                    width: "20%",
+                                                    border: "1px solid #ded8ee",
+                                                    padding: "8px",
+                                                    textAlign: "center",
+                                                }}
+                                            >
+                                                Harga
+                                            </th>
+                                            <th
+                                                style={{
+                                                    width: "20%",
+                                                    border: "1px solid #ded8ee",
+                                                    padding: "8px",
+                                                    textAlign: "center",
+                                                }}
+                                            >
+                                                Pajak
+                                            </th>
+                                            <th
+                                                style={{
+                                                    width: "20%",
+                                                    border: "1px solid #ded8ee",
+                                                    padding: "8px",
+                                                    textAlign: "center",
+                                                }}
+                                            >
+                                                Jumlah
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {data.bills?.map((bill, key) => {
+                                            return (
+                                                <tr key={key}>
+                                                    <td
+                                                        style={{
+                                                            width: "5%",
+                                                            textAlign: "center",
+                                                            border: "1px solid #ded8ee",
+                                                            padding: "8px",
+                                                        }}
+                                                    >
+                                                        {key + 1}
+                                                    </td>
+                                                    <td
+                                                        style={{
+                                                            width: "35%",
+                                                            border: "1px solid #ded8ee",
+                                                            padding: "8px",
+                                                        }}
+                                                    >
+                                                        {bill.bill}
+                                                    </td>
+                                                    <td
+                                                        style={{
+                                                            width: "20%",
+                                                            border: "1px solid #ded8ee",
+                                                            padding: "8px",
+                                                        }}
+                                                    >
+                                                        Rp
+                                                        {bill.nominal
+                                                            ? bill.nominal.toLocaleString(
+                                                                  "id"
+                                                              )
+                                                            : 0}
+                                                    </td>
+                                                    <td
+                                                        style={{
+                                                            width: "20%",
+                                                            border: "1px solid #ded8ee",
+                                                            padding: "8px",
+                                                        }}
+                                                    >
+                                                        Rp
+                                                        {bill.total_ppn
+                                                            ? bill.total_ppn.toLocaleString(
+                                                                  "id"
+                                                              )
+                                                            : 0}
+                                                    </td>
+                                                    <td
+                                                        style={{
+                                                            width: "20%",
+                                                            border: "1px solid #ded8ee",
+                                                            padding: "8px",
+                                                        }}
+                                                    >
+                                                        Rp
+                                                        {bill.total_bill
+                                                            ? bill.total_bill.toLocaleString(
+                                                                  "id"
+                                                              )
+                                                            : 0}
+                                                    </td>
+                                                </tr>
+                                            );
+                                        })}
+
+                                        <tr>
+                                            <td
+                                                colSpan="4"
+                                                style={{
+                                                    textAlign: "right",
+                                                    padding: "8px",
+                                                }}
+                                            >
+                                                Sub Total
+                                            </td>
+                                            <td
+                                                style={{
+                                                    width: "35%",
+                                                    border: "1px solid #ded8ee",
+                                                    padding: "8px",
+                                                }}
+                                            >
                                                 Rp
-                                                {data.paid_off
+                                                {data.total_nominal
+                                                    ? data.total_nominal.toLocaleString(
+                                                          "id"
+                                                      )
+                                                    : 0}
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td
+                                                colSpan="4"
+                                                style={{
+                                                    textAlign: "right",
+                                                    padding: "8px",
+                                                }}
+                                            >
+                                                Diskon/Uang Muka
+                                            </td>
+                                            <td
+                                                style={{
+                                                    width: "35%",
+                                                    border: "1px solid #ded8ee",
+                                                    padding: "8px",
+                                                }}
+                                            >
+                                                <span ref={animatePaidOffRef}>
+                                                    Rp
+                                                    {data.paid_off
+                                                        ? Number(
+                                                              data.paid_off
+                                                          ).toLocaleString("id")
+                                                        : 0}
+                                                </span>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td
+                                                colSpan="4"
+                                                style={{
+                                                    textAlign: "right",
+                                                    padding: "8px",
+                                                }}
+                                            >
+                                                Total Tagihan
+                                            </td>
+                                            <td
+                                                className="font-bold"
+                                                style={{
+                                                    width: "35%",
+                                                    border: "1px solid #ded8ee",
+                                                    padding: "8px",
+                                                }}
+                                            >
+                                                Rp
+                                                {data.total_bill
                                                     ? Number(
-                                                          data.paid_off
+                                                          data.total_bill
                                                       ).toLocaleString("id")
                                                     : 0}
-                                            </span>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td
-                                            colSpan="4"
-                                            style={{
-                                                textAlign: "right",
-                                                padding: "8px",
-                                            }}
-                                        >
-                                            Total Tagihan
-                                        </td>
-                                        <td
-                                            className="font-bold"
-                                            style={{
-                                                width: "35%",
-                                                border: "1px solid #ded8ee",
-                                                padding: "8px",
-                                            }}
-                                        >
-                                            Rp
-                                            {data.total_bill
-                                                ? Number(
-                                                      data.total_bill
-                                                  ).toLocaleString("id")
-                                                : 0}
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-
-                        <div className="flex flex-row mt-10 justify-between items-center">
-                            <div
-                                style={{ width: "50%" }}
-                                ref={animatePaymentMetodeRef}
-                            >
-                                {data.payment_metode === "payment link" && (
-                                    <>
-                                        <p className="font-bold underline">
-                                            Payment Link
-                                        </p>
-                                        <p>
-                                            Silakan klik link pembayaran
-                                            berikut:
-                                        </p>
-                                        <p ref={animateXenditLinkRef}>
-                                            <Link
-                                                className="text-blue-600"
-                                                href={
-                                                    isValidURL(data.xendit_link)
-                                                        ? data.xendit_link
-                                                        : null
-                                                }
-                                            >
-                                                {data.xendit_link
-                                                    ? data.xendit_link
-                                                    : "{{link_xendit}}"}
-                                            </Link>
-                                        </p>
-                                    </>
-                                )}
-                                {data.payment_metode === "cazhbox" && (
-                                    <>
-                                        <p className="font-bold underline">
-                                            Payment
-                                        </p>
-                                        <p>Pembayaran akan dilakukan dengan</p>
-                                        <p>
-                                            mengurangi <b>CazhBOX</b> lembaga
-                                            Anda
-                                        </p>
-                                    </>
-                                )}
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
                             </div>
-                            <div
-                                style={{ width: "30%" }}
-                                ref={animateSignatureNameRef}
-                            >
-                                <p>Hormat Kami,</p>
-                                {data.signature.image ? (
-                                    <div className="h-[130px] w-[130px] self-center py-2">
-                                        <img
-                                            src={`/storage/${data.signature.image}`}
-                                            alt=""
-                                            className="w-full h-full object-cover"
-                                        />
-                                    </div>
-                                ) : (
-                                    <div style={{ minHeight: "80px" }}></div>
-                                )}
-                                <p className="font-bold">
-                                    {data.signature.name}
-                                </p>
+
+                            <div className="flex flex-row mt-10 justify-between items-center">
+                                <div
+                                    style={{ width: "50%" }}
+                                    ref={animatePaymentMetodeRef}
+                                >
+                                    {data.payment_metode === "payment link" && (
+                                        <>
+                                            <p className="font-bold underline">
+                                                Payment Link
+                                            </p>
+                                            <p>
+                                                Silakan klik link pembayaran
+                                                berikut:
+                                            </p>
+                                            <p ref={animateXenditLinkRef}>
+                                                <Link
+                                                    className="text-blue-600"
+                                                    href={
+                                                        isValidURL(
+                                                            data.xendit_link
+                                                        )
+                                                            ? data.xendit_link
+                                                            : null
+                                                    }
+                                                >
+                                                    {data.xendit_link
+                                                        ? data.xendit_link
+                                                        : "{{link_xendit}}"}
+                                                </Link>
+                                            </p>
+                                        </>
+                                    )}
+                                    {data.payment_metode === "cazhbox" && (
+                                        <>
+                                            <p className="font-bold underline">
+                                                Payment
+                                            </p>
+                                            <p>
+                                                Pembayaran akan dilakukan dengan
+                                            </p>
+                                            <p>
+                                                mengurangi <b>CazhBOX</b>{" "}
+                                                lembaga Anda
+                                            </p>
+                                        </>
+                                    )}
+                                </div>
+                                <div
+                                    style={{ width: "30%" }}
+                                    ref={animateSignatureNameRef}
+                                >
+                                    <p>Hormat Kami,</p>
+                                    {data.signature.image ? (
+                                        <div className="h-[100px] w-[170px] self-center py-2">
+                                            <img
+                                                src={`/storage/${data.signature.image}`}
+                                                alt=""
+                                                className="min-h-20 w-full h-full object-fill"
+                                            />
+                                        </div>
+                                    ) : (
+                                        <div
+                                            style={{ minHeight: "100px" }}
+                                        ></div>
+                                    )}
+                                    <p className="font-bold">
+                                        {data.signature.name}
+                                    </p>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
+            </BlockUI>
         </>
     );
 };

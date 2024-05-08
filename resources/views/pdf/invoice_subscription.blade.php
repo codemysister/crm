@@ -34,7 +34,7 @@
 <body style="font-size: 10pt">
 
     @php
-use Carbon\Carbon;
+        use Carbon\Carbon;
     @endphp
     <div class="flex justify-between items-center">
         <table>
@@ -68,8 +68,9 @@ use Carbon\Carbon;
         <div style="width: 60%;">
             <p class="underline">Ditagihkan Kepada:</p>
             <p class="font-bold">{{$invoice_subscription->partner_name}}</p>
-            <p class="font-bold">{{json_decode($invoice_subscription->partner_regency)->name}},
-                {{json_decode($invoice_subscription->partner_province)->name}}</p>
+            <p class="font-bold">{{ucwords(json_decode($invoice_subscription->partner_regency)->name)}},
+                {{ucwords(json_decode($invoice_subscription->partner_province)->name)}}
+            </p>
         </div>
         <div style="width: 40%;">
             <div class="flex flex-row">
@@ -111,19 +112,20 @@ use Carbon\Carbon;
             <tbody>
 
                 @foreach($invoice_subscription->bills as $key => $bill)
-                <tr>
-                    <td class="p-1" style="width: 5%; text-align: center; border: 1px solid #ded8ee; padding: 8px;">
-                        {{++$key}}
-                    </td>
-                    <td class="p-1" style="width: 35%; border: 1px solid #ded8ee; padding: 8px;">
-                        {{$bill->bill}}</td>
-                    <td class="p-1" style="width: 20%; border: 1px solid #ded8ee; padding: 8px;">
-                        Rp{{number_format($bill->nominal, 0, ',', '.')}}</td>
-                    <td class="p-1" style="width: 20%; border: 1px solid #ded8ee; padding: 8px;">
-                        Rp{{number_format($bill->total_ppn, 0, ',', '.')}}</td>
-                    <td class="p-1" style="width: 20%; border: 1px solid #ded8ee; padding: 8px;">
-                        Rp{{number_format($bill->total_bill, 0, ',', '.')}}</td>
-                </tr>
+                    <tr>
+                        <td class="p-1" style="width: 5%; text-align: center; border: 1px solid #ded8ee; padding: 8px;">
+                            {{++$key}}
+                        </td>
+                        <td class="p-1" style="width: 35%; border: 1px solid #ded8ee; padding: 8px;">
+                            {{$bill->bill}}
+                        </td>
+                        <td class="p-1" style="width: 20%; border: 1px solid #ded8ee; padding: 8px;">
+                            Rp{{number_format($bill->nominal, 0, ',', '.')}}</td>
+                        <td class="p-1" style="width: 20%; border: 1px solid #ded8ee; padding: 8px;">
+                            Rp{{number_format($bill->total_ppn, 0, ',', '.')}}</td>
+                        <td class="p-1" style="width: 20%; border: 1px solid #ded8ee; padding: 8px;">
+                            Rp{{number_format($bill->total_bill, 0, ',', '.')}}</td>
+                    </tr>
                 @endforeach
 
                 <tr>
@@ -160,34 +162,34 @@ use Carbon\Carbon;
 
         <div class="flex flex-row mt-10 justify-between items-center" style="width: 100%;">
             <div style="width: 50%; min-width: 50%;" class="leading-6">
-                
+
                 @if($invoice_subscription->payment_metode == 'payment link')
-                <p class="font-bold underline">Payment Link</p>
-                <p>Pembayaran online* via link berikut:</p>
-                <p><a href="{{$invoice_subscription->xendit_link}}" class="text-blue-600">{{$invoice_subscription->xendit_link}}</a></p>
-                <p style="font-size: 8pt">*melalui m-Banking, ATM, QRIS, Minimarket dll.</p>
+                    <p class="font-bold underline">Payment Link</p>
+                    <p>Pembayaran online* via link berikut:</p>
+                    <p><a href="{{$invoice_subscription->xendit_link}}"
+                            class="text-blue-600">{{$invoice_subscription->xendit_link}}</a></p>
+                    <p style="font-size: 8pt">*melalui m-Banking, ATM, QRIS, Minimarket dll.</p>
                 @elseif($invoice_subscription->payment_metode == 'cazhbox')
-                <p class="font-bold underline">Payment</p>
-                <p>Pembayaran akan dilakukan dengan</p>
-                <p>mengurangi <b>CazhBOX</b> lembaga Anda</p>
+                    <p class="font-bold underline">Payment</p>
+                    <p>Pembayaran akan dilakukan dengan</p>
+                    <p>mengurangi <b>CazhBOX</b> lembaga Anda</p>
                 @else
-                <p class="font-bold underline">Payment</p>
-                <p>Pembayaran akan dilakukan dengan {{$invoice_subscription->payment_metode}}</p>
+                    <p class="font-bold underline">Payment</p>
+                    <p>Pembayaran akan dilakukan dengan {{$invoice_subscription->payment_metode}}</p>
                 @endif
-             </div>
-
-        <div class="w-[30%]" style="width: 30%; height: 30%">
-            <p>Hormat Kami,</p>
-            <div style="width: 170px; height: 100px; overflow: hidden;" class="py-2">
-                <img src="{{ public_path("/storage/$invoice_subscription->signature_image") }}" alt="" class="min-h-20
-                w-full"
-                style="object-fit: fill; width:100%; height:100%;" />
             </div>
-            <!-- <div style="min-height: 80px"></div> -->
-            <p class="font-bold">{{$invoice_subscription->signature_name}}</p>
-        </div>
 
-    </div>
+            <div class="w-[30%]" style="width: 30%; height: 30%">
+                <p>Hormat Kami,</p>
+                <div style="width: 170px; height: 100px; overflow: hidden;" class="py-2">
+                    <img src="{{ public_path("/storage/$invoice_subscription->signature_image") }}" alt="" class="min-h-20
+                w-full" style="object-fit: fill; width:100%; height:100%;" />
+                </div>
+                <!-- <div style="min-height: 80px"></div> -->
+                <p class="font-bold">{{$invoice_subscription->signature_name}}</p>
+            </div>
+
+        </div>
 
 
 </body>
