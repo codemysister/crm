@@ -81,8 +81,8 @@ use Carbon\Carbon;
 
     <div class="w-full text-left mt-5 leading-7" style="font-size: 10pt">
         <p>Ditagihkan Kepada:</p>
-        <p class="font-bold">{{$invoice_general->partner_name}}</p>
-        <p>{{json_decode($invoice_general->partner_regency)->name}},{{json_decode($invoice_general->partner_province)->name}}</p>
+        <p class="font-bold">{{$invoice_general->institution_name}}</p>
+        <p>{{json_decode($invoice_general->institution_regency)->name}},{{json_decode($invoice_general->institution_province)->name}}</p>
      
     </div>
 
@@ -186,6 +186,7 @@ use Carbon\Carbon;
     'D MMMM YYYY',
     'Do MMMM YYYY'
 ) }}</p>
+            @if($invoice_general->signature_name)
             <div style="width: 170px; height: 100px; overflow: hidden;" class="py-2">
 
             <img src="{{ public_path("storage/$invoice_general->signature_image") }}" alt="" class="min-h-20 w-full"
@@ -193,6 +194,7 @@ use Carbon\Carbon;
             </div>
             <!-- <div style="min-height: 80px"></div> -->
             <p class="font-bold">{{$invoice_general->signature_name}}</p>
+            @endif
         </div>
 
     </div>

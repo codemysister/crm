@@ -395,6 +395,10 @@ const LogComponent = ({
                                 event = "pulihkan";
                                 color = "green";
                                 severity = "success";
+                            } else if (rowData.event == "payment") {
+                                event = "Pembayaran";
+                                color = "green";
+                                severity = "success";
                             } else if (rowData.event == "deleted") {
                                 event = "hapus";
                                 color = "red";
@@ -468,6 +472,7 @@ const LogComponent = ({
                     {selectedLog?.event == "created" ||
                     selectedLog?.event == "onboarding" ||
                     selectedLog?.event == "updated" ||
+                    selectedLog?.event == "payment" ||
                     selectedLog?.event == "restored" ? (
                         <div className="flex-1 w-1/2">
                             <Message
@@ -480,6 +485,8 @@ const LogComponent = ({
                                                 "created" ||
                                                 selectedLog?.event ===
                                                     "onboarding" ||
+                                                selectedLog?.event ===
+                                                    "payment" ||
                                                 selectedLog?.event ===
                                                     "restored") &&
                                             selectedLog !== null

@@ -25,7 +25,7 @@ class InvoiceGeneralRequest extends FormRequest
             'partner.name' => 'required',
             'partner.province' => 'required',
             'partner.regency' => 'required',
-            'partner.number' => 'required',
+            'partner.phone_number' => 'required',
             'date' => 'required',
             'due_date' => 'required',
             'total' => 'required',

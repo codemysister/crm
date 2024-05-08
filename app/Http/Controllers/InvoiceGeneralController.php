@@ -5,24 +5,26 @@ namespace App\Http\Controllers;
 use App\Http\Requests\InvoiceGeneralRequest;
 use App\Jobs\GenerateInvoiceGeneralJob;
 use App\Models\InvoiceGeneral;
+use App\Models\InvoiceGeneralTransaction;
 use App\Models\InvoiceGeneralProducts;
+use App\Models\Lead;
 use App\Models\Partner;
 use App\Models\Product;
 use App\Models\Signature;
 use App\Models\Status;
 use App\Models\User;
-use App\Utils\ExtendedTemplateProcessor;
+use Spatie\Activitylog\Models\Activity;
 use Carbon\Carbon;
-use Dipantry\Rupiah\RupiahService;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
-use PhpOffice\PhpWord\Element\Table;
-use PhpOffice\PhpWord\SimpleType\TblWidth;
+use Spatie\Browsershot\Browsershot;
 
 class InvoiceGeneralController extends Controller
 {
@@ -38,7 +40,8 @@ class InvoiceGeneralController extends Controller
     public function create()
     {
         $partnersProp = Partner::with(
-            'pics'
+            'pic',
+            'status'
         )->get();
         $productsProp = Product::all();
         $signaturesProp = Signature::all();
@@ -48,128 +51,125 @@ class InvoiceGeneralController extends Controller
     public function edit($uuid)
     {
         $partnersProp = Partner::with(
-            'pics'
+            'pic',
+            'status'
         )->get();
         $productsProp = Product::all();
         $signaturesProp = Signature::all();
-        $invoiceGeneral = InvoiceGeneral::with('products', 'transactions', 'partner')->where('uuid', '=', $uuid)->first();
+        $invoiceGeneral = InvoiceGeneral::with('products', 'transactions', 'partner', 'lead')->where('uuid', '=', $uuid)->first();
         return Inertia::render('InvoiceGeneral/Edit', compact('partnersProp', 'productsProp', 'invoiceGeneral', 'signaturesProp'));
     }
 
-    public function generateInvoiceGeneral($invoice_general, $products)
-    {
-        $templateInvoice = 'assets/template/revisi/invoice_umum.docx';
+    // public function generateInvoiceGeneral($invoice_general, $products)
+    // {
+    //     $templateInvoice = 'assets/template/revisi/invoice_umum.docx';
 
-        if ($invoice_general->total_all_ppn == 0) {
-            // dd('oke');
-            if ($invoice_general->payment_metode === "payment link") {
-                $templateInvoice = 'assets/template/revisi/invoice_umum_tanpa_pajak_xendit.docx';
-            } else if ($invoice_general->payment_metode === "cazhbox") {
-                $templateInvoice = 'assets/template/revisi/invoice_umum_tanpa_pajak_cazhbox.docx';
-            } else {
-                $templateInvoice = 'assets/template/revisi/invoice_umum.docx';
-            }
-        } else {
-            if ($invoice_general->payment_metode === "payment link") {
-                // dd('oke');
-                $templateInvoice = 'assets/template/revisi/invoice_umum_xendit.docx';
-            } else if ($invoice_general->payment_metode === "cazhbox") {
-                $templateInvoice = 'assets/template/revisi/invoice_umum_cazhbox.docx';
-            } else {
-                $templateInvoice = 'assets/template/revisi/invoice_umum.docx';
-            }
-        }
+    //     if ($invoice_general->total_all_ppn == 0) {
+    //         // dd('oke');
+    //         if ($invoice_general->payment_metode === "payment link") {
+    //             $templateInvoice = 'assets/template/revisi/invoice_umum_tanpa_pajak_xendit.docx';
+    //         } else if ($invoice_general->payment_metode === "cazhbox") {
+    //             $templateInvoice = 'assets/template/revisi/invoice_umum_tanpa_pajak_cazhbox.docx';
+    //         } else {
+    //             $templateInvoice = 'assets/template/revisi/invoice_umum.docx';
+    //         }
+    //     } else {
+    //         if ($invoice_general->payment_metode === "payment link") {
+    //             // dd('oke');
+    //             $templateInvoice = 'assets/template/revisi/invoice_umum_xendit.docx';
+    //         } else if ($invoice_general->payment_metode === "cazhbox") {
+    //             $templateInvoice = 'assets/template/revisi/invoice_umum_cazhbox.docx';
+    //         } else {
+    //             $templateInvoice = 'assets/template/revisi/invoice_umum.docx';
+    //         }
+    //     }
 
-        $phpWord = new ExtendedTemplateProcessor($templateInvoice);
-        $phpWord->setValues([
-            'nomor_invoice' => $invoice_general->code,
-            'tanggal_invoice' => Carbon::parse($invoice_general->date)->format('d-m-Y'),
-            'jatuh_tempo' => Carbon::parse($invoice_general->due_date)->format('d-m-Y'),
-            'nama_partner' => $invoice_general->partner_name,
-            'provinsi' => json_decode($invoice_general->partner_province)->name,
-            'kabupaten' => json_decode($invoice_general->partner_regency)->name,
-            'nomor_hp' => $invoice_general->partner_phone_number,
-            'sub_total' => "Rp" . number_format($invoice_general->total, 0, ',', '.'),
-            'ppn' => "Rp" . number_format($invoice_general->total_all_ppn, 0, ',', '.'),
-            'terbayar' => "Rp" . number_format($invoice_general->paid_off, 0, ',', '.'),
-            'tagihan' => "Rp" . number_format($invoice_general->rest_of_bill, 0, ',', '.'),
-            // 'xendit' => $invoice_general->xendit_link,
-            'metode' => ucwords($invoice_general->payment_metode),
-            'tanggal_dibuat' => Carbon::parse($invoice_general->created_at)->locale('id-ID')->isoFormat('D MMMM YYYY'),
-            'atas_nama' => $invoice_general->signature_name,
-        ]);
+    //     $phpWord = new ExtendedTemplateProcessor($templateInvoice);
+    //     $phpWord->setValues([
+    //         'nomor_invoice' => $invoice_general->code,
+    //         'tanggal_invoice' => Carbon::parse($invoice_general->date)->format('d-m-Y'),
+    //         'jatuh_tempo' => Carbon::parse($invoice_general->due_date)->format('d-m-Y'),
+    //         'nama_partner' => $invoice_general->partner_name,
+    //         'provinsi' => json_decode($invoice_general->partner_province)->name,
+    //         'kabupaten' => json_decode($invoice_general->partner_regency)->name,
+    //         'nomor_hp' => $invoice_general->partner_phone_number,
+    //         'sub_total' => "Rp" . number_format($invoice_general->total, 0, ',', '.'),
+    //         'ppn' => "Rp" . number_format($invoice_general->total_all_ppn, 0, ',', '.'),
+    //         'terbayar' => "Rp" . number_format($invoice_general->paid_off, 0, ',', '.'),
+    //         'tagihan' => "Rp" . number_format($invoice_general->rest_of_bill, 0, ',', '.'),
+    //         // 'xendit' => $invoice_general->xendit_link,
+    //         'metode' => ucwords($invoice_general->payment_metode),
+    //         'tanggal_dibuat' => Carbon::parse($invoice_general->created_at)->locale('id-ID')->isoFormat('D MMMM YYYY'),
+    //         'atas_nama' => $invoice_general->signature_name,
+    //     ]);
 
-        $phpWord->setImageValue('tanda_tangan', array('path' => public_path($invoice_general->signature_image)));
+    //     $phpWord->setImageValue('tanda_tangan', array('path' => public_path($invoice_general->signature_image)));
 
-        // $phpWord->setComplexValue('xendit', $linkTest);
-        $linkVar = new \PhpOffice\PhpWord\Element\TextRun();
-        $linkTest = $linkVar->addLink($invoice_general->xendit_link, $invoice_general->xendit_link, ['name' => 'Inter', 'size' => 10, 'color' => 'blue', 'underline' => \PhpOffice\PhpWord\Style\Font::UNDERLINE_SINGLE]);
+    //     // $phpWord->setComplexValue('xendit', $linkTest);
+    //     $linkVar = new \PhpOffice\PhpWord\Element\TextRun();
+    //     $linkTest = $linkVar->addLink($invoice_general->xendit_link, $invoice_general->xendit_link, ['name' => 'Inter', 'size' => 10, 'color' => 'blue', 'underline' => \PhpOffice\PhpWord\Style\Font::UNDERLINE_SINGLE]);
 
-        $phpWord->addLink($linkTest);
-        $phpWord->setComplexValue('xendit', $linkVar);
+    //     $phpWord->addLink($linkTest);
+    //     $phpWord->setComplexValue('xendit', $linkVar);
 
-        $table = new Table(
-            array(
-                'borderSize' => 8,
-                'borderColor' => 'D9D2E9',
-                'width' => 100 * 50,
-                'alignment' => \PhpOffice\PhpWord\SimpleType\JcTable::CENTER,
-                'layout' => \PhpOffice\PhpWord\Style\Table::LAYOUT_FIXED,
-                'unit' => TblWidth::PERCENT
-            )
-        );
-        $table->addRow(400);
-        $pStyle = array('spaceAfter' => 20, 'align' => 'center');
-        $table->addCell(1500, ['bgColor' => '#674EA7', 'valign' => 'center'])->addText('Produk', ['color' => 'FFFFFF', 'name' => 'Inter', 'size' => 10, 'bold' => true], $pStyle);
-        $table->addCell(3000, ['bgColor' => '#674EA7', 'valign' => 'center'])->addText('Deskripsi', ['color' => 'FFFFFF', 'name' => 'Inter', 'size' => 10, 'bold' => true], $pStyle);
-        $table->addCell(1500, ['bgColor' => '#674EA7', 'valign' => 'center'])->addText('Kuantitas', ['color' => 'FFFFFF', 'name' => 'Inter', 'size' => 10, 'bold' => true], $pStyle);
-        $table->addCell(2000, ['bgColor' => '#674EA7', 'valign' => 'center'])->addText('Harga', ['color' => 'FFFFFF', 'name' => 'Inter', 'size' => 10, 'bold' => true], $pStyle);
-        $table->addCell(2000, ['bgColor' => '#674EA7', 'valign' => 'center'])->addText('Total Harga', ['color' => 'FFFFFF', 'name' => 'Inter', 'size' => 10, 'bold' => true], $pStyle);
-        $table->addCell(2000, ['bgColor' => '#674EA7', 'valign' => 'center'])->addText('PPN', ['color' => 'FFFFFF', 'name' => 'Inter', 'size' => 10, 'bold' => true], $pStyle);
+    //     $table = new Table(
+    //         array(
+    //             'borderSize' => 8,
+    //             'borderColor' => 'D9D2E9',
+    //             'width' => 100 * 50,
+    //             'alignment' => \PhpOffice\PhpWord\SimpleType\JcTable::CENTER,
+    //             'layout' => \PhpOffice\PhpWord\Style\Table::LAYOUT_FIXED,
+    //             'unit' => TblWidth::PERCENT
+    //         )
+    //     );
+    //     $table->addRow(400);
+    //     $pStyle = array('spaceAfter' => 20, 'align' => 'center');
+    //     $table->addCell(1500, ['bgColor' => '#674EA7', 'valign' => 'center'])->addText('Produk', ['color' => 'FFFFFF', 'name' => 'Inter', 'size' => 10, 'bold' => true], $pStyle);
+    //     $table->addCell(3000, ['bgColor' => '#674EA7', 'valign' => 'center'])->addText('Deskripsi', ['color' => 'FFFFFF', 'name' => 'Inter', 'size' => 10, 'bold' => true], $pStyle);
+    //     $table->addCell(1500, ['bgColor' => '#674EA7', 'valign' => 'center'])->addText('Kuantitas', ['color' => 'FFFFFF', 'name' => 'Inter', 'size' => 10, 'bold' => true], $pStyle);
+    //     $table->addCell(2000, ['bgColor' => '#674EA7', 'valign' => 'center'])->addText('Harga', ['color' => 'FFFFFF', 'name' => 'Inter', 'size' => 10, 'bold' => true], $pStyle);
+    //     $table->addCell(2000, ['bgColor' => '#674EA7', 'valign' => 'center'])->addText('Total Harga', ['color' => 'FFFFFF', 'name' => 'Inter', 'size' => 10, 'bold' => true], $pStyle);
+    //     $table->addCell(2000, ['bgColor' => '#674EA7', 'valign' => 'center'])->addText('PPN', ['color' => 'FFFFFF', 'name' => 'Inter', 'size' => 10, 'bold' => true], $pStyle);
 
-        $values = collect($products)->map(function ($product) {
-            return ['produk' => $product['name'], 'deskripsi' => $product['description'], 'kuantitas' => $product['quantity'], 'harga' => number_format($product['price'], 0, ',', '.'), 'total' => number_format($product['total'], 0, ',', '.'), 'ppn' => $product['total_ppn'] !== 0 ? number_format($product['total_ppn'], 0, ',', '.') : "0 "];
-        });
+    //     $values = collect($products)->map(function ($product) {
+    //         return ['produk' => $product['name'], 'deskripsi' => $product['description'], 'kuantitas' => $product['quantity'], 'harga' => number_format($product['price'], 0, ',', '.'), 'total' => number_format($product['total'], 0, ',', '.'), 'ppn' => $product['total_ppn'] !== 0 ? number_format($product['total_ppn'], 0, ',', '.') : "0 "];
+    //     });
 
-        foreach ($values as $key => $value) {
-            $table->addRow(400);
+    //     foreach ($values as $key => $value) {
+    //         $table->addRow(400);
 
-            if ($key % 2 == 0) {
-                $table->addCell(null, ['valign' => 'center'])->addText($value['produk'], ['name' => 'Inter', 'size' => 10], ['spaceAfter' => 20, 'align' => 'left']);
-                $table->addCell(null, ['valign' => 'center'])->addText($value['deskripsi'], ['name' => 'Inter', 'size' => 10], ['spaceAfter' => 20, 'align' => 'left']);
-                $table->addCell(null, ['valign' => 'center'])->addText($value['kuantitas'], ['name' => 'Inter', 'size' => 10], ['spaceAfter' => 20, 'align' => 'center']);
-                $table->addCell(null, ['valign' => 'center'])->addText("Rp" . $value['harga'], ['name' => 'Inter', 'size' => 10], ['spaceAfter' => 20, 'align' => 'right']);
-                $table->addCell(null, ['valign' => 'center'])->addText("Rp" . $value['total'], ['name' => 'Inter', 'size' => 10], ['spaceAfter' => 20, 'align' => 'right']);
-                $table->addCell(null, ['valign' => 'center'])->addText("Rp" . $value['ppn'], ['name' => 'Inter', 'size' => 10], ['spaceAfter' => 20, 'align' => 'right']);
-            } else {
-                $table->addCell(null, ['bgColor' => '#F3F3F3', 'valign' => 'center'])->addText($value['produk'], ['name' => 'Inter', 'size' => 10], ['align' => 'left']);
-                $table->addCell(null, ['bgColor' => '#F3F3F3', 'valign' => 'center'])->addText($value['deskripsi'], ['name' => 'Inter', 'size' => 10], ['align' => 'left']);
-                $table->addCell(null, ['bgColor' => '#F3F3F3', 'valign' => 'center'])->addText($value['kuantitas'], ['name' => 'Inter', 'size' => 10], ['align' => 'center']);
-                $table->addCell(null, ['bgColor' => '#F3F3F3', 'valign' => 'center'])->addText("Rp" . $value['harga'], ['name' => 'Inter', 'size' => 10], ['align' => 'right']);
-                $table->addCell(null, ['bgColor' => '#F3F3F3', 'valign' => 'center'])->addText("Rp" . $value['total'], ['name' => 'Inter', 'size' => 10], ['align' => 'right']);
-                $table->addCell(null, ['bgColor' => '#F3F3F3', 'valign' => 'center'])->addText("Rp" . $value['ppn'], ['name' => 'Inter', 'size' => 10], ['align' => 'right']);
-            }
+    //         if ($key % 2 == 0) {
+    //             $table->addCell(null, ['valign' => 'center'])->addText($value['produk'], ['name' => 'Inter', 'size' => 10], ['spaceAfter' => 20, 'align' => 'left']);
+    //             $table->addCell(null, ['valign' => 'center'])->addText($value['deskripsi'], ['name' => 'Inter', 'size' => 10], ['spaceAfter' => 20, 'align' => 'left']);
+    //             $table->addCell(null, ['valign' => 'center'])->addText($value['kuantitas'], ['name' => 'Inter', 'size' => 10], ['spaceAfter' => 20, 'align' => 'center']);
+    //             $table->addCell(null, ['valign' => 'center'])->addText("Rp" . $value['harga'], ['name' => 'Inter', 'size' => 10], ['spaceAfter' => 20, 'align' => 'right']);
+    //             $table->addCell(null, ['valign' => 'center'])->addText("Rp" . $value['total'], ['name' => 'Inter', 'size' => 10], ['spaceAfter' => 20, 'align' => 'right']);
+    //             $table->addCell(null, ['valign' => 'center'])->addText("Rp" . $value['ppn'], ['name' => 'Inter', 'size' => 10], ['spaceAfter' => 20, 'align' => 'right']);
+    //         } else {
+    //             $table->addCell(null, ['bgColor' => '#F3F3F3', 'valign' => 'center'])->addText($value['produk'], ['name' => 'Inter', 'size' => 10], ['align' => 'left']);
+    //             $table->addCell(null, ['bgColor' => '#F3F3F3', 'valign' => 'center'])->addText($value['deskripsi'], ['name' => 'Inter', 'size' => 10], ['align' => 'left']);
+    //             $table->addCell(null, ['bgColor' => '#F3F3F3', 'valign' => 'center'])->addText($value['kuantitas'], ['name' => 'Inter', 'size' => 10], ['align' => 'center']);
+    //             $table->addCell(null, ['bgColor' => '#F3F3F3', 'valign' => 'center'])->addText("Rp" . $value['harga'], ['name' => 'Inter', 'size' => 10], ['align' => 'right']);
+    //             $table->addCell(null, ['bgColor' => '#F3F3F3', 'valign' => 'center'])->addText("Rp" . $value['total'], ['name' => 'Inter', 'size' => 10], ['align' => 'right']);
+    //             $table->addCell(null, ['bgColor' => '#F3F3F3', 'valign' => 'center'])->addText("Rp" . $value['ppn'], ['name' => 'Inter', 'size' => 10], ['align' => 'right']);
+    //         }
 
-        }
-        $phpWord->setComplexBlock('table', $table);
+    //     }
+    //     $phpWord->setComplexBlock('table', $table);
 
-        $phpWord->setImageValue('tanda_tangan', array('path' => public_path($invoice_general->signature_image)));
-        $phpWord->setImageValue('tanda_tangan', array('path' => public_path($invoice_general->signature_image)));
+    //     $phpWord->setImageValue('tanda_tangan', array('path' => public_path($invoice_general->signature_image)));
+    //     $phpWord->setImageValue('tanda_tangan', array('path' => public_path($invoice_general->signature_image)));
 
-        $fileName = $invoice_general->uuid . '.docx';
-        $phpWord->saveAs(storage_path('app/public/invoice_umum/' . $fileName));
-        $invoice_general->update(['invoice_general_doc' => 'invoice_umum/' . $fileName]);
+    //     $fileName = $invoice_general->uuid . '.docx';
+    //     $phpWord->saveAs(storage_path('app/public/invoice_umum/' . $fileName));
+    //     $invoice_general->update(['invoice_general_doc' => 'invoice_umum/' . $fileName]);
 
-    }
+    // }
 
     public function generateCode()
     {
         $currentMonth = date('n');
         $currentYear = date('Y');
-
-        $totalDataPerMonth = InvoiceGeneral::whereYear('created_at', $currentYear)
-            ->whereMonth('created_at', $currentMonth)
-            ->count();
 
         function intToRoman($number)
         {
@@ -177,12 +177,41 @@ class InvoiceGeneralController extends Controller
             return $map[$number - 1];
         }
 
+
+        $lastDataCurrentMonth = InvoiceGeneral::withTrashed()->whereYear('created_at', $currentYear)
+            ->whereMonth('created_at', $currentMonth)->latest()->first();
+
+        $code = null;
+        if ($lastDataCurrentMonth == null) {
+            $code = "0000";
+        } else {
+            $parts = explode("/", $lastDataCurrentMonth->code);
+            $code = $parts[1];
+        }
+        $codeInteger = intval($code) + 1;
+        $latestCode = str_pad($codeInteger, strlen($code), "0", STR_PAD_LEFT);
+
         $romanMonth = intToRoman($currentMonth);
-        $latestData = "#INV/000/$romanMonth/$currentYear";
-        $lastCode = $latestData ? explode('/', $latestData)[1] : 0;
-        $newCode = str_pad((int) $lastCode + $totalDataPerMonth + 1, 3, '0', STR_PAD_LEFT);
-        $newCode = "#INV/$newCode/$romanMonth/$currentYear";
+        $newCode = "#INV/$latestCode/$romanMonth/$currentYear";
         return $newCode;
+    }
+
+    public function generateInvoiceGeneral($invoice_general, $products)
+    {
+        $path = "invoice_umum/invoice_umum-" . $invoice_general->uuid . ".pdf";
+
+        $invoice_general->invoice_general_doc = "storage/" . $path;
+
+        $html = view('pdf.invoice_general', ["invoice_general" => $invoice_general, "products" => $products])->render();
+
+        $pdf = Browsershot::html($html)
+            ->setIncludedPath(config('services.browsershot.included_path'))
+            ->showBackground()
+            ->pdf();
+
+        Storage::put("public/$path", $pdf);
+
+        return $invoice_general;
     }
 
     public function store(InvoiceGeneralRequest $request)
@@ -192,53 +221,84 @@ class InvoiceGeneralController extends Controller
         $date_now = Carbon::now()->setTimezone('GMT+7');
         $invoice_age = $date_now->diffInDays($date, false) + 1;
 
-        $code = $this->generateCode();
+        DB::beginTransaction();
 
-        $statusBelumBayar = Status::where('name', 'belum bayar')->where('category', 'invoice')->first();
+        try {
+            $code = $this->generateCode();
 
-        $invoice_general = InvoiceGeneral::create([
-            'uuid' => Str::uuid(),
-            'code' => $code,
-            'partner_id' => $request['partner']['id'],
-            'status_id' => $statusBelumBayar->id,
-            'partner_name' => $request['partner']['name'],
-            'partner_province' => $request['partner']['province'],
-            'partner_regency' => $request['partner']['regency'],
-            'partner_phone_number' => $request['partner']['number'],
-            'date' => $date,
-            'due_date' => $due_date,
-            'invoice_age' => $invoice_age,
-            'total' => $request->total,
-            'total_all_ppn' => $request->total_all_ppn,
-            'total_final_with_ppn' => $request->total_all_ppn + $request->total,
-            'paid_off' => $request->paid_off,
-            'rest_of_bill' => $request->rest_of_bill,
-            'rest_of_bill_locked' => $request->rest_of_bill,
-            'signature_name' => $request['signature']['name'],
-            'signature_image' => $request['signature']['image'],
-            'payment_metode' => $request->payment_metode,
-            'xendit_link' => $request->xendit_link,
-            'invoice_general_doc' => '',
-            'created_by' => Auth::user()->id
-        ]);
+            $statusBelumBayar = Status::where('name', 'belum bayar')->where('category', 'invoice')->first();
+
+            $invoice_general = new InvoiceGeneral();
+            $invoice_general->uuid = Str::uuid();
+            $invoice_general->code = $code;
+            if ($request['partner']['type'] == 'partner') {
+                $partnerExist = Partner::where('uuid', $request['partner']["uuid"])->first();
+                $invoice_general->partner_id = $partnerExist->id;
+            } else {
+                $leadExist = Lead::where('uuid', $request['partner']["uuid"])->first();
+                $invoice_general->lead_id = $leadExist->id;
+            }
+            $invoice_general->status_id = $statusBelumBayar->id;
+            $invoice_general->institution_name = $request['partner']['name'];
+            $invoice_general->institution_province = $request['partner']['province'];
+            $invoice_general->institution_regency = $request['partner']['regency'];
+            $invoice_general->institution_phone_number = $request['partner']['phone_number'];
+            $invoice_general->date = $date;
+            $invoice_general->due_date = $due_date;
+            $invoice_general->invoice_age = $invoice_age;
+            $invoice_general->total = $request->total;
+            $invoice_general->total_all_ppn = $request->total_all_ppn;
+            $invoice_general->total_final_with_ppn = $request->total_all_ppn + $request->total;
+            $invoice_general->paid_off = $request->paid_off;
+            $invoice_general->rest_of_bill = $request->rest_of_bill;
+            $invoice_general->rest_of_bill_locked = $request->rest_of_bill;
+            $invoice_general->signature_name = $request['signature']['name'];
+            $invoice_general->signature_image = $request['signature']['image'];
+            $invoice_general->payment_metode = $request->payment_metode;
+            $invoice_general->xendit_link = $request->xendit_link;
+            $invoice_general->created_by = Auth::user()->id;
+            $invoice_general = $this->generateInvoiceGeneral($invoice_general, $request->products);
+            $invoice_general->save();
+
+            $invoiceProductsLog = collect($request->products)->map(function ($product, $index) {
+                return ($index + 1) . ". " . $product['name'] . "(" . $product['price'] . ")";
+            })->implode(', ');
+
+            Activity::create([
+                'log_name' => 'created',
+                'description' => Auth::user()->name . ' menambah data Invoice Umum',
+                'subject_type' => get_class($invoice_general),
+                'subject_id' => $invoice_general->id,
+                'causer_type' => get_class(Auth::user()),
+                'causer_id' => Auth::user()->id,
+                "event" => "created",
+                'properties' => ["attributes" => ["code" => $invoice_general->code, "institution_name" => $invoice_general->institution_name, "institution_npwp" => $invoice_general->institution_npwp, "date" => $invoice_general->date, "due_date" => $invoice_general->due_date, "invoice_age" => $invoice_general->invoice_age, "bill_date" => $invoice_general->bill_date, 'total' => $invoice_general->total, 'total_all_ppn' => $invoice_general->total_all_ppn, 'paid_off' => $invoice_general->paid_off, 'rest_of_bill' => $invoice_general->rest_of_bill, 'signature_name' => $invoice_general->signature_name, 'products' => $invoiceProductsLog]]
+            ]);
 
 
-        foreach ($request->products as $product) {
-            InvoiceGeneralProducts::create([
-                'uuid' => Str::uuid(),
-                'invoice_general_id' => $invoice_general->id,
-                'name' => $product['name'],
-                'description' => $product['description'],
-                'quantity' => $product['quantity'],
-                'price' => $product['price'],
-                'total' => $product['total'],
-                'total_ppn' => $product['total_ppn'],
-                'ppn' => $product['ppn'],
+            foreach ($request->products as $product) {
+                InvoiceGeneralProducts::create([
+                    'uuid' => Str::uuid(),
+                    'invoice_general_id' => $invoice_general->id,
+                    'name' => $product['name'],
+                    'description' => $product['description'],
+                    'quantity' => $product['quantity'],
+                    'price' => $product['price'],
+                    'total' => $product['total'],
+                    'total_ppn' => $product['total_ppn'],
+                    'ppn' => $product['ppn'],
+                ]);
+            }
+
+            DB::commit();
+
+        } catch (Exception $e) {
+            DB::rollback();
+            Log::error('Error tambah invoice umum: ' . $e->getMessage());
+            return redirect()->back()->withErrors([
+                'error' => $e->getMessage()
             ]);
         }
-
-        // $this->generateInvoiceGeneral($invoice_general, $request->products);
-        GenerateInvoiceGeneralJob::dispatch($invoice_general, $request->products);
     }
 
     public function calculateRestOfBill($invoice_general)
@@ -346,38 +406,71 @@ class InvoiceGeneralController extends Controller
             $status = $status->where('name', 'sebagian')->first();
         }
 
+        DB::beginTransaction();
 
-        $invoice_general->update([
-            'partner_id' => $request['partner']['id'],
-            'status_id' => $status->id,
-            'partner_name' => $request['partner']['name'],
-            'partner_province' => $request['partner']['province'],
-            'partner_regency' => $request['partner']['regency'],
-            'partner_phone_number' => $request['partner']['number'],
-            'date' => $date,
-            'due_date' => $due_date,
-            'invoice_age' => $invoice_age,
-            'total' => $request->total,
-            'total_all_ppn' => $request->total_all_ppn,
-            'total_final_with_ppn' => $request->total_all_ppn + $request->total,
-            'paid_off' => $request->paid_off,
-            'rest_of_bill' => $request->rest_of_bill,
-            'rest_of_bill_locked' => $request->rest_of_bill,
-            'signature_name' => $request['signature']['name'],
-            'signature_image' => $request['signature']['image'],
-            'payment_metode' => $request->payment_metode,
-            'xendit_link' => $request->xendit_link,
-            'invoice_general_doc' => '',
-        ]);
+        try {
 
-        $results = $this->updateProducts($invoice_general, $invoice_general->products, $request->products);
-        $rest_of_bill = $this->calculateRestOfBill($invoice_general);
+            $invoiceNewProductsLog = collect($request->products)->map(function ($product, $index) {
+                return ($index + 1) . ". " . $product['name'] . "(" . $product['price'] . ")";
+            })->implode(', ');
+            $invoiceOldProductsLog = collect($invoice_general->products)->map(function ($product, $index) {
+                return ($index + 1) . ". " . $product['name'] . "(" . $product['price'] . ")";
+            })->implode(', ');
 
-        $invoice_general->update(['rest_of_bill' => $rest_of_bill, 'status_id' => $status->id]);
 
-        // $this->generateInvoiceGeneral($invoice_general, $request->products);
-        GenerateInvoiceGeneralJob::dispatch($invoice_general, $request->products);
+            Activity::create([
+                'log_name' => 'updated',
+                'description' => Auth::user()->name . ' mengubah data Invoice Umum',
+                'subject_type' => get_class($invoice_general),
+                'subject_id' => $invoice_general->id,
+                'causer_type' => get_class(Auth::user()),
+                'causer_id' => Auth::user()->id,
+                "event" => "updated",
+                'properties' => ["attributes" => ["code" => $invoice_general->code, "institution_name" => $invoice_general->institution_name, "institution_npwp" => $invoice_general->institution_npwp, "date" => $invoice_general->date, "due_date" => $invoice_general->due_date, "invoice_age" => $invoice_general->invoice_age, "bill_date" => $invoice_general->bill_date, 'total' => $invoice_general->total, 'total_all_ppn' => $invoice_general->total_all_ppn, 'paid_off' => $invoice_general->paid_off, 'rest_of_bill' => $invoice_general->rest_of_bill, 'signature_name' => $invoice_general->signature_name, 'products' => $invoiceNewProductsLog], "old" => ["code" => $invoice_general->code, "institution_name" => $invoice_general->institution_name, "institution_npwp" => $invoice_general->institution_npwp, "date" => $invoice_general->date, "due_date" => $invoice_general->due_date, "invoice_age" => $invoice_general->invoice_age, "bill_date" => $invoice_general->bill_date, 'total' => $invoice_general->total, 'total_all_ppn' => $invoice_general->total_all_ppn, 'paid_off' => $invoice_general->paid_off, 'rest_of_bill' => $invoice_general->rest_of_bill, 'signature_name' => $invoice_general->signature_name, 'products' => $invoiceOldProductsLog]]
+            ]);
 
+            if ($request['partner']['type'] == 'partner') {
+                $partnerExist = Partner::where('uuid', $request['partner']["uuid"])->first();
+                $invoice_general->partner_id = $partnerExist->id;
+            } else {
+                $leadExist = Lead::where('uuid', $request['partner']["uuid"])->first();
+                $invoice_general->lead_id = $leadExist->id;
+            }
+            $invoice_general->status_id = $status->id;
+            $invoice_general->institution_name = $request['partner']['name'];
+            $invoice_general->institution_province = $request['partner']['province'];
+            $invoice_general->institution_regency = $request['partner']['regency'];
+            $invoice_general->institution_phone_number = $request['partner']['phone_number'];
+            $invoice_general->date = $date;
+            $invoice_general->due_date = $due_date;
+            $invoice_general->invoice_age = $invoice_age;
+            $invoice_general->total = $request->total;
+            $invoice_general->total_all_ppn = $request->total_all_ppn;
+            $invoice_general->total_final_with_ppn = $request->total_all_ppn + $request->total;
+            $invoice_general->paid_off = $request->paid_off;
+            $invoice_general->rest_of_bill = $request->rest_of_bill;
+            $invoice_general->rest_of_bill_locked = $request->rest_of_bill;
+            $invoice_general->signature_name = $request['signature']['name'];
+            $invoice_general->signature_image = $request['signature']['image'];
+            $invoice_general->payment_metode = $request->payment_metode;
+            $invoice_general->xendit_link = $request->xendit_link;
+            $invoice_general = $this->generateInvoiceGeneral($invoice_general, $request->products);
+            $invoice_general->save();
+
+
+            $this->updateProducts($invoice_general, $invoice_general->products, $request->products);
+            $rest_of_bill = $this->calculateRestOfBill($invoice_general);
+            $invoice_general->update(['rest_of_bill' => $rest_of_bill, 'status_id' => $status->id]);
+
+            DB::commit();
+
+        } catch (Exception $e) {
+            DB::rollback();
+            Log::error('Error update invoice umum: ' . $e->getMessage());
+            return redirect()->back()->withErrors([
+                'error' => $e->getMessage()
+            ]);
+        }
     }
 
     public function filter(Request $request)
@@ -415,14 +508,116 @@ class InvoiceGeneralController extends Controller
 
     public function apiGetInvoiceGenerals()
     {
-        $invoiceGenerals = InvoiceGeneral::with(['partner', 'products', 'transactions.user', 'status'])->latest()->get();
+        $invoiceGenerals = InvoiceGeneral::with(['partner', 'products', 'transactions.user', 'status', 'lead'])->latest()->get();
         return response()->json($invoiceGenerals);
     }
 
     public function destroy($uuid)
     {
-        $invoice_general = InvoiceGeneral::where('uuid', '=', $uuid)->first();
-        Storage::disk('public')->delete($invoice_general->invoice_general_doc);
-        $invoice_general->delete();
+        try {
+            $invoice_general = InvoiceGeneral::where('uuid', '=', $uuid)->first();
+            Activity::create([
+                'log_name' => 'deleted',
+                'description' => Auth::user()->name . ' menghapus data Invoice Umum',
+                'subject_type' => get_class($invoice_general),
+                'subject_id' => $invoice_general->id,
+                'causer_type' => get_class(Auth::user()),
+                'causer_id' => Auth::user()->id,
+                "event" => "deleted",
+                'properties' => ["old" => ["code" => $invoice_general->code, "institution_name" => $invoice_general->institution_name, "institution_npwp" => $invoice_general->institution_npwp, "date" => $invoice_general->date, "due_date" => $invoice_general->due_date, "invoice_age" => $invoice_general->invoice_age, "bill_date" => $invoice_general->bill_date, 'total' => $invoice_general->total, 'total_all_ppn' => $invoice_general->total_all_ppn, 'paid_off' => $invoice_general->paid_off, 'rest_of_bill' => $invoice_general->rest_of_bill, 'signature_name' => $invoice_general->signature_name]]
+            ]);
+
+
+            // Storage::disk('public')->delete($invoice_general->invoice_general_doc);
+            $invoice_general->delete();
+
+            DB::commit();
+
+        } catch (Exception $e) {
+            DB::rollback();
+            Log::error('Error hapus invoice umum: ' . $e->getMessage());
+            return redirect()->back()->withErrors([
+                'error' => $e->getMessage()
+            ]);
+        }
+
     }
+
+    public function restore($uuid)
+    {
+        $invoice_general = InvoiceGeneral::withTrashed()->where('uuid', '=', $uuid)->first();
+        $invoice_general->restore();
+    }
+
+    public function destroyForce($uuid)
+    {
+        try {
+            $invoice_general = InvoiceGeneral::withTrashed()->where('uuid', '=', $uuid)->first();
+            Activity::create([
+                'log_name' => 'force',
+                'description' => Auth::user()->name . ' menghapus permanen data Invoice Umum',
+                'subject_type' => get_class($invoice_general),
+                'subject_id' => $invoice_general->id,
+                'causer_type' => get_class(Auth::user()),
+                'causer_id' => Auth::user()->id,
+                "event" => "force",
+                'properties' => ["old" => ["code" => $invoice_general->code, "institution_name" => $invoice_general->institution_name, "institution_npwp" => $invoice_general->institution_npwp, "date" => $invoice_general->date, "due_date" => $invoice_general->due_date, "invoice_age" => $invoice_general->invoice_age, "bill_date" => $invoice_general->bill_date, 'total' => $invoice_general->total, 'total_all_ppn' => $invoice_general->total_all_ppn, 'paid_off' => $invoice_general->paid_off, 'rest_of_bill' => $invoice_general->rest_of_bill, 'signature_name' => $invoice_general->signature_name]]
+            ]);
+
+
+            Storage::disk('public')->delete($invoice_general->invoice_general_doc);
+            $invoice_general->forceDelete();
+
+            DB::commit();
+
+        } catch (Exception $e) {
+            DB::rollback();
+            Log::error('Error hapus permanen invoice umum: ' . $e->getMessage());
+            return redirect()->back()->withErrors([
+                'error' => $e->getMessage()
+            ]);
+        }
+
+    }
+
+    public function logFilter(Request $request)
+    {
+        $logs = Activity::with(['causer', 'subject'])->whereMorphedTo('subject', InvoiceGeneral::class);
+
+        if ($request->user) {
+            $logs->whereMorphRelation('causer', User::class, 'causer_id', '=', $request->user['id']);
+        }
+
+        if ($request->date['start'] && $request->date['end']) {
+            $logs->whereBetween('created_at', [Carbon::parse($request->date['start'])->setTimezone('GMT+7')->startOfDay(), Carbon::parse($request->date['end'])->setTimezone('GMT+7')->endOfDay()]);
+        }
+
+        $logs = $logs->get();
+
+        return response()->json($logs);
+    }
+
+    public function apiGetLogs()
+    {
+        $logs = Activity::with(['causer', 'subject'])
+            ->whereMorphedTo('subject', InvoiceGeneral::class)->orWhereMorphedTo('subject', InvoiceGeneralTransaction::class);
+
+        $logs = $logs->latest()->get();
+
+        return response()->json($logs);
+    }
+
+    public function destroyLogs(Request $request)
+    {
+        $ids = explode(",", $request->query('ids'));
+        Activity::whereIn('id', $ids)->delete();
+    }
+
+    public function apiGetArsip()
+    {
+        $arsip = InvoiceGeneral::withTrashed()->with(['createdBy', 'lead', 'status', 'partner'])->whereNotNull('deleted_at')->latest()->get();
+
+        return response()->json($arsip);
+    }
+
 }

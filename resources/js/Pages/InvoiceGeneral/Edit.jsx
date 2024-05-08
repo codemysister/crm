@@ -14,6 +14,12 @@ import { Toast } from "primereact/toast";
 import { Badge } from "primereact/badge";
 import { InputNumber } from "primereact/inputnumber";
 import { Calendar } from "primereact/calendar";
+import LoadingDocument from "@/Components/LoadingDocument";
+import { upperCaseEachWord } from "@/Utils/UppercaseEachWord";
+import { BlockUI } from "primereact/blockui";
+import { getProvince } from "@/Services/getProvince";
+import { getRegencys } from "@/Services/getRegency";
+import DialogInstitution from "@/Components/DialogInstitution";
 
 const BASE_URL = import.meta.env.VITE_BASE_URL;
 
@@ -29,14 +35,19 @@ const Edit = ({
     const [products, setProducts] = useState(productsProp);
     const [signatures, setSignatures] = useState(signaturesProp);
     const [dialogVisible, setDialogVisible] = useState(false);
+    const [dialogInstitutionVisible, setDialogInstitutionVisible] =
+        useState(false);
+    const [leads, setLeads] = useState(null);
+    const [isLoadingData, setIsLoadingData] = useState(false);
     const [dialogProductVisible, setDialogProductVisible] = useState(false);
     const [rowClick, setRowClick] = useState(true);
     const [selectedProducts, setSelectedProducts] = useState([]);
     const toast = useRef(null);
+    const [blocked, setBlocked] = useState(false);
     const partnerScrollRef = useRef(null);
     const [provinces, setProvinces] = useState([]);
     const [regencys, setRegencys] = useState([]);
-    const [codeProvince, setcodeProvince] = useState(null);
+    const [provinceName, setProvinceName] = useState(null);
     const [theme, setTheme] = useState(localStorage.theme);
     useEffect(() => {
         theme
@@ -79,11 +90,20 @@ const Edit = ({
         total_ppn: invoiceGeneral.total_all_ppn,
         total_all_ppn: invoiceGeneral.total_all_ppn,
         partner: {
-            id: invoiceGeneral.partner_id,
-            name: invoiceGeneral.partner_name,
-            province: invoiceGeneral.partner_province,
-            regency: invoiceGeneral.partner_regency,
-            number: invoiceGeneral.partner_phone_number,
+            id:
+                invoiceGeneral.partner == undefined
+                    ? invoiceGeneral.lead.id
+                    : invoiceGeneral.partner.id,
+            uuid:
+                invoiceGeneral.partner == undefined
+                    ? invoiceGeneral.lead.uuid
+                    : invoiceGeneral.partner.uuid,
+
+            name: invoiceGeneral.institution_name,
+            province: invoiceGeneral.institution_province,
+            regency: invoiceGeneral.institution_regency,
+            phone_number: invoiceGeneral.institution_phone_number,
+            type: invoiceGeneral.partner == undefined ? "lead" : "partner",
         },
         date: invoiceGeneral.date,
         due_date: invoiceGeneral.due_date,
@@ -99,20 +119,32 @@ const Edit = ({
     });
 
     useEffect(() => {
-        const fetchData = async () => {
-            await getProvince();
-            await getRegencys();
-        };
+        if (processing) {
+            setBlocked(true);
+        } else {
+            setBlocked(false);
+        }
+    }, [processing]);
 
-        fetchData();
+    useEffect(() => {
+        const fetch = async () => {
+            let province = await getProvince();
+            setProvinces((prev) => (prev = province));
+        };
+        setProvinceName(JSON.parse(data.partner.province).name);
+        fetch();
         handleTotalInvoice();
     }, []);
 
     useEffect(() => {
-        if (codeProvince) {
-            getRegencys(codeProvince);
-        }
-    }, [codeProvince]);
+        const fetch = async () => {
+            if (provinceName) {
+                let response = await getRegencys(provinceName);
+                setRegencys((prev) => (prev = response));
+            }
+        };
+        fetch();
+    }, [provinceName]);
 
     useEffect(() => {
         handleTotalInvoice();
@@ -160,69 +192,6 @@ const Edit = ({
         const hasilFormat = `${hari}-${bulan}-${tahun}`;
 
         return hasilFormat;
-    };
-
-    const getProvince = async () => {
-        const options = {
-            method: "GET",
-            url: `/api/wilayah/provinsi/`,
-            headers: {
-                "Content-Type": "application/json",
-            },
-        };
-
-        try {
-            const response = await axios.request(options);
-            const dataArray = Object.entries(response.data).map(
-                ([key, value]) => ({
-                    code: key,
-                    name: value
-                        .toLowerCase()
-                        .split(" ")
-                        .map(
-                            (word) =>
-                                word.charAt(0).toUpperCase() + word.slice(1)
-                        )
-                        .join(" "),
-                })
-            );
-            setProvinces((prev) => (prev = dataArray));
-        } catch (error) {
-            console.log(error);
-        }
-    };
-
-    const getRegencys = async (code) => {
-        let url = code
-            ? `/api/wilayah/kabupaten?provinsi=${code}`
-            : `/api/wilayah/kabupaten`;
-        const options = {
-            method: "GET",
-            url: url,
-            headers: {
-                "Content-Type": "application/json",
-            },
-        };
-
-        try {
-            const response = await axios.request(options);
-            const dataArray = Object.entries(response.data).map(
-                ([key, value]) => ({
-                    code: key,
-                    name: value
-                        .toLowerCase()
-                        .split(" ")
-                        .map(
-                            (word) =>
-                                word.charAt(0).toUpperCase() + word.slice(1)
-                        )
-                        .join(" "),
-                })
-            );
-            setRegencys((prev) => (prev = dataArray));
-        } catch (error) {
-            console.log(error);
-        }
     };
 
     const [filters, setFilters] = useState({
@@ -423,333 +392,327 @@ const Edit = ({
         <>
             <Head title="Invoice Umum"></Head>
             <Toast ref={toast} />
-            <div className="h-screen max-h-screen overflow-y-hidden dark:bg-slate-950">
-                <div className="flex flex-col h-screen max-h-screen overflow-hidden md:flex-row z-40 relative gap-5">
-                    <div className="md:w-[30%] overflow-y-auto h-screen max-h-screen p-5">
-                        <Card>
-                            <div className="flex justify-between items-center mb-4">
-                                <h1 className="font-bold text-2xl">
-                                    Invoice Umum
-                                </h1>
-                                <Link href="/invoice_generals">
-                                    <svg
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        fill="none"
-                                        viewBox="0 0 24 24"
-                                        stroke-width="1.5"
-                                        stroke="currentColor"
-                                        class="w-6 h-6"
-                                    >
-                                        <path
-                                            stroke-linecap="round"
-                                            stroke-linejoin="round"
-                                            d="M8.25 9V5.25A2.25 2.25 0 0 1 10.5 3h6a2.25 2.25 0 0 1 2.25 2.25v13.5A2.25 2.25 0 0 1 16.5 21h-6a2.25 2.25 0 0 1-2.25-2.25V15m-3 0-3-3m0 0 3-3m-3 3H15"
-                                        />
-                                    </svg>
-                                </Link>
-                            </div>
-                            <div className="flex flex-col">
-                                <Button
-                                    label="Tambah Produk"
-                                    icon="pi pi-external-link"
-                                    onClick={() => setDialogVisible(true)}
-                                />
-
-                                <div className="flex flex-col mt-3">
-                                    <InputText
-                                        value={data.code}
-                                        onChange={(e) =>
-                                            setData("code", e.target.value)
-                                        }
-                                        className="dark:bg-gray-300"
-                                        id="code"
-                                        aria-describedby="code-help"
-                                        hidden
-                                    />
+            <BlockUI blocked={blocked} template={LoadingDocument}>
+                <div className="h-screen max-h-screen overflow-y-hidden dark:bg-slate-950">
+                    <div className="flex flex-col h-screen max-h-screen overflow-hidden md:flex-row z-40 relative gap-5">
+                        <div className="md:w-[30%] overflow-y-auto h-screen max-h-screen p-5">
+                            <Card>
+                                <div className="flex justify-between items-center mb-4">
+                                    <h1 className="font-bold text-2xl">
+                                        Invoice Umum
+                                    </h1>
+                                    <Link href="/invoice_generals">
+                                        <svg
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            fill="none"
+                                            viewBox="0 0 24 24"
+                                            stroke-width="1.5"
+                                            stroke="currentColor"
+                                            class="w-6 h-6"
+                                        >
+                                            <path
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                d="M8.25 9V5.25A2.25 2.25 0 0 1 10.5 3h6a2.25 2.25 0 0 1 2.25 2.25v13.5A2.25 2.25 0 0 1 16.5 21h-6a2.25 2.25 0 0 1-2.25-2.25V15m-3 0-3-3m0 0 3-3m-3 3H15"
+                                            />
+                                        </svg>
+                                    </Link>
                                 </div>
+                                <div className="flex flex-col">
+                                    <Button
+                                        label="Tambah Produk"
+                                        icon="pi pi-external-link"
+                                        onClick={() => setDialogVisible(true)}
+                                    />
 
-                                <div className="flex flex-col mt-3">
-                                    <label htmlFor="lembaga">Lembaga *</label>
-                                    <Dropdown
-                                        value={data.partner}
-                                        dataKey="id"
-                                        onChange={(e) => {
-                                            setData("partner", {
-                                                ...data.partner,
-                                                id: e.target.value.id,
-                                                name: e.target.value.name,
-                                                province:
-                                                    e.target.value.province,
-                                                regency: e.target.value.regency,
-                                                number: e.target.value
-                                                    .phone_number,
-                                                pic: e.target.value.pics[0]
-                                                    ?.name,
-                                            });
-                                            if (e.target.value.province) {
-                                                setcodeProvince(
-                                                    (prev) =>
-                                                        (prev = JSON.parse(
-                                                            e.target.value
-                                                                .province
-                                                        ).code)
-                                                );
+                                    <div className="flex flex-col mt-3">
+                                        <InputText
+                                            value={data.code}
+                                            onChange={(e) =>
+                                                setData("code", e.target.value)
                                             }
-                                        }}
-                                        onFocus={() => {
-                                            triggerInputFocus(
-                                                animatePartnerNameRef
-                                            );
-                                        }}
-                                        onShow={() => {
-                                            triggerInputFocus(
-                                                animatePartnerNameRef
-                                            );
-                                        }}
-                                        onHide={() => {
-                                            stopAnimateInputFocus(
-                                                animatePartnerNameRef
-                                            );
-                                        }}
-                                        options={partners}
-                                        optionLabel="name"
-                                        placeholder="Pilih Lembaga"
-                                        filter
-                                        valueTemplate={selectedOptionTemplate}
-                                        itemTemplate={optionTemplate}
-                                        className="w-full md:w-14rem"
-                                    />
-                                </div>
+                                            className="dark:bg-gray-300"
+                                            id="code"
+                                            aria-describedby="code-help"
+                                            hidden
+                                        />
+                                    </div>
 
-                                <div className="flex flex-col mt-3">
-                                    <label htmlFor="number">
-                                        Nomor Telepon *
-                                    </label>
-                                    <InputText
-                                        value={data.partner.number}
-                                        onChange={(e) =>
-                                            setData("partner", {
-                                                ...data.partner,
-                                                number: e.target.value,
-                                            })
-                                        }
-                                        className="dark:bg-gray-300"
-                                        id="number"
-                                        aria-describedby="number-help"
-                                        onFocus={() => {
-                                            triggerInputFocus(
-                                                animatePartnerNumberRef
-                                            );
-                                        }}
-                                        onBlur={() => {
-                                            stopAnimateInputFocus(
-                                                animatePartnerNumberRef
-                                            );
-                                        }}
-                                        keyfilter="int"
-                                    />
-                                </div>
+                                    <div className="flex flex-col mt-3">
+                                        <label htmlFor="lembaga">
+                                            Lembaga *
+                                        </label>
+                                        <InputText
+                                            value={data.partner.name}
+                                            onFocus={() => {
+                                                triggerInputFocus(
+                                                    animatePartnerNameRef
+                                                );
+                                            }}
+                                            onBlur={() => {
+                                                stopAnimateInputFocus(
+                                                    animatePartnerNameRef
+                                                );
+                                            }}
+                                            onClick={() => {
+                                                setDialogInstitutionVisible(
+                                                    true
+                                                );
+                                            }}
+                                            placeholder="Pilih lembaga"
+                                            className="dark:bg-gray-300 cursor-pointer"
+                                            id="partner"
+                                            aria-describedby="partner-help"
+                                        />
+                                    </div>
 
-                                <div className="flex flex-col mt-3">
-                                    <label htmlFor="province">Provinsi *</label>
+                                    <div className="flex flex-col mt-3">
+                                        <label htmlFor="number">
+                                            Nomor Telepon *
+                                        </label>
+                                        <InputText
+                                            value={data.partner.phone_number}
+                                            onChange={(e) =>
+                                                setData("partner", {
+                                                    ...data.partner,
+                                                    phone_number:
+                                                        e.target.value,
+                                                })
+                                            }
+                                            className="dark:bg-gray-300"
+                                            id="number"
+                                            aria-describedby="number-help"
+                                            onFocus={() => {
+                                                triggerInputFocus(
+                                                    animatePartnerNumberRef
+                                                );
+                                            }}
+                                            onBlur={() => {
+                                                stopAnimateInputFocus(
+                                                    animatePartnerNumberRef
+                                                );
+                                            }}
+                                            keyfilter="int"
+                                        />
+                                    </div>
 
-                                    <Dropdown
-                                        value={
-                                            data.partner.province
-                                                ? JSON.parse(
-                                                      data.partner.province
-                                                  )
-                                                : null
-                                        }
-                                        onChange={(e) => {
-                                            setcodeProvince(
-                                                (prev) =>
-                                                    (prev = e.target.value.code)
-                                            );
-                                            setData("partner", {
-                                                ...data.partner,
-                                                province: JSON.stringify(
+                                    <div className="flex flex-col mt-3">
+                                        <label htmlFor="province">
+                                            Provinsi *
+                                        </label>
+
+                                        <Dropdown
+                                            value={
+                                                data.partner.province
+                                                    ? JSON.parse(
+                                                          data.partner.province
+                                                      )
+                                                    : null
+                                            }
+                                            onChange={(e) => {
+                                                setProvinceName(
+                                                    (prev) =>
+                                                        (prev =
+                                                            e.target.value.code)
+                                                );
+                                                setData("partner", {
+                                                    ...data.partner,
+                                                    province: JSON.stringify(
+                                                        e.target.value
+                                                    ),
+                                                    regency: null,
+                                                });
+                                            }}
+                                            dataKey="code"
+                                            options={provinces}
+                                            optionLabel="name"
+                                            placeholder="Pilih Provinsi"
+                                            filter
+                                            valueTemplate={
+                                                selectedOptionTemplate
+                                            }
+                                            itemTemplate={optionTemplate}
+                                            className="w-full md:w-14rem"
+                                            onFocus={() => {
+                                                triggerInputFocus(
+                                                    animatePartnerProvinceRef
+                                                );
+                                            }}
+                                            onShow={() => {
+                                                triggerInputFocus(
+                                                    animatePartnerProvinceRef
+                                                );
+                                            }}
+                                            onHide={() => {
+                                                stopAnimateInputFocus(
+                                                    animatePartnerProvinceRef
+                                                );
+                                            }}
+                                        />
+                                    </div>
+
+                                    <div className="flex flex-col mt-3">
+                                        <label htmlFor="regency">
+                                            Kabupaten *
+                                        </label>
+                                        <Dropdown
+                                            value={
+                                                data.partner.regency
+                                                    ? JSON.parse(
+                                                          data.partner.regency
+                                                      )
+                                                    : null
+                                            }
+                                            onChange={(e) => {
+                                                setData("partner", {
+                                                    ...data.partner,
+                                                    regency: JSON.stringify(
+                                                        e.target.value
+                                                    ),
+                                                });
+                                            }}
+                                            onFocus={() => {
+                                                triggerInputFocus(
+                                                    animatePartnerRegencyRef
+                                                );
+                                            }}
+                                            onShow={() => {
+                                                triggerInputFocus(
+                                                    animatePartnerRegencyRef
+                                                );
+                                            }}
+                                            onHide={() => {
+                                                stopAnimateInputFocus(
+                                                    animatePartnerRegencyRef
+                                                );
+                                            }}
+                                            options={regencys}
+                                            optionLabel="name"
+                                            dataKey="code"
+                                            placeholder="Pilih Kabupaten"
+                                            filter
+                                            valueTemplate={
+                                                selectedOptionTemplate
+                                            }
+                                            itemTemplate={optionTemplate}
+                                            className="w-full md:w-14rem"
+                                        />
+                                    </div>
+
+                                    <div className="flex flex-col mt-3">
+                                        <label htmlFor="date">Tanggal *</label>
+                                        <Calendar
+                                            value={
+                                                data.date
+                                                    ? new Date(data.date)
+                                                    : null
+                                            }
+                                            style={{ height: "35px" }}
+                                            onChange={(e) => {
+                                                setData("date", e.target.value);
+                                            }}
+                                            onFocus={() => {
+                                                triggerInputFocus(
+                                                    animateDateRef
+                                                );
+                                            }}
+                                            onShow={() => {
+                                                triggerInputFocus(
+                                                    animateDateRef
+                                                );
+                                            }}
+                                            onHide={() => {
+                                                stopAnimateInputFocus(
+                                                    animateDateRef
+                                                );
+                                            }}
+                                            onBlur={() => {
+                                                stopAnimateInputFocus(
+                                                    animateDateRef
+                                                );
+                                            }}
+                                            showIcon
+                                            dateFormat="dd-mm-yy"
+                                            className={`w-full md:w-14rem ${
+                                                errors.due_date && "p-invalid"
+                                            }`}
+                                        />
+                                    </div>
+                                    <div className="flex flex-col mt-3">
+                                        <label htmlFor="due_date">
+                                            Jatuh Tempo *
+                                        </label>
+                                        <Calendar
+                                            value={
+                                                data.due_date
+                                                    ? new Date(data.due_date)
+                                                    : null
+                                            }
+                                            style={{ height: "35px" }}
+                                            onChange={(e) => {
+                                                setData(
+                                                    "due_date",
                                                     e.target.value
-                                                ),
-                                            });
-                                        }}
-                                        dataKey="name"
-                                        options={provinces}
-                                        optionLabel="name"
-                                        placeholder="Pilih Provinsi"
-                                        filter
-                                        valueTemplate={selectedOptionTemplate}
-                                        itemTemplate={optionTemplate}
-                                        className="w-full md:w-14rem"
-                                        onFocus={() => {
-                                            triggerInputFocus(
-                                                animatePartnerProvinceRef
-                                            );
-                                        }}
-                                        onShow={() => {
-                                            triggerInputFocus(
-                                                animatePartnerProvinceRef
-                                            );
-                                        }}
-                                        onHide={() => {
-                                            stopAnimateInputFocus(
-                                                animatePartnerProvinceRef
-                                            );
-                                        }}
-                                    />
-                                </div>
+                                                );
+                                            }}
+                                            onFocus={() => {
+                                                triggerInputFocus(
+                                                    animateDueDateRef
+                                                );
+                                            }}
+                                            onShow={() => {
+                                                triggerInputFocus(
+                                                    animateDueDateRef
+                                                );
+                                            }}
+                                            onHide={() => {
+                                                stopAnimateInputFocus(
+                                                    animateDueDateRef
+                                                );
+                                            }}
+                                            onBlur={() => {
+                                                stopAnimateInputFocus(
+                                                    animateDueDateRef
+                                                );
+                                            }}
+                                            showIcon
+                                            dateFormat="dd-mm-yy"
+                                            className={`w-full md:w-14rem ${
+                                                errors.due_date && "p-invalid"
+                                            }`}
+                                        />
+                                    </div>
 
-                                <div className="flex flex-col mt-3">
-                                    <label htmlFor="regency">Kabupaten *</label>
-                                    <Dropdown
-                                        value={
-                                            data.partner.regency
-                                                ? JSON.parse(
-                                                      data.partner.regency
-                                                  )
-                                                : null
-                                        }
-                                        onChange={(e) => {
-                                            setData("partner", {
-                                                ...data.partner,
-                                                regency: JSON.stringify(
-                                                    e.target.value
-                                                ),
-                                            });
-                                        }}
-                                        onFocus={() => {
-                                            triggerInputFocus(
-                                                animatePartnerRegencyRef
-                                            );
-                                        }}
-                                        onShow={() => {
-                                            triggerInputFocus(
-                                                animatePartnerRegencyRef
-                                            );
-                                        }}
-                                        onHide={() => {
-                                            stopAnimateInputFocus(
-                                                animatePartnerRegencyRef
-                                            );
-                                        }}
-                                        options={regencys}
-                                        optionLabel="name"
-                                        dataKey="name"
-                                        placeholder="Pilih Kabupaten"
-                                        filter
-                                        valueTemplate={selectedOptionTemplate}
-                                        itemTemplate={optionTemplate}
-                                        className="w-full md:w-14rem"
-                                    />
-                                </div>
+                                    <div className="flex flex-col mt-3">
+                                        <label htmlFor="paid_off">
+                                            Terbayarkan *
+                                        </label>
+                                        <InputNumber
+                                            value={data.paid_off}
+                                            onChange={(e) => {
+                                                setData((data) => ({
+                                                    ...data,
+                                                    paid_off: e.value,
+                                                }));
+                                            }}
+                                            // onBlur={() => {
+                                            //     let rest_of_bill =
+                                            //         data.rest_of_bill -
+                                            //         data.paid_off;
+                                            //     setData((data) => ({
+                                            //         ...data,
+                                            //         rest_of_bill: rest_of_bill,
+                                            //     }));
+                                            // }}
+                                            defaultValue={0}
+                                            className="dark:bg-gray-300"
+                                            id="partner_address"
+                                            aria-describedby="partner_address-help"
+                                            locale="id-ID"
+                                        />
+                                    </div>
 
-                                <div className="flex flex-col mt-3">
-                                    <label htmlFor="date">Tanggal *</label>
-                                    <Calendar
-                                        value={
-                                            data.date
-                                                ? new Date(data.date)
-                                                : null
-                                        }
-                                        style={{ height: "35px" }}
-                                        onChange={(e) => {
-                                            setData("date", e.target.value);
-                                        }}
-                                        onFocus={() => {
-                                            triggerInputFocus(animateDateRef);
-                                        }}
-                                        onShow={() => {
-                                            triggerInputFocus(animateDateRef);
-                                        }}
-                                        onHide={() => {
-                                            stopAnimateInputFocus(
-                                                animateDateRef
-                                            );
-                                        }}
-                                        onBlur={() => {
-                                            stopAnimateInputFocus(
-                                                animateDateRef
-                                            );
-                                        }}
-                                        showIcon
-                                        dateFormat="dd-mm-yy"
-                                        className={`w-full md:w-14rem ${
-                                            errors.due_date && "p-invalid"
-                                        }`}
-                                    />
-                                </div>
-                                <div className="flex flex-col mt-3">
-                                    <label htmlFor="due_date">
-                                        Jatuh Tempo *
-                                    </label>
-                                    <Calendar
-                                        value={
-                                            data.due_date
-                                                ? new Date(data.due_date)
-                                                : null
-                                        }
-                                        style={{ height: "35px" }}
-                                        onChange={(e) => {
-                                            setData("due_date", e.target.value);
-                                        }}
-                                        onFocus={() => {
-                                            triggerInputFocus(
-                                                animateDueDateRef
-                                            );
-                                        }}
-                                        onShow={() => {
-                                            triggerInputFocus(
-                                                animateDueDateRef
-                                            );
-                                        }}
-                                        onHide={() => {
-                                            stopAnimateInputFocus(
-                                                animateDueDateRef
-                                            );
-                                        }}
-                                        onBlur={() => {
-                                            stopAnimateInputFocus(
-                                                animateDueDateRef
-                                            );
-                                        }}
-                                        showIcon
-                                        dateFormat="dd-mm-yy"
-                                        className={`w-full md:w-14rem ${
-                                            errors.due_date && "p-invalid"
-                                        }`}
-                                    />
-                                </div>
-
-                                <div className="flex flex-col mt-3">
-                                    <label htmlFor="paid_off">
-                                        Terbayarkan *
-                                    </label>
-                                    <InputNumber
-                                        value={data.paid_off}
-                                        onChange={(e) => {
-                                            setData((data) => ({
-                                                ...data,
-                                                paid_off: e.value,
-                                            }));
-                                        }}
-                                        // onBlur={() => {
-                                        //     let rest_of_bill =
-                                        //         data.rest_of_bill -
-                                        //         data.paid_off;
-                                        //     setData((data) => ({
-                                        //         ...data,
-                                        //         rest_of_bill: rest_of_bill,
-                                        //     }));
-                                        // }}
-                                        defaultValue={0}
-                                        className="dark:bg-gray-300"
-                                        id="partner_address"
-                                        aria-describedby="partner_address-help"
-                                        locale="id-ID"
-                                    />
-                                </div>
-
-                                {/* <div className="flex flex-col mt-3">
+                                    {/* <div className="flex flex-col mt-3">
                                     <label htmlFor="rest_of_bill">
                                         Sisa Tagihan *
                                     </label>
@@ -766,667 +729,720 @@ const Edit = ({
                                     />
                                 </div> */}
 
-                                <div className="flex flex-col mt-3">
-                                    <label htmlFor="payment_metode">
-                                        Metode Pembayaran *
-                                    </label>
-                                    <Dropdown
-                                        value={data.payment_metode}
-                                        onChange={(e) => {
-                                            setData(
-                                                "payment_metode",
-                                                e.target.value
-                                            );
-                                        }}
-                                        onShow={() => {
-                                            triggerInputFocus(
-                                                animatePaymentMetodeRef
-                                            );
-                                        }}
-                                        onHide={() => {
-                                            stopAnimateInputFocus(
-                                                animatePaymentMetodeRef
-                                            );
-                                        }}
-                                        options={[
-                                            { name: "cazhbox" },
-                                            { name: "payment link" },
-                                        ]}
-                                        optionLabel="name"
-                                        optionValue="name"
-                                        placeholder="Pilih Metode Pembayaran"
-                                        valueTemplate={selectedOptionTemplate}
-                                        itemTemplate={optionTemplate}
-                                        className="w-full md:w-14rem"
-                                        editable
-                                    />
-                                </div>
-
-                                {data.payment_metode === "payment link" && (
                                     <div className="flex flex-col mt-3">
-                                        <label htmlFor="partner_address">
-                                            Link Xendit *
+                                        <label htmlFor="payment_metode">
+                                            Metode Pembayaran *
                                         </label>
-                                        <InputText
-                                            value={data.xendit_link}
-                                            onChange={(e) =>
+                                        <Dropdown
+                                            value={data.payment_metode}
+                                            onChange={(e) => {
                                                 setData(
-                                                    "xendit_link",
+                                                    "payment_metode",
                                                     e.target.value
-                                                )
+                                                );
+                                            }}
+                                            onShow={() => {
+                                                triggerInputFocus(
+                                                    animatePaymentMetodeRef
+                                                );
+                                            }}
+                                            onHide={() => {
+                                                stopAnimateInputFocus(
+                                                    animatePaymentMetodeRef
+                                                );
+                                            }}
+                                            options={[
+                                                { name: "cazhbox" },
+                                                { name: "payment link" },
+                                            ]}
+                                            optionLabel="name"
+                                            optionValue="name"
+                                            placeholder="Pilih Metode Pembayaran"
+                                            valueTemplate={
+                                                selectedOptionTemplate
                                             }
-                                            className="dark:bg-gray-300"
-                                            id="partner_address"
-                                            aria-describedby="partner_address-help"
+                                            itemTemplate={optionTemplate}
+                                            className="w-full md:w-14rem"
+                                            editable
                                         />
                                     </div>
-                                )}
 
-                                <div className="flex flex-col mt-3">
-                                    <label htmlFor="signature">
-                                        Tanda Tangan *
-                                    </label>
-                                    <Dropdown
-                                        value={data.signature}
-                                        onChange={(e) => {
-                                            setData("signature", {
-                                                ...data.signature,
-                                                name: e.target.value.name,
-                                                position:
-                                                    e.target.value.position,
-                                                image: e.target.value.image,
-                                            });
-                                        }}
-                                        dataKey="name"
-                                        options={signatures}
-                                        optionLabel="name"
-                                        placeholder="Pilih Tanda Tangan"
-                                        filter
-                                        valueTemplate={selectedOptionTemplate}
-                                        itemTemplate={optionSignatureTemplate}
-                                        className="w-full md:w-14rem"
-                                        onShow={() => {
-                                            triggerInputFocus(
-                                                animateSignatureNameRef
-                                            );
-                                        }}
-                                        onHide={() => {
-                                            stopAnimateInputFocus(
-                                                animateSignatureNameRef
-                                            );
-                                        }}
-                                    />
+                                    {data.payment_metode === "payment link" && (
+                                        <div className="flex flex-col mt-3">
+                                            <label htmlFor="partner_address">
+                                                Link Xendit *
+                                            </label>
+                                            <InputText
+                                                value={data.xendit_link}
+                                                onChange={(e) =>
+                                                    setData(
+                                                        "xendit_link",
+                                                        e.target.value
+                                                    )
+                                                }
+                                                className="dark:bg-gray-300"
+                                                id="partner_address"
+                                                aria-describedby="partner_address-help"
+                                            />
+                                        </div>
+                                    )}
+
+                                    <div className="flex flex-col mt-3">
+                                        <label htmlFor="signature">
+                                            Tanda Tangan *
+                                        </label>
+                                        <Dropdown
+                                            value={data.signature}
+                                            onChange={(e) => {
+                                                setData("signature", {
+                                                    ...data.signature,
+                                                    name: e.target.value.name,
+                                                    position:
+                                                        e.target.value.position,
+                                                    image: e.target.value.image,
+                                                });
+                                            }}
+                                            dataKey="name"
+                                            options={signatures}
+                                            optionLabel="name"
+                                            placeholder="Pilih Tanda Tangan"
+                                            filter
+                                            valueTemplate={
+                                                selectedOptionTemplate
+                                            }
+                                            itemTemplate={
+                                                optionSignatureTemplate
+                                            }
+                                            className="w-full md:w-14rem"
+                                            onShow={() => {
+                                                triggerInputFocus(
+                                                    animateSignatureNameRef
+                                                );
+                                            }}
+                                            onHide={() => {
+                                                stopAnimateInputFocus(
+                                                    animateSignatureNameRef
+                                                );
+                                            }}
+                                        />
+                                    </div>
+
+                                    <div className="flex-flex-col mt-3">
+                                        <form onSubmit={handleSubmitForm}>
+                                            <Button className="mx-auto justify-center block">
+                                                Submit
+                                            </Button>
+                                        </form>
+                                    </div>
                                 </div>
-
-                                <div className="flex-flex-col mt-3">
-                                    <form onSubmit={handleSubmitForm}>
-                                        <Button className="mx-auto justify-center block">
-                                            Submit
-                                        </Button>
-                                    </form>
-                                </div>
-                            </div>
-                        </Card>
-                    </div>
-
-                    <Dialog
-                        header="Input Produk"
-                        visible={dialogVisible}
-                        style={{ width: "85vw" }}
-                        maximizable
-                        modal
-                        contentStyle={{ height: "550px" }}
-                        onHide={() => {
-                            setDialogVisible(false);
-                            handleTotalInvoice();
-                        }}
-                        footer={dialogFooterTemplate}
-                    >
-                        <div className="flex my-5 gap-3">
-                            <Button
-                                label="Tambah produk dari stock"
-                                icon="pi pi-external-link"
-                                className="text-xs md:text-base"
-                                onClick={() => setDialogProductVisible(true)}
-                            />
-                            <Button
-                                label="Tambah Inputan Produk"
-                                icon="pi pi-plus"
-                                className="text-xs md:text-base"
-                                onClick={() => {
-                                    let inputNew = {
-                                        name: "",
-                                        price: 0,
-                                        quantity: 1,
-                                        description: null,
-                                        total: 0,
-                                        ppn: 0,
-                                        total_ppn: 0,
-                                    };
-
-                                    let updatedProducts = [
-                                        ...data.products,
-                                        inputNew,
-                                    ];
-
-                                    setData("products", updatedProducts);
-                                }}
-                            />
+                            </Card>
                         </div>
 
-                        {data.products?.map((product, index) => {
-                            const no = index + 1;
-                            return (
-                                <div
-                                    className="flex  w-full max-h-full gap-5 mt-2 items-center"
-                                    key={product + index}
-                                >
-                                    <div>
-                                        <Badge value={no} size="large"></Badge>
-                                    </div>
-
-                                    <div className="flex flex-col">
-                                        <label htmlFor="partner_address">
-                                            Produk *
-                                        </label>
-                                        <InputText
-                                            value={product.name}
-                                            onChange={(e) =>
-                                                handleInputChange(
-                                                    index,
-                                                    "name",
-                                                    e.target.value
-                                                )
-                                            }
-                                            className="dark:bg-gray-300"
-                                            id="partner_address"
-                                            aria-describedby="partner_address-help"
-                                        />
-                                    </div>
-
-                                    <div className="flex flex-col">
-                                        <label htmlFor="partner_address">
-                                            Deskripsi *
-                                        </label>
-                                        <InputText
-                                            value={product.description}
-                                            onChange={(e) =>
-                                                handleInputChange(
-                                                    index,
-                                                    "description",
-                                                    e.target.value
-                                                )
-                                            }
-                                            className="dark:bg-gray-300"
-                                            id="partner_address"
-                                            aria-describedby="partner_address-help"
-                                        />
-                                    </div>
-
-                                    <div className="flex">
-                                        <div className="flex flex-col">
-                                            <label htmlFor="partner_address">
-                                                Harga Satuan *
-                                            </label>
-                                            <InputNumber
-                                                value={product.price}
-                                                onChange={(e) =>
-                                                    handleInputChange(
-                                                        index,
-                                                        "price",
-                                                        e.value
-                                                    )
-                                                }
-                                                defaultValue={0}
-                                                className="dark:bg-gray-300"
-                                                id="partner_address"
-                                                aria-describedby="partner_address-help"
-                                                locale="id-ID"
-                                            />
-                                        </div>
-                                    </div>
-
-                                    <div className="flex">
-                                        <div className="flex flex-col">
-                                            <label htmlFor="partner_address">
-                                                Kuantitas *
-                                            </label>
-                                            <InputNumber
-                                                value={product.quantity}
-                                                onChange={(e) =>
-                                                    handleInputChange(
-                                                        index,
-                                                        "quantity",
-                                                        e.value
-                                                    )
-                                                }
-                                                defaultValue={1}
-                                                className="dark:bg-gray-300"
-                                                id="partner_address"
-                                                aria-describedby="partner_address-help"
-                                                locale="id-ID"
-                                            />
-                                        </div>
-                                    </div>
-
-                                    <div className="flex">
-                                        <div className="flex flex-col">
-                                            <label htmlFor="partner_address">
-                                                Pajak (%) *
-                                            </label>
-                                            <InputNumber
-                                                onChange={(e) => {
-                                                    handleInputChange(
-                                                        index,
-                                                        "ppn",
-                                                        e.value
-                                                    );
-                                                }}
-                                                defaultValue={0}
-                                                value={product.ppn}
-                                                className="dark:bg-gray-300"
-                                                id="partner_address"
-                                                aria-describedby="partner_address-help"
-                                                locale="id-ID"
-                                            />
-                                        </div>
-                                    </div>
-
-                                    <div className="flex">
-                                        <div className="flex flex-col">
-                                            <label htmlFor="partner_address">
-                                                Jumlah Harga *
-                                            </label>
-                                            <InputNumber
-                                                value={product.total}
-                                                onChange={(e) => {
-                                                    handleInputChange(
-                                                        index,
-                                                        "total",
-                                                        e.value
-                                                    );
-                                                }}
-                                                defaultValue={0}
-                                                className="dark:bg-gray-300"
-                                                id="partner_address"
-                                                aria-describedby="partner_address-help"
-                                                locale="id-ID"
-                                                disabled
-                                            />
-                                        </div>
-                                    </div>
-
-                                    <div className="flex">
-                                        <div className="flex flex-col">
-                                            <label htmlFor="partner_address">
-                                                Pajak *
-                                            </label>
-                                            <InputNumber
-                                                onChange={(e) => {
-                                                    handleInputChange(
-                                                        index,
-                                                        "total_ppn",
-                                                        e.value
-                                                    );
-                                                }}
-                                                value={product.total_ppn}
-                                                className="dark:bg-gray-300"
-                                                id="partner_address"
-                                                aria-describedby="partner_address-help"
-                                                locale="id-ID"
-                                                disabled
-                                            />
-                                        </div>
-                                    </div>
-
-                                    <div className="flex self-center pt-4 ">
-                                        <Button
-                                            className="bg-red-500 h-1 w-1 shadow-md rounded-full "
-                                            icon={() => (
-                                                <i
-                                                    className="pi pi-minus"
-                                                    style={{
-                                                        fontSize: "0.7rem",
-                                                    }}
-                                                ></i>
-                                            )}
-                                            onClick={() => {
-                                                const updatedProducts = [
-                                                    ...data.products,
-                                                ];
-
-                                                updatedProducts.splice(
-                                                    index,
-                                                    1
-                                                );
-
-                                                setData((prevData) => ({
-                                                    ...prevData,
-                                                    products: updatedProducts,
-                                                }));
-                                            }}
-                                            aria-controls="popup_menu_right"
-                                            aria-haspopup
-                                        />
-                                    </div>
-                                </div>
-                            );
-                        })}
-
                         <Dialog
-                            header="Produk"
-                            visible={dialogProductVisible}
-                            style={{ width: "75vw" }}
+                            header="Input Produk"
+                            visible={dialogVisible}
+                            style={{ width: "85vw" }}
                             maximizable
                             modal
                             contentStyle={{ height: "550px" }}
                             onHide={() => {
-                                setDialogProductVisible(false);
+                                setDialogVisible(false);
+                                handleTotalInvoice();
                             }}
-                            footer={() => dialogFooterTemplate("product")}
+                            footer={dialogFooterTemplate}
                         >
-                            <DataTable
-                                value={products}
-                                paginator
-                                filters={filters}
-                                rows={5}
-                                header={header}
-                                scrollable
-                                scrollHeight="flex"
-                                tableStyle={{ minWidth: "50rem" }}
-                                selectionMode={rowClick ? null : "checkbox"}
-                                // onSelectionChange={(e) => {
-                                //     setData("products", e.value);
-                                // }}
-                                selection={selectedProducts}
-                                onSelectionChange={(e) => {
-                                    setSelectedProducts(e.value);
-                                }}
-                                dataKey="id"
-                            >
-                                <Column
-                                    selectionMode="multiple"
-                                    headerStyle={{ width: "3rem" }}
-                                ></Column>
-                                <Column
-                                    field="name"
-                                    header="Name"
-                                    style={{ minWidth: "5rem" }}
-                                ></Column>
-                                <Column
-                                    field="category"
-                                    header="Kategori"
-                                    style={{ minWidth: "5rem" }}
-                                ></Column>
-                                <Column
-                                    field="price"
-                                    header="Harga"
-                                    style={{ minWidth: "5rem" }}
-                                ></Column>
-                                <Column
-                                    field="description"
-                                    header="Deskripsi"
-                                    style={{ minWidth: "5rem" }}
-                                ></Column>
-                            </DataTable>
-                        </Dialog>
-                    </Dialog>
+                            <div className="flex my-5 gap-3">
+                                <Button
+                                    label="Tambah produk dari stock"
+                                    icon="pi pi-external-link"
+                                    className="text-xs md:text-base"
+                                    onClick={() =>
+                                        setDialogProductVisible(true)
+                                    }
+                                />
+                                <Button
+                                    label="Tambah Inputan Produk"
+                                    icon="pi pi-plus"
+                                    className="text-xs md:text-base"
+                                    onClick={() => {
+                                        let inputNew = {
+                                            name: "",
+                                            price: 0,
+                                            quantity: 1,
+                                            description: null,
+                                            total: 0,
+                                            ppn: 0,
+                                            total_ppn: 0,
+                                        };
 
-                    <div className="md:w-[70%] hidden md:block text-sm h-screen max-h-screen overflow-y-auto p-5">
-                        <header>
-                            <div className="flex justify-between items-center">
-                                <div className="w-full flex flex-col text-xs text-purple-700">
-                                    <img
-                                        src="/assets/img/cazh.png"
-                                        alt=""
-                                        className="float-left w-[40%] h-[40%]"
-                                    />
+                                        let updatedProducts = [
+                                            ...data.products,
+                                            inputNew,
+                                        ];
 
-                                    <p className="mt-3">
-                                        PT CAZH TEKNOLOGI INOVASI
-                                    </p>
-                                    <div className="leading-2 mt-2 w-[80%]">
-                                        Bonavida Park D1, Jl. Raya
-                                        Karanggintung, Sumbang Banyumas, Jawa
-                                        Tengah, 53183 | hello@cazh.id
-                                    </div>
-                                </div>
-                                <div className="w-full text-right text-xs">
-                                    <h1 className="font-bold text-3xl text-purple-800">
-                                        INVOICE
-                                    </h1>
-
-                                    <p className="mt-4">{data.code}</p>
-                                    <p ref={animateDateRef}>
-                                        Tanggal{" "}
-                                        {formatDate(data.date) ??
-                                            "{{Tanggal Invoice}}"}
-                                    </p>
-                                    <p ref={animateDueDateRef}>
-                                        Jatuh Tempo{" "}
-                                        {formatDate(data.due_date) ??
-                                            "{{Jatuh Tempo}}"}
-                                    </p>
-                                </div>
+                                        setData("products", updatedProducts);
+                                    }}
+                                />
                             </div>
-                        </header>
 
-                        <div className="mt-5" ref={partnerScrollRef}>
-                            <h1>Ditagihkan Kepada:</h1>
-                            <h1
-                                className="font-bold mt-3"
-                                ref={animatePartnerNameRef}
-                            >
-                                {data.partner.name ?? "{{partner}}"}
-                            </h1>
+                            {data.products?.map((product, index) => {
+                                const no = index + 1;
+                                return (
+                                    <div
+                                        className="flex  w-full max-h-full gap-5 mt-2 items-center"
+                                        key={product + index}
+                                    >
+                                        <div>
+                                            <Badge
+                                                value={no}
+                                                size="large"
+                                            ></Badge>
+                                        </div>
 
-                            <h1 className="mt-2">
-                                di{" "}
-                                <span ref={animatePartnerRegencyRef}>
-                                    {data.partner.regency
-                                        ? JSON.parse(data.partner.regency).name
-                                        : "{{kabupaten}}"}
-                                </span>
-                                {", "}
-                                <span ref={animatePartnerProvinceRef}>
-                                    {data.partner.province
-                                        ? JSON.parse(data.partner.province).name
-                                        : "{{provinsi}}"}
-                                </span>
-                            </h1>
-                            <h1 ref={animatePartnerNumberRef}>
-                                {data.partner.number ?? "{{nomor hp partner}}"}
-                            </h1>
-                        </div>
+                                        <div className="flex flex-col">
+                                            <label htmlFor="partner_address">
+                                                Produk *
+                                            </label>
+                                            <InputText
+                                                value={product.name}
+                                                onChange={(e) =>
+                                                    handleInputChange(
+                                                        index,
+                                                        "name",
+                                                        e.target.value
+                                                    )
+                                                }
+                                                className="dark:bg-gray-300"
+                                                id="partner_address"
+                                                aria-describedby="partner_address-help"
+                                            />
+                                        </div>
 
-                        <div className="w-full mt-5">
-                            <table className="w-full border">
-                                <thead className="bg-purple-800 text-white text-center border">
-                                    <th className="p-1 border ">Produk</th>
-                                    <th className="p-1 border">Deskripsi</th>
-                                    <th className="p-1 border">Kuantitas</th>
-                                    <th className="p-1 border">Harga Satuan</th>
-                                    <th className="p-1 border">Jumlah Harga</th>
-                                    <th className="p-1 border">Pajak</th>
-                                </thead>
-                                <tbody>
-                                    {data.products?.length == 0 && (
-                                        <tr className="text-center border">
-                                            <td colSpan={6}>
-                                                Produk belum ditambah
-                                            </td>
-                                        </tr>
-                                    )}
-                                    {data.products?.map((data, i) => {
-                                        return (
-                                            <tr
-                                                key={data.name + i}
-                                                className="border p-1"
-                                            >
-                                                <td className="border p-1">
-                                                    {data.name}
-                                                </td>
-                                                <td className="border p-1">
-                                                    {data.description}
-                                                </td>
-                                                <td className="border p-1 text-center">
-                                                    {data.quantity}
-                                                </td>
-                                                <td className="border p-1 text-right">
-                                                    Rp
-                                                    {data.price
-                                                        ? data.price.toLocaleString(
-                                                              "id-ID"
-                                                          )
-                                                        : 0}
-                                                </td>
-                                                <td className="border p-1 text-right">
-                                                    Rp
-                                                    {data.total
-                                                        ? data.total.toLocaleString(
-                                                              "id-ID"
-                                                          )
-                                                        : 0}
-                                                </td>
-                                                <td className="border p-1 text-right">
-                                                    Rp
-                                                    {data.total_ppn
-                                                        ? data.total_ppn.toLocaleString(
-                                                              "id-ID"
-                                                          )
-                                                        : 0}
-                                                </td>
-                                            </tr>
-                                        );
-                                    })}
-                                </tbody>
-                            </table>
-                        </div>
+                                        <div className="flex flex-col">
+                                            <label htmlFor="partner_address">
+                                                Deskripsi *
+                                            </label>
+                                            <InputText
+                                                value={product.description}
+                                                onChange={(e) =>
+                                                    handleInputChange(
+                                                        index,
+                                                        "description",
+                                                        e.target.value
+                                                    )
+                                                }
+                                                className="dark:bg-gray-300"
+                                                id="partner_address"
+                                                aria-describedby="partner_address-help"
+                                            />
+                                        </div>
 
-                        <div className="mt-5">
-                            <div className="w-full flex justify-end">
-                                <div className="w-[35%]">
-                                    <div className="flex gap-1">
-                                        <p className="w-[50%] text-right">
-                                            Total Harga
-                                        </p>
-                                        <p className="text-right w-full">
-                                            Rp
-                                            {data.total.toLocaleString(
-                                                "id-ID"
-                                            ) ?? 0}
-                                        </p>
-                                    </div>
-                                    <div className="flex gap-1">
-                                        <p className="w-[50%] text-right">
-                                            Pajak
-                                        </p>
-                                        <p className="text-right w-full">
-                                            Rp
-                                            {data.total_all_ppn.toLocaleString(
-                                                "id-ID"
-                                            ) ?? 0}
-                                        </p>
-                                    </div>
-                                    <div className="flex gap-1 mt-5">
-                                        <p className="w-[50%] text-right">
-                                            Terbayar
-                                        </p>
-                                        <div className="w-full">
-                                            <p className="text-right w-full">
-                                                Rp
-                                                {data.paid_off
-                                                    ? data.paid_off.toLocaleString(
-                                                          "id-ID"
-                                                      )
-                                                    : 0}
-                                            </p>
-                                            <hr className="h-[2px] bg-gray-500" />
+                                        <div className="flex">
+                                            <div className="flex flex-col">
+                                                <label htmlFor="partner_address">
+                                                    Harga Satuan *
+                                                </label>
+                                                <InputNumber
+                                                    value={product.price}
+                                                    onChange={(e) =>
+                                                        handleInputChange(
+                                                            index,
+                                                            "price",
+                                                            e.value
+                                                        )
+                                                    }
+                                                    defaultValue={0}
+                                                    className="dark:bg-gray-300"
+                                                    id="partner_address"
+                                                    aria-describedby="partner_address-help"
+                                                    locale="id-ID"
+                                                />
+                                            </div>
+                                        </div>
+
+                                        <div className="flex">
+                                            <div className="flex flex-col">
+                                                <label htmlFor="partner_address">
+                                                    Kuantitas *
+                                                </label>
+                                                <InputNumber
+                                                    value={product.quantity}
+                                                    onChange={(e) =>
+                                                        handleInputChange(
+                                                            index,
+                                                            "quantity",
+                                                            e.value
+                                                        )
+                                                    }
+                                                    defaultValue={1}
+                                                    className="dark:bg-gray-300"
+                                                    id="partner_address"
+                                                    aria-describedby="partner_address-help"
+                                                    locale="id-ID"
+                                                />
+                                            </div>
+                                        </div>
+
+                                        <div className="flex">
+                                            <div className="flex flex-col">
+                                                <label htmlFor="partner_address">
+                                                    Pajak (%) *
+                                                </label>
+                                                <InputNumber
+                                                    onChange={(e) => {
+                                                        handleInputChange(
+                                                            index,
+                                                            "ppn",
+                                                            e.value
+                                                        );
+                                                    }}
+                                                    defaultValue={0}
+                                                    value={product.ppn}
+                                                    className="dark:bg-gray-300"
+                                                    id="partner_address"
+                                                    aria-describedby="partner_address-help"
+                                                    locale="id-ID"
+                                                />
+                                            </div>
+                                        </div>
+
+                                        <div className="flex">
+                                            <div className="flex flex-col">
+                                                <label htmlFor="partner_address">
+                                                    Jumlah Harga *
+                                                </label>
+                                                <InputNumber
+                                                    value={product.total}
+                                                    onChange={(e) => {
+                                                        handleInputChange(
+                                                            index,
+                                                            "total",
+                                                            e.value
+                                                        );
+                                                    }}
+                                                    defaultValue={0}
+                                                    className="dark:bg-gray-300"
+                                                    id="partner_address"
+                                                    aria-describedby="partner_address-help"
+                                                    locale="id-ID"
+                                                    disabled
+                                                />
+                                            </div>
+                                        </div>
+
+                                        <div className="flex">
+                                            <div className="flex flex-col">
+                                                <label htmlFor="partner_address">
+                                                    Pajak *
+                                                </label>
+                                                <InputNumber
+                                                    onChange={(e) => {
+                                                        handleInputChange(
+                                                            index,
+                                                            "total_ppn",
+                                                            e.value
+                                                        );
+                                                    }}
+                                                    value={product.total_ppn}
+                                                    className="dark:bg-gray-300"
+                                                    id="partner_address"
+                                                    aria-describedby="partner_address-help"
+                                                    locale="id-ID"
+                                                    disabled
+                                                />
+                                            </div>
+                                        </div>
+
+                                        <div className="flex self-center pt-4 ">
+                                            <Button
+                                                className="bg-red-500 h-1 w-1 shadow-md rounded-full "
+                                                icon={() => (
+                                                    <i
+                                                        className="pi pi-minus"
+                                                        style={{
+                                                            fontSize: "0.7rem",
+                                                        }}
+                                                    ></i>
+                                                )}
+                                                onClick={() => {
+                                                    const updatedProducts = [
+                                                        ...data.products,
+                                                    ];
+
+                                                    updatedProducts.splice(
+                                                        index,
+                                                        1
+                                                    );
+
+                                                    setData((prevData) => ({
+                                                        ...prevData,
+                                                        products:
+                                                            updatedProducts,
+                                                    }));
+                                                }}
+                                                aria-controls="popup_menu_right"
+                                                aria-haspopup
+                                            />
                                         </div>
                                     </div>
-                                    <div className="flex gap-1 font-bold mt-5">
-                                        <p className="w-[50%] text-right">
-                                            Sisa Tagihan
+                                );
+                            })}
+
+                            <Dialog
+                                header="Produk"
+                                visible={dialogProductVisible}
+                                style={{ width: "75vw" }}
+                                maximizable
+                                modal
+                                contentStyle={{ height: "550px" }}
+                                onHide={() => {
+                                    setDialogProductVisible(false);
+                                }}
+                                footer={() => dialogFooterTemplate("product")}
+                            >
+                                <DataTable
+                                    value={products}
+                                    paginator
+                                    filters={filters}
+                                    rows={5}
+                                    header={header}
+                                    scrollable
+                                    scrollHeight="flex"
+                                    tableStyle={{ minWidth: "50rem" }}
+                                    selectionMode={rowClick ? null : "checkbox"}
+                                    // onSelectionChange={(e) => {
+                                    //     setData("products", e.value);
+                                    // }}
+                                    selection={selectedProducts}
+                                    onSelectionChange={(e) => {
+                                        setSelectedProducts(e.value);
+                                    }}
+                                    dataKey="id"
+                                >
+                                    <Column
+                                        selectionMode="multiple"
+                                        headerStyle={{ width: "3rem" }}
+                                    ></Column>
+                                    <Column
+                                        field="name"
+                                        header="Name"
+                                        style={{ minWidth: "5rem" }}
+                                    ></Column>
+                                    <Column
+                                        field="category"
+                                        header="Kategori"
+                                        style={{ minWidth: "5rem" }}
+                                    ></Column>
+                                    <Column
+                                        field="price"
+                                        header="Harga"
+                                        style={{ minWidth: "5rem" }}
+                                    ></Column>
+                                    <Column
+                                        field="description"
+                                        header="Deskripsi"
+                                        style={{ minWidth: "5rem" }}
+                                    ></Column>
+                                </DataTable>
+                            </Dialog>
+                        </Dialog>
+
+                        <div className="md:w-[70%] hidden md:block text-sm h-screen max-h-screen overflow-y-auto p-5">
+                            <header>
+                                <div className="flex justify-between items-center">
+                                    <div className="w-full flex flex-col text-xs text-purple-700">
+                                        <img
+                                            src="/assets/img/cazh.png"
+                                            alt=""
+                                            className="float-left w-[40%] h-[40%]"
+                                        />
+
+                                        <p className="mt-3">
+                                            PT CAZH TEKNOLOGI INOVASI
                                         </p>
-                                        <p className="text-right w-full">
-                                            Rp
-                                            {data.rest_of_bill.toLocaleString(
-                                                "id-ID"
-                                            ) ?? 0}
+                                        <div className="leading-2 mt-2 w-[80%]">
+                                            Bonavida Park D1, Jl. Raya
+                                            Karanggintung, Sumbang Banyumas,
+                                            Jawa Tengah, 53183 | hello@cazh.id
+                                        </div>
+                                    </div>
+                                    <div className="w-full text-right text-xs">
+                                        <h1 className="font-bold text-3xl text-purple-800">
+                                            INVOICE
+                                        </h1>
+
+                                        <p className="mt-4">{data.code}</p>
+                                        <p ref={animateDateRef}>
+                                            Tanggal{" "}
+                                            {formatDate(data.date) ??
+                                                "{{Tanggal Invoice}}"}
+                                        </p>
+                                        <p ref={animateDueDateRef}>
+                                            Jatuh Tempo{" "}
+                                            {formatDate(data.due_date) ??
+                                                "{{Jatuh Tempo}}"}
                                         </p>
                                     </div>
                                 </div>
-                            </div>
-                        </div>
+                            </header>
 
-                        {data.total_all_ppn == 0 && (
-                            <div className="mt-16 w-full">
-                                <h1 className="font-bold underline">Catatan</h1>
-                                <p className="w-1/2">
-                                    Pajak akan ditanggung dan dibayarkan oleh
-                                    lembaga secara mandiri.
-                                </p>
-                            </div>
-                        )}
+                            <div className="mt-5" ref={partnerScrollRef}>
+                                <h1>Ditagihkan Kepada:</h1>
+                                <h1
+                                    className="font-bold mt-3"
+                                    ref={animatePartnerNameRef}
+                                >
+                                    {data.partner.name ?? "{{partner}}"}
+                                </h1>
 
-                        <div
-                            ref={animatePaymentMetodeRef}
-                            className="flex w-full mt-5 justify-between items-center"
-                        >
-                            <div className="w-[50%] leading-6">
-                                {data.payment_metode === "payment link" && (
-                                    <div>
-                                        <h1 className="font-bold underline">
-                                            Payment Link:
-                                        </h1>
-                                        <p>
-                                            Pembayaran online* via link berikut:
-                                        </p>
-                                        <p>
-                                            <a
-                                                className="text-blue-500"
-                                                href={data.xendit_link}
-                                            >
-                                                {data.xendit_link ?? "{{link}}"}
-                                            </a>
-                                        </p>
-                                        <p className="text-xs mt-1">
-                                            *melalui m-Banking, ATM, QRIS,
-                                            Minimarket dll.
-                                        </p>
-                                    </div>
-                                )}
-                                {data.payment_metode === "cazhbox" && (
-                                    <div>
-                                        <h1 className="font-bold underline">
-                                            Payment:
-                                        </h1>
-                                        <p>
-                                            Pembayaran akan dilakukan dengan
-                                            mengurangi <b>CazhBOX</b> lembaga
-                                            Anda.
-                                        </p>
-                                    </div>
-                                )}
+                                <h1 className="mt-2">
+                                    di{" "}
+                                    <span ref={animatePartnerRegencyRef}>
+                                        {data.partner.regency
+                                            ? upperCaseEachWord(
+                                                  JSON.parse(
+                                                      data.partner.regency
+                                                  ).name
+                                              )
+                                            : "{{kabupaten}}"}
+                                    </span>
+                                    {", "}
+                                    <span ref={animatePartnerProvinceRef}>
+                                        {data.partner.province
+                                            ? upperCaseEachWord(
+                                                  JSON.parse(
+                                                      data.partner.province
+                                                  ).name
+                                              )
+                                            : "{{provinsi}}"}
+                                    </span>
+                                </h1>
+                                <h1 ref={animatePartnerNumberRef}>
+                                    {data.partner.number ??
+                                        "{{nomor hp partner}}"}
+                                </h1>
                             </div>
+
+                            <div className="w-full mt-5">
+                                <table className="w-full border">
+                                    <thead className="bg-purple-800 text-white text-center border">
+                                        <th className="p-1 border ">Produk</th>
+                                        <th className="p-1 border">
+                                            Deskripsi
+                                        </th>
+                                        <th className="p-1 border">
+                                            Kuantitas
+                                        </th>
+                                        <th className="p-1 border">
+                                            Harga Satuan
+                                        </th>
+                                        <th className="p-1 border">
+                                            Jumlah Harga
+                                        </th>
+                                        <th className="p-1 border">Pajak</th>
+                                    </thead>
+                                    <tbody>
+                                        {data.products?.length == 0 && (
+                                            <tr className="text-center border">
+                                                <td colSpan={6}>
+                                                    Produk belum ditambah
+                                                </td>
+                                            </tr>
+                                        )}
+                                        {data.products?.map((data, i) => {
+                                            return (
+                                                <tr
+                                                    key={data.name + i}
+                                                    className="border p-1"
+                                                >
+                                                    <td className="border p-1">
+                                                        {data.name}
+                                                    </td>
+                                                    <td className="border p-1">
+                                                        {data.description}
+                                                    </td>
+                                                    <td className="border p-1 text-center">
+                                                        {data.quantity}
+                                                    </td>
+                                                    <td className="border p-1 text-right">
+                                                        Rp
+                                                        {data.price
+                                                            ? data.price.toLocaleString(
+                                                                  "id-ID"
+                                                              )
+                                                            : 0}
+                                                    </td>
+                                                    <td className="border p-1 text-right">
+                                                        Rp
+                                                        {data.total
+                                                            ? data.total.toLocaleString(
+                                                                  "id-ID"
+                                                              )
+                                                            : 0}
+                                                    </td>
+                                                    <td className="border p-1 text-right">
+                                                        Rp
+                                                        {data.total_ppn
+                                                            ? data.total_ppn.toLocaleString(
+                                                                  "id-ID"
+                                                              )
+                                                            : 0}
+                                                    </td>
+                                                </tr>
+                                            );
+                                        })}
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <div className="mt-5">
+                                <div className="w-full flex justify-end">
+                                    <div className="w-[35%]">
+                                        <div className="flex gap-1">
+                                            <p className="w-[50%] text-right">
+                                                Total Harga
+                                            </p>
+                                            <p className="text-right w-full">
+                                                Rp
+                                                {data.total.toLocaleString(
+                                                    "id-ID"
+                                                ) ?? 0}
+                                            </p>
+                                        </div>
+                                        <div className="flex gap-1">
+                                            <p className="w-[50%] text-right">
+                                                Pajak
+                                            </p>
+                                            <p className="text-right w-full">
+                                                Rp
+                                                {data.total_all_ppn.toLocaleString(
+                                                    "id-ID"
+                                                ) ?? 0}
+                                            </p>
+                                        </div>
+                                        <div className="flex gap-1 mt-5">
+                                            <p className="w-[50%] text-right">
+                                                Terbayar
+                                            </p>
+                                            <div className="w-full">
+                                                <p className="text-right w-full">
+                                                    Rp
+                                                    {data.paid_off
+                                                        ? data.paid_off.toLocaleString(
+                                                              "id-ID"
+                                                          )
+                                                        : 0}
+                                                </p>
+                                                <hr className="h-[2px] bg-gray-500" />
+                                            </div>
+                                        </div>
+                                        <div className="flex gap-1 font-bold mt-5">
+                                            <p className="w-[50%] text-right">
+                                                Sisa Tagihan
+                                            </p>
+                                            <p className="text-right w-full">
+                                                Rp
+                                                {data.rest_of_bill.toLocaleString(
+                                                    "id-ID"
+                                                ) ?? 0}
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {data.total_all_ppn == 0 && (
+                                <div className="mt-16 w-full">
+                                    <h1 className="font-bold underline">
+                                        Catatan
+                                    </h1>
+                                    <p className="w-1/2">
+                                        Pajak akan ditanggung dan dibayarkan
+                                        oleh lembaga secara mandiri.
+                                    </p>
+                                </div>
+                            )}
+
                             <div
-                                className="flex flex-col text-center justify-start w-[30%]"
-                                ref={animateSignatureNameRef}
+                                ref={animatePaymentMetodeRef}
+                                className="flex w-full mt-5 justify-between items-center"
                             >
-                                <p>{formatDateSignature()}</p>
-                                <div className="h-[100px] w-[170px] self-center py-2">
-                                    <img
-                                        src={"/storage/" + data.signature.image}
-                                        alt=""
-                                        className="object-fill w-full h-full"
-                                    />
-                                    <p>{data.signature.name}</p>
+                                <div className="w-[50%] leading-6">
+                                    {data.payment_metode === "payment link" && (
+                                        <div>
+                                            <h1 className="font-bold underline">
+                                                Payment Link:
+                                            </h1>
+                                            <p>
+                                                Pembayaran online* via link
+                                                berikut:
+                                            </p>
+                                            <p>
+                                                <a
+                                                    className="text-blue-500"
+                                                    href={data.xendit_link}
+                                                >
+                                                    {data.xendit_link ??
+                                                        "{{link}}"}
+                                                </a>
+                                            </p>
+                                            <p className="text-xs mt-1">
+                                                *melalui m-Banking, ATM, QRIS,
+                                                Minimarket dll.
+                                            </p>
+                                        </div>
+                                    )}
+                                    {data.payment_metode === "cazhbox" && (
+                                        <div>
+                                            <h1 className="font-bold underline">
+                                                Payment:
+                                            </h1>
+                                            <p>
+                                                Pembayaran akan dilakukan dengan
+                                                mengurangi <b>CazhBOX</b>{" "}
+                                                lembaga Anda.
+                                            </p>
+                                        </div>
+                                    )}
+                                </div>
+                                <div
+                                    className="flex flex-col text-center justify-start w-[30%]"
+                                    ref={animateSignatureNameRef}
+                                >
+                                    <p>{formatDateSignature()}</p>
+                                    <div className="h-[100px] w-[170px] self-center py-2">
+                                        <img
+                                            src={
+                                                "/storage/" +
+                                                data.signature.image
+                                            }
+                                            alt=""
+                                            className="object-fill w-full h-full"
+                                        />
+                                        <p>{data.signature.name}</p>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
+            </BlockUI>
+            <DialogInstitution
+                dialogInstitutionVisible={dialogInstitutionVisible}
+                setDialogInstitutionVisible={setDialogInstitutionVisible}
+                filters={filters}
+                setFilters={setFilters}
+                isLoadingData={isLoadingData}
+                setIsLoadingData={setIsLoadingData}
+                leads={leads}
+                setLeads={setLeads}
+                partners={partners}
+                setPartners={setPartners}
+                data={data}
+                setData={setData}
+                setProvinceName={setProvinceName}
+                reset={reset}
+            />
         </>
     );
 };

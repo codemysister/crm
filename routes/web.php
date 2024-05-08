@@ -322,10 +322,17 @@ Route::middleware('auth')->group(function () {
     Route::get('/invoice_generals/create', [InvoiceGeneralController::class, 'create'])->name('invoice_generals.create')->middleware(['can:tambah invoice umum']);
     Route::post('/invoice_generals/filter', [InvoiceGeneralController::class, 'filter'])->name('invoice_generals.filter')->middleware(['can:tambah invoice umum']);
     Route::post('/invoice_generals', [InvoiceGeneralController::class, 'store'])->name('invoice_generals.store')->middleware(['can:tambah invoice umum']);
+    Route::post('/invoice_generals/arsip/filter', [InvoiceGeneralController::class, 'arsipFilter'])->name('invoice_generals.arsip.filter');
+    Route::post('/invoice_generals/logs/filter', [InvoiceGeneralController::class, 'logFilter'])->name('invoice_generals.log.filter');
+    Route::delete('/invoice_generals/logs', [InvoiceGeneralController::class, 'destroyLogs'])->name('sla.invoice_generals.destroy');
+    Route::put('/invoice_generals/{invoice_generals:uuid}/restore', [InvoiceGeneralController::class, 'restore'])->name('invoice_generals.restore');
     Route::put('/invoice_generals/{invoice_generals:uuid}/xendit', [InvoiceGeneralController::class, 'updateXendit'])->name('invoice_generals.update.xendit')->middleware(['can:edit invoice umum']);
     Route::get('/invoice_generals/{invoice_generals:uuid}', [InvoiceGeneralController::class, 'edit'])->name('invoice_generals.edit')->middleware(['can:edit invoice umum']);
     Route::put('/invoice_generals/{invoice_generals:uuid}', [InvoiceGeneralController::class, 'update'])->name('invoice_generals.update')->middleware(['can:edit invoice umum']);
+    Route::delete('/invoice_generals/{invoice_generals:uuid}/force', [InvoiceGeneralController::class, 'destroyForce'])->name('invoice_generals.destroy.force')->middleware(['can:hapus sla']);
     Route::delete('/invoice_generals/{invoice_generals:uuid}', [InvoiceGeneralController::class, 'destroy'])->name('invoice_generals.destroy')->middleware(['can:hapus invoice umum']);
+    Route::get('/api/invoice_generals/logs', [InvoiceGeneralController::class, 'apiGetLogs'])->name('api.invoice_generals.logs');
+    Route::get('api/invoice_generals/arsip', [InvoiceGeneralController::class, 'apiGetArsip'])->name('invoice_generals.arsip');
     Route::get('/api/invoice_generals', [InvoiceGeneralController::class, 'apiGetInvoiceGenerals'])->name('api.invoice_generals');
 
     // Invoice Umum Transaksi
