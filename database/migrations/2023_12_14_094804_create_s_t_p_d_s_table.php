@@ -14,11 +14,12 @@ return new class extends Migration {
             $table->id();
             $table->uuid();
             $table->foreignId('created_by')->nullable()->constrained('users', 'id')->onDelete('cascade');
-            $table->morphs('stpdable');
+            $table->foreignId('partner_id')->nullable()->constrained()->onDelete('cascade');
+            $table->foreignId('lead_id')->nullable()->constrained('leads')->onDelete('cascade');
             $table->string('code');
-            $table->string('partner_name');
-            $table->json('partner_province');
-            $table->json('partner_regency');
+            $table->string('institution_name');
+            $table->json('institution_province');
+            $table->json('institution_regency');
             $table->date('departure_date');
             $table->date('return_date');
             $table->string('transportation');

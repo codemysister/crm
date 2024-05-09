@@ -33,7 +33,7 @@
 
 <body class="text-sm">
 
-<div class="flex justify-between items-center">
+    <div class="flex justify-between items-center">
         <table>
             <tr>
                 <td style="width:20%;">
@@ -74,12 +74,11 @@
             </thead>
             <tbody>
                 @foreach($employees as $employee)
-
-                <tr>
-                    <td style="text-align:left; width:5%;" class="p-2 pl-2">{{ $loop->index + 1 }}</td>
-                    <td style="text-align:left;" class="p-2">{{ $employee['name'] }}</td>
-                    <td style="text-align:left;" class="p-2">{{ ucwords($employee['position']) }}</td>
-                </tr>
+                    <tr>
+                        <td style="text-align:left; width:5%;" class="p-2 pl-2">{{ $loop->index + 1 }}</td>
+                        <td style="text-align:left;" class="p-2">{{ $employee['name'] }}</td>
+                        <td style="text-align:left;" class="p-2">{{ ucwords($employee['position']) }}</td>
+                    </tr>
                 @endforeach
             </tbody>
         </table>
@@ -95,13 +94,14 @@
                 <tr>
                     <td style="width:20%;">Lembaga Tujuan</td>
                     <td style="width:1%">:</td>
-                    <td style="font-weight:bold">{{$stpd->partner_name}}</td>
+                    <td style="font-weight:bold">{{$stpd->institution_name}}</td>
                 </tr>
                 <tr>
                     <td style="width:20%;">Lokasi</td>
                     <td style="width:1%">:</td>
-                    <td style="font-weight:bold">{{json_decode($stpd->partner_regency)->name}},
-            {{json_decode($stpd->partner_province)->name}}</td>
+                    <td style="font-weight:bold">{{ucwords(json_decode($stpd->institution_regency)->name)}},
+                        {{ucwords(json_decode($stpd->institution_province)->name)}}
+                    </td>
                 </tr>
                 <br />
                 <tr>
@@ -146,9 +146,10 @@
         <div class="flex flex-col justify-start mt-8 float-left">
             <div>Purwokerto, {{date("d/m/Y")}}</div>
             <div style="width: 170px; height: 100px; overflow: hidden;" class="py-2">
-            <img class="h-20 w-[15%]" src='{{ public_path("/storage/$stpd->signature_image") }}' style="object-fit:fill; width:100%; height:100%;" alt="Signature">
+                <img class="h-20 w-[15%]" src='{{ public_path("/storage/$stpd->signature_image") }}'
+                    style="object-fit:fill; width:100%; height:100%;" alt="Signature">
             </div>
-            <div>{{ $stpd->signature_name }}</div>
+            <div>{{ ucwords($stpd->signature_name) }}</div>
             <div>{{ $stpd->signature_position }}</div>
         </div>
 

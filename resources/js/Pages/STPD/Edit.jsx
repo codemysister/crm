@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Button } from "primereact/button";
 import { DataTable } from "primereact/datatable";
 import { Dialog } from "primereact/dialog";
-import { Head, Link, useForm } from "@inertiajs/react";
+import { Head, Link, router, useForm } from "@inertiajs/react";
 import { Calendar } from "primereact/calendar";
 import { useRef } from "react";
 import { FilterMatchMode } from "primereact/api";
@@ -13,6 +13,12 @@ import React from "react";
 import { Toast } from "primereact/toast";
 import { Column } from "primereact/column";
 import { useEffect } from "react";
+import LoadingDocument from "@/Components/LoadingDocument";
+import { getRegencys } from "@/Services/getRegency";
+import { getProvince } from "@/Services/getProvince";
+import { BlockUI } from "primereact/blockui";
+import DialogInstitution from "@/Components/DialogInstitution";
+import { upperCaseEachWord } from "@/Utils/UppercaseEachWord";
 
 const BASE_URL = import.meta.env.VITE_BASE_URL;
 
@@ -25,7 +31,13 @@ const Edit = ({ stpd, usersDefault, partnersDefault, signaturesProp }) => {
     const toast = useRef(null);
     const [provinces, setProvinces] = useState([]);
     const [regencys, setRegencys] = useState([]);
-    const [codeProvince, setcodeProvince] = useState(null);
+    const [dialogInstitutionVisible, setDialogInstitutionVisible] =
+        useState(false);
+    const [isLoadingData, setIsLoadingData] = useState(false);
+    const [leads, setLeads] = useState(null);
+    const [provinceName, setProvinceName] = useState(null);
+    const [regencyName, setRegencyName] = useState(null);
+    const [blocked, setBlocked] = useState(false);
 
     const [theme, setTheme] = useState(localStorage.theme);
     useEffect(() => {
@@ -96,9 +108,12 @@ const Edit = ({ stpd, usersDefault, partnersDefault, signaturesProp }) => {
         code: stpd.code,
         employees: stpd.employees,
         partner: {
-            name: stpd.partner_name,
-            province: stpd.partner_province,
-            regency: stpd.partner_regency,
+            uuid:
+                stpd.partner == undefined ? stpd.lead.uuid : stpd.partner.uuid,
+            name: stpd.institution_name,
+            province: stpd.institution_province,
+            regency: stpd.institution_regency,
+            type: stpd.partner == undefined ? "lead" : "partner",
         },
         departure_date: stpd.departure_date,
         return_date: stpd.return_date,
@@ -113,82 +128,31 @@ const Edit = ({ stpd, usersDefault, partnersDefault, signaturesProp }) => {
     });
 
     useEffect(() => {
-        const fetchData = async () => {
-            await getProvince();
-            await getRegencys();
+        const fetch = async () => {
+            let province = await getProvince();
+            setProvinces((prev) => (prev = province));
         };
-
-        fetchData();
+        setProvinceName(JSON.parse(data.partner.province).name);
+        fetch();
     }, []);
 
     useEffect(() => {
-        if (codeProvince) {
-            getRegencys(codeProvince);
+        if (processing) {
+            setBlocked(true);
+        } else {
+            setBlocked(false);
         }
-    }, [codeProvince]);
+    }, [processing]);
 
-    const getProvince = async () => {
-        const options = {
-            method: "GET",
-            url: `/api/wilayah/provinsi/`,
-            headers: {
-                "Content-Type": "application/json",
-            },
+    useEffect(() => {
+        const fetch = async () => {
+            if (provinceName) {
+                let response = await getRegencys(provinceName);
+                setRegencys((prev) => (prev = response));
+            }
         };
-
-        try {
-            const response = await axios.request(options);
-            const dataArray = Object.entries(response.data).map(
-                ([key, value]) => ({
-                    code: key,
-                    name: value
-                        .toLowerCase()
-                        .split(" ")
-                        .map(
-                            (word) =>
-                                word.charAt(0).toUpperCase() + word.slice(1)
-                        )
-                        .join(" "),
-                })
-            );
-            setProvinces((prev) => (prev = dataArray));
-        } catch (error) {
-            console.log(error);
-        }
-    };
-
-    const getRegencys = async (code) => {
-        let url = code
-            ? `/api/wilayah/kabupaten?provinsi=${code}`
-            : `/api/wilayah/kabupaten`;
-        const options = {
-            method: "GET",
-            url: url,
-            headers: {
-                "Content-Type": "application/json",
-            },
-        };
-
-        try {
-            const response = await axios.request(options);
-            const dataArray = Object.entries(response.data).map(
-                ([key, value]) => ({
-                    code: key,
-                    name: value
-                        .toLowerCase()
-                        .split(" ")
-                        .map(
-                            (word) =>
-                                word.charAt(0).toUpperCase() + word.slice(1)
-                        )
-                        .join(" "),
-                })
-            );
-            setRegencys((prev) => (prev = dataArray));
-        } catch (error) {
-            console.log(error);
-        }
-    };
+        fetch();
+    }, [provinceName]);
 
     const dialogFooterTemplate = () => {
         return (
@@ -298,8 +262,7 @@ const Edit = ({ stpd, usersDefault, partnersDefault, signaturesProp }) => {
         put("/stpd/" + data.uuid, {
             onSuccess: () => {
                 showSuccess("Tambah");
-                window.location = "/stpd";
-                // reset("name", "category", "price", "unit", "description");
+                router.get("/stpd");
             },
 
             onError: () => {
@@ -312,67 +275,58 @@ const Edit = ({ stpd, usersDefault, partnersDefault, signaturesProp }) => {
         <>
             <Head title="Surat Keterangan Perjalanan Dinas"></Head>
             <Toast ref={toast} />
-            <div className="h-screen max-h-screen overflow-y-hidden">
-                <div className="flex flex-col h-screen max-h-screen overflow-hidden md:flex-row z-40 relative gap-5">
-                    <div className="md:w-[35%] overflow-y-auto h-screen max-h-screen p-5">
-                        <Card>
-                            <div className="flex justify-between items-center mb-4">
-                                <h1 className="font-bold text-xl">
-                                    Surat Keterangan Perjalanan Dinas
-                                </h1>
-                                <Link href="/stpd">
-                                    <svg
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        fill="none"
-                                        viewBox="0 0 24 24"
-                                        stroke-width="1.5"
-                                        stroke="currentColor"
-                                        class="w-6 h-6"
-                                    >
-                                        <path
-                                            stroke-linecap="round"
-                                            stroke-linejoin="round"
-                                            d="M8.25 9V5.25A2.25 2.25 0 0 1 10.5 3h6a2.25 2.25 0 0 1 2.25 2.25v13.5A2.25 2.25 0 0 1 16.5 21h-6a2.25 2.25 0 0 1-2.25-2.25V15m-3 0-3-3m0 0 3-3m-3 3H15"
-                                        />
-                                    </svg>
-                                </Link>
-                            </div>
-                            <div className="flex flex-col">
-                                <Button
-                                    label="Tambah karyawan"
-                                    icon="pi pi-external-link"
-                                    onClick={() => setDialogVisible(true)}
-                                />
-
-                                <div className="flex flex-col mt-3">
-                                    <InputText
-                                        value={data.code}
-                                        onChange={(e) =>
-                                            setData("code", e.target.value)
-                                        }
-                                        className="dark:bg-gray-300"
-                                        id="code"
-                                        aria-describedby="code-help"
-                                        hidden
-                                    />
+            <BlockUI blocked={blocked} template={LoadingDocument}>
+                <div className="h-screen max-h-screen overflow-y-hidden">
+                    <div className="flex flex-col h-screen max-h-screen overflow-hidden md:flex-row z-40 relative gap-5">
+                        <div className="md:w-[35%] overflow-y-auto h-screen max-h-screen p-5">
+                            <Card>
+                                <div className="flex justify-between items-center mb-4">
+                                    <h1 className="font-bold text-xl">
+                                        Surat Keterangan Perjalanan Dinas
+                                    </h1>
+                                    <Link href="/stpd">
+                                        <svg
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            fill="none"
+                                            viewBox="0 0 24 24"
+                                            stroke-width="1.5"
+                                            stroke="currentColor"
+                                            class="w-6 h-6"
+                                        >
+                                            <path
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                d="M8.25 9V5.25A2.25 2.25 0 0 1 10.5 3h6a2.25 2.25 0 0 1 2.25 2.25v13.5A2.25 2.25 0 0 1 16.5 21h-6a2.25 2.25 0 0 1-2.25-2.25V15m-3 0-3-3m0 0 3-3m-3 3H15"
+                                            />
+                                        </svg>
+                                    </Link>
                                 </div>
+                                <div className="flex flex-col">
+                                    <Button
+                                        label="Tambah karyawan"
+                                        icon="pi pi-external-link"
+                                        onClick={() => setDialogVisible(true)}
+                                    />
 
-                                <div className="flex flex-col mt-3">
-                                    <label htmlFor="lembaga">Lembaga *</label>
-                                    <div className="p-inputgroup flex-1">
+                                    <div className="flex flex-col mt-3">
+                                        <InputText
+                                            value={data.code}
+                                            onChange={(e) =>
+                                                setData("code", e.target.value)
+                                            }
+                                            className="dark:bg-gray-300"
+                                            id="code"
+                                            aria-describedby="code-help"
+                                            hidden
+                                        />
+                                    </div>
+
+                                    <div className="flex flex-col mt-3">
+                                        <label htmlFor="lembaga">
+                                            Lembaga *
+                                        </label>
                                         <InputText
                                             value={data.partner.name}
-                                            placeholder="Lembaga"
-                                            onChange={(e) => {
-                                                setData((prev) => ({
-                                                    ...prev,
-                                                    partner: {
-                                                        ...prev.partner,
-                                                        name: e.target.value,
-                                                        id: null,
-                                                    },
-                                                }));
-                                            }}
                                             onFocus={() => {
                                                 triggerInputFocus(
                                                     animatePartnerNameRef
@@ -383,576 +337,592 @@ const Edit = ({ stpd, usersDefault, partnersDefault, signaturesProp }) => {
                                                     animatePartnerNameRef
                                                 );
                                             }}
-                                            className="w-[90%]"
+                                            onClick={() => {
+                                                setDialogInstitutionVisible(
+                                                    true
+                                                );
+                                            }}
+                                            placeholder="Pilih lembaga"
+                                            className="dark:bg-gray-300 cursor-pointer"
+                                            id="partner"
+                                            aria-describedby="partner-help"
                                         />
+                                    </div>
+
+                                    <div className="flex flex-col mt-3">
+                                        <label htmlFor="province">
+                                            Provinsi *
+                                        </label>
 
                                         <Dropdown
-                                            value={data.partner}
-                                            dataKey="name"
+                                            value={
+                                                data.partner.province
+                                                    ? JSON.parse(
+                                                          data.partner.province
+                                                      )
+                                                    : null
+                                            }
                                             onChange={(e) => {
-                                                setData((prev) => ({
-                                                    ...prev,
-                                                    partner: {
-                                                        ...prev.partner,
-                                                        name: e.target.value
-                                                            .name,
-                                                        id: e.target.value.id,
-                                                        province:
-                                                            e.target.value
-                                                                .province,
-                                                        regency:
-                                                            e.target.value
-                                                                .regency,
-                                                    },
-                                                }));
-                                                if (e.target.value.province) {
-                                                    setcodeProvince(
-                                                        (prev) =>
-                                                            (prev = JSON.parse(
-                                                                e.target.value
-                                                                    .province
-                                                            ).code)
-                                                    );
-                                                }
+                                                setProvinceName(
+                                                    (prev) =>
+                                                        (prev =
+                                                            e.target.value.code)
+                                                );
+                                                setData("partner", {
+                                                    ...data.partner,
+                                                    province: JSON.stringify(
+                                                        e.target.value
+                                                    ),
+                                                });
                                             }}
-                                            options={partners}
-                                            filter
-                                            placeholder={false}
-                                            showClear={false}
+                                            dataKey="code"
+                                            options={provinces}
                                             optionLabel="name"
+                                            placeholder="Pilih Provinsi"
+                                            filter
                                             valueTemplate={
                                                 selectedOptionTemplate
                                             }
                                             itemTemplate={optionTemplate}
-                                            className="w-[10%] dropdown-group border-l-0"
+                                            className="w-full md:w-14rem"
+                                            onFocus={() => {
+                                                triggerInputFocus(
+                                                    animatePartnerProvinceRef
+                                                );
+                                            }}
+                                            onShow={() => {
+                                                triggerInputFocus(
+                                                    animatePartnerProvinceRef
+                                                );
+                                            }}
+                                            onBlur={() => {
+                                                stopAnimateInputFocus(
+                                                    animatePartnerProvinceRef
+                                                );
+                                            }}
                                         />
                                     </div>
-                                </div>
 
-                                <div className="flex flex-col mt-3">
-                                    <label htmlFor="province">Provinsi *</label>
-
-                                    <Dropdown
-                                        value={
-                                            data.partner.province
-                                                ? JSON.parse(
-                                                      data.partner.province
-                                                  )
-                                                : null
-                                        }
-                                        onChange={(e) => {
-                                            setcodeProvince(
-                                                (prev) =>
-                                                    (prev = e.target.value.code)
-                                            );
-                                            setData("partner", {
-                                                ...data.partner,
-                                                province: JSON.stringify(
-                                                    e.target.value
-                                                ),
-                                            });
-                                        }}
-                                        dataKey="name"
-                                        options={provinces}
-                                        optionLabel="name"
-                                        placeholder="Pilih Provinsi"
-                                        filter
-                                        valueTemplate={selectedOptionTemplate}
-                                        itemTemplate={optionTemplate}
-                                        className="w-full md:w-14rem"
-                                        onFocus={() => {
-                                            triggerInputFocus(
-                                                animatePartnerProvinceRef
-                                            );
-                                        }}
-                                        onShow={() => {
-                                            triggerInputFocus(
-                                                animatePartnerProvinceRef
-                                            );
-                                        }}
-                                        onBlur={() => {
-                                            stopAnimateInputFocus(
-                                                animatePartnerProvinceRef
-                                            );
-                                        }}
-                                    />
-                                </div>
-
-                                <div className="flex flex-col mt-3">
-                                    <label htmlFor="regency">Kabupaten *</label>
-                                    <Dropdown
-                                        dataKey="name"
-                                        value={
-                                            data.partner.regency
-                                                ? JSON.parse(
-                                                      data.partner.regency
-                                                  )
-                                                : null
-                                        }
-                                        onChange={(e) => {
-                                            setData("partner", {
-                                                ...data.partner,
-                                                regency: JSON.stringify(
-                                                    e.target.value
-                                                ),
-                                            });
-                                        }}
-                                        onFocus={() => {
-                                            triggerInputFocus(
-                                                animatePartnerRegencyRef
-                                            );
-                                        }}
-                                        onShow={() => {
-                                            triggerInputFocus(
-                                                animatePartnerRegencyRef
-                                            );
-                                        }}
-                                        onBlur={() => {
-                                            stopAnimateInputFocus(
-                                                animatePartnerRegencyRef
-                                            );
-                                        }}
-                                        options={regencys}
-                                        optionLabel="name"
-                                        placeholder="Pilih Kabupaten"
-                                        filter
-                                        valueTemplate={selectedOptionTemplate}
-                                        itemTemplate={optionTemplate}
-                                        className="w-full md:w-14rem"
-                                    />
-                                </div>
-                                <div className="flex flex-col mt-3">
-                                    <label htmlFor="register_date">
-                                        Tanggal Berangkat *
-                                    </label>
-                                    <Calendar
-                                        value={
-                                            data.departure_date
-                                                ? new Date(data.departure_date)
-                                                : null
-                                        }
-                                        style={{ height: "35px" }}
-                                        onChange={(e) => {
-                                            const formattedDate = new Date(
-                                                e.target.value
-                                            )
-                                                .toISOString()
-                                                .split("T")[0];
-                                            setData(
-                                                "departure_date",
-                                                e.target.value
-                                            );
-                                        }}
-                                        onFocus={() => {
-                                            triggerInputFocus(
-                                                animateDepartureDateRef
-                                            );
-                                        }}
-                                        onShow={() => {
-                                            triggerInputFocus(
-                                                animateDepartureDateRef
-                                            );
-                                        }}
-                                        onHide={() => {
-                                            stopAnimateInputFocus(
-                                                animateDepartureDateRef
-                                            );
-                                        }}
-                                        showIcon
-                                        dateFormat="dd/mm/yy"
-                                    />
-                                </div>
-                                <div className="flex flex-col mt-3">
-                                    <label htmlFor="register_date">
-                                        Tanggal Kembali *
-                                    </label>
-                                    <Calendar
-                                        value={
-                                            data.return_date
-                                                ? new Date(data.return_date)
-                                                : null
-                                        }
-                                        style={{ height: "35px" }}
-                                        onChange={(e) => {
-                                            const formattedDate = new Date(
-                                                e.target.value
-                                            )
-                                                .toISOString()
-                                                .split("T")[0];
-                                            setData(
-                                                "return_date",
-                                                e.target.value
-                                            );
-                                        }}
-                                        onFocus={() => {
-                                            triggerInputFocus(
-                                                animateReturnDateRef
-                                            );
-                                        }}
-                                        onShow={() => {
-                                            triggerInputFocus(
-                                                animateReturnDateRef
-                                            );
-                                        }}
-                                        onHide={() => {
-                                            stopAnimateInputFocus(
-                                                animateReturnDateRef
-                                            );
-                                        }}
-                                        showIcon
-                                        dateFormat="dd/mm/yy"
-                                    />
-                                </div>
-                                <div className="flex flex-col mt-3">
-                                    <label htmlFor="transportation">
-                                        Kendaraan *
-                                    </label>
-                                    <InputText
-                                        value={data.transportation}
-                                        onChange={(e) =>
-                                            setData(
-                                                "transportation",
-                                                e.target.value
-                                            )
-                                        }
-                                        onFocus={() => {
-                                            triggerInputFocus(
-                                                animateTransportationRef
-                                            );
-                                        }}
-                                        onBlur={() => {
-                                            stopAnimateInputFocus(
-                                                animateTransportationRef
-                                            );
-                                        }}
-                                        className="dark:bg-gray-300"
-                                        id="transportation"
-                                        aria-describedby="transportation-help"
-                                    />
-                                </div>
-                                <div className="flex flex-col mt-3">
-                                    <label htmlFor="accomodation">
-                                        Akomodasi *
-                                    </label>
-                                    <InputText
-                                        value={data.accommodation}
-                                        onChange={(e) =>
-                                            setData(
-                                                "accommodation",
-                                                e.target.value
-                                            )
-                                        }
-                                        onFocus={() => {
-                                            triggerInputFocus(
-                                                animateAccomodationRef
-                                            );
-                                        }}
-                                        onBlur={() => {
-                                            stopAnimateInputFocus(
-                                                animateAccomodationRef
-                                            );
-                                        }}
-                                        className="dark:bg-gray-300"
-                                        id="accommodation"
-                                        aria-describedby="accommodation-help"
-                                    />
-                                </div>
-                                <div className="flex flex-col mt-3">
-                                    <label htmlFor="signature">
-                                        Tanda Tangan *
-                                    </label>
-                                    <Dropdown
-                                        dataKey="name"
-                                        value={data.signature}
-                                        onChange={(e) => {
-                                            setData({
-                                                ...data,
-                                                signature: {
-                                                    name: e.target.value.name,
-                                                    image: e.target.value.image,
-                                                    position:
-                                                        e.target.value.position,
-                                                },
-                                            });
-                                        }}
-                                        options={signatures}
-                                        optionLabel="name"
-                                        placeholder="Pilih Tanda Tangan"
-                                        filter
-                                        valueTemplate={selectedOptionTemplate}
-                                        itemTemplate={optionSignatureTemplate}
-                                        className="w-full md:w-14rem"
-                                    />
-                                </div>
-
-                                <div className="flex-flex-col mt-3">
-                                    <form onSubmit={handleSubmitForm}>
-                                        <Button className="mx-auto justify-center block">
-                                            Submit
-                                        </Button>
-                                    </form>
-                                </div>
-                            </div>
-                        </Card>
-                    </div>
-
-                    <Dialog
-                        header="Karyawan"
-                        visible={dialogVisible}
-                        style={{ width: "75vw" }}
-                        maximizable
-                        modal
-                        contentStyle={{ height: "550px" }}
-                        onHide={() => setDialogVisible(false)}
-                        footer={dialogFooterTemplate}
-                    >
-                        <DataTable
-                            value={users}
-                            paginator
-                            filters={filters}
-                            rows={5}
-                            header={header}
-                            scrollable
-                            scrollHeight="flex"
-                            tableStyle={{ minWidth: "50rem" }}
-                            selectionMode={rowClick ? null : "checkbox"}
-                            selection={data.employees}
-                            onSelectionChange={(e) => {
-                                setData("employees", e.value);
-                            }}
-                            dataKey="name"
-                        >
-                            <Column
-                                selectionMode="multiple"
-                                headerStyle={{ width: "3rem" }}
-                            ></Column>
-                            <Column field="name" header="Name"></Column>
-                            <Column
-                                filter
-                                body={(rowData) => {
-                                    return <span>{rowData.position}</span>;
-                                }}
-                                header="Jabatan"
-                                field="position"
-                            ></Column>
-                        </DataTable>
-                    </Dialog>
-
-                    <div className="md:w-[65%] hidden md:block h-screen text-sm max-h-screen overflow-y-auto p-5">
-                        <header>
-                            <div className="flex justify-between items-center">
-                                <div className="w-full">
-                                    <img
-                                        src="/assets/img/cazh.png"
-                                        alt=""
-                                        className="float-left w-1/3 h-1/3"
-                                    />
-                                </div>
-                                <div className="w-full text-right text-xs">
-                                    <h2 className="font-bold">
-                                        PT CAZH TEKNOLOGI INOVASI
-                                    </h2>
-                                    <p>
-                                        Bonavida Park D1, Jl. Raya Karanggintung
-                                    </p>
-                                    <p>
-                                        Kec. Sumbang, Kab. Banyumas,Jawa Tengah
-                                        53183
-                                    </p>
-
-                                    <p>
-                                        hello@cards.co.id | https://cards.co.id
-                                    </p>
-                                </div>
-                            </div>
-                        </header>
-
-                        <div className="text-center mt-5">
-                            <h1 className="font-bold underline mx-auto">
-                                SURAT TUGAS PERJALANAN DINAS
-                            </h1>
-                            <p className="">Nomor : {data.code}</p>
-                        </div>
-
-                        <div className="w-full mt-5">
-                            <table className="w-full">
-                                <thead className="bg-blue-100 dark:text-gray-600 text-left">
-                                    <th className="px-2 py-1">No</th>
-                                    <th className="px-2 py-1">Nama Karyawan</th>
-                                    <th className="px-2 py-1">Jabatan</th>
-                                </thead>
-                                <tbody>
-                                    {data.employees?.length == 0 && (
-                                        <tr className="text-center">
-                                            <td colSpan={3}>
-                                                Karyawan belum ditambah
-                                            </td>
-                                        </tr>
-                                    )}
-                                    {data.employees?.map((data, i) => {
-                                        return (
-                                            <tr key={data.name + i}>
-                                                <td className="px-2 py-1">
-                                                    {++i}
-                                                </td>
-                                                <td className="px-2 py-1">
-                                                    {data.name}
-                                                </td>
-                                                <td className="px-2 py-1">
-                                                    {data.position}
-                                                </td>
-                                            </tr>
-                                        );
-                                    })}
-                                </tbody>
-                            </table>
-                        </div>
-
-                        <p className="mt-10">
-                            Untuk melaksanakan tugas melakukan perjalanan dinas
-                            dengan ketentuan sebagai berikut:
-                        </p>
-
-                        <div className="w-full mt-5">
-                            <table className="w-full">
-                                <tbody>
-                                    <tr>
-                                        <td className="text-gray-700 w-1/6">
-                                            Lembaga Tujuan
-                                        </td>
-                                        <td className="text-gray-700 w-[1%]">
-                                            :
-                                        </td>
-                                        <td className="text-gray-700 font-bold w-7/12">
-                                            {data.partner.name ?? "{{Lembaga}}"}
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td className="text-gray-700 w-1/6">
-                                            Lokasi
-                                        </td>
-                                        <td className="text-gray-700 w-[1%]">
-                                            :
-                                        </td>
-                                        <td className="text-gray-700 font-bold w-7/12">
-                                            <span
-                                                ref={animatePartnerRegencyRef}
-                                            >
-                                                {data.partner.regency
+                                    <div className="flex flex-col mt-3">
+                                        <label htmlFor="regency">
+                                            Kabupaten *
+                                        </label>
+                                        <Dropdown
+                                            dataKey="code"
+                                            value={
+                                                data.partner.regency
                                                     ? JSON.parse(
                                                           data.partner.regency
-                                                      ).name
-                                                    : "{{Kab/Kota}}"}
-                                            </span>
-                                            {", "}
-                                            <span
-                                                ref={animatePartnerProvinceRef}
-                                            >
-                                                {data.partner.province
-                                                    ? JSON.parse(
-                                                          data.partner.province
-                                                      ).name
-                                                    : "{{Provinsi}}"}
-                                            </span>
-                                        </td>
-                                    </tr>
-                                    <br />
-                                    <tr>
-                                        <td className="text-gray-700 w-1/6">
-                                            Berangkat
-                                        </td>
-                                        <td className="text-gray-700 w-[1%]">
-                                            :
-                                        </td>
-                                        <td
-                                            ref={animateDepartureDateRef}
-                                            className="text-gray-700 font-bold w-7/12"
-                                        >
-                                            {ubahFormatTanggal(
+                                                      )
+                                                    : null
+                                            }
+                                            onChange={(e) => {
+                                                setData("partner", {
+                                                    ...data.partner,
+                                                    regency: JSON.stringify(
+                                                        e.target.value
+                                                    ),
+                                                });
+                                            }}
+                                            onFocus={() => {
+                                                triggerInputFocus(
+                                                    animatePartnerRegencyRef
+                                                );
+                                            }}
+                                            onShow={() => {
+                                                triggerInputFocus(
+                                                    animatePartnerRegencyRef
+                                                );
+                                            }}
+                                            onBlur={() => {
+                                                stopAnimateInputFocus(
+                                                    animatePartnerRegencyRef
+                                                );
+                                            }}
+                                            options={regencys}
+                                            optionLabel="name"
+                                            placeholder="Pilih Kabupaten"
+                                            filter
+                                            valueTemplate={
+                                                selectedOptionTemplate
+                                            }
+                                            itemTemplate={optionTemplate}
+                                            className="w-full md:w-14rem"
+                                        />
+                                    </div>
+                                    <div className="flex flex-col mt-3">
+                                        <label htmlFor="register_date">
+                                            Tanggal Berangkat *
+                                        </label>
+                                        <Calendar
+                                            value={
                                                 data.departure_date
-                                            )}
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td className="text-gray-700 w-1/6">
-                                            Kembali
-                                        </td>
-                                        <td className="text-gray-700 w-[1%]">
-                                            :
-                                        </td>
-                                        <td
-                                            ref={animateReturnDateRef}
-                                            className="text-gray-700 font-bold w-7/12"
-                                        >
-                                            {ubahFormatTanggal(
+                                                    ? new Date(
+                                                          data.departure_date
+                                                      )
+                                                    : null
+                                            }
+                                            style={{ height: "35px" }}
+                                            onChange={(e) => {
+                                                const formattedDate = new Date(
+                                                    e.target.value
+                                                )
+                                                    .toISOString()
+                                                    .split("T")[0];
+                                                setData(
+                                                    "departure_date",
+                                                    e.target.value
+                                                );
+                                            }}
+                                            onFocus={() => {
+                                                triggerInputFocus(
+                                                    animateDepartureDateRef
+                                                );
+                                            }}
+                                            onShow={() => {
+                                                triggerInputFocus(
+                                                    animateDepartureDateRef
+                                                );
+                                            }}
+                                            onHide={() => {
+                                                stopAnimateInputFocus(
+                                                    animateDepartureDateRef
+                                                );
+                                            }}
+                                            showIcon
+                                            dateFormat="dd/mm/yy"
+                                        />
+                                    </div>
+                                    <div className="flex flex-col mt-3">
+                                        <label htmlFor="register_date">
+                                            Tanggal Kembali *
+                                        </label>
+                                        <Calendar
+                                            value={
                                                 data.return_date
-                                            )}
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td className="text-gray-700 w-1/6">
-                                            Kendaraan
-                                        </td>
-                                        <td className="text-gray-700 w-[1%]">
-                                            :
-                                        </td>
-                                        <td
-                                            ref={animateTransportationRef}
-                                            className="text-gray-700 font-bold w-7/12"
-                                        >
-                                            {data.transportation ??
-                                                "{{Kendaraan}}"}
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td className="text-gray-700 w-1/6">
-                                            Akomodasi
-                                        </td>
-                                        <td className="text-gray-700 w-[1%]">
-                                            :
-                                        </td>
-                                        <td
-                                            ref={animateAccomodationRef}
-                                            className="text-gray-700 font-bold w-7/12"
-                                        >
-                                            {data.accommodation ??
-                                                "{{Akomodasi}}"}
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
+                                                    ? new Date(data.return_date)
+                                                    : null
+                                            }
+                                            style={{ height: "35px" }}
+                                            onChange={(e) => {
+                                                const formattedDate = new Date(
+                                                    e.target.value
+                                                )
+                                                    .toISOString()
+                                                    .split("T")[0];
+                                                setData(
+                                                    "return_date",
+                                                    e.target.value
+                                                );
+                                            }}
+                                            onFocus={() => {
+                                                triggerInputFocus(
+                                                    animateReturnDateRef
+                                                );
+                                            }}
+                                            onShow={() => {
+                                                triggerInputFocus(
+                                                    animateReturnDateRef
+                                                );
+                                            }}
+                                            onHide={() => {
+                                                stopAnimateInputFocus(
+                                                    animateReturnDateRef
+                                                );
+                                            }}
+                                            showIcon
+                                            dateFormat="dd/mm/yy"
+                                        />
+                                    </div>
+                                    <div className="flex flex-col mt-3">
+                                        <label htmlFor="transportation">
+                                            Kendaraan *
+                                        </label>
+                                        <InputText
+                                            value={data.transportation}
+                                            onChange={(e) =>
+                                                setData(
+                                                    "transportation",
+                                                    e.target.value
+                                                )
+                                            }
+                                            onFocus={() => {
+                                                triggerInputFocus(
+                                                    animateTransportationRef
+                                                );
+                                            }}
+                                            onBlur={() => {
+                                                stopAnimateInputFocus(
+                                                    animateTransportationRef
+                                                );
+                                            }}
+                                            className="dark:bg-gray-300"
+                                            id="transportation"
+                                            aria-describedby="transportation-help"
+                                        />
+                                    </div>
+                                    <div className="flex flex-col mt-3">
+                                        <label htmlFor="accomodation">
+                                            Akomodasi *
+                                        </label>
+                                        <InputText
+                                            value={data.accommodation}
+                                            onChange={(e) =>
+                                                setData(
+                                                    "accommodation",
+                                                    e.target.value
+                                                )
+                                            }
+                                            onFocus={() => {
+                                                triggerInputFocus(
+                                                    animateAccomodationRef
+                                                );
+                                            }}
+                                            onBlur={() => {
+                                                stopAnimateInputFocus(
+                                                    animateAccomodationRef
+                                                );
+                                            }}
+                                            className="dark:bg-gray-300"
+                                            id="accommodation"
+                                            aria-describedby="accommodation-help"
+                                        />
+                                    </div>
+                                    <div className="flex flex-col mt-3">
+                                        <label htmlFor="signature">
+                                            Tanda Tangan *
+                                        </label>
+                                        <Dropdown
+                                            dataKey="name"
+                                            value={data.signature}
+                                            onChange={(e) => {
+                                                setData({
+                                                    ...data,
+                                                    signature: {
+                                                        name: e.target.value
+                                                            .name,
+                                                        image: e.target.value
+                                                            .image,
+                                                        position:
+                                                            e.target.value
+                                                                .position,
+                                                    },
+                                                });
+                                            }}
+                                            options={signatures}
+                                            optionLabel="name"
+                                            placeholder="Pilih Tanda Tangan"
+                                            filter
+                                            valueTemplate={
+                                                selectedOptionTemplate
+                                            }
+                                            itemTemplate={
+                                                optionSignatureTemplate
+                                            }
+                                            className="w-full md:w-14rem"
+                                        />
+                                    </div>
+
+                                    <div className="flex-flex-col mt-3">
+                                        <form onSubmit={handleSubmitForm}>
+                                            <Button className="mx-auto justify-center block">
+                                                Submit
+                                            </Button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </Card>
                         </div>
 
-                        <div className="w-full mt-5 text-justify">
-                            Semua biaya dalam perjalanan dinas, konsumsi, serta
-                            akomodasi dalam rangka perjalanan dinas ini akan
-                            menjadi tanggung jawab PT Cazh Teknologi Inovasi
-                            sesuai peraturan perjalanan dinas yang berlaku.
-                        </div>
+                        <Dialog
+                            header="Karyawan"
+                            visible={dialogVisible}
+                            style={{ width: "75vw" }}
+                            maximizable
+                            modal
+                            contentStyle={{ height: "550px" }}
+                            onHide={() => setDialogVisible(false)}
+                            footer={dialogFooterTemplate}
+                        >
+                            <DataTable
+                                value={users}
+                                paginator
+                                filters={filters}
+                                rows={5}
+                                header={header}
+                                scrollable
+                                scrollHeight="flex"
+                                tableStyle={{ minWidth: "50rem" }}
+                                selectionMode={rowClick ? null : "checkbox"}
+                                selection={data.employees}
+                                onSelectionChange={(e) => {
+                                    setData("employees", e.value);
+                                }}
+                                dataKey="name"
+                            >
+                                <Column
+                                    selectionMode="multiple"
+                                    headerStyle={{ width: "3rem" }}
+                                ></Column>
+                                <Column field="name" header="Name"></Column>
+                                <Column
+                                    filter
+                                    body={(rowData) => {
+                                        return <span>{rowData.position}</span>;
+                                    }}
+                                    header="Jabatan"
+                                    field="position"
+                                ></Column>
+                            </DataTable>
+                        </Dialog>
 
-                        <div className="w-full mt-5 text-justify">
-                            Demikian surat ini dibuat agar dapat dilaksanakan
-                            dengan baik dan penuh tanggung jawab. Kepada semua
-                            pihak yang terlibat dimohon kerja sama yang baik
-                            agar perjalanan dinas ini dapat terlaksana dengan
-                            lancar.
-                        </div>
+                        <div className="md:w-[65%] hidden md:block h-screen text-sm max-h-screen overflow-y-auto p-5">
+                            <header>
+                                <div className="flex justify-between items-center">
+                                    <div className="w-full">
+                                        <img
+                                            src="/assets/img/cazh.png"
+                                            alt=""
+                                            className="float-left w-1/3 h-1/3"
+                                        />
+                                    </div>
+                                    <div className="w-full text-right text-xs">
+                                        <h2 className="font-bold">
+                                            PT CAZH TEKNOLOGI INOVASI
+                                        </h2>
+                                        <p>
+                                            Bonavida Park D1, Jl. Raya
+                                            Karanggintung
+                                        </p>
+                                        <p>
+                                            Kec. Sumbang, Kab. Banyumas,Jawa
+                                            Tengah 53183
+                                        </p>
 
-                        <div className="flex flex-col mt-5 justify-start w-[30%]">
-                            <p>Purwokerto, {new Date().getFullYear()}</p>
-                            <div className="h-[100px] w-[170px] py-2">
-                                <img
-                                    src={"/storage/" + data.signature.image}
-                                    alt=""
-                                    className="w-full h-full object-fill"
-                                />
+                                        <p>
+                                            hello@cards.co.id |
+                                            https://cards.co.id
+                                        </p>
+                                    </div>
+                                </div>
+                            </header>
+
+                            <div className="text-center mt-5">
+                                <h1 className="font-bold underline mx-auto">
+                                    SURAT TUGAS PERJALANAN DINAS
+                                </h1>
+                                <p className="">Nomor : {data.code}</p>
                             </div>
-                            <p>{data.signature.name}</p>
-                            <p>{data.signature.position}</p>
+
+                            <div className="w-full mt-5">
+                                <table className="w-full">
+                                    <thead className="bg-blue-100 dark:text-gray-600 text-left">
+                                        <th className="px-2 py-1">No</th>
+                                        <th className="px-2 py-1">
+                                            Nama Karyawan
+                                        </th>
+                                        <th className="px-2 py-1">Jabatan</th>
+                                    </thead>
+                                    <tbody>
+                                        {data.employees?.length == 0 && (
+                                            <tr className="text-center">
+                                                <td colSpan={3}>
+                                                    Karyawan belum ditambah
+                                                </td>
+                                            </tr>
+                                        )}
+                                        {data.employees?.map((data, i) => {
+                                            return (
+                                                <tr key={data.name + i}>
+                                                    <td className="px-2 py-1">
+                                                        {++i}
+                                                    </td>
+                                                    <td className="px-2 py-1">
+                                                        {data.name}
+                                                    </td>
+                                                    <td className="px-2 py-1">
+                                                        {data.position}
+                                                    </td>
+                                                </tr>
+                                            );
+                                        })}
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <p className="mt-10">
+                                Untuk melaksanakan tugas melakukan perjalanan
+                                dinas dengan ketentuan sebagai berikut:
+                            </p>
+
+                            <div className="w-full mt-5">
+                                <table className="w-full">
+                                    <tbody>
+                                        <tr>
+                                            <td className="text-gray-700 w-1/6">
+                                                Lembaga Tujuan
+                                            </td>
+                                            <td className="text-gray-700 w-[1%]">
+                                                :
+                                            </td>
+                                            <td className="text-gray-700 font-bold w-7/12">
+                                                {data.partner.name ??
+                                                    "{{Lembaga}}"}
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td className="text-gray-700 w-1/6">
+                                                Lokasi
+                                            </td>
+                                            <td className="text-gray-700 w-[1%]">
+                                                :
+                                            </td>
+                                            <td className="text-gray-700 font-bold w-7/12">
+                                                <span
+                                                    ref={
+                                                        animatePartnerRegencyRef
+                                                    }
+                                                >
+                                                    {data.partner.regency
+                                                        ? upperCaseEachWord(
+                                                              JSON.parse(
+                                                                  data.partner
+                                                                      .regency
+                                                              ).name
+                                                          )
+                                                        : "{{Kab/Kota}}"}
+                                                </span>
+                                                {", "}
+                                                <span
+                                                    ref={
+                                                        animatePartnerProvinceRef
+                                                    }
+                                                >
+                                                    {data.partner.province
+                                                        ? JSON.parse(
+                                                              data.partner
+                                                                  .province
+                                                          ).name
+                                                        : "{{Provinsi}}"}
+                                                </span>
+                                            </td>
+                                        </tr>
+                                        <br />
+                                        <tr>
+                                            <td className="text-gray-700 w-1/6">
+                                                Berangkat
+                                            </td>
+                                            <td className="text-gray-700 w-[1%]">
+                                                :
+                                            </td>
+                                            <td
+                                                ref={animateDepartureDateRef}
+                                                className="text-gray-700 font-bold w-7/12"
+                                            >
+                                                {ubahFormatTanggal(
+                                                    data.departure_date
+                                                )}
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td className="text-gray-700 w-1/6">
+                                                Kembali
+                                            </td>
+                                            <td className="text-gray-700 w-[1%]">
+                                                :
+                                            </td>
+                                            <td
+                                                ref={animateReturnDateRef}
+                                                className="text-gray-700 font-bold w-7/12"
+                                            >
+                                                {ubahFormatTanggal(
+                                                    data.return_date
+                                                )}
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td className="text-gray-700 w-1/6">
+                                                Kendaraan
+                                            </td>
+                                            <td className="text-gray-700 w-[1%]">
+                                                :
+                                            </td>
+                                            <td
+                                                ref={animateTransportationRef}
+                                                className="text-gray-700 font-bold w-7/12"
+                                            >
+                                                {data.transportation ??
+                                                    "{{Kendaraan}}"}
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td className="text-gray-700 w-1/6">
+                                                Akomodasi
+                                            </td>
+                                            <td className="text-gray-700 w-[1%]">
+                                                :
+                                            </td>
+                                            <td
+                                                ref={animateAccomodationRef}
+                                                className="text-gray-700 font-bold w-7/12"
+                                            >
+                                                {data.accommodation ??
+                                                    "{{Akomodasi}}"}
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <div className="w-full mt-5 text-justify">
+                                Semua biaya dalam perjalanan dinas, konsumsi,
+                                serta akomodasi dalam rangka perjalanan dinas
+                                ini akan menjadi tanggung jawab PT Cazh
+                                Teknologi Inovasi sesuai peraturan perjalanan
+                                dinas yang berlaku.
+                            </div>
+
+                            <div className="w-full mt-5 text-justify">
+                                Demikian surat ini dibuat agar dapat
+                                dilaksanakan dengan baik dan penuh tanggung
+                                jawab. Kepada semua pihak yang terlibat dimohon
+                                kerja sama yang baik agar perjalanan dinas ini
+                                dapat terlaksana dengan lancar.
+                            </div>
+
+                            <div className="flex flex-col mt-5 justify-start w-[30%]">
+                                <p>Purwokerto, {new Date().getFullYear()}</p>
+                                <div className="h-[100px] w-[170px] py-2">
+                                    <img
+                                        src={"/storage/" + data.signature.image}
+                                        alt=""
+                                        className="w-full h-full object-fill"
+                                    />
+                                </div>
+                                <p>{data.signature.name}</p>
+                                <p>{data.signature.position}</p>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
+            </BlockUI>
+
+            <DialogInstitution
+                dialogInstitutionVisible={dialogInstitutionVisible}
+                setDialogInstitutionVisible={setDialogInstitutionVisible}
+                filters={filters}
+                setFilters={setFilters}
+                isLoadingData={isLoadingData}
+                setIsLoadingData={setIsLoadingData}
+                leads={leads}
+                setLeads={setLeads}
+                partners={partners}
+                setPartners={setPartners}
+                data={data}
+                setData={setData}
+                setProvinceName={setProvinceName}
+                reset={reset}
+            />
         </>
     );
 };

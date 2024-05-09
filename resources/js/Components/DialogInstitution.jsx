@@ -90,7 +90,7 @@ const DialogInstitution = ({
                                     pic: selectedInstitution.pic
                                         ? selectedInstitution.pic.name
                                         : null,
-                                    pic_position: selectedInstitution.pic.lgn
+                                    pic_position: selectedInstitution.pic
                                         ? selectedInstitution.pic.position
                                         : null,
                                     bank: selectedInstitution.bank

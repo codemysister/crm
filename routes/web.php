@@ -240,10 +240,18 @@ Route::middleware('auth')->group(function () {
     // STPD
     Route::get('/stpd', [STPDController::class, 'index'])->name('stpd.view')->middleware(['can:lihat stpd']);
     Route::get('/stpd/create', [STPDController::class, 'create'])->name('stpd.create');
+    Route::post('/stpd/filter', [STPDController::class, 'filter'])->name('stpd.filter');
     Route::post('/stpd', [STPDController::class, 'store'])->name('stpd.store')->middleware(['can:tambah stpd']);
     Route::get('/stpd/{stpd:uuid}', [STPDController::class, 'edit'])->name('stpd.edit')->middleware(['can:edit stpd']);
+    Route::put('/stpd/{stpd:uuid}/restore', [STPDController::class, 'restore'])->name('stpd.restore');
     Route::put('/stpd/{stpd:uuid}', [STPDController::class, 'update'])->name('stpd.update')->middleware(['can:edit stpd']);
+    Route::post('/stpd/arsip/filter', [STPDController::class, 'arsipFilter'])->name('stpd.arsip.filter');
+    Route::post('/stpd/logs/filter', [STPDController::class, 'logFilter'])->name('stpd.log.filter');
+    Route::delete('/stpd/logs', [STPDController::class, 'destroyLogs'])->name('stpd.log.destroy');
+    Route::delete('/stpd/{stpd:uuid}/force', [STPDController::class, 'destroyForce'])->name('stpd.destroy.force');
     Route::delete('/stpd/{stpd:uuid}', [STPDController::class, 'destroy'])->name('stpd.destroy')->middleware(['can:hapus stpd']);
+    Route::get('/api/stpd/logs', [STPDController::class, 'apiGetLogs'])->name('api.stpd.logs');
+    Route::get('api/stpd/arsip', [STPDController::class, 'apiGetArsip'])->name('stpd.arsip');
     Route::get('/api/stpd', [STPDController::class, 'apiGetSTPD'])->name('api.stpd');
 
 
