@@ -1909,7 +1909,7 @@ export default function InvoiceSubscription({
                                     />
                                 </div>
                             </div>
-                            <div className="flex flex-col mt-3">
+                            {/* <div className="flex flex-col mt-3">
                                 <label htmlFor="signature">
                                     Tanda Tangan *
                                 </label>
@@ -1935,7 +1935,7 @@ export default function InvoiceSubscription({
                                     panelClassName="max-w-[300px]"
                                     className="w-full md:w-14rem"
                                 />
-                            </div>
+                            </div> */}
                         </div>
 
                         <div className="flex justify-center mt-5">
@@ -2084,7 +2084,7 @@ export default function InvoiceSubscription({
                                     editable
                                 />
                             </div>
-                            <div className="flex flex-col mt-3">
+                            {/* <div className="flex flex-col mt-3">
                                 <label htmlFor="signature">
                                     Tanta tangan *
                                 </label>
@@ -2107,7 +2107,7 @@ export default function InvoiceSubscription({
                                     itemTemplate={optionSignatureTemplate}
                                     className="w-full md:w-14rem"
                                 />
-                            </div>
+                            </div> */}
                             <div className="flex justify-center my-5">
                                 <Button
                                     label="Submit"

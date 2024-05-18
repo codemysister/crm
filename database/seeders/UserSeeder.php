@@ -25,15 +25,6 @@ class UserSeeder extends Seeder
 
         $super_admin->assignRole("super admin");
 
-        // CEO
-        $ceo = User::create([
-            "name" => "Muh Arif Mahfudin",
-            "email" => "ceo@gmail.com",
-            "number" => "085178612434",
-            "password" => bcrypt("ceo123")
-        ]);
-
-        $ceo->assignRole("ceo");
 
         // AE
         $sales = User::create([
@@ -152,23 +143,12 @@ class UserSeeder extends Seeder
 
         // DPD
         $designer = User::create([
-            "name" => "Graphics Designer",
+            "name" => "Febrian",
             "email" => "graphic_designer@gmail.com",
             "number" => "085178612434",
             "password" => bcrypt("designer123")
         ]);
         $designer->assignRole("graphics designer");
-
-        // Referral
-        $referral = User::create([
-            "name" => "Referral",
-            "email" => "referral@gmail.com",
-            "number" => "085178612434",
-            "password" => bcrypt("referral123")
-        ]);
-
-        $referral->assignRole("referral");
-
 
     }
 }

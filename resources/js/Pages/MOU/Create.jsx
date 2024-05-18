@@ -135,14 +135,13 @@ const Create = ({ usersProp, partnersProp, signaturesProp, referralsProp }) => {
         fee_topup_cazhpos: null,
         fee_withdraw_cazhpos: null,
         fee_bill_saldokartu: null,
-
         expired_date: null,
         profit_sharing: false,
         profit_sharing_detail: null,
         signature: {
-            name: null,
-            position: null,
-            image: null,
+            name: "Muh Arif Mahmudin",
+            position: "CEO",
+            image: "/assets/img/signatures/ttd.png",
         },
         mou_doc: "mou_path",
     });
@@ -419,6 +418,147 @@ const Create = ({ usersProp, partnersProp, signaturesProp, referralsProp }) => {
                                         />
                                     </div>
                                     <div className="flex flex-col mt-3">
+                                        <label htmlFor="lembaga">
+                                            Lembaga *
+                                        </label>
+                                        <Dropdown
+                                            value={data.partner}
+                                            dataKey="id"
+                                            onChange={(e) => {
+                                                setData((data) => ({
+                                                    ...data,
+                                                    partner: {
+                                                        ...data.partner,
+                                                        id: e.target.value.id,
+                                                        name: e.target.value
+                                                            .name,
+                                                        province:
+                                                            e.target.value
+                                                                .province,
+                                                        regency:
+                                                            e.target.value
+                                                                .regency,
+                                                        pic:
+                                                            e.target.value.pic
+                                                                ?.name ?? "",
+                                                        pic_position:
+                                                            e.target.value.pic
+                                                                ?.position ??
+                                                            "",
+                                                        bank:
+                                                            e.target.value.bank
+                                                                ?.bank ?? "",
+                                                        account_bank_name:
+                                                            e.target.value.bank
+                                                                ?.account_bank_name ??
+                                                            "",
+                                                        account_bank_number:
+                                                            e.target.value.bank
+                                                                ?.account_bank_number ??
+                                                            "",
+                                                    },
+                                                    url_subdomain:
+                                                        e.target.value.account
+                                                            ?.subdomain ?? "",
+                                                    price_card: e.target.value
+                                                        .price_list?.price_card
+                                                        ? JSON.parse(
+                                                              e.target.value
+                                                                  .price_list
+                                                                  .price_card
+                                                          ).price
+                                                        : "",
+                                                    price_lanyard:
+                                                        e.target.value
+                                                            .price_list
+                                                            ?.price_lanyard ??
+                                                        "",
+                                                    price_subscription_system:
+                                                        e.target.value
+                                                            .price_list
+                                                            ?.price_subscription_system ??
+                                                        "",
+                                                    period_subscription:
+                                                        e.target.value
+                                                            .price_list
+                                                            ?.period_subscription ??
+                                                        "",
+                                                    price_training_offline:
+                                                        e.target.value
+                                                            .price_list
+                                                            ?.price_training_offline ??
+                                                        "",
+                                                    price_training_online:
+                                                        e.target.value
+                                                            .price_list
+                                                            ?.price_training_online ??
+                                                        "",
+                                                    fee_qris:
+                                                        e.target.value
+                                                            .price_list
+                                                            ?.fee_qris ?? "",
+                                                    fee_purchase_cazhpoin:
+                                                        e.target.value
+                                                            .price_list
+                                                            ?.fee_purchase_cazhpoin ??
+                                                        "",
+                                                    fee_bill_cazhpoin:
+                                                        e.target.value
+                                                            .price_list
+                                                            ?.fee_bill_cazhpoin ??
+                                                        "",
+                                                    fee_topup_cazhpos:
+                                                        e.target.value
+                                                            .price_list
+                                                            ?.fee_topup_cazhpos ??
+                                                        "",
+                                                    fee_withdraw_cazhpos:
+                                                        e.target.value
+                                                            .price_list
+                                                            ?.fee_withdraw_cazhpos ??
+                                                        "",
+                                                    fee_bill_saldokartu:
+                                                        e.target.value
+                                                            .price_list
+                                                            ?.fee_bill_saldokartu ??
+                                                        "",
+                                                }));
+                                                setProvinceName(
+                                                    (prev) =>
+                                                        JSON.parse(
+                                                            e.target.value
+                                                                .province
+                                                        ).name
+                                                );
+                                            }}
+                                            onFocus={() => {
+                                                triggerInputFocus(
+                                                    animatePartnerNameRef
+                                                );
+                                            }}
+                                            onShow={() => {
+                                                triggerInputFocus(
+                                                    animatePartnerNameRef
+                                                );
+                                            }}
+                                            onHide={() => {
+                                                stopAnimateInputFocus(
+                                                    animatePartnerNameRef
+                                                );
+                                            }}
+                                            options={partners}
+                                            optionLabel="name"
+                                            placeholder="Pilih Lembaga"
+                                            filter
+                                            valueTemplate={
+                                                selectedOptionTemplate
+                                            }
+                                            itemTemplate={optionTemplate}
+                                            className="w-full md:w-14rem"
+                                        />
+                                    </div>
+
+                                    <div className="flex flex-col mt-3">
                                         <label htmlFor="partner_pic">
                                             PIC *
                                         </label>
@@ -483,37 +623,7 @@ const Create = ({ usersProp, partnersProp, signaturesProp, referralsProp }) => {
                                             className="mt-2"
                                         />
                                     </div>
-                                    <div className="flex flex-col mt-3">
-                                        <label htmlFor="lembaga">
-                                            Lembaga *
-                                        </label>
-                                        <InputText
-                                            value={data.partner.name}
-                                            onFocus={() => {
-                                                triggerInputFocus(
-                                                    animatePartnerNameRef
-                                                );
-                                            }}
-                                            onBlur={() => {
-                                                stopAnimateInputFocus(
-                                                    animatePartnerNameRef
-                                                );
-                                            }}
-                                            onClick={() => {
-                                                setDialogInstitutionVisible(
-                                                    true
-                                                );
-                                            }}
-                                            placeholder="Pilih lembaga"
-                                            className="dark:bg-gray-300 cursor-pointer"
-                                            id="partner"
-                                            aria-describedby="partner-help"
-                                        />
-                                        <InputError
-                                            message={errors["partner.name"]}
-                                            className="mt-2"
-                                        />
-                                    </div>
+
                                     <div className="flex flex-col mt-3">
                                         <label htmlFor="province">
                                             Provinsi *
@@ -1404,7 +1514,7 @@ const Create = ({ usersProp, partnersProp, signaturesProp, referralsProp }) => {
                                         </div>
                                     )}
 
-                                    <div className="flex flex-col mt-3">
+                                    {/* <div className="flex flex-col mt-3">
                                         <label htmlFor="signature">
                                             Tanda Tangan *
                                         </label>
@@ -1461,7 +1571,7 @@ const Create = ({ usersProp, partnersProp, signaturesProp, referralsProp }) => {
                                             message={errors["signature.image"]}
                                             className="mt-2"
                                         />
-                                    </div>
+                                    </div> */}
 
                                     <div className="flex flex-col mt-3">
                                         <label htmlFor="signature">
@@ -3356,10 +3466,7 @@ const Create = ({ usersProp, partnersProp, signaturesProp, referralsProp }) => {
                                         <p>Pihak Pertama</p>
                                         <div className="h-[100px] w-[170px] py-2">
                                             <img
-                                                src={
-                                                    "/storage/" +
-                                                    data.signature.image
-                                                }
+                                                src={data.signature.image}
                                                 alt=""
                                                 className="h-full w-full object-fill"
                                             />
@@ -3400,22 +3507,6 @@ const Create = ({ usersProp, partnersProp, signaturesProp, referralsProp }) => {
                     </div>
                 </div>
             </BlockUI>
-            <DialogInstitution
-                dialogInstitutionVisible={dialogInstitutionVisible}
-                setDialogInstitutionVisible={setDialogInstitutionVisible}
-                filters={filters}
-                setFilters={setFilters}
-                isLoadingData={isLoadingData}
-                setIsLoadingData={setIsLoadingData}
-                leads={leads}
-                setLeads={setLeads}
-                partners={partners}
-                setPartners={setPartners}
-                data={data}
-                setData={setData}
-                reset={reset}
-                setProvinceName={setProvinceName}
-            />
         </>
     );
 };

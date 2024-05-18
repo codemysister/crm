@@ -42,6 +42,7 @@ import { handleSelectedDetailInstitution } from "@/Utils/handleSelectedDetailIns
 import { upperCaseEachWord } from "@/Utils/UppercaseEachWord.js";
 import LogComponent from "@/Components/LogComponent.jsx";
 import ArsipComponent from "@/Components/ArsipComponent.jsx";
+import { Password } from "primereact/password";
 registerPlugin(FilePondPluginFileValidateSize);
 
 export default function Index({
@@ -56,7 +57,6 @@ export default function Index({
     const [sales, setSales] = useState(null);
     const [status, setStatus] = useState(statusProp);
     const [account_managers, setAccountManagers] = useState(null);
-    const [referrals, setReferrals] = useState(null);
     const [sidebarFilter, setSidebarFilter] = useState(false);
     const [detailPartner, setDetailPartner] = useState(partner);
     const viewportSize = getViewportSize();
@@ -118,13 +118,8 @@ export default function Index({
             return user.roles[0].name == "account manager";
         });
 
-        let referrals = usersProp.filter((user) => {
-            return user.roles[0].name == "referral";
-        });
-
         setSales(sales);
         setAccountManagers(account_manager);
-        setReferrals(referrals);
     }, []);
 
     useEffect(() => {
@@ -205,13 +200,13 @@ export default function Index({
                 name: null,
                 id: null,
             },
-            referral: {},
             name: "",
             logo: null,
             npwp: null,
             total_members: null,
             pic: null,
             password: null,
+            email: null,
             phone_number: null,
             province: null,
             regency: null,
@@ -244,7 +239,6 @@ export default function Index({
     } = useForm({
         user: null,
         sales: null,
-        referral: null,
         account_manager: null,
         status: null,
         province: null,
@@ -359,7 +353,6 @@ export default function Index({
                 logo: partner.logo ?? null,
                 phone_number: partner.phone_number,
                 sales: partner.sales,
-                referral: partner.referral,
                 account_manager: partner.account_manager,
                 onboarding_date: partner.onboarding_date,
                 onboarding_age: partner.onboarding_age,
@@ -421,6 +414,139 @@ export default function Index({
                 className="pi pi-plus"
                 style={{ fontSize: "0.7rem", paddingRight: "5px" }}
             ></i>
+        );
+    };
+
+    const rowExpansionTemplate = (data) => {
+        return (
+            <div className="md:px-14">
+                <div className="flex">
+                    <DataTable
+                        headerClassName="bg-red-500"
+                        value={data.transactions}
+                        className=""
+                        header={headerTransaction}
+                        emptyMessage="Transaksi tidak ditemukan."
+                    >
+                        <Column
+                            header="No"
+                            body={(_, { rowIndex }) => rowIndex + 1}
+                            className="dark:border-none"
+                            headerClassName="dark:border-none bg-gray-50 dark:bg-transparent dark:text-gray-300"
+                            style={{
+                                width: "max-content",
+                                whiteSpace: "nowrap",
+                            }}
+                        />
+                        <Column
+                            field="date"
+                            header="Tanggal"
+                            style={{
+                                width: "max-content",
+                                whiteSpace: "nowrap",
+                            }}
+                            body={(rowData) => {
+                                return new Date(
+                                    rowData.date
+                                ).toLocaleDateString("id");
+                            }}
+                            headerClassName="dark:border-none bg-gray-50 dark:bg-transparent dark:text-gray-300"
+                        ></Column>
+                        <Column
+                            field="nominal"
+                            header="Nominal"
+                            style={{
+                                width: "max-content",
+                                whiteSpace: "nowrap",
+                            }}
+                            body={(rowData) => {
+                                return rowData.nominal.toLocaleString("id-ID");
+                            }}
+                            headerClassName="dark:border-none bg-gray-50 dark:bg-transparent dark:text-gray-300"
+                        ></Column>
+                        <Column
+                            field="money"
+                            header="Uang Terbilang"
+                            style={{
+                                width: "max-content",
+                                whiteSpace: "nowrap",
+                            }}
+                            headerClassName="dark:border-none bg-gray-50 dark:bg-transparent dark:text-gray-300"
+                        ></Column>
+                        <Column
+                            field="metode"
+                            header="Metode"
+                            style={{
+                                width: "max-content",
+                                whiteSpace: "nowrap",
+                            }}
+                            headerClassName="dark:border-none bg-gray-50 dark:bg-transparent dark:text-gray-300"
+                        ></Column>
+                        <Column
+                            field="created_by"
+                            header="Diinput Oleh"
+                            style={{
+                                width: "max-content",
+                                whiteSpace: "nowrap",
+                            }}
+                            body={(rowData) => {
+                                return rowData.user.name;
+                            }}
+                            headerClassName="dark:border-none bg-gray-50 dark:bg-transparent dark:text-gray-300"
+                        ></Column>
+                        <Column
+                            body={(rowData) => {
+                                return rowData.receipt_doc == "" ? (
+                                    <ProgressSpinner
+                                        style={{
+                                            width: "30px",
+                                            height: "30px",
+                                        }}
+                                        strokeWidth="8"
+                                        fill="var(--surface-ground)"
+                                        animationDuration=".5s"
+                                    />
+                                ) : (
+                                    <div className="flex w-full h-full items-center justify-center">
+                                        <a
+                                            href={rowData.receipt_doc}
+                                            download={`Kwitansi_${rowData.partner_name}`}
+                                            class="font-bold  w-full h-full text-center rounded-full "
+                                        >
+                                            <i
+                                                className="pi pi-file-pdf"
+                                                style={{
+                                                    width: "100%",
+                                                    height: "100%",
+                                                    fontSize: "1.5rem",
+                                                }}
+                                            ></i>
+                                        </a>
+                                    </div>
+                                );
+                            }}
+                            className="dark:border-none"
+                            headerClassName="dark:border-none bg-gray-50 dark:bg-transparent dark:text-gray-300"
+                            align="left"
+                            header="Dokumen"
+                            style={{
+                                width: "max-content",
+                                whiteSpace: "nowrap",
+                            }}
+                        ></Column>
+                        <Column
+                            header="Action"
+                            body={actionTransactionBodyTemplate}
+                            style={{
+                                width: "max-content",
+                                whiteSpace: "nowrap",
+                            }}
+                            className="dark:border-none"
+                            headerClassName="dark:border-none bg-gray-50 dark:bg-transparent dark:text-gray-300"
+                        ></Column>
+                    </DataTable>
+                </div>
+            </div>
         );
     };
 
@@ -511,17 +637,6 @@ export default function Index({
                 return rowData.account_manager
                     ? rowData.account_manager.name
                     : "-";
-            },
-        },
-        {
-            field: "referral",
-            header: "Referral",
-            style: {
-                width: "max-content",
-                whiteSpace: "nowrap",
-            },
-            body: (rowData) => {
-                return rowData.referral ? rowData.referral.name : "-";
             },
         },
 
@@ -685,8 +800,6 @@ export default function Index({
             keyIndo = "Nomor Telepon";
         } else if (key == "sales.name") {
             keyIndo = "Sales";
-        } else if (key == "referral.name") {
-            keyIndo = "Referral";
         } else if (key == "account_manager.name") {
             keyIndo = "Account Manager";
         } else if (key == "npwp") {
@@ -855,7 +968,6 @@ export default function Index({
             user: dataFilter.user,
             sales: dataFilter.sales,
             account_manager: dataFilter.account_manager,
-            referral: dataFilter.referral,
             province: dataFilter.province,
             onboarding_date: dataFilter.onboarding_date,
             live_date: dataFilter.live_date,
@@ -1070,25 +1182,6 @@ export default function Index({
                     </div>
 
                     <div className="flex flex-col mt-3">
-                        <label htmlFor="name">Berdasarkan referral</label>
-                        <Dropdown
-                            optionLabel="name"
-                            dataKey="id"
-                            value={dataFilter.referral}
-                            onChange={(e) =>
-                                setDataFilter("referral", e.target.value)
-                            }
-                            options={referrals}
-                            placeholder="Pilih referral"
-                            filter
-                            showClear
-                            valueTemplate={selectedOptionTemplate}
-                            itemTemplate={optionTemplate}
-                            className="flex justify-center  dark:text-gray-400   "
-                        />
-                    </div>
-
-                    <div className="flex flex-col mt-3">
                         <label htmlFor="name">Berdasarkan penginput</label>
                         <Dropdown
                             optionLabel="name"
@@ -1294,6 +1387,13 @@ export default function Index({
                                 onSubmit={(e) => handleSubmitForm(e, "tambah")}
                             >
                                 <div className="flex flex-col justify-around gap-4 mt-3">
+                                    <div className="w-full flex justify-center align-middle ">
+                                        <span className="h-[2px] self-center w-full bg-slate-500"></span>
+                                        <h2 className="w-fit text-center">
+                                            Biodata
+                                        </h2>
+                                        <span className="h-[2px] self-center w-full bg-slate-500"></span>
+                                    </div>
                                     <div className="flex flex-col">
                                         <label htmlFor="name">Nama *</label>
                                         <InputText
@@ -1444,22 +1544,6 @@ export default function Index({
                                     </div>
 
                                     <div className="flex flex-col">
-                                        <label htmlFor="name">Password</label>
-                                        <InputText
-                                            value={data.partner.password}
-                                            onChange={(e) =>
-                                                setData("partner", {
-                                                    ...data.partner,
-                                                    password: e.target.value,
-                                                })
-                                            }
-                                            className="dark:bg-gray-300"
-                                            id="password"
-                                            aria-describedby="password-help"
-                                        />
-                                    </div>
-
-                                    <div className="flex flex-col">
                                         <label htmlFor="name">
                                             Nomor Telepon
                                         </label>
@@ -1517,31 +1601,6 @@ export default function Index({
                                             options={account_managers}
                                             optionLabel="name"
                                             placeholder="Pilih Account Manager (AM)"
-                                            filter
-                                            valueTemplate={
-                                                selectedOptionTemplate
-                                            }
-                                            itemTemplate={optionTemplate}
-                                            className="w-full md:w-14rem"
-                                        />
-                                    </div>
-
-                                    <div className="flex flex-col">
-                                        <label htmlFor="referral">
-                                            Referral
-                                        </label>
-                                        <Dropdown
-                                            dataKey="id"
-                                            value={data.partner.referral}
-                                            onChange={(e) =>
-                                                setData("partner", {
-                                                    ...data.partner,
-                                                    referral: e.target.value,
-                                                })
-                                            }
-                                            options={referrals}
-                                            optionLabel="name"
-                                            placeholder="Pilih Referral"
                                             filter
                                             valueTemplate={
                                                 selectedOptionTemplate
@@ -1929,6 +1988,54 @@ export default function Index({
                                             className="mt-2"
                                         />
                                     </div>
+
+                                    <div className="w-full mt-3 flex justify-center align-middle ">
+                                        <span className="h-[2px] self-center w-full bg-slate-500"></span>
+                                        <h2 className="w-fit text-center">
+                                            Akun
+                                        </h2>
+                                        <span className="h-[2px] self-center w-full bg-slate-500"></span>
+                                    </div>
+
+                                    <div className="flex flex-col">
+                                        <label htmlFor="email">Email *</label>
+                                        <InputText
+                                            value={data.partner.email}
+                                            onChange={(e) =>
+                                                setData("partner", {
+                                                    ...data.partner,
+                                                    email: e.target.value,
+                                                })
+                                            }
+                                            className="dark:bg-gray-300"
+                                            id="email"
+                                            required
+                                            aria-describedby="email-help"
+                                        />
+                                        <InputError
+                                            message={errors["partner.name"]}
+                                            className="mt-2"
+                                        />
+                                    </div>
+                                    <div className="flex flex-col">
+                                        <label htmlFor="name">Password</label>
+
+                                        <Password
+                                            value={data.partner.password}
+                                            onChange={(e) =>
+                                                setData("partner", {
+                                                    ...data.partner,
+                                                    password: e.target.value,
+                                                })
+                                            }
+                                            inputClassName="w-full dark:bg-gray-300"
+                                            className="flex w-full"
+                                            feedback={false}
+                                            tabIndex={1}
+                                            toggleMask
+                                            style={{ width: "100% !important" }}
+                                        />
+                                    </div>
                                 </div>
 
                                 <div className="flex justify-center mt-5">
@@ -2241,31 +2348,6 @@ export default function Index({
                                             options={account_managers}
                                             optionLabel="name"
                                             placeholder="Pilih Account Manager (AM)"
-                                            filter
-                                            valueTemplate={
-                                                selectedOptionTemplate
-                                            }
-                                            itemTemplate={optionTemplate}
-                                            className="w-full md:w-14rem"
-                                        />
-                                    </div>
-
-                                    <div className="flex flex-col">
-                                        <label htmlFor="referral">
-                                            Referral
-                                        </label>
-                                        <Dropdown
-                                            dataKey="id"
-                                            value={data.partner.referral}
-                                            onChange={(e) =>
-                                                setData("partner", {
-                                                    ...data.partner,
-                                                    referral: e.target.value,
-                                                })
-                                            }
-                                            options={referrals}
-                                            optionLabel="name"
-                                            placeholder="Pilih Referral"
                                             filter
                                             valueTemplate={
                                                 selectedOptionTemplate
@@ -2767,7 +2849,6 @@ export default function Index({
                             }
                             sales={sales}
                             account_managers={account_managers}
-                            referrals={referrals}
                             status={status}
                             isLoading={isLoading}
                             provinces={provinces}

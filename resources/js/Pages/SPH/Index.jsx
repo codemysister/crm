@@ -56,7 +56,7 @@ export default function Index({
     const toast = useRef(null);
     const [permissionErrorIsVisible, setPermissionErrorIsVisible] =
         useState(false);
-    const { roles, permissions, currentUser } = auth.user;
+    const { roles, permissions, data: currentUser } = auth.user;
 
     const [filters, setFilters] = useState({
         global: { value: null, matchMode: FilterMatchMode.CONTAINS },

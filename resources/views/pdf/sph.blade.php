@@ -11,8 +11,6 @@
 
 
     <style>
-       
-
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap');
 
 
@@ -23,8 +21,6 @@
             font-family: 'Inter', sans-serif;
 
         }
-
-
     </style>
 </head>
 
@@ -72,7 +68,8 @@
     <div class="mt-6 text-left">
         <p class="text-sm text-justify">Menindaklanjuti komunikasi yang telah dilakukan oleh tim marketing kami
             {{$sph->sales_name}}
-            dengan perwakilan dari {{$sph->partner_pic}}, dengan ini kami sampaikan penawaran sebagai berikut:</p>
+            dengan perwakilan dari {{$sph->partner_pic}}, dengan ini kami sampaikan penawaran sebagai berikut:
+        </p>
     </div>
 
 
@@ -89,19 +86,20 @@
             </thead>
             <tbody>
                 @foreach($products as $product)
-                <tr>
-                    <td class="p-1" style=" width: 10%; text-align: center;">{{$loop->index + 1}}</td>
-                    <td class="p-1" style="width: 40%;">{{$product['name']}}</td>
-                    <td class="p-1" style="width: 20%;">{{isset($product['detail']) ? $product['detail'] : null}}</td>
-                    <td class="p-1" style="text-align: right;">Rp{{number_format($product['total'], 0, ',', '.')}}</td>
-                </tr>
+                    <tr>
+                        <td class="p-1" style=" width: 10%; text-align: center;">{{$loop->index + 1}}</td>
+                        <td class="p-1" style="width: 40%;">{{$product['name']}}</td>
+                        <td class="p-1" style="width: 20%;">{{isset($product['detail']) ? $product['detail'] : null}}</td>
+                        <td class="p-1" style="text-align: right;">Rp{{number_format($product['total'], 0, ',', '.')}}</td>
+                    </tr>
                 @endforeach
             </tbody>
         </table>
     </div>
 
     <div class="mt-6">
-    <div style="text-align: left; width:100%;" class="text-sm">*) Harga yang tertera belum termasuk PPN sebesar 11%.</div>
+        <div style="text-align: left; width:100%;" class="text-sm">*) Harga yang tertera belum termasuk PPN sebesar 11%.
+        </div>
     </div>
 
     <div class="mt-6">
@@ -128,14 +126,15 @@
     'Do MMMM YYYY'
 ) }}</p>
         @if($sph->signature_name)
-        <div style="width: 170px; height: 100px; overflow: hidden;" class="py-2">
-            <img class="h-20 w-[15%]" style="width: 100%; height: 100%; object-fit:fill;" src="{{ public_path("/storage/$sph->signature_image") }}" alt="Signature">
-        </div>
-        <div class="text-sm">{{ $sph->signature_name }}</div>
+            <div style="width: 170px; height: 100px; overflow: hidden;" class="py-2">
+                <img class="h-20 w-[15%]" style="width: 100%; height: 100%; object-fit:fill;"
+                    src="{{ public_path("$sph->signature_image") }}" alt="Signature">
+            </div>
+            <div class="text-sm">{{ $sph->signature_name }}</div>
         @endif
     </div>
 
- 
+
 
 </body>
 

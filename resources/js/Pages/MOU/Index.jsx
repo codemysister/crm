@@ -52,7 +52,7 @@ export default function Index({ auth, usersProp }) {
     const [sidebarFilter, setSidebarFilter] = useState(null);
     const windowEscapeRef = useRef(null);
     const toast = useRef(null);
-    const { roles, permissions, currentUser } = auth.user;
+    const { roles, permissions, data: currentUser } = auth.user;
     const [permissionErrorIsVisible, setPermissionErrorIsVisible] =
         useState(false);
     const [filters, setFilters] = useState({

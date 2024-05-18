@@ -633,23 +633,21 @@ const DetailPriceList = ({
 
                                         <div className="flex justify-between gap-1 w-full items-center">
                                             <div className="w-full flex gap-2 h-full">
-                                                <InputNumber
+                                                <InputText
                                                     placeholder="harga"
                                                     value={
                                                         dataPriceList.fee_qris
                                                     }
-                                                    onValueChange={(e) =>
+                                                    onChange={(e) =>
                                                         setDataPriceList({
                                                             ...dataPriceList,
-                                                            fee_qris: Number(
-                                                                e.target.value
-                                                            ),
+                                                            fee_qris:
+                                                                e.target.value,
                                                         })
                                                     }
                                                     className="dark:bg-gray-300 w-full"
                                                     id="qris"
                                                     aria-describedby="qris-help"
-                                                    locale="id-ID"
                                                 />
                                             </div>
                                         </div>
@@ -1161,21 +1159,18 @@ const DetailPriceList = ({
 
                                 <div className="flex justify-between gap-1 w-full items-center">
                                     <div className="w-full flex gap-2 h-full">
-                                        <InputNumber
+                                        <InputText
                                             placeholder="harga"
                                             value={dataPriceList.fee_qris}
-                                            onValueChange={(e) =>
+                                            onChange={(e) =>
                                                 setDataPriceList({
                                                     ...dataPriceList,
-                                                    fee_qris: Number(
-                                                        e.target.value
-                                                    ),
+                                                    fee_qris: e.target.value,
                                                 })
                                             }
                                             className="dark:bg-gray-300 w-full"
                                             id="qris"
                                             aria-describedby="qris-help"
-                                            locale="id-ID"
                                         />
                                     </div>
                                 </div>

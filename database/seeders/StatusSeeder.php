@@ -18,7 +18,7 @@ class StatusSeeder extends Seeder
             'uuid' => Str::uuid(),
             'name' => 'aktif',
             'category' => 'partner',
-            'color' => 'DC2626'
+            'color' => '00ff48'
         ]);
 
         Status::create([
@@ -46,7 +46,7 @@ class StatusSeeder extends Seeder
             'uuid' => Str::uuid(),
             'name' => 'cancel',
             'category' => 'partner',
-            'color' => 'D946EF'
+            'color' => 'DC2626'
         ]);
 
         Status::create([
@@ -83,6 +83,42 @@ class StatusSeeder extends Seeder
             'category' => 'invoice',
             'color' => '689f38'
         ]);
+
+        Status::create([
+            'uuid' => Str::uuid(),
+            'name' => 'pengajuan',
+            'category' => 'kartu',
+            'color' => '2196f3'
+        ]);
+
+        Status::create([
+            'uuid' => Str::uuid(),
+            'name' => 'approve',
+            'category' => 'kartu',
+            'color' => '00ff48'
+        ]);
+
+        Status::create([
+            'uuid' => Str::uuid(),
+            'name' => 'design',
+            'category' => 'kartu',
+            'color' => '4B5563'
+        ]);
+
+        Status::create([
+            'uuid' => Str::uuid(),
+            'name' => 'print',
+            'category' => 'kartu',
+            'color' => 'D97706'
+        ]);
+
+        Status::create([
+            'uuid' => Str::uuid(),
+            'name' => 'delivery',
+            'category' => 'kartu',
+            'color' => '7C3AED'
+        ]);
+
 
     }
 }

@@ -206,17 +206,6 @@ export const DatatablePartner = memo(
                         : "-";
                 },
             },
-            {
-                field: "referral",
-                header: "Referral",
-                style: {
-                    width: "max-content",
-                    whiteSpace: "nowrap",
-                },
-                body: (rowData) => {
-                    return rowData.referral ? rowData.referral.name : "-";
-                },
-            },
 
             {
                 field: "province",

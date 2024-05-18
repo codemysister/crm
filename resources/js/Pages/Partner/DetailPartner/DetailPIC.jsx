@@ -101,7 +101,7 @@ const DetailPIC = ({
                             </td>
                             <td class="pt-2 pb-1  text-base w-[2%]">:</td>
                             <td class="pt-2 pb-1  text-base w-7/12">
-                                {partner.pic.position}
+                                {partner.pic.position ?? "-"}
                             </td>
                         </tr>
                         <tr class="border-b">

@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { Button } from "primereact/button";
 import { DataTable } from "primereact/datatable";
 import { Dialog } from "primereact/dialog";
-import { Head, Link, router, useForm } from "@inertiajs/react";
+import { Head, Link, router, useForm, usePage } from "@inertiajs/react";
 import { Column } from "primereact/column";
 import { useRef } from "react";
 import { FilterMatchMode } from "primereact/api";
@@ -53,6 +53,7 @@ const Create = ({
     const [provinceName, setProvinceName] = useState(null);
     const [theme, setTheme] = useState(localStorage.theme);
     const [blocked, setBlocked] = useState(false);
+    const userLoggin = usePage().props.auth.user;
 
     useEffect(() => {
         theme
@@ -109,9 +110,9 @@ const Create = ({
         },
         created_by: null,
         signature: {
-            name: null,
-            position: null,
-            image: null,
+            name: "Muh Arif Mahmudin",
+            position: "CEO",
+            image: "/assets/img/signatures/ttd.png",
         },
     });
 
@@ -340,38 +341,6 @@ const Create = ({
                                     </div>
 
                                     <div className="flex flex-col mt-3">
-                                        <label htmlFor="partner_pic">
-                                            PIC *
-                                        </label>
-                                        <InputText
-                                            value={data.partner.pic}
-                                            onChange={(e) =>
-                                                setData("partner", {
-                                                    ...data.partner,
-                                                    pic: e.target.value,
-                                                })
-                                            }
-                                            onFocus={() => {
-                                                triggerInputFocus(
-                                                    animatePartnerPicRef
-                                                );
-                                            }}
-                                            onBlur={() => {
-                                                stopAnimateInputFocus(
-                                                    animatePartnerPicRef
-                                                );
-                                            }}
-                                            className="dark:bg-gray-300"
-                                            id="partner_pic"
-                                            aria-describedby="partner_pic-help"
-                                        />
-                                        <InputError
-                                            message={errors["partner.pic"]}
-                                            className="mt-2"
-                                        />
-                                    </div>
-
-                                    <div className="flex flex-col mt-3">
                                         <label htmlFor="lembaga">
                                             Lembaga *
                                         </label>
@@ -399,6 +368,38 @@ const Create = ({
                                         />
                                         <InputError
                                             message={errors["partner.name"]}
+                                            className="mt-2"
+                                        />
+                                    </div>
+
+                                    <div className="flex flex-col mt-3">
+                                        <label htmlFor="partner_pic">
+                                            PIC *
+                                        </label>
+                                        <InputText
+                                            value={data.partner.pic}
+                                            onChange={(e) =>
+                                                setData("partner", {
+                                                    ...data.partner,
+                                                    pic: e.target.value,
+                                                })
+                                            }
+                                            onFocus={() => {
+                                                triggerInputFocus(
+                                                    animatePartnerPicRef
+                                                );
+                                            }}
+                                            onBlur={() => {
+                                                stopAnimateInputFocus(
+                                                    animatePartnerPicRef
+                                                );
+                                            }}
+                                            className="dark:bg-gray-300"
+                                            id="partner_pic"
+                                            aria-describedby="partner_pic-help"
+                                        />
+                                        <InputError
+                                            message={errors["partner.pic"]}
                                             className="mt-2"
                                         />
                                     </div>
@@ -705,7 +706,7 @@ const Create = ({
                                             className="mt-2"
                                         />
                                     </div>
-                                    <div className="flex flex-col mt-3">
+                                    {/* <div className="flex flex-col mt-3">
                                         <label htmlFor="signature">
                                             Tanda Tangan *
                                         </label>
@@ -752,7 +753,7 @@ const Create = ({
                                             message={errors["signature.image"]}
                                             className="mt-2"
                                         />
-                                    </div>
+                                    </div> */}
 
                                     <div className="flex-flex-col mt-3">
                                         <form onSubmit={handleSubmitForm}>
@@ -1211,7 +1212,7 @@ const Create = ({
                                 </p>
                                 <div className="h-[100px] w-[170px] self-start py-2">
                                     <img
-                                        src={"/storage/" + data.signature.image}
+                                        src={data.signature.image}
                                         alt=""
                                         className="object-fill  w-full h-full"
                                     />

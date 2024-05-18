@@ -27,10 +27,16 @@ registerPlugin(FilePondPluginFileValidateSize);
 
 const BASE_URL = import.meta.env.VITE_BASE_URL;
 
-const Edit = ({ usersProp, leadsProp, sla, signaturesProp, referralsProp }) => {
+const Edit = ({
+    usersProp,
+    partnersProp,
+    sla,
+    signaturesProp,
+    referralsProp,
+}) => {
     const [users, setUsers] = useState(usersProp);
     const [blocked, setBlocked] = useState(false);
-    const [leads, setleads] = useState(leadsProp);
+    const [partners, setleads] = useState(partnersProp);
     const [dialogVisible, setDialogVisible] = useState(false);
     const toast = useRef(null);
     const [provinces, setProvinces] = useState([]);
@@ -72,7 +78,7 @@ const Edit = ({ usersProp, leadsProp, sla, signaturesProp, referralsProp }) => {
             let response = await getProvince();
             setProvinces((prev) => (prev = response));
             setProvinceName(
-                (prev) => (prev = JSON.parse(sla.lead_province).name)
+                (prev) => (prev = JSON.parse(sla.partner_province).name)
             );
         };
 
@@ -102,29 +108,26 @@ const Edit = ({ usersProp, leadsProp, sla, signaturesProp, referralsProp }) => {
         uuid: sla.uuid,
         code: sla.code,
         activities: sla.sla_activities.map((data) => {
-            return { ...data, cazh_pic: { name: data.cazh_pic, id: data.id } };
+            return {
+                ...data,
+                cazh_pic: { name: data.cazh_pic, id: data.user_id },
+            };
         }),
-        lead: {
-            id: sla.lead_id,
-            name: sla.lead_name,
-            phone_number: sla.lead_phone_number,
-            province: sla.lead_province,
-            regency: sla.lead_regency,
-            pic: sla.lead_pic,
-            pic_position: sla.lead_pic_position,
-            pic_number: sla.lead_pic_number,
-            pic_email: sla.lead_pic_email,
+        partner: {
+            id: sla.partner_id,
+            name: sla.partner_name,
+            phone_number: sla.partner_phone_number,
+            province: sla.partner_province,
+            regency: sla.partner_regency,
+            pic: sla.partner_pic,
+            pic_position: sla.partner_pic_position,
+            pic_number: sla.partner_pic_number,
+            pic_email: sla.partner_pic_email,
         },
         pic_signature: null,
         referral: Boolean(sla.referral),
         referral_name: sla.referral_name,
         logo: null,
-        referral_signature: {
-            name: sla.referral_name,
-            image: sla.referral_signature,
-            institution: sla.referral_institution,
-        },
-        referral_logo: sla.referral_logo,
         signature: {
             name: sla.signature_name,
             image: sla.signature_image,
@@ -144,7 +147,7 @@ const Edit = ({ usersProp, leadsProp, sla, signaturesProp, referralsProp }) => {
             setData({
                 ...data,
                 logo: sla.logo,
-                pic_signature: sla.lead_pic_signature,
+                pic_signature: sla.partner_pic_signature,
             });
         }, 500);
     }, []);
@@ -392,11 +395,11 @@ const Edit = ({ usersProp, leadsProp, sla, signaturesProp, referralsProp }) => {
                                             Lembaga *
                                         </label>
                                         <Dropdown
-                                            value={data.lead}
+                                            value={data.partner}
                                             dataKey="id"
                                             onChange={(e) => {
-                                                setData("lead", {
-                                                    ...data.lead,
+                                                setData("partner", {
+                                                    ...data.partner,
                                                     id: e.target.value.id,
                                                     name: e.target.value.name,
                                                     phone_number:
@@ -420,7 +423,7 @@ const Edit = ({ usersProp, leadsProp, sla, signaturesProp, referralsProp }) => {
                                                     animatePartnerNameRef
                                                 );
                                             }}
-                                            options={leads}
+                                            options={partners}
                                             optionLabel="name"
                                             placeholder="Pilih Lembaga"
                                             filter
@@ -437,9 +440,9 @@ const Edit = ({ usersProp, leadsProp, sla, signaturesProp, referralsProp }) => {
                                         </label>
                                         <Dropdown
                                             value={
-                                                data.lead.province
+                                                data.partner.province
                                                     ? JSON.parse(
-                                                          data.lead.province
+                                                          data.partner.province
                                                       )
                                                     : null
                                             }
@@ -449,15 +452,15 @@ const Edit = ({ usersProp, leadsProp, sla, signaturesProp, referralsProp }) => {
                                                         (prev =
                                                             e.target.value.code)
                                                 );
-                                                setData("lead", {
-                                                    ...data.lead,
+                                                setData("partner", {
+                                                    ...data.partner,
                                                     province: JSON.stringify(
                                                         e.target.value
                                                     ),
                                                     regency: null,
                                                 });
                                             }}
-                                            dataKey="name"
+                                            dataKey="code"
                                             options={provinces}
                                             optionLabel="name"
                                             placeholder="Pilih Provinsi"
@@ -491,15 +494,15 @@ const Edit = ({ usersProp, leadsProp, sla, signaturesProp, referralsProp }) => {
                                         </label>
                                         <Dropdown
                                             value={
-                                                data.lead.regency
+                                                data.partner.regency
                                                     ? JSON.parse(
-                                                          data.lead.regency
+                                                          data.partner.regency
                                                       )
                                                     : null
                                             }
                                             onChange={(e) => {
-                                                setData("lead", {
-                                                    ...data.lead,
+                                                setData("partner", {
+                                                    ...data.partner,
                                                     regency: JSON.stringify(
                                                         e.target.value
                                                     ),
@@ -533,14 +536,14 @@ const Edit = ({ usersProp, leadsProp, sla, signaturesProp, referralsProp }) => {
                                         />
                                     </div>
                                     <div className="flex flex-col mt-3">
-                                        <label htmlFor="lead_address">
+                                        <label htmlFor="partner_address">
                                             Nomor Telepon Lembaga *
                                         </label>
                                         <InputText
-                                            value={data.lead.phone_number}
+                                            value={data.partner.phone_number}
                                             onChange={(e) =>
-                                                setData("lead", {
-                                                    ...data.lead,
+                                                setData("partner", {
+                                                    ...data.partner,
                                                     phone_number:
                                                         e.target.value,
                                                 })
@@ -557,19 +560,19 @@ const Edit = ({ usersProp, leadsProp, sla, signaturesProp, referralsProp }) => {
                                                 );
                                             }}
                                             className="dark:bg-gray-300"
-                                            id="lead_phone_number"
-                                            aria-describedby="lead_phone_number-help"
+                                            id="partner_phone_number"
+                                            aria-describedby="partner_phone_number-help"
                                         />
                                     </div>
                                     <div className="flex flex-col mt-3">
-                                        <label htmlFor="lead_pic">
+                                        <label htmlFor="partner_pic">
                                             Penanggungjawab *
                                         </label>
                                         <InputText
-                                            value={data.lead.pic}
+                                            value={data.partner.pic}
                                             onChange={(e) =>
-                                                setData("lead", {
-                                                    ...data.lead,
+                                                setData("partner", {
+                                                    ...data.partner,
                                                     pic: e.target.value,
                                                 })
                                             }
@@ -584,19 +587,19 @@ const Edit = ({ usersProp, leadsProp, sla, signaturesProp, referralsProp }) => {
                                                 );
                                             }}
                                             className="dark:bg-gray-300"
-                                            id="lead_pic"
-                                            aria-describedby="lead_pic-help"
+                                            id="partner_pic"
+                                            aria-describedby="partner_pic-help"
                                         />
                                     </div>
                                     <div className="flex flex-col mt-3">
-                                        <label htmlFor="lead_pic_email">
+                                        <label htmlFor="partner_pic_email">
                                             Email Penanggungjawab *
                                         </label>
                                         <InputText
-                                            value={data.lead.pic_email ?? ""}
+                                            value={data.partner.pic_email ?? ""}
                                             onChange={(e) => {
-                                                setData("lead", {
-                                                    ...data.lead,
+                                                setData("partner", {
+                                                    ...data.partner,
                                                     pic_email: e.target.value,
                                                 });
                                             }}
@@ -611,19 +614,19 @@ const Edit = ({ usersProp, leadsProp, sla, signaturesProp, referralsProp }) => {
                                                 );
                                             }}
                                             className="dark:bg-gray-300"
-                                            id="lead_pic_email"
-                                            aria-describedby="lead_pic_email-help"
+                                            id="partner_pic_email"
+                                            aria-describedby="partner_pic_email-help"
                                         />
                                     </div>
                                     <div className="flex flex-col mt-3">
-                                        <label htmlFor="lead_pic_number">
+                                        <label htmlFor="partner_pic_number">
                                             Nomor HP Penanggungjawab *
                                         </label>
                                         <InputText
-                                            value={data.lead.pic_number}
+                                            value={data.partner.pic_number}
                                             onChange={(e) =>
-                                                setData("lead", {
-                                                    ...data.lead,
+                                                setData("partner", {
+                                                    ...data.partner,
                                                     pic_number: e.target.value,
                                                 })
                                             }
@@ -639,48 +642,87 @@ const Edit = ({ usersProp, leadsProp, sla, signaturesProp, referralsProp }) => {
                                             }}
                                             keyfilter="int"
                                             className="dark:bg-gray-300"
-                                            id="lead_pic_number"
-                                            aria-describedby="lead_pic_number-help"
-                                        />
-                                    </div>
-                                    <div className="flex flex-col mt-3">
-                                        <label htmlFor="signature">
-                                            Tanda Tangan Pihak Pertama*
-                                        </label>
-                                        <Dropdown
-                                            value={data.signature}
-                                            onChange={(e) => {
-                                                setData("signature", {
-                                                    ...data.signature,
-                                                    name: e.target.value.name,
-                                                    image: e.target.value.image,
-                                                });
-                                            }}
-                                            dataKey="name"
-                                            options={signatures}
-                                            optionLabel="name"
-                                            placeholder="Pilih Tanda Tangan"
-                                            filter
-                                            valueTemplate={
-                                                selectedOptionTemplate
-                                            }
-                                            itemTemplate={
-                                                optionSignatureTemplate
-                                            }
-                                            className="w-full md:w-14rem"
-                                            onShow={() => {
-                                                triggerInputFocus(
-                                                    animateSignatureNameRef
-                                                );
-                                            }}
-                                            onHide={() => {
-                                                stopAnimateInputFocus(
-                                                    animateSignatureNameRef
-                                                );
-                                            }}
+                                            id="partner_pic_number"
+                                            aria-describedby="partner_pic_number-help"
                                         />
                                     </div>
 
+                                    <div className="flex flex-col mt-3">
+                                        <label htmlFor="signature">
+                                            Tanda Tangan PIC
+                                        </label>
+
+                                        <div className="App">
+                                            {data.signature.image !== null &&
+                                            typeof data.signature.image ==
+                                                "string" ? (
+                                                <>
+                                                    <FilePond2
+                                                        files={
+                                                            data.signature.image
+                                                        }
+                                                        onaddfile={(
+                                                            error,
+                                                            fileItems
+                                                        ) => {
+                                                            if (!error) {
+                                                                setData({
+                                                                    ...data,
+                                                                    signature: {
+                                                                        ...data.signature,
+                                                                        image: fileItems.file,
+                                                                    },
+                                                                });
+                                                            }
+                                                        }}
+                                                        onremovefile={() => {
+                                                            setData({
+                                                                ...data,
+                                                                signature: {
+                                                                    ...data.signature,
+                                                                    image: null,
+                                                                },
+                                                            });
+                                                        }}
+                                                        maxFileSize="2mb"
+                                                        labelMaxFileSizeExceeded="File terlalu besar"
+                                                        labelIdle='Drag & Drop your files or <span class="filepond--label-action">Browse</span>'
+                                                    />
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <FilePond2
+                                                        onaddfile={(
+                                                            error,
+                                                            fileItems
+                                                        ) => {
+                                                            if (!error) {
+                                                                setData({
+                                                                    ...data,
+                                                                    signature: {
+                                                                        ...data.signature,
+                                                                        image: fileItems.file,
+                                                                    },
+                                                                });
+                                                            }
+                                                        }}
+                                                        onremovefile={() => {
+                                                            setData({
+                                                                ...data,
+                                                                signature: {
+                                                                    ...data.signature,
+                                                                    image: null,
+                                                                },
+                                                            });
+                                                        }}
+                                                        maxFileSize="2mb"
+                                                        labelMaxFileSizeExceeded="File terlalu besar"
+                                                        labelIdle='Drag & Drop your files or <span class="filepond--label-action">Browse</span>'
+                                                    />
+                                                </>
+                                            )}
+                                        </div>
+                                    </div>
                                     <div className="flex flex-col mt-3">
                                         <label htmlFor="signature">
                                             Tanda Tangan PIC
@@ -693,7 +735,6 @@ const Edit = ({ usersProp, leadsProp, sla, signaturesProp, referralsProp }) => {
                                                 <>
                                                     <FilePond2
                                                         files={
-                                                            "/storage/" +
                                                             data.pic_signature
                                                         }
                                                         onaddfile={(
@@ -746,7 +787,7 @@ const Edit = ({ usersProp, leadsProp, sla, signaturesProp, referralsProp }) => {
                                             )}
                                         </div>
                                     </div>
-
+                                    {/* 
                                     <div className="flex flex-col mt-3">
                                         <label htmlFor="referral">
                                             Referral
@@ -855,7 +896,7 @@ const Edit = ({ usersProp, leadsProp, sla, signaturesProp, referralsProp }) => {
                                                 />
                                             </div>
                                         </>
-                                    )}
+                                    )} */}
 
                                     <div className="flex-flex-col mt-3">
                                         <form onSubmit={handleSubmitForm}>
@@ -921,7 +962,7 @@ const Edit = ({ usersProp, leadsProp, sla, signaturesProp, referralsProp }) => {
                                         </div>
 
                                         <div className="flex flex-col">
-                                            <label htmlFor="lead_address">
+                                            <label htmlFor="partner_address">
                                                 Tahapan *
                                             </label>
                                             <InputText
@@ -934,14 +975,14 @@ const Edit = ({ usersProp, leadsProp, sla, signaturesProp, referralsProp }) => {
                                                     )
                                                 }
                                                 className="dark:bg-gray-300"
-                                                id="lead_address"
-                                                aria-describedby="lead_address-help"
+                                                id="partner_address"
+                                                aria-describedby="partner_address-help"
                                             />
                                         </div>
 
                                         <div className="flex">
                                             <div className="flex flex-col">
-                                                <label htmlFor="lead_address">
+                                                <label htmlFor="partner_address">
                                                     Penanggungjawab *
                                                 </label>
                                                 <Dropdown
@@ -1134,7 +1175,7 @@ const Edit = ({ usersProp, leadsProp, sla, signaturesProp, referralsProp }) => {
                                                 <span
                                                     ref={animatePartnerNameRef}
                                                 >
-                                                    {data.lead.name ??
+                                                    {data.partner.name ??
                                                         "{{nama_lembaga}}"}
                                                 </span>
                                             </td>
@@ -1152,9 +1193,10 @@ const Edit = ({ usersProp, leadsProp, sla, signaturesProp, referralsProp }) => {
                                                         animatePartnerRegencyRef
                                                     }
                                                 >
-                                                    {data.lead.regency
+                                                    {data.partner.regency
                                                         ? JSON.parse(
-                                                              data.lead.regency
+                                                              data.partner
+                                                                  .regency
                                                           ).name
                                                         : "{{kabupaten}}"}
                                                 </span>
@@ -1164,9 +1206,10 @@ const Edit = ({ usersProp, leadsProp, sla, signaturesProp, referralsProp }) => {
                                                         animatePartnerProvinceRef
                                                     }
                                                 >
-                                                    {data.lead.province
+                                                    {data.partner.province
                                                         ? JSON.parse(
-                                                              data.lead.province
+                                                              data.partner
+                                                                  .province
                                                           ).name
                                                         : "{{provinsi}}"}
                                                 </span>
@@ -1185,7 +1228,8 @@ const Edit = ({ usersProp, leadsProp, sla, signaturesProp, referralsProp }) => {
                                                         animatePartnerPhoneNumberRef
                                                     }
                                                 >
-                                                    {data.lead.phone_number ??
+                                                    {data.partner
+                                                        .phone_number ??
                                                         "{{nomor_hp_lembaga}}"}
                                                 </span>
                                             </td>
@@ -1201,7 +1245,7 @@ const Edit = ({ usersProp, leadsProp, sla, signaturesProp, referralsProp }) => {
                                                 <span
                                                     ref={animatePartnerPicRef}
                                                 >
-                                                    {data.lead.pic ??
+                                                    {data.partner.pic ??
                                                         "{{pic_lembaga}}"}
                                                 </span>
                                             </td>
@@ -1219,7 +1263,7 @@ const Edit = ({ usersProp, leadsProp, sla, signaturesProp, referralsProp }) => {
                                                         animatePartnerPicEmailRef
                                                     }
                                                 >
-                                                    {data.lead.pic_email ??
+                                                    {data.partner.pic_email ??
                                                         "{{pic_email}}"}
                                                 </span>
                                             </td>
@@ -1237,7 +1281,7 @@ const Edit = ({ usersProp, leadsProp, sla, signaturesProp, referralsProp }) => {
                                                         animatePartnerPicNumberRef
                                                     }
                                                 >
-                                                    {data.lead.pic_number ??
+                                                    {data.partner.pic_number ??
                                                         "{{nomor_hp_pic}}"}
                                                 </span>
                                             </td>
@@ -1343,14 +1387,23 @@ const Edit = ({ usersProp, leadsProp, sla, signaturesProp, referralsProp }) => {
                                 >
                                     <p>Pihak Pertama</p>
                                     <div className="h-[100px] w-[170px] py-2">
-                                        <img
-                                            src={
-                                                "/storage/" +
-                                                data.signature.image
-                                            }
-                                            alt=""
-                                            className="w-full h-full object-fill"
-                                        />
+                                        {data.signature.image !== null ? (
+                                            <img
+                                                src={
+                                                    typeof data.signature
+                                                        .image === "string"
+                                                        ? data.signature.image
+                                                        : URL.createObjectURL(
+                                                              data.signature
+                                                                  .image
+                                                          )
+                                                }
+                                                alt=""
+                                                className="w-full h-full object-fill"
+                                            />
+                                        ) : (
+                                            <div className="min-h-20"></div>
+                                        )}
                                     </div>
                                     <p>
                                         <b>
@@ -1367,8 +1420,7 @@ const Edit = ({ usersProp, leadsProp, sla, signaturesProp, referralsProp }) => {
                                                 src={
                                                     typeof data.pic_signature ===
                                                     "string"
-                                                        ? "/storage/" +
-                                                          data.pic_signature
+                                                        ? data.pic_signature
                                                         : URL.createObjectURL(
                                                               data.pic_signature
                                                           )
@@ -1381,39 +1433,11 @@ const Edit = ({ usersProp, leadsProp, sla, signaturesProp, referralsProp }) => {
                                     )}
                                     <p>
                                         <b>
-                                            {data.lead.pic ??
+                                            {data.partner.pic ??
                                                 "{{nama_pihak_kedua}}"}
                                         </b>
                                     </p>
                                 </div>
-                                {data.referral && (
-                                    <div
-                                        className="w-[30%]"
-                                        ref={animateReferralRef}
-                                    >
-                                        <p>Pihak Ketiga</p>
-                                        {data.referral_signature.image ? (
-                                            <div className="h-[100px] w-[170px] py-2">
-                                                <img
-                                                    src={
-                                                        "/storage" +
-                                                        data.referral_signature
-                                                            .image
-                                                    }
-                                                    className="w-full h-full object-fill"
-                                                />
-                                            </div>
-                                        ) : (
-                                            <div className="min-h-20"></div>
-                                        )}
-                                        <p>
-                                            <b ref={animateReferralNameRef}>
-                                                {data.referral_signature.name ??
-                                                    "{{nama_referral}}"}
-                                            </b>
-                                        </p>
-                                    </div>
-                                )}
                             </div>
                         </div>
                     </div>

@@ -94,7 +94,7 @@ const Edit = ({ usersProp, partnersProp, mou, signaturesProp }) => {
     const animateExpiredDate = useRef(null);
     const animateProfitSharing = useRef(null);
     const animateProfitSharingDetail = useRef(null);
-    const animateReferral = useRef(null);
+    const animateFeeQRIS = useRef(null);
     const animateSignatureName = useRef(null);
     const animatePartnerProvinceRef = useRef(null);
     const animatePartnerRegencyRef = useRef(null);
@@ -119,14 +119,13 @@ const Edit = ({ usersProp, partnersProp, mou, signaturesProp }) => {
             name: mou.partner_name,
             pic: mou.partner_pic,
             pic_position: mou.partner_pic_position,
+            pic_signature: mou.partner_pic_signature,
             province: mou.partner_province,
             regency: mou.partner_regency,
             bank: mou.bank,
             account_bank_number: mou.account_bank_number,
             account_bank_name: mou.account_bank_name,
-            type: mou.partner == undefined ? "lead" : "partner",
         },
-        pic_signature: mou.partner_pic_signature,
         url_subdomain: mou.url_subdomain,
         price_card: mou.price_card,
         price_lanyard: mou.price_lanyard,
@@ -148,12 +147,14 @@ const Edit = ({ usersProp, partnersProp, mou, signaturesProp }) => {
         // referral_name: mou.referral_name,
         // referral_signature: mou.referral_signature,
         signature: {
-            name: mou.signature_name,
-            position: mou.signature_position,
-            image: mou.signature_image,
+            name: "Muh Arif Mahmudin",
+            position: "CEO",
+            image: "/assets/img/signatures/ttd.png",
         },
         mou_doc: mou.mou_doc,
     });
+
+    console.log(data.partner.partner_pic_signature);
 
     useEffect(() => {
         if (processing) {
@@ -443,6 +444,146 @@ const Edit = ({ usersProp, partnersProp, mou, signaturesProp }) => {
                                         />
                                     </div>
                                     <div className="flex flex-col mt-3">
+                                        <label htmlFor="lembaga">
+                                            Lembaga *
+                                        </label>
+                                        <Dropdown
+                                            value={data.partner}
+                                            dataKey="id"
+                                            onChange={(e) => {
+                                                setData((data) => ({
+                                                    ...data,
+                                                    partner: {
+                                                        ...data.partner,
+                                                        id: e.target.value.id,
+                                                        name: e.target.value
+                                                            .name,
+                                                        province:
+                                                            e.target.value
+                                                                .province,
+                                                        regency:
+                                                            e.target.value
+                                                                .regency,
+                                                        pic:
+                                                            e.target.value.pic
+                                                                ?.name ?? "",
+                                                        pic_position:
+                                                            e.target.value.pic
+                                                                ?.position ??
+                                                            "",
+                                                        bank:
+                                                            e.target.value.bank
+                                                                ?.bank ?? "",
+                                                        account_bank_name:
+                                                            e.target.value.bank
+                                                                ?.account_bank_name ??
+                                                            "",
+                                                        account_bank_number:
+                                                            e.target.value.bank
+                                                                ?.account_bank_number ??
+                                                            "",
+                                                    },
+                                                    url_subdomain:
+                                                        e.target.value.account
+                                                            ?.subdomain ?? "",
+                                                    price_card: e.target.value
+                                                        .price_list?.price_card
+                                                        ? JSON.parse(
+                                                              e.target.value
+                                                                  .price_list
+                                                                  .price_card
+                                                          ).price
+                                                        : "",
+                                                    price_lanyard:
+                                                        e.target.value
+                                                            .price_list
+                                                            ?.price_lanyard ??
+                                                        "",
+                                                    price_subscription_system:
+                                                        e.target.value
+                                                            .price_list
+                                                            ?.price_subscription_system ??
+                                                        "",
+                                                    period_subscription:
+                                                        e.target.value
+                                                            .price_list
+                                                            ?.period_subscription ??
+                                                        "",
+                                                    price_training_offline:
+                                                        e.target.value
+                                                            .price_list
+                                                            ?.price_training_offline ??
+                                                        "",
+                                                    price_training_online:
+                                                        e.target.value
+                                                            .price_list
+                                                            ?.price_training_online ??
+                                                        "",
+                                                    fee_qris:
+                                                        e.target.value
+                                                            .price_list
+                                                            ?.fee_qris ?? "",
+                                                    fee_purchase_cazhpoin:
+                                                        e.target.value
+                                                            .price_list
+                                                            ?.fee_purchase_cazhpoin ??
+                                                        "",
+                                                    fee_bill_cazhpoin:
+                                                        e.target.value
+                                                            .price_list
+                                                            ?.fee_bill_cazhpoin ??
+                                                        "",
+                                                    fee_topup_cazhpos:
+                                                        e.target.value
+                                                            .price_list
+                                                            ?.fee_topup_cazhpos ??
+                                                        "",
+                                                    fee_withdraw_cazhpos:
+                                                        e.target.value
+                                                            .price_list
+                                                            ?.fee_withdraw_cazhpos ??
+                                                        "",
+                                                    fee_bill_saldokartu:
+                                                        e.target.value
+                                                            .price_list
+                                                            ?.fee_bill_saldokartu ??
+                                                        "",
+                                                }));
+                                                setProvinceName(
+                                                    (prev) =>
+                                                        JSON.parse(
+                                                            e.target.value
+                                                                .province
+                                                        ).name
+                                                );
+                                            }}
+                                            onFocus={() => {
+                                                triggerInputFocus(
+                                                    animatePartnerNameRef
+                                                );
+                                            }}
+                                            onShow={() => {
+                                                triggerInputFocus(
+                                                    animatePartnerNameRef
+                                                );
+                                            }}
+                                            onHide={() => {
+                                                stopAnimateInputFocus(
+                                                    animatePartnerNameRef
+                                                );
+                                            }}
+                                            options={partners}
+                                            optionLabel="name"
+                                            placeholder="Pilih Lembaga"
+                                            filter
+                                            valueTemplate={
+                                                selectedOptionTemplate
+                                            }
+                                            itemTemplate={optionTemplate}
+                                            className="w-full md:w-14rem"
+                                        />
+                                    </div>
+                                    <div className="flex flex-col mt-3">
                                         <label htmlFor="partner_pic">
                                             PIC *
                                         </label>
@@ -509,37 +650,7 @@ const Edit = ({ usersProp, partnersProp, mou, signaturesProp }) => {
                                             className="mt-2"
                                         />
                                     </div>
-                                    <div className="flex flex-col mt-3">
-                                        <label htmlFor="lembaga">
-                                            Lembaga *
-                                        </label>
-                                        <InputText
-                                            value={data.partner.name}
-                                            onFocus={() => {
-                                                triggerInputFocus(
-                                                    animatePartnerNameRef
-                                                );
-                                            }}
-                                            onBlur={() => {
-                                                stopAnimateInputFocus(
-                                                    animatePartnerNameRef
-                                                );
-                                            }}
-                                            onClick={() => {
-                                                setDialogInstitutionVisible(
-                                                    true
-                                                );
-                                            }}
-                                            placeholder="Pilih lembaga"
-                                            className="dark:bg-gray-300 cursor-pointer"
-                                            id="partner"
-                                            aria-describedby="partner-help"
-                                        />
-                                        <InputError
-                                            message={errors["partner.name"]}
-                                            className="mt-2"
-                                        />
-                                    </div>
+
                                     <div className="flex flex-col mt-3">
                                         <label htmlFor="province">
                                             Provinsi *
@@ -1429,65 +1540,6 @@ const Edit = ({ usersProp, partnersProp, mou, signaturesProp }) => {
                                             />
                                         </div>
                                     )}
-
-                                    <div className="flex flex-col mt-3">
-                                        <label htmlFor="signature">
-                                            Tanda Tangan *
-                                        </label>
-
-                                        <Dropdown
-                                            value={data.signature}
-                                            onChange={(e) => {
-                                                setData({
-                                                    ...data,
-                                                    signature: {
-                                                        name: e.target.value
-                                                            .name,
-                                                        position:
-                                                            e.target.value
-                                                                .position,
-                                                        image: e.target.value
-                                                            .image,
-                                                    },
-                                                });
-                                            }}
-                                            dataKey="name"
-                                            options={signatures}
-                                            optionLabel="name"
-                                            placeholder="Pilih Tanda Tangan"
-                                            filter
-                                            valueTemplate={
-                                                selectedOptionTemplate
-                                            }
-                                            itemTemplate={
-                                                optionSignatureTemplate
-                                            }
-                                            className={`w-full md:w-14rem ${
-                                                errors.signature_name &&
-                                                "p-invalid"
-                                            }`}
-                                            onFocus={() => {
-                                                triggerInputFocus(
-                                                    animateSignatureName
-                                                );
-                                            }}
-                                            onShow={() => {
-                                                triggerInputFocus(
-                                                    animateSignatureName
-                                                );
-                                            }}
-                                            onHide={() => {
-                                                stopAnimateInputFocus(
-                                                    animateSignatureName
-                                                );
-                                            }}
-                                            showOnFocus
-                                        />
-                                        <InputError
-                                            message={errors["signature.image"]}
-                                            className="mt-2"
-                                        />
-                                    </div>
 
                                     <div className="flex flex-col mt-3">
                                         <label htmlFor="signature">
@@ -3370,10 +3422,7 @@ const Edit = ({ usersProp, partnersProp, mou, signaturesProp }) => {
                                         <p>Pihak Pertama</p>
                                         <div className="h-[100px] w-[170px] py-2">
                                             <img
-                                                src={
-                                                    "/storage/" +
-                                                    data.signature.image
-                                                }
+                                                src={data.signature.image}
                                                 alt=""
                                                 className="w-full h-full object-fill"
                                             />
@@ -3388,16 +3437,18 @@ const Edit = ({ usersProp, partnersProp, mou, signaturesProp }) => {
                                     </div>
                                     <div className="w-[30%]">
                                         <p>Pihak Kedua</p>
-                                        {data.pic_signature &&
-                                        isSignatureBlob ? (
+                                        {data.partner.pic_signature ? (
                                             <div className="h-[100px] w-[170px] py-2">
                                                 <img
                                                     src={
-                                                        typeof data.pic_signature ===
+                                                        typeof data.partner
+                                                            .pic_signature ===
                                                         "string"
-                                                            ? data.pic_signature
+                                                            ? data.partner
+                                                                  .pic_signature
                                                             : URL.createObjectURL(
-                                                                  data.pic_signature
+                                                                  data.partner
+                                                                      .pic_signature
                                                               )
                                                     }
                                                     className="w-full h-full object-fill"
@@ -3450,22 +3501,6 @@ const Edit = ({ usersProp, partnersProp, mou, signaturesProp }) => {
                     </div>
                 </div>
             </BlockUI>
-            <DialogInstitution
-                dialogInstitutionVisible={dialogInstitutionVisible}
-                setDialogInstitutionVisible={setDialogInstitutionVisible}
-                filters={filters}
-                setFilters={setFilters}
-                isLoadingData={isLoadingData}
-                setIsLoadingData={setIsLoadingData}
-                leads={leads}
-                setLeads={setLeads}
-                partners={partners}
-                setPartners={setPartners}
-                data={data}
-                setData={setData}
-                reset={reset}
-                setProvinceName={setProvinceName}
-            />
         </>
     );
 };

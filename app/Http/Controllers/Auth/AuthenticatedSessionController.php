@@ -33,8 +33,11 @@ class AuthenticatedSessionController extends Controller
         $request->authenticate();
 
         $request->session()->regenerate();
-
-        return redirect()->intended(RouteServiceProvider::HOME);
+        $path = '/dashboard';
+        if (Auth()->user()->getRoleNames()[0] == 'partner') {
+            $path = '/e-learning';
+        }
+        return redirect()->intended($path);
     }
 
     /**

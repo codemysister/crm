@@ -68,7 +68,6 @@ const DetailLog = ({
         address: "Alamat",
         sales: "Sales",
         account_managers: "Account Manager",
-        referrals: "Referral",
         onboarding_date: "Tanggal Onboarding",
         live_date: "Tanggal Live",
         live_age: "Umur Live",

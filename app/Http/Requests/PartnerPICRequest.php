@@ -24,8 +24,6 @@ class PartnerPICRequest extends FormRequest
         return [
             'partner' => 'required',
             'name' => 'required',
-            'email' => 'required',
-            'number' => 'required',
             'position' => 'required'
         ];
     }
@@ -35,8 +33,6 @@ class PartnerPICRequest extends FormRequest
         return [
             'partner.required' => 'Lembaga PIC harus diiisi',
             'name.required' => 'Nama PIC harus diiisi',
-            'email.required' => 'Email PIC harus diiisi',
-            'number.required' => 'Nomor PIC harus diiisi',
             'position.required' => 'Jabatan PIC harus diiisi'
         ];
     }

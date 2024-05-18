@@ -167,11 +167,10 @@ return [
         App\Providers\AuthServiceProvider::class,
         // App\Providers\BroadcastServiceProvider::class,
         Spatie\Permission\PermissionServiceProvider::class,
-        Elibyy\TCPDF\ServiceProvider::class,
         Dipantry\Rupiah\ServiceProvider::class,
         App\Providers\EventServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
-//        Barryvdh\Debugbar\ServiceProvider::class,
+        //        Barryvdh\Debugbar\ServiceProvider::class,
         Maatwebsite\Excel\ExcelServiceProvider::class,
 
     ])->toArray(),
@@ -189,8 +188,8 @@ return [
 
     'aliases' => Facade::defaultAliases()->merge([
         // 'Example' => App\Facades\Example::class,
-        'Rupiah' => Dipantry\Rupiah\Facade::class,
         'Excel' => Maatwebsite\Excel\Facades\Excel::class,
+        'Rupiah' => Dipantry\Rupiah\Facade::class,
 
     ])->toArray(),
 

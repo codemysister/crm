@@ -13,7 +13,7 @@ return new class extends Migration {
         Schema::create('partner_banks', function (Blueprint $table) {
             $table->id();
             $table->uuid('uuid');
-            $table->foreignId('partner_id')->constrained('partners', 'id')->onDelete('cascade');
+            $table->foreignId('partner_id')->constrained()->onDelete('cascade');
             $table->foreignId('created_by')->nullable()->constrained('users', 'id')->onDelete('cascade');
             $table->string('bank')->nullable();
             $table->bigInteger('account_bank_number')->nullable();

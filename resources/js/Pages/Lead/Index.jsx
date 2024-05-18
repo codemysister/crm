@@ -36,6 +36,7 @@ import { useCallback } from "react";
 import { DatatableLead } from "./Component/DatatableLead";
 import { Calendar } from "primereact/calendar";
 import LogComponent from "@/Components/LogComponent";
+import PermissionErrorDialog from "@/Components/PermissionErrorDialog";
 registerPlugin(FilePondPluginFileValidateSize);
 
 export default function Index({
@@ -44,7 +45,6 @@ export default function Index({
     usersProp,
     statusProp,
     salesProp,
-    referralProp,
 }) {
     const [activeIndexTab, setActiveIndexTab] = useState(0);
     const [leads, setLeads] = useState(null);
@@ -52,7 +52,6 @@ export default function Index({
     const [users, setUsers] = useState(usersProp);
     const [status, setStatus] = useState(statusProp);
     const [sales, setSales] = useState(salesProp);
-    const [referrals, setReferrals] = useState(referralProp);
     const [confirmIsVisible, setConfirmIsVisible] = useState(false);
     const [selectedLead, setSelectedLead] = useState(null);
     const [isLoadingData, setIsLoadingData] = useState(false);
@@ -68,6 +67,8 @@ export default function Index({
     const [modalStatusIsVisible, setModalStatusIsVisible] = useState(false);
     const [sidebarFilter, setSidebarFilter] = useState(null);
     const [modalImportLeadIsVisible, setModalImportLeadIsVisible] =
+        useState(false);
+    const [permissionErrorIsVisible, setPermissionErrorIsVisible] =
         useState(false);
     const { roles, permissions } = auth.user;
     const [filters, setFilters] = useState({
@@ -193,7 +194,6 @@ export default function Index({
             name: lead.name,
             pic: lead.pic,
             sales: lead.sales,
-            referral: lead.referral,
             phone_number: lead.phone_number,
             address: lead.address,
             total_members: lead.total_members,
@@ -449,17 +449,6 @@ export default function Index({
                 return rowData.sales ? rowData.sales.name : "-";
             },
         },
-        {
-            field: "referral",
-            header: "Referral",
-            style: {
-                width: "max-content",
-                whiteSpace: "nowrap",
-            },
-            body: (rowData) => {
-                return rowData.referral ? rowData.referral.name : "-";
-            },
-        },
 
         {
             field: "phone_number",
@@ -499,8 +488,6 @@ export default function Index({
             keyIndo = "PIC";
         } else if (key == "sales.name") {
             keyIndo = "Sales";
-        } else if (key == "referral.name") {
-            keyIndo = "Referral.name";
         } else if (key == "npwp") {
             keyIndo = "NPWP";
         } else if (key == "total_members") {
@@ -519,6 +506,12 @@ export default function Index({
     return (
         <DashboardLayout auth={auth.user} className="">
             {/* Tombol Aksi */}
+
+            <PermissionErrorDialog
+                dialogIsVisible={permissionErrorIsVisible}
+                setDialogVisible={setPermissionErrorIsVisible}
+            />
+
             <OverlayPanel
                 className=" shadow-md p-1 dark:bg-slate-800 dark:text-gray-300"
                 ref={action}
@@ -539,7 +532,16 @@ export default function Index({
                         label="edit"
                         className="bg-transparent hover:bg-slate-200 w-full text-slate-500 border-b-2 border-slate-400"
                         onClick={() => {
-                            handleEditLead(selectedLead);
+                            if (
+                                permissions.includes("edit lead") &&
+                                selectedLead.created_by.id == currentUser.id
+                            ) {
+                                handleEditLead(selectedLead);
+                            } else {
+                                setPermissionErrorIsVisible(
+                                    (prev) => (prev = true)
+                                );
+                            }
                         }}
                     />
                     <Button
@@ -547,7 +549,16 @@ export default function Index({
                         label="hapus"
                         className="bg-transparent hover:bg-slate-200 w-full text-slate-500 border-b-2 border-slate-400"
                         onClick={() => {
-                            confirmDeleteStatus();
+                            if (
+                                permissions.includes("hapus lead") &&
+                                selectedLead.created_by.id == currentUser.id
+                            ) {
+                                confirmDeleteStatus();
+                            } else {
+                                setPermissionErrorIsVisible(
+                                    (prev) => (prev = true)
+                                );
+                            }
                         }}
                     />
                 </div>
@@ -951,25 +962,6 @@ export default function Index({
                             </div>
 
                             <div className="flex flex-col">
-                                <label htmlFor="referral">Referral</label>
-                                <Dropdown
-                                    dataKey="name"
-                                    value={data.referral}
-                                    onChange={(e) =>
-                                        setData("referral", e.target.value)
-                                    }
-                                    options={referrals}
-                                    optionLabel="name"
-                                    placeholder="Pilih Referral"
-                                    filter
-                                    showClear
-                                    valueTemplate={selectedOptionTemplate}
-                                    itemTemplate={optionTemplate}
-                                    className="w-full md:w-14rem"
-                                />
-                            </div>
-
-                            <div className="flex flex-col">
                                 <label htmlFor="phone_number">
                                     Nomor Telepon *
                                 </label>
@@ -1109,24 +1101,6 @@ export default function Index({
                                     options={sales}
                                     optionLabel="name"
                                     placeholder="Pilih Sales"
-                                    filter
-                                    valueTemplate={selectedOptionTemplate}
-                                    itemTemplate={optionTemplate}
-                                    className="w-full md:w-14rem"
-                                />
-                            </div>
-
-                            <div className="flex flex-col">
-                                <label htmlFor="referral">Referral</label>
-                                <Dropdown
-                                    dataKey="name"
-                                    value={data.referral}
-                                    onChange={(e) =>
-                                        setData("referral", e.target.value)
-                                    }
-                                    options={referrals}
-                                    optionLabel="name"
-                                    placeholder="Pilih Referral"
                                     filter
                                     valueTemplate={selectedOptionTemplate}
                                     itemTemplate={optionTemplate}

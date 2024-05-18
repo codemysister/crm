@@ -127,9 +127,9 @@ const Create = ({
         xendit_link: "https://checkout.xendit.co/web/",
         created_by: null,
         signature: {
-            name: null,
-            position: null,
-            image: null,
+            name: "Hari Yuliawan",
+            position: "CTO",
+            image: "/assets/img/signatures/ttd_cto.png",
         },
     });
 
@@ -806,7 +806,7 @@ const Create = ({
                                         </div>
                                     )}
 
-                                    <div className="flex flex-col mt-3">
+                                    {/* <div className="flex flex-col mt-3">
                                         <label htmlFor="signature">
                                             Tanda Tangan *
                                         </label>
@@ -844,7 +844,7 @@ const Create = ({
                                                 );
                                             }}
                                         />
-                                    </div>
+                                    </div> */}
 
                                     <div className="flex-flex-col mt-3">
                                         <form onSubmit={handleSubmitForm}>
@@ -1428,10 +1428,7 @@ const Create = ({
                                     <p>{formatDateSignature()}</p>
                                     <div className="h-[100px] w-[170px] self-center py-2">
                                         <img
-                                            src={
-                                                "/storage/" +
-                                                data.signature.image
-                                            }
+                                            src={data.signature.image}
                                             alt=""
                                             className="object-fill w-full h-full"
                                         />

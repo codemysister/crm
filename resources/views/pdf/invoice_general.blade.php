@@ -189,7 +189,7 @@ use Carbon\Carbon;
             @if($invoice_general->signature_name)
             <div style="width: 170px; height: 100px; overflow: hidden;" class="py-2">
 
-            <img src="{{ public_path("storage/$invoice_general->signature_image") }}" alt="" class="min-h-20 w-full"
+            <img src="{{ public_path("$invoice_general->signature_image") }}" alt="" class="min-h-20 w-full"
             style="object-fit: fill; width:100%; height:100%;" />
             </div>
             <!-- <div style="min-height: 80px"></div> -->

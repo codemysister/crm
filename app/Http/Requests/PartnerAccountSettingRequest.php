@@ -26,7 +26,6 @@ class PartnerAccountSettingRequest extends FormRequest
             'subdomain' => 'required',
             'email_super_admin' => 'required',
             'cas_link_partner' => 'required',
-            'card_number' => 'required'
         ];
     }
 

@@ -14,6 +14,7 @@ use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
@@ -32,13 +33,13 @@ class PartnerController extends Controller
         if ($uuid) {
             $partner = Partner::with([
                 'sales',
-                'referral',
                 'status',
                 'account_manager',
                 'pic',
                 'subscription',
                 'bank',
                 'price_list',
+                'account',
                 'createdBy'
             ])->where('uuid', '=', $uuid)->first();
         }
@@ -53,10 +54,10 @@ class PartnerController extends Controller
     {
         $partners = Partner::with([
             'sales',
-            'referral',
             'status',
             'account_manager',
             'pic',
+            'account',
             'subscription',
             'bank',
             'price_list',
@@ -79,10 +80,6 @@ class PartnerController extends Controller
 
         if ($request->sales) {
             $partners->where('sales_id', $request->sales['id']);
-        }
-
-        if ($request->referral) {
-            $partners->where('referral_id', $request->referral['id']);
         }
 
         if ($request->onboarding_date['start'] && $request->onboarding_date['end']) {
@@ -124,17 +121,25 @@ class PartnerController extends Controller
 
         try {
 
+            $user = User::create([
+                'name' => $request['partner']['name'],
+                'email' => $request['partner']['email'],
+                'password' => Hash::make($request['partner']['password']),
+            ]);
+            $user->assignRole('partner');
+
             $partner = Partner::create([
                 'uuid' => Str::uuid(),
+                'user_id' => $user->id,
                 'name' => $request['partner']['name'],
                 'logo' => $pathLogo ?? null,
                 'npwp' => $request['partner']['npwp'] ?? null,
                 'password' => $request['partner']['password'] ?? null,
+                'email' => $request['partner']['email'] ?? null,
                 'phone_number' => $request['partner']['phone_number'] ?? null,
                 'total_members' => $request['partner']['total_members'] ?? null,
                 'status_id' => $request['partner']['status']['id'],
                 'sales_id' => $request['partner']['sales']['id'] ?? null,
-                'referral_id' => $request['partner']['referral']['id'] ?? null,
                 'account_manager_id' => $request['partner']['account_manager']['id'] ?? null,
                 'onboarding_date' => $request['partner']['onboarding_date'] !== null ? Carbon::parse($request['partner']['onboarding_date'])->setTimezone('GMT+7')->format('Y-m-d H:i:s') : null,
                 'live_date' => $request['partner']['live_date'] !== null ? Carbon::parse($request['partner']['live_date'])->setTimezone('GMT+7')->format('Y-m-d H:i:s') : null,
@@ -149,8 +154,6 @@ class PartnerController extends Controller
                 'period' => $request['partner']['period']['name'] ?? $request['partner']['period'],
                 'created_by' => Auth::user()->id
             ]);
-
-
             if ($request['partner']['uuid_lead'] && $request['partner']['onboarding']) {
 
                 $leadExist = Lead::with('status')->where('uuid', $request['partner']['uuid_lead'])->first();
@@ -250,7 +253,6 @@ class PartnerController extends Controller
                 'phone_number' => $request['partner']['phone_number'] ?? null,
                 'status_id' => $request['partner']['status']['id'],
                 'sales_id' => $request['partner']['sales']['id'] ?? null,
-                'referral_id' => $request['partner']['referral']['id'] ?? null,
                 'account_manager_id' => $request['partner']['account_manager']['id'] ?? null,
                 'onboarding_date' => $request['partner']['onboarding_date'] !== null ? Carbon::parse($request['partner']['onboarding_date'])->setTimezone('GMT+7')->format('Y-m-d H:i:s') : null,
                 'live_date' => $request['partner']['live_date'] !== null ? Carbon::parse($request['partner']['live_date'])->setTimezone('GMT+7')->format('Y-m-d H:i:s') : null,
@@ -321,7 +323,6 @@ class PartnerController extends Controller
             'phone_number' => $request['phone_number'] ?? null,
             'status_id' => $request['status']['id'],
             'sales_id' => $request['sales']['id'] ?? null,
-            'referral_id' => $request['referral']['id'] ?? null,
             'account_manager_id' => $request['account_manager']['id'] ?? null,
             'onboarding_date' => Carbon::parse($request['onboarding_date'])->setTimezone('GMT+7')->format('Y-m-d H:i:s'),
             'live_date' => $request['live_date'] !== null ? Carbon::parse($request['live_date'])->setTimezone('GMT+7')->format('Y-m-d H:i:s') : null,
@@ -342,13 +343,13 @@ class PartnerController extends Controller
     {
         $partner = Partner::with([
             'sales',
-            'referral',
             'status',
             'account_manager',
             'pic',
             'subscription',
             'bank',
             'price_list',
+            'account',
             'createdBy'
         ])->where('uuid', $uuid)->first();
 
@@ -360,7 +361,7 @@ class PartnerController extends Controller
             'causer_type' => get_class(Auth::user()),
             'causer_id' => Auth::user()->id,
             "event" => "deleted",
-            'properties' => ["old" => ['name' => $partner->name, 'npwp' => $partner->npwp, 'password' => $partner->password, 'phone_number' => $partner->phone_number, 'status.name' => $partner->status->name, 'status.color' => $partner->status->color, 'pic.name' => $partner->pic->name, 'bank.bank' => $partner->bank ? $partner->bank->bank : null, 'bank.account_bank_name' => $partner->bank ? $partner->bank->account_bank_name : null, 'bank.account_bank_number' => $partner->bank ? $partner->bank->account_bank_number : null, 'sales.name' => $partner->sales->name, 'referral.name' => $partner->referral ? $partner->referral->name : null, 'account_manager.name' => $partner->account_manager ? $partner->account_manager->name : null, 'onboarding_date' => $partner->onboarding_date, 'live_date' => $partner->live_date, 'monitoring_date_after_3_month_live' => $partner->monitoring_date_after_3_month_live, 'province' => $partner->province, 'regency' => $partner->regency, 'address' => $partner->address, 'payment_metode' => $partner->payment_metode, 'period' => $partner->period]]
+            'properties' => ["old" => ['name' => $partner->name, 'npwp' => $partner->npwp, 'password' => $partner->password, 'phone_number' => $partner->phone_number, 'status.name' => $partner->status->name, 'status.color' => $partner->status->color, 'pic.name' => $partner->pic->name, 'bank.bank' => $partner->bank ? $partner->bank->bank : null, 'bank.account_bank_name' => $partner->bank ? $partner->bank->account_bank_name : null, 'bank.account_bank_number' => $partner->bank ? $partner->bank->account_bank_number : null, 'sales.name' => $partner->sales->name, 'account_manager.name' => $partner->account_manager ? $partner->account_manager->name : null, 'onboarding_date' => $partner->onboarding_date, 'live_date' => $partner->live_date, 'monitoring_date_after_3_month_live' => $partner->monitoring_date_after_3_month_live, 'province' => $partner->province, 'regency' => $partner->regency, 'address' => $partner->address, 'payment_metode' => $partner->payment_metode, 'period' => $partner->period]]
         ]);
         $partner->delete();
     }
@@ -375,12 +376,12 @@ class PartnerController extends Controller
     {
         $partner = Partner::withTrashed()->with([
             'sales',
-            'referral',
             'status',
             'account_manager',
             'pic',
             'subscription',
             'bank',
+            'account',
             'price_list',
             'createdBy'
         ])->where('uuid', $uuid)->first();
@@ -393,7 +394,7 @@ class PartnerController extends Controller
             'causer_type' => get_class(Auth::user()),
             'causer_id' => Auth::user()->id,
             "event" => "force",
-            'properties' => ["old" => ['name' => $partner->name, 'npwp' => $partner->npwp, 'password' => $partner->password, 'phone_number' => $partner->phone_number, 'status.name' => $partner->status->name, 'status.color' => $partner->status->color, 'pic.name' => $partner->pic->name, 'bank.bank' => $partner->bank ? $partner->bank->bank : null, 'bank.account_bank_name' => $partner->bank ? $partner->bank->account_bank_name : null, 'bank.account_bank_number' => $partner->bank ? $partner->bank->account_bank_number : null, 'sales.name' => $partner->sales->name, 'referral.name' => $partner->referral ? $partner->referral->name : null, 'account_manager.name' => $partner->account_manager ? $partner->account_manager->name : null, 'onboarding_date' => $partner->onboarding_date, 'live_date' => $partner->live_date, 'monitoring_date_after_3_month_live' => $partner->monitoring_date_after_3_month_live, 'province' => $partner->province, 'regency' => $partner->regency, 'address' => $partner->address, 'payment_metode' => $partner->payment_metode, 'period' => $partner->period]]
+            'properties' => ["old" => ['name' => $partner->name, 'npwp' => $partner->npwp, 'password' => $partner->password, 'phone_number' => $partner->phone_number, 'status.name' => $partner->status->name, 'status.color' => $partner->status->color, 'pic.name' => $partner->pic->name, 'bank.bank' => $partner->bank ? $partner->bank->bank : null, 'bank.account_bank_name' => $partner->bank ? $partner->bank->account_bank_name : null, 'bank.account_bank_number' => $partner->bank ? $partner->bank->account_bank_number : null, 'sales.name' => $partner->sales->name, 'account_manager.name' => $partner->account_manager ? $partner->account_manager->name : null, 'onboarding_date' => $partner->onboarding_date, 'live_date' => $partner->live_date, 'monitoring_date_after_3_month_live' => $partner->monitoring_date_after_3_month_live, 'province' => $partner->province, 'regency' => $partner->regency, 'address' => $partner->address, 'payment_metode' => $partner->payment_metode, 'period' => $partner->period]]
         ]);
         $partner->forceDelete();
     }
@@ -402,12 +403,12 @@ class PartnerController extends Controller
     {
         $partnersDefault = Partner::with([
             'sales',
-            'referral',
             'status',
             'account_manager',
             'pic',
             'subscription',
             'bank',
+            'account',
             'price_list',
             'createdBy'
         ])->latest()->get();
@@ -425,12 +426,11 @@ class PartnerController extends Controller
     {
         $partner = Partner::with([
             'sales',
-            'referral',
             'status',
             'account_manager',
             'pic',
-            'subscription'
-            ,
+            'subscription',
+            'account',
             'bank',
             'sph' => function ($query) {
                 $query->with(['user', 'products'])->latest();
@@ -495,12 +495,12 @@ class PartnerController extends Controller
     {
         $arsip = Partner::withTrashed()->with(
             'sales',
-            'referral',
             'status',
             'account_manager',
             'pic',
             'subscription',
             'bank',
+            'account',
             'price_list',
             'createdBy'
         )->whereNotNull('deleted_at')->get();
@@ -511,12 +511,12 @@ class PartnerController extends Controller
     {
         $arsip = Partner::withTrashed()->with(
             'sales',
-            'referral',
             'status',
             'account_manager',
             'pic',
             'subscription',
             'bank',
+            'account',
             'price_list',
             'createdBy'
         )->whereNotNull('deleted_at');

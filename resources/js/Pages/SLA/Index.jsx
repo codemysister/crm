@@ -186,10 +186,6 @@ export default function Index({ auth }) {
         setIsLoadingData(false);
     };
 
-    const handleSelectedDetaillead = (lead) => {
-        router.get(`/leads?uuid=${lead.uuid}`);
-    };
-
     const selectedOptionTemplate = (option, props) => {
         if (option) {
             return (
@@ -251,7 +247,7 @@ export default function Index({ auth }) {
         const exports = slas.map((data) => {
             return {
                 Kode: data.code ?? "-",
-                Lembaga: data.lead ? data.lead.name : "-",
+                Lembaga: data.partner ? data.partner.name : "-",
                 Link_Dokumen: {
                     v: window.location.origin + "/" + data.sla_doc ?? "-",
                     h: "link",
@@ -346,17 +342,17 @@ export default function Index({ auth }) {
         let keyIndo;
         const keySplit = key.split(".");
         const firstKey = keySplit[0];
-        if (firstKey == "lead_name") {
+        if (firstKey == "partner_name") {
             keyIndo = "Lembaga";
-        } else if (firstKey == "lead_phone_number") {
+        } else if (firstKey == "partner_phone_number") {
             keyIndo = "Nomor Lembaga";
         } else if (firstKey == "code") {
             keyIndo = "Kode";
-        } else if (firstKey == "lead_pic") {
+        } else if (firstKey == "partner_pic") {
             keyIndo = "PIC";
-        } else if (firstKey == "lead_pic_email") {
+        } else if (firstKey == "partner_pic_email") {
             keyIndo = "Email PIC";
-        } else if (firstKey == "lead_pic_number") {
+        } else if (firstKey == "partner_pic_number") {
             keyIndo = "Nomor PIC";
         } else if (firstKey == "referral_name") {
             keyIndo = "Referral";
@@ -406,7 +402,7 @@ export default function Index({ auth }) {
                     onClick={() => handleSelectedDetailInstitution(rowData)}
                     className="hover:text-blue-700 text-left"
                 >
-                    {rowData.lead_name}
+                    {rowData.partner_name}
                 </button>
             ),
         },
@@ -426,7 +422,7 @@ export default function Index({ auth }) {
                     <div className="flex w-full h-full items-center justify-center">
                         <a
                             href={rowData.sla_doc}
-                            download={`SLA_${rowData.lead_name}`}
+                            download={`SLA_${rowData.partner_name}`}
                             class="font-bold  w-full h-full text-center rounded-full "
                         >
                             <i
@@ -499,8 +495,8 @@ export default function Index({ auth }) {
 
     const globalFilterFields = [
         "code",
-        "lead.name",
-        "lead.npwp",
+        "partner.name",
+        "partner.npwp",
         "created_at.name",
     ];
 
@@ -1021,7 +1017,7 @@ export default function Index({ auth }) {
                         className="bg-transparent hover:bg-slate-200 w-full text-slate-500 border-b-2 border-slate-400"
                         onClick={() => {
                             if (
-                                permissions.includes("edit aktivitas sla") &&
+                                permissions.includes("edit sla") &&
                                 selectedActivity.user_id == currentUser.id
                             ) {
                                 handleEditActivity(selectedActivity);

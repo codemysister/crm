@@ -13,7 +13,7 @@ return new class extends Migration {
         Schema::create('partner_subscriptions', function (Blueprint $table) {
             $table->id();
             $table->uuid('uuid');
-            $table->foreignId('partner_id')->constrained('partners', 'id')->onDelete('cascade');
+            $table->foreignId('partner_id')->constrained()->onDelete('cascade');
             $table->foreignId('created_by')->nullable()->constrained('users', 'id')->onDelete('cascade');
             $table->string('bill')->nullable();
             $table->bigInteger('nominal')->nullable()->default(0);

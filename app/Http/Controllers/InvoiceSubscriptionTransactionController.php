@@ -111,8 +111,8 @@ class InvoiceSubscriptionTransactionController extends Controller
             $transaction->metode = $request->dataTransaction['metode']['name'];
             $transaction->payment_for = $request->dataTransaction['payment_for'];
             $transaction->receipt_doc = '';
-            $transaction->signature_name = $request->dataTransaction['signature']['name'];
-            $transaction->signature_image = $request->dataTransaction['signature']['image'];
+            $transaction->signature_name = "Muh Arif Mahfudin";
+            $transaction->signature_image = "/assets/img/signatures/ttd.png";
             $transaction->created_by = Auth::user()->id;
             $transaction = $this->generateReceipt($transaction);
             $transaction->save();

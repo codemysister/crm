@@ -167,17 +167,6 @@ export const DatatableLead = memo(
                     return rowData.sales ? rowData.sales.name : "-";
                 },
             },
-            {
-                field: "referral",
-                header: "Referral",
-                style: {
-                    width: "max-content",
-                    whiteSpace: "nowrap",
-                },
-                body: (rowData) => {
-                    return rowData.referral ? rowData.referral.name : "-";
-                },
-            },
 
             {
                 field: "phone_number",

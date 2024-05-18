@@ -14,7 +14,7 @@ return new class extends Migration {
             $table->id();
             $table->uuid('uuid');
             $table->foreignId('sla_id')->constrained('slas', 'id')->onDelete('cascade');
-            $table->foreignId('user_id')->constrained();
+            $table->foreignId('user_id')->constrained('users', 'id');
             $table->string('cazh_pic');
             $table->string('activity');
             $table->string('duration');

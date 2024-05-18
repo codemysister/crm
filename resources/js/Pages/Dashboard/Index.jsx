@@ -36,7 +36,7 @@ ChartJS.register(
 );
 
 const Index = ({ statisticGeneralProp, usersProp }) => {
-    const [statiscticAM, setStatisticAM] = useState({
+    const [statisticUser, setStatisticUser] = useState({
         data: [0, 0, 0, 0, 0],
     });
     const [isLoadingData, setIsLoadingData] = useState(false);
@@ -74,14 +74,14 @@ const Index = ({ statisticGeneralProp, usersProp }) => {
 
     const getStatGeneral = async () => {
         let response = await fetch("/api/dashboard");
-        statisticGeneralProp = data;
-        setStatisticAM((prev) => (prev = { data: [0, 0, 0, 0, 0] }));
+        statisticGeneralProp = response;
+        setStatisticUser((prev) => (prev = { data: [0, 0, 0, 0, 0] }));
     };
 
     const getPartnerByUser = async () => {
         let response = await fetch("/api/dashboard/" + selectedAM?.id);
         let data = await response.json();
-        setStatisticAM((prev) => ({
+        setStatisticUser((prev) => ({
             ...prev,
             data: [
                 data[0].totalProses,
@@ -139,8 +139,8 @@ const Index = ({ statisticGeneralProp, usersProp }) => {
 
     const backgroundColors = colors.slice(
         0,
-        statiscticAM.partnersByProvince?.length > 0
-            ? statiscticAM.partnersByProvince.length
+        statisticUser.partnersByProvince?.length > 0
+            ? statisticUser.partnersByProvince.length
             : statisticGeneralProp.partnersByProvince.length
     );
 
@@ -213,7 +213,7 @@ const Index = ({ statisticGeneralProp, usersProp }) => {
                             </p>
                             <p className="text-lg font-semibold text-gray-700 dark:text-gray-200">
                                 {selectedAM
-                                    ? statiscticAM.totalPartner
+                                    ? statisticUser.totalPartner
                                     : statisticGeneralProp.totalPartner}
                             </p>
                         </div>
@@ -242,7 +242,7 @@ const Index = ({ statisticGeneralProp, usersProp }) => {
                             </p>
                             <p className="text-lg font-semibold text-gray-700 dark:text-gray-200">
                                 {selectedAM
-                                    ? statiscticAM.totalProses
+                                    ? statisticUser.totalProses
                                     : statisticGeneralProp.totalProses}
                             </p>
                         </div>
@@ -271,7 +271,7 @@ const Index = ({ statisticGeneralProp, usersProp }) => {
                             </p>
                             <p className="text-lg font-semibold text-gray-700 dark:text-gray-200">
                                 {selectedAM
-                                    ? statiscticAM.totalAktif
+                                    ? statisticUser.totalAktif
                                     : statisticGeneralProp.totalAktif}
                             </p>
                         </div>
@@ -300,7 +300,7 @@ const Index = ({ statisticGeneralProp, usersProp }) => {
                             </p>
                             <p className="text-lg font-semibold text-gray-700 dark:text-gray-200">
                                 {selectedAM
-                                    ? statiscticAM.totalNonaktif
+                                    ? statisticUser.totalNonaktif
                                     : statisticGeneralProp.totalNonaktif}
                             </p>
                         </div>
@@ -328,7 +328,7 @@ const Index = ({ statisticGeneralProp, usersProp }) => {
                             </p>
                             <p className="text-lg font-semibold text-gray-700 dark:text-gray-200">
                                 {selectedAM
-                                    ? statiscticAM.totalCancel
+                                    ? statisticUser.totalCancel
                                     : statisticGeneralProp.totalCancel}
                             </p>
                         </div>
@@ -358,17 +358,18 @@ const Index = ({ statisticGeneralProp, usersProp }) => {
                             </p>
                             <p className="text-lg font-semibold text-gray-700 dark:text-gray-200">
                                 {selectedAM
-                                    ? statiscticAM.totalCLBK
+                                    ? statisticUser.totalCLBK
                                     : statisticGeneralProp.totalCLBK}
                             </p>
                         </div>
                     </div>
                 </div>
+                {console.log(statisticUser)}
 
                 <div className="card flex flex-col -mt-7 w-full md:max-h-[320px] md:flex-row mx-auto justify-between gap-7">
                     <div className="flex flex-col text-center md:w-[50%] justify-center border p-8 bg-white dark:bg-slate-900 dark:border-none dark:text-gray-400  shadow-md rounded-lg">
                         <h1 className="mb-2 font-semibold">
-                            Presentase Status Partner User
+                            Presentase Status Partner By User
                         </h1>
                         <Doughnut
                             className="mx-auto"
@@ -383,7 +384,23 @@ const Index = ({ statisticGeneralProp, usersProp }) => {
                                 datasets: [
                                     {
                                         label: "Presentase",
-                                        data: statiscticAM.data,
+                                        data: [
+                                            (statisticUser.totalProses /
+                                                statisticUser.totalPartner) *
+                                                100,
+                                            (statisticUser.totalAktif /
+                                                statisticUser.totalPartner) *
+                                                100,
+                                            (statisticUser.totalNonaktif /
+                                                statisticUser.totalPartner) *
+                                                100,
+                                            (statisticUser.totalCLBK /
+                                                statisticUser.totalPartner) *
+                                                100,
+                                            (statisticUser.totalCancel /
+                                                statisticUser.totalPartner) *
+                                                100,
+                                        ],
                                         backgroundColor: [
                                             "orange",
                                             "green",
@@ -451,8 +468,8 @@ const Index = ({ statisticGeneralProp, usersProp }) => {
                             className="w-full bg-white dark:text-white object-cover dark:bg-slate-900 h-full rounded-lg"
                             data={{
                                 labels:
-                                    statiscticAM.partnersByProvince?.length > 0
-                                        ? statiscticAM.partnersByProvince.map(
+                                    statisticUser.partnersByProvince?.length > 0
+                                        ? statisticUser.partnersByProvince.map(
                                               (province) =>
                                                   province.province_name
                                           )
@@ -463,14 +480,14 @@ const Index = ({ statisticGeneralProp, usersProp }) => {
                                 datasets: [
                                     {
                                         label:
-                                            statiscticAM.partnersByProvince
+                                            statisticUser.partnersByProvince
                                                 ?.length > 0
                                                 ? "Jumlah Partner Tiap Provinsi By User"
                                                 : "Jumlah Partner Tiap Provinsi",
                                         data:
-                                            statiscticAM.partnersByProvince
+                                            statisticUser.partnersByProvince
                                                 ?.length > 0
-                                                ? statiscticAM.partnersByProvince.map(
+                                                ? statisticUser.partnersByProvince.map(
                                                       (province) =>
                                                           province.total
                                                   )
@@ -532,7 +549,7 @@ const Index = ({ statisticGeneralProp, usersProp }) => {
                         paginatorClassName="dark:bg-transparent paginator-custome dark:text-gray-300 rounded-b-lg"
                         header={header}
                         value={
-                            statiscticAM.partners ??
+                            statisticUser.partners ??
                             statisticGeneralProp.partners
                         }
                         dataKey="id"

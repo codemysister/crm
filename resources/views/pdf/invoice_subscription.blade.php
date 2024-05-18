@@ -182,7 +182,7 @@
             <div class="w-[30%]" style="width: 30%; height: 30%">
                 <p>Hormat Kami,</p>
                 <div style="width: 170px; height: 100px; overflow: hidden;" class="py-2">
-                    <img src="{{ public_path("/storage/$invoice_subscription->signature_image") }}" alt="" class="min-h-20
+                    <img src="{{ public_path("$invoice_subscription->signature_image") }}" alt="" class="min-h-20
                 w-full" style="object-fit: fill; width:100%; height:100%;" />
                 </div>
                 <!-- <div style="min-height: 80px"></div> -->

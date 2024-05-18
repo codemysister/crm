@@ -19,7 +19,7 @@ class SLA extends Model
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()
-            ->logOnly(['code', 'lead_name', 'lead_phone_number', 'lead_pic', 'lead_pic_email', 'lead_pic_email', 'signature_name'])
+            ->logOnly(['code', 'partner_name', 'partner_phone_number', 'partner_pic', 'partner_pic_email', 'partner_pic_email', 'signature_name'])
             ->dontLogIfAttributesChangedOnly(['deleted_at', 'updated_at'])
             ->setDescriptionForEvent(function (string $eventName) {
                 $modelName = strtoupper(class_basename($this));
@@ -37,9 +37,9 @@ class SLA extends Model
             });
     }
 
-    public function lead()
+    public function partner()
     {
-        return $this->belongsTo(Lead::class, 'lead_id', 'id');
+        return $this->belongsTo(Partner::class, 'partner_id', 'id');
     }
 
     public function createdBy()

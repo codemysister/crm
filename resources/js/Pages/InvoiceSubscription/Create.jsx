@@ -94,9 +94,9 @@ const Create = ({ usersProp, partnersProp, salesProp, signaturesProp }) => {
         xendit_link: "https://checkout.xendit.co/web/",
         created_by: null,
         signature: {
-            name: null,
-            position: null,
-            image: null,
+            name: "Hari Yuliawan",
+            position: "CTO",
+            image: "/assets/img/signatures/ttd_cto.png",
         },
     });
 
@@ -420,8 +420,6 @@ const Create = ({ usersProp, partnersProp, salesProp, signaturesProp }) => {
                                         />
                                     </div>
 
-                                    {console.log(data.total_bill)}
-
                                     <div className="flex flex-col mt-3">
                                         <label htmlFor="date">Tanggal *</label>
                                         <Calendar
@@ -594,7 +592,7 @@ const Create = ({ usersProp, partnersProp, salesProp, signaturesProp }) => {
                                         </div>
                                     )}
 
-                                    <div className="flex flex-col mt-3">
+                                    {/* <div className="flex flex-col mt-3">
                                         <label htmlFor="signature">
                                             Tanda Tangan *
                                         </label>
@@ -632,7 +630,7 @@ const Create = ({ usersProp, partnersProp, salesProp, signaturesProp }) => {
                                                 );
                                             }}
                                         />
-                                    </div>
+                                    </div> */}
 
                                     <div className="flex-flex-col mt-3">
                                         <form onSubmit={handleSubmitForm}>
@@ -1202,7 +1200,7 @@ const Create = ({ usersProp, partnersProp, salesProp, signaturesProp }) => {
                                     {data.signature.image ? (
                                         <div className="h-[100px] w-[170px] self-center py-2">
                                             <img
-                                                src={`/storage/${data.signature.image}`}
+                                                src={`${data.signature.image}`}
                                                 alt=""
                                                 className="min-h-20 w-full h-full object-fill"
                                             />

@@ -25,14 +25,13 @@ class LeadController extends Controller
         $usersProp = User::with('roles')->get();
         $statusProp = Status::where('category', 'lead')->get();
         $salesProp = User::role('account executive')->get();
-        $referralProp = User::role('referral')->get();
 
         $uuid = $request->query('detail');
         $leadDetail = null;
         if ($uuid) {
-            $leadDetail = Lead::with(['status', 'createdBy', 'sales', 'referral'])->where('uuid', '=', $uuid)->first();
+            $leadDetail = Lead::with(['status', 'createdBy', 'sales'])->where('uuid', '=', $uuid)->first();
         }
-        return Inertia::render("Lead/Index", compact('usersProp', 'leadDetail', 'statusProp', 'salesProp', 'referralProp'));
+        return Inertia::render("Lead/Index", compact('usersProp', 'leadDetail', 'statusProp', 'salesProp'));
     }
 
     public function store(LeadRequest $request)
@@ -42,7 +41,6 @@ class LeadController extends Controller
                 'uuid' => Str::uuid(),
                 'name' => $request->name,
                 'sales_id' => $request->sales['id'],
-                'referral_id' => $request->referral['id'] ?? null,
                 'pic' => $request->pic,
                 'phone_number' => $request->phone_number,
                 'address' => $request->address,
@@ -65,7 +63,6 @@ class LeadController extends Controller
         $lead->update([
             'name' => $request->name,
             'sales_id' => $request->sales['id'] ?? null,
-            'referral_id' => $request->referral['id'] ?? null,
             'pic' => $request->pic,
             'phone_number' => $request->phone_number,
             'address' => $request->address,
@@ -104,7 +101,7 @@ class LeadController extends Controller
 
     public function apiGetLeads()
     {
-        $leads = Lead::with(['status', 'createdBy', 'sales', 'referral'])
+        $leads = Lead::with(['status', 'createdBy', 'sales'])
             ->latest()
             ->get();
 
@@ -205,13 +202,13 @@ class LeadController extends Controller
 
     public function apiGetLeadArsip()
     {
-        $arsip = Lead::withTrashed()->with(['createdBy', 'status', 'sales', 'referral'])->whereNotNull('deleted_at')->get();
+        $arsip = Lead::withTrashed()->with(['createdBy', 'status', 'sales'])->whereNotNull('deleted_at')->get();
         return response()->json($arsip);
     }
 
     public function arsipFilter(Request $request)
     {
-        $arsip = Lead::withTrashed()->with(['createdBy', 'status', 'sales', 'referral'])->whereNotNull('deleted_at');
+        $arsip = Lead::withTrashed()->with(['createdBy', 'status', 'sales'])->whereNotNull('deleted_at');
 
         if ($request->user) {
             $arsip->where('created_by', '=', $request->user['id']);

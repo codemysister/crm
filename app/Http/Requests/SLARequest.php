@@ -24,13 +24,13 @@ class SLARequest extends FormRequest
         return [
             "code" => "required",
             "logo" => "required",
-            "lead.name" => "required",
-            "lead.province" => "required",
-            "lead.regency" => "required",
-            "lead.phone_number" => "required",
-            "lead.pic" => "required",
-            "lead.pic_email" => "required",
-            "lead.pic_number" => "required",
+            "partner.name" => "required",
+            "partner.province" => "required",
+            "partner.regency" => "required",
+            "partner.phone_number" => "required",
+            "partner.pic" => "required",
+            "partner.pic_email" => "required",
+            "partner.pic_number" => "required",
             "referral" => "required",
         ];
     }

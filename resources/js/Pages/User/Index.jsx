@@ -24,6 +24,8 @@ import { OverlayPanel } from "primereact/overlaypanel";
 import { Calendar } from "primereact/calendar";
 import { TabPanel, TabView } from "primereact/tabview";
 import { formateDate } from "@/Utils/formatDate";
+import LogComponent from "@/Components/LogComponent";
+import ArsipComponent from "@/Components/ArsipComponent";
 
 export default function Index({ auth }) {
     const [users, setUsers] = useState("");
@@ -40,7 +42,6 @@ export default function Index({ auth }) {
     const [preRenderLoad, setPreRenderLoad] = useState(true);
     const [modalUserIsVisible, setModalUserIsVisible] = useState(false);
     const [modalEditUserIsVisible, setModalEditUserIsVisible] = useState(false);
-    const toast = useRef(null);
     const [filters, setFilters] = useState({
         global: { value: null, matchMode: FilterMatchMode.CONTAINS },
     });
@@ -73,7 +74,7 @@ export default function Index({ auth }) {
         setData: setDataFilter,
         reset: resetFilter,
     } = useForm({
-        user: null,
+        role: null,
         input_date: { start: null, end: null },
         institution_type: null,
     });
@@ -229,23 +230,22 @@ export default function Index({ auth }) {
         e.preventDefault();
         setIsLoadingData(true);
         const formData = {
-            user: dataFilter.user,
+            role: dataFilter.role,
             input_date: dataFilter.input_date,
-            institution_type: dataFilter.institution_type,
         };
 
         const csrfToken = document
             .querySelector('meta[name="csrf-token"]')
             .getAttribute("content");
 
-        const response = await axios.post("/sph/filter", formData, {
+        const response = await axios.post("/users/filter", formData, {
             headers: {
                 "Content-Type": "application/json",
                 "X-CSRF-TOKEN": csrfToken,
             },
         });
         const data = response.data;
-        setSphs(data);
+        setUsers(data);
         setSidebarFilter(false);
         setIsLoadingData(false);
     };
@@ -268,7 +268,7 @@ export default function Index({ auth }) {
                         {!isMobile && <span>filter</span>}
                     </span>
                 </Button>
-                <Button
+                {/* <Button
                     className="shadow-md w-[10px] lg:w-[90px] bg-transparent text-slate-600 dark:bg-slate-700 dark:text-slate-300 dark:border rounded-lg"
                     onClick={exportExcel}
                     data-pr-tooltip="XLS"
@@ -280,7 +280,7 @@ export default function Index({ auth }) {
                         ></i>{" "}
                         {!isMobile && <span>export</span>}
                     </span>
-                </Button>
+                </Button> */}
             </HeaderDatatable>
         );
     };
@@ -391,6 +391,21 @@ export default function Index({ auth }) {
         });
     };
 
+    const objectKeyToIndo = (key) => {
+        let keyIndo;
+        if (key == "name") {
+            keyIndo = "Nama";
+        } else if (key == "email") {
+            keyIndo = "Email";
+        } else if (key == "phone_number") {
+            keyIndo = "Nomor Telepon";
+        } else if (key == "role") {
+            keyIndo = "Role";
+        }
+
+        return keyIndo;
+    };
+
     if (preRenderLoad) {
         return <SkeletonDatatable auth={auth} />;
     }
@@ -398,7 +413,6 @@ export default function Index({ auth }) {
     return (
         <DashboardLayout auth={auth.user} className="">
             <Toast ref={toast} />
-            <ConfirmDialog />
 
             {/* Sidebar filter */}
             <Sidebar
@@ -410,40 +424,21 @@ export default function Index({ auth }) {
             >
                 <form onSubmit={handleFilter}>
                     <div className="flex flex-col mt-3">
-                        <label htmlFor="name">Berdasarkan penginput</label>
+                        <label htmlFor="name">Berdasarkan role</label>
                         <Dropdown
                             optionLabel="name"
                             dataKey="id"
-                            value={dataFilter.user}
+                            value={dataFilter.role}
                             onChange={(e) =>
-                                setDataFilter("user", e.target.value)
+                                setDataFilter("role", e.target.value)
                             }
-                            options={users}
-                            placeholder="Pilih User"
+                            options={roles}
+                            placeholder="Pilih Role"
                             filter
                             showClear
                             valueTemplate={selectedOptionTemplate}
                             itemTemplate={optionTemplate}
                             className="flex justify-center  dark:text-gray-400   "
-                        />
-                    </div>
-
-                    <div className="flex flex-col mt-3">
-                        <label htmlFor="institution_type">Tipe Lembaga</label>
-                        <Dropdown
-                            value={dataFilter.institution_type}
-                            onChange={(e) =>
-                                setDataFilter(
-                                    "institution_type",
-                                    e.target.value
-                                )
-                            }
-                            showClear
-                            options={[{ name: "Lead" }, { name: "Partner" }]}
-                            optionLabel="name"
-                            optionValue="name"
-                            placeholder="Pilih tipe"
-                            className="w-full md:w-14rem"
                         />
                     </div>
 
@@ -597,7 +592,7 @@ export default function Index({ auth }) {
                                             currentPageReportTemplate="{first} - {last} dari {totalRecords}"
                                             filters={filters}
                                             rows={10}
-                                            emptyMessage="Surat penawaran harga tidak ditemukan."
+                                            emptyMessage="User tidak ditemukan."
                                             paginatorClassName="dark:bg-transparent paginator-custome dark:text-gray-300 rounded-b-lg"
                                             header={header}
                                             globalFilterFields={
@@ -663,9 +658,9 @@ export default function Index({ auth }) {
                     {activeIndexTab == 1 && (
                         <LogComponent
                             auth={auth}
-                            fetchUrl={"/api/sph/logs"}
-                            filterUrl={"/sph/logs/filter"}
-                            deleteUrl={"/sph/logs"}
+                            fetchUrl={"/api/users/logs"}
+                            filterUrl={"/users/logs/filter"}
+                            deleteUrl={"/users/logs"}
                             objectKeyToIndo={objectKeyToIndo}
                             users={users}
                             showSuccess={showSuccess}
@@ -679,10 +674,10 @@ export default function Index({ auth }) {
                         <ArsipComponent
                             auth={auth}
                             users={users}
-                            fetchUrl={"/api/sph/arsip"}
-                            forceDeleteUrl={"/sph/{id}/force"}
-                            restoreUrl={"/sph/{id}/restore"}
-                            filterUrl={"/sph/arsip/filter"}
+                            fetchUrl={"/api/users/arsip"}
+                            forceDeleteUrl={"/users/{id}/force"}
+                            restoreUrl={"/users/{id}/restore"}
+                            filterUrl={"/users/arsip/filter"}
                             columns={columns}
                             showSuccess={showSuccess}
                             showError={showError}

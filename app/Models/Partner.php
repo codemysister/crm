@@ -16,7 +16,7 @@ use Spatie\Permission\Traits\HasRoles;
 
 class Partner extends Authenticatable
 {
-    use HasApiTokens, HasFactory, Notifiable, HasRoles, SoftDeletes, LogsActivity;
+    use HasFactory, SoftDeletes, LogsActivity;
 
     protected $guarded = [];
 
@@ -104,7 +104,7 @@ class Partner extends Authenticatable
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()
-            ->logOnly(['name', 'npwp', 'password', 'phone_number', 'status.name', 'status.color', 'pic.name', 'bank.bank', 'bank.account_bank_name', 'bank.account_bank_number', 'sales.name', 'referral.name', 'account_manager.name', 'onboarding_date', 'live_date', 'monitoring_date_after_3_month_live', 'province', 'regency', 'address', 'payment_metode', 'period'])
+            ->logOnly(['name', 'npwp', 'password', 'phone_number', 'status.name', 'status.color', 'pic.name', 'bank.bank', 'bank.account_bank_name', 'bank.account_bank_number', 'sales.name', 'account_manager.name', 'onboarding_date', 'live_date', 'monitoring_date_after_3_month_live', 'province', 'regency', 'address', 'payment_metode', 'period'])
             ->dontLogIfAttributesChangedOnly(['deleted_at', 'updated_at'])
             ->setDescriptionForEvent(function (string $eventName) {
                 $modelName = class_basename($this);
@@ -130,10 +130,7 @@ class Partner extends Authenticatable
     {
         return $this->belongsTo(User::class, 'sales_id', 'id');
     }
-    public function referral()
-    {
-        return $this->belongsTo(User::class, 'referral_id', 'id');
-    }
+
     public function account_manager()
     {
         return $this->belongsTo(User::class, 'account_manager_id', 'id');
@@ -142,17 +139,17 @@ class Partner extends Authenticatable
 
     public function pic()
     {
-        return $this->hasOne(PartnerPIC::class, 'partner_id', 'id');
+        return $this->hasOne(PartnerPIC::class);
     }
 
     public function bank()
     {
-        return $this->hasOne(PartnerBank::class, 'partner_id', 'id');
+        return $this->hasOne(PartnerBank::class);
     }
 
     public function account()
     {
-        return $this->hasOne(PartnerAccountSetting::class, 'partner_id', 'id');
+        return $this->hasOne(PartnerAccountSetting::class);
     }
 
     public function subscription()
@@ -167,15 +164,12 @@ class Partner extends Authenticatable
 
     public function sph()
     {
-        return $this->hasOne(SPH::class, 'partner_id', 'id')->withTrashed();
+        return $this->hasOne(SPH::class)->withTrashed();
     }
-    public function memo()
-    {
-        return $this->hasOne(Memo::class, 'partner_id', 'id')->withTrashed();
-    }
+
     public function mou()
     {
-        return $this->hasOne(MOU::class, 'partner_id', 'id')->withTrashed();
+        return $this->hasOne(MOU::class)->withTrashed();
     }
 
     public function status()

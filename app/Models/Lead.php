@@ -128,10 +128,6 @@ class Lead extends Model
         return $this->belongsTo(User::class, 'sales_id', 'id');
     }
 
-    public function referral()
-    {
-        return $this->belongsTo(User::class, 'referral_id', 'id');
-    }
 
     public function status()
     {
@@ -143,10 +139,6 @@ class Lead extends Model
         return $this->hasOne(SPH::class, 'lead_id', 'id')->withTrashed();
     }
 
-    public function memo()
-    {
-        return $this->hasOne(Memo::class, 'lead_id', 'id')->withTrashed();
-    }
 
     public function mou()
     {

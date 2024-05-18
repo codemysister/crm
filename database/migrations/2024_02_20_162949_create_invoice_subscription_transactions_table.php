@@ -14,7 +14,7 @@ return new class extends Migration {
             $table->id();
             $table->uuid('uuid');
             $table->foreignId('invoice_id')->constrained('invoice_subscriptions', 'id')->onDelete('cascade');
-            $table->foreignId('partner_id')->constrained('partners', 'id')->onDelete('cascade');
+            $table->foreignId('partner_id')->constrained()->onDelete('cascade');
             $table->string('code')->default("KW/0001/XI/2024");
             $table->string('partner_name');
             $table->date('date');

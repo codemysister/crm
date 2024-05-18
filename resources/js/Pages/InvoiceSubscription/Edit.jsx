@@ -591,7 +591,7 @@ const Edit = ({
                                         </div>
                                     )}
 
-                                    <div className="flex flex-col mt-3">
+                                    {/* <div className="flex flex-col mt-3">
                                         <label htmlFor="signature">
                                             Tanda Tangan *
                                         </label>
@@ -629,7 +629,7 @@ const Edit = ({
                                                 );
                                             }}
                                         />
-                                    </div>
+                                    </div> */}
 
                                     <div className="flex-flex-col mt-3">
                                         <form onSubmit={handleSubmitForm}>
@@ -1192,7 +1192,7 @@ const Edit = ({
                                     {data.signature.image ? (
                                         <div className="h-[100px] w-[170px] self-center py-2">
                                             <img
-                                                src={`/storage/${data.signature.image}`}
+                                                src={`${data.signature.image}`}
                                                 alt=""
                                                 className="min-h-20 w-full h-full object-fill"
                                             />

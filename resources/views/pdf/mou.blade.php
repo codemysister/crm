@@ -185,7 +185,8 @@
                                                     b.
                                                 </td>
                                                 <td>
-                                                    Aplikasi <i>Mobile</i> Kartu Digital bernama <b>“CARDS Kartu Digital”</b>
+                                                    Aplikasi <i>Mobile</i> Kartu Digital bernama <b>“CARDS Kartu
+                                                        Digital”</b>
                                                     yang
                                                     dapat diunduh untuk pengguna sistem operasi Android maupun iOS.
                                                 </td>
@@ -195,7 +196,8 @@
                                                     c.
                                                 </td>
                                                 <td>
-                                                    Aplikasi <i>Mobile</i> Kasir Digital bernama <b>“CAZH POS”</b> dan/atau
+                                                    Aplikasi <i>Mobile</i> Kasir Digital bernama <b>“CAZH POS”</b>
+                                                    dan/atau
                                                     “CAZH POS
                                                     Lite” yang dapat diunduh untuk pengguna sistem operasi Android.
                                                 </td>
@@ -1148,27 +1150,30 @@
 
             </div>
             <div class="px-8 flex flex-row mt-5 justify-between">
-    <div  style="width:40%; height: 30%;">
-        <p>
-            Pihak Pertama,
-        </p>
-        <div style="width: 170px; height: 100px; overflow: hidden;" class="py-2">
-            <img class="w-full h-full object-fit-cover" style="object-fit: fill; width:100%; height:100%;" src='{{ public_path("/storage/$mou->signature_image") }}' />
-        </div>
-        <p><b>{{$mou->signature_name}}</b></p>
-    </div>
-    <div  style="width:40%; height: 30%;">
-        <p>Pihak Kedua</p>
-        @if($mou->partner_pic_signature)
-        <div style="width: 170px; height: 100px; overflow: hidden;" class="py-2">
-            <img src='{{ public_path("storage/$mou->partner_pic_signature") }}' alt="" class="min-h-20 w-full h-full object-fit-cover" style="object-fit: fill; width:100%; height:100%;" />
+                <div style="width:40%; height: 30%;">
+                    <p>
+                        Pihak Pertama,
+                    </p>
+                    <div style="width: 170px; height: 100px; overflow: hidden;" class="py-2">
+                        <img class="w-full h-full object-fit-cover" style="object-fit: fill; width:100%; height:100%;"
+                            src='{{ public_path("$mou->signature_image") }}' />
+                    </div>
+                    <p><b>{{$mou->signature_name}}</b></p>
+                </div>
+                <div style="width:40%; height: 30%;">
+                    <p>Pihak Kedua</p>
+                    @if($mou->partner_pic_signature)
+                        <div style="width: 170px; height: 100px; overflow: hidden;" class="py-2">
+                            <img src='{{ public_path("/storage/$mou->partner_pic_signature") }}' alt=""
+                                class="min-h-20 w-full h-full object-fit-cover"
+                                style="object-fit: fill; width:100%; height:100%;" />
+                        </div>
+                    @else
+                        <div style="min-height: 100px"></div>
+                    @endif
+                    <p><b>{{$mou->partner_pic}}</b></p>
+                </div>
             </div>
-        @else
-        <div style="min-height: 100px"></div>
-        @endif
-        <p><b>{{$mou->partner_pic}}</b></p>
-    </div>
-</div>
 
 
 

@@ -396,7 +396,7 @@ const Index = ({ auth }) => {
             <ConfirmDialog />
 
             <HeaderModule title="Role & Perizinan">
-                <Menu
+                {/* <Menu
                     model={items}
                     popup
                     ref={menuRight}
@@ -413,7 +413,7 @@ const Index = ({ auth }) => {
                         aria-controls="popup_menu_right"
                         aria-haspopup
                     />
-                )}
+                )} */}
             </HeaderModule>
 
             {/* Modal role */}
@@ -523,7 +523,7 @@ const Index = ({ auth }) => {
                 </Dialog>
             </div>
 
-            <div className="flex mx-auto flex-col justify-center mt-5 gap-5">
+            {/* <div className="flex mx-auto flex-col justify-center mt-5 gap-5">
                 {permissionAuth.includes("lihat role") && (
                     <div className="card p-fluid w-full h-full flex justify-center">
                         <DataTable
@@ -663,7 +663,7 @@ const Index = ({ auth }) => {
                         </DataTable>
                     </div>
                 )}
-            </div>
+            </div> */}
 
             {permissionAuth.includes("setting role permission") && (
                 <div className="flex h-[80%] mx-auto my-5">

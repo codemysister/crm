@@ -1,36 +1,61 @@
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import DeleteUserForm from './Partials/DeleteUserForm';
-import UpdatePasswordForm from './Partials/UpdatePasswordForm';
-import UpdateProfileInformationForm from './Partials/UpdateProfileInformationForm';
-import { Head } from '@inertiajs/react';
+import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
+import DeleteUserForm from "./Partials/DeleteUserForm";
+import UpdatePasswordForm from "./Partials/UpdatePasswordForm";
+import UpdateProfileInformationForm from "./Partials/UpdateProfileInformationForm";
+import { Head } from "@inertiajs/react";
+import DashboardLayout from "@/Layouts/DashboardLayout";
+import HeaderModule from "@/Components/HeaderModule";
+import { useRef } from "react";
+import { Toast } from "primereact/toast";
 
 export default function Edit({ auth, mustVerifyEmail, status }) {
-    return (
-        <AuthenticatedLayout
-            user={auth.user}
-            header={<h2 className="font-semibold text-xl text-gray-800 leading-tight">Profile</h2>}
-        >
-            <Head title="Profile" />
+    const toast = useRef(null);
 
-            <div className="py-12">
-                <div className="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
-                    <div className="p-4 sm:p-8 bg-white shadow sm:rounded-lg">
+    const showSuccess = (type) => {
+        toast.current.show({
+            severity: "success",
+            summary: "Success",
+            detail: `${type} data berhasil`,
+            life: 3000,
+        });
+    };
+
+    const showError = (type) => {
+        toast.current.show({
+            severity: "error",
+            summary: "Error",
+            detail: `${type} data gagal`,
+            life: 3000,
+        });
+    };
+
+    return (
+        <DashboardLayout auth={auth.user}>
+            <Head title="Profile" />
+            <HeaderModule title="Profile"></HeaderModule>
+            <Toast ref={toast} />
+
+            <div className="mt-4">
+                <div className="flex flex-col md:flex-row items-center gap-4 ">
+                    <div className="w-full lg:w-1/2 p-4 sm:p-6 bg-white shadow sm:rounded-lg">
                         <UpdateProfileInformationForm
                             mustVerifyEmail={mustVerifyEmail}
                             status={status}
-                            className="max-w-xl"
+                            showSuccess={showSuccess}
+                            showError={showError}
+                            className="max-w-xl h-fit lg:h-[63vh] overflow-y-scroll pr-4"
                         />
                     </div>
 
-                    <div className="p-4 sm:p-8 bg-white shadow sm:rounded-lg">
-                        <UpdatePasswordForm className="max-w-xl" />
-                    </div>
-
-                    <div className="p-4 sm:p-8 bg-white shadow sm:rounded-lg">
-                        <DeleteUserForm className="max-w-xl" />
+                    <div className="w-full lg:w-1/2 p-4 sm:p-6 bg-white shadow sm:rounded-lg">
+                        <UpdatePasswordForm
+                            showSuccess={showSuccess}
+                            showError={showError}
+                            className="max-w-xl h-fit lg:h-[63vh]"
+                        />
                     </div>
                 </div>
             </div>
-        </AuthenticatedLayout>
+        </DashboardLayout>
     );
 }

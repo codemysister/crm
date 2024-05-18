@@ -74,14 +74,12 @@ class LeadsImport implements ToCollection, SkipsEmptyRows, WithValidation, WithS
                 }
 
                 $sales = User::where('name', $row['sales'])->first();
-                $referral = User::where('name', $row['referral'])->first();
 
                 $prospekStatus = Status::where('name', 'prospek')->first();
                 $lead = Lead::create([
                     'uuid' => Str::uuid(),
                     'name' => $row['lembaga'],
                     'sales_id' => $sales->id,
-                    'referral_id' => $referral->id ?? null,
                     'pic' => $row['pic_partner'],
                     'phone_number' => $row['nomor_telepon_lembaga'],
                     'address' => $row['alamat'],

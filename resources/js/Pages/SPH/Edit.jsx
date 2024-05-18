@@ -335,6 +335,38 @@ const Edit = ({
                                     </div>
 
                                     <div className="flex flex-col mt-3">
+                                        <label htmlFor="lembaga">
+                                            Lembaga *
+                                        </label>
+                                        <InputText
+                                            value={data.partner.name}
+                                            onFocus={() => {
+                                                triggerInputFocus(
+                                                    animatePartnerNameRef
+                                                );
+                                            }}
+                                            onBlur={() => {
+                                                stopAnimateInputFocus(
+                                                    animatePartnerNameRef
+                                                );
+                                            }}
+                                            onClick={() => {
+                                                setDialogInstitutionVisible(
+                                                    true
+                                                );
+                                            }}
+                                            placeholder="Pilih lembaga"
+                                            className="dark:bg-gray-300 cursor-pointer"
+                                            id="partner"
+                                            aria-describedby="partner-help"
+                                        />
+                                        <InputError
+                                            message={errors["partner.name"]}
+                                            className="mt-2"
+                                        />
+                                    </div>
+
+                                    <div className="flex flex-col mt-3">
                                         <label htmlFor="partner_pic">
                                             PIC *
                                         </label>
@@ -364,38 +396,6 @@ const Edit = ({
                                                     animatePartnerRegencyRef
                                                 );
                                             }}
-                                        />
-                                    </div>
-
-                                    <div className="flex flex-col mt-3">
-                                        <label htmlFor="lembaga">
-                                            Lembaga *
-                                        </label>
-                                        <InputText
-                                            value={data.partner.name}
-                                            onFocus={() => {
-                                                triggerInputFocus(
-                                                    animatePartnerNameRef
-                                                );
-                                            }}
-                                            onBlur={() => {
-                                                stopAnimateInputFocus(
-                                                    animatePartnerNameRef
-                                                );
-                                            }}
-                                            onClick={() => {
-                                                setDialogInstitutionVisible(
-                                                    true
-                                                );
-                                            }}
-                                            placeholder="Pilih lembaga"
-                                            className="dark:bg-gray-300 cursor-pointer"
-                                            id="partner"
-                                            aria-describedby="partner-help"
-                                        />
-                                        <InputError
-                                            message={errors["partner.name"]}
-                                            className="mt-2"
                                         />
                                     </div>
 
@@ -601,7 +601,7 @@ const Edit = ({
                                             className="mt-2"
                                         />
                                     </div>
-                                    <div className="flex flex-col mt-3">
+                                    {/* <div className="flex flex-col mt-3">
                                         <label htmlFor="signature">
                                             Tanda Tangan *
                                         </label>
@@ -648,7 +648,7 @@ const Edit = ({
                                             message={errors["signature.image"]}
                                             className="mt-2"
                                         />
-                                    </div>
+                                    </div> */}
 
                                     <div className="flex-flex-col mt-3">
                                         <form onSubmit={handleSubmitForm}>
@@ -1081,7 +1081,7 @@ const Edit = ({
                                 </p>
                                 <div className="h-[100px] w-[170px] self-start py-2">
                                     <img
-                                        src={"/storage/" + data.signature.image}
+                                        src={data.signature.image}
                                         alt=""
                                         className="object-fill w-full h-full"
                                     />

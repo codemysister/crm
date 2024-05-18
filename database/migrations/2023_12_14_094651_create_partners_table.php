@@ -13,14 +13,15 @@ return new class extends Migration {
         Schema::create('partners', function (Blueprint $table) {
             $table->id();
             $table->uuid('uuid');
+            $table->foreignId('user_id')->nullable()->constrained('users', 'id')->onDelete('cascade');
             $table->foreignId('created_by')->nullable()->constrained('users', 'id')->onDelete('cascade');
             $table->foreignId('status_id')->constrained('statuses', 'id')->onDelete('cascade');
             $table->foreignId('sales_id')->nullable()->constrained('users', 'id')->onDelete('cascade');
             $table->foreignId('account_manager_id')->nullable()->constrained('users', 'id')->onDelete('cascade');
-            $table->foreignId('referral_id')->nullable()->constrained('users', 'id')->onDelete('cascade');
             $table->string('name')->unique();
             $table->integer('total_members')->default(0);
             $table->string('npwp')->nullable();
+            $table->string('email')->nullable();
             $table->string('password')->nullable();
             $table->string('logo')->nullable();
             $table->string('phone_number')->nullable();

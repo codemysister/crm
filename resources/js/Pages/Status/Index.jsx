@@ -337,9 +337,10 @@ export default function Index({ auth }) {
                                             header="Aksi"
                                             body={actionBodyTemplate}
                                             style={{
-                                                width: "max-content",
+                                                width: "1%",
                                                 whiteSpace: "nowrap",
                                             }}
+                                            align="center"
                                             className="dark:border-none"
                                             headerClassName="dark:border-none  bg-transparent dark:bg-transparent dark:text-gray-300"
                                         ></Column>
@@ -362,7 +363,7 @@ export default function Index({ auth }) {
                                             header="Nama"
                                             align="left"
                                             style={{
-                                                width: "max-content",
+                                                width: "25%",
                                                 whiteSpace: "nowrap",
                                             }}
                                         ></Column>
@@ -373,7 +374,7 @@ export default function Index({ auth }) {
                                             header="Kategori"
                                             align="left"
                                             style={{
-                                                width: "max-content",
+                                                width: "25%",
                                                 whiteSpace: "nowrap",
                                             }}
                                         ></Column>
@@ -395,7 +396,7 @@ export default function Index({ auth }) {
                                                 );
                                             }}
                                             style={{
-                                                width: "max-content",
+                                                width: "25%",
                                                 whiteSpace: "nowrap",
                                             }}
                                         ></Column>

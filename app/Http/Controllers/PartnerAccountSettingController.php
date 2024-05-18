@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
+use Spatie\Activitylog\Models\Activity;
 
 class PartnerAccountSettingController extends Controller
 {
@@ -34,7 +35,6 @@ class PartnerAccountSettingController extends Controller
             'subdomain' => $request->subdomain,
             'email_super_admin' => $request->email_super_admin,
             'cas_link_partner' => $request->cas_link_partner,
-            'card_number' => $request->card_number,
             'created_by' => Auth::user()->id
         ]);
     }
@@ -46,7 +46,6 @@ class PartnerAccountSettingController extends Controller
             'subdomain' => $request->subdomain,
             'email_super_admin' => $request->email_super_admin,
             'cas_link_partner' => $request->cas_link_partner,
-            'card_number' => $request->card_number,
         ]);
     }
 
@@ -70,6 +69,19 @@ class PartnerAccountSettingController extends Controller
 
         return response()->json($accounts);
     }
+
+    public function apiGetLogs($partner_id)
+    {
+        $logs = Activity::with(['causer', 'subject'])
+            ->whereHasMorph('subject', [PartnerAccountSetting::class], function ($query) use ($partner_id) {
+                $query->where('partner_id', $partner_id);
+            })
+            ->latest()
+            ->get();
+
+        return response()->json($logs);
+    }
+
 
 
     public function destroy($uuid)

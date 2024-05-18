@@ -53,10 +53,10 @@
                     <h2 class="font-bold">TIME LINE PROSES IMPLEMENTASI LAYANAN CAZH CARDS</h2>
                 </div>
                 <div class="w-[10%]" style="width:10%">
-                @if($sla->referral_logo !== null)
-                <img src="{{ public_path("storage/$sla->referral_logo") }}" alt="" class="float-left w-full h-full"
-                        style="width: 100%; height: 100%; object-fit: cover;" />
-                @endif
+                    @if($sla->referral_logo !== null)
+                        <img src="{{ public_path("storage/$sla->referral_logo") }}" alt="" class="float-left w-full h-full"
+                            style="width: 100%; height: 100%; object-fit: cover;" />
+                    @endif
                 </div>
             </div>
         </header>
@@ -69,22 +69,22 @@
                     <tr>
                         <td class="w-1/6">Nama Lembaga</td>
                         <td style="width: 1%">:</td>
-                        <td class="w-7/12">{{$sla->lead_name}}
+                        <td class="w-7/12">{{$sla->partner_name}}
 
                         </td>
                     </tr>
                     <tr>
                         <td class="w-1/6">Alamat Lembaga</td>
                         <td style="width: 1%">:</td>
-                        <td class="w-7/12">{{json_decode($sla->lead_regency)->name}},
-                            {{json_decode($sla->lead_province)->name}}
+                        <td class="w-7/12">{{json_decode($sla->partner_regency)->name}},
+                            {{json_decode($sla->partner_province)->name}}
 
                         </td>
                     </tr>
                     <tr>
                         <td class="w-1/6">Nomor Telepon Lembaga</td>
                         <td style="width: 1%">:</td>
-                        <td class="w-7/12">{{$sla->lead_phone_number}}
+                        <td class="w-7/12">{{$sla->partner_phone_number}}
 
                         </td>
                     </tr>
@@ -92,21 +92,21 @@
                     <tr>
                         <td class="w-1/6">Penanggungjawab</td>
                         <td style="width: 1%">:</td>
-                        <td class="w-7/12">{{$sla->lead_pic}}
+                        <td class="w-7/12">{{$sla->partner_pic}}
 
                         </td>
                     </tr>
                     <tr>
                         <td class="w-1/6">Email Penanggungjawab</td>
                         <td style="width: 1%">:</td>
-                        <td class="w-7/12">{{$sla->lead_pic_email}}
+                        <td class="w-7/12">{{$sla->partner_pic_email}}
 
                         </td>
                     </tr>
                     <tr>
                         <td class="w-1/6">Nomor HP Penanggungjawab</td>
                         <td style="width: 1%">:</td>
-                        <td class="w-7/12">{{$sla->lead_pic_number}}
+                        <td class="w-7/12">{{$sla->partner_pic_number}}
 
                         </td>
                     </tr>
@@ -127,24 +127,24 @@
                 <tbody>
 
                     @foreach($activities as $activity)
-                    <tr>
-                        <td class="border text-center">{{$loop->index + 1}}</td>
-                        <td class="border w-[30%] p-1" style="width:30%">{{$activity["activity"]}}</td>
-                        <td class="border w-[15%] text-center italic p-1" style="width:15%">
-                            {{ucwords($activity["cazh_pic"]['name'] ?? $activity["cazh_pic"])}}
-                        </td>
+                                    <tr>
+                                        <td class="border text-center">{{$loop->index + 1}}</td>
+                                        <td class="border w-[30%] p-1" style="width:30%">{{$activity["activity"]}}</td>
+                                        <td class="border w-[15%] text-center italic p-1" style="width:15%">
+                                            {{ucwords($activity["cazh_pic"]['name'] ?? $activity["cazh_pic"])}}
+                                        </td>
 
-                        <td class="border w-[25%] text-center p-1" style="width:20%">{{$activity["duration"]}}</td>
-                        <td class="border w-[15%] text-right p-1" style="width:15%">
-                            {{date('j M Y', strtotime($activity["estimation_date"]))}}
-                        </td>
-                        <td class="border w-[15%] text-right p-1" style="width:15%">{{$activity["realization_date"] ?
-        date(
-            'j M Y',
-            strtotime($activity["realization_date"])
-        ) : ''}}</td>
+                                        <td class="border w-[25%] text-center p-1" style="width:20%">{{$activity["duration"]}}</td>
+                                        <td class="border w-[15%] text-right p-1" style="width:15%">
+                                            {{date('j M Y', strtotime($activity["estimation_date"]))}}
+                                        </td>
+                                        <td class="border w-[15%] text-right p-1" style="width:15%">{{$activity["realization_date"] ?
+                        date(
+                            'j M Y',
+                            strtotime($activity["realization_date"])
+                        ) : ''}}</td>
 
-                    </tr>
+                                    </tr>
                     @endforeach
 
                 </tbody>
@@ -157,40 +157,40 @@
             <div class="w-[30%]" style="width: 30%; height: 30%;">
                 <p>Pihak Pertama</p>
                 <div style="width: 170px; height: 100px; overflow: hidden;" class="py-2">
-                @if($sla->signature_name)
-                <img src="{{ public_path("storage/$sla->signature_image") }}" alt="" class="min-h-20 w-full"
-                    style="object-fit: fill; width: 100%; height: 100%;" />
-                @endif
-            </div>
+                    @if($sla->signature_name)
+                        <img src="{{ public_path("$sla->signature_image") }}" alt="" class="min-h-20 w-full"
+                            style="object-fit: fill; width: 100%; height: 100%;" />
+                    @endif
+                </div>
                 <p>{{$sla->signature_name}}</p>
             </div>
             <div class="w-[30%]" style="width: 30%; height: 30%;">
                 <p>Pihak Kedua</p>
-                @if($sla->lead_pic_signature)
-                <div style="width: 170px; height: 100px; overflow: hidden;" class="py-2">
-                <img src='{{ public_path("storage/$sla->lead_pic_signature") }}' alt="" class="min-h-20 w-full"
-                    style="object-fit: fill; width: 100%; height: 100%;" />
-                </div>
-                <p>{{$sla->lead_pic}}</p>
+                @if($sla->partner_pic_signature)
+                    <div style="width: 170px; height: 100px; overflow: hidden;" class="py-2">
+                        <img src='{{ public_path("$sla->partner_pic_signature") }}' alt="" class="min-h-20 w-full"
+                            style="object-fit: fill; width: 100%; height: 100%;" />
+                    </div>
+                    <p>{{$sla->partner_pic}}</p>
                 @else
-                <div style="min-height: 100px"></div>
-                <p>{{$sla->lead_pic}}</p>
+                    <div style="min-height: 100px"></div>
+                    <p>{{$sla->partner_pic}}</p>
                 @endif
 
             </div>
             @if($sla->referral)
-            <div class="w-[30%]" style="width: 30%; height: 30%;">
-                <p>Pihak Ketiga</p>
-                @if($sla->referral_signature)
-                <div style="width: 170px; height: 100px; overflow: hidden;" class="py-2">
-                <img src='{{ public_path("storage/$sla->referral_signature") }}' alt="" class="min-h-20 w-full"
-                style="object-fit: fill; width: 100%; height: 100%;" />
+                <div class="w-[30%]" style="width: 30%; height: 30%;">
+                    <p>Pihak Ketiga</p>
+                    @if($sla->referral_signature)
+                        <div style="width: 170px; height: 100px; overflow: hidden;" class="py-2">
+                            <img src='{{ public_path("storage/$sla->referral_signature") }}' alt="" class="min-h-20 w-full"
+                                style="object-fit: fill; width: 100%; height: 100%;" />
+                        </div>
+                    @else
+                        <div style="min-height: 100px"></div>
+                    @endif
+                    <p>{{$sla->referral_name}}</p>
                 </div>
-                @else
-                <div style="min-height: 100px"></div>
-                @endif
-                <p>{{$sla->referral_name}}</p>
-            </div>
             @endif
         </div>
     </div>

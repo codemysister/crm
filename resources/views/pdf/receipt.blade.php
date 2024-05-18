@@ -113,10 +113,9 @@
     ) }}</p>
                 <div style="width: 170px; height: 100px; overflow: hidden;" class="py-2">
 
-                <img class="h-20 w-[15%]" style="width:100%; height:100%;object-fit:fill;" src="{{ public_path("/storage/$receipt->signature_image")
-                }}"
-                alt="Signature">
-            </div>
+                    <img class="h-20 w-[15%]" style="width:100%; height:100%;object-fit:fill;" src="{{ public_path("$receipt->signature_image")
+                }}" alt="Signature">
+                </div>
                 <div class="text-sm">{{$receipt->signature_name}}</div>
                 <div></div>
             </div>

@@ -63,7 +63,7 @@ class InvoiceGeneralTransactionController extends Controller
     {
         $path = "kwitansi/kwitansi-" . $receipt->uuid . ".pdf";
 
-        $receipt->receipt_doc = $path;
+        $receipt->receipt_doc = "/storage/" . $path;
 
         $html = view('pdf.receipt', ["receipt" => $receipt])->render();
 
@@ -75,7 +75,6 @@ class InvoiceGeneralTransactionController extends Controller
             ->footerHtml('<div style="text-align: left; font-size: 10px; width:100%; margin-left: 2.5cm; margin-bottom: 1cm;">*) Harga produk/layanan tidak termasuk biaya admin transaksi <span style="font-style:italic;">user</span> aplikasi <span style="font-style:italic;">mobile</span>.</div>')
             ->pdf();
 
-
         Storage::put("public/$path", $pdf);
 
         return $receipt;
@@ -84,23 +83,23 @@ class InvoiceGeneralTransactionController extends Controller
     public function store(InvoiceGeneralTransactionRequest $request)
     {
 
+        $invoice_general = InvoiceGeneral::with('transactions')->where('uuid', '=', $request->invoice_general)->first();
+
+        $rest_of_bill = $this->calculateRestOfBill($invoice_general);
+
+        if ($rest_of_bill < $request->nominal) {
+            return response()->json(['error' => 'Pembayaran melebihi sisa tagihan']);
+        }
+        $rest_of_bill = $rest_of_bill - $request->nominal;
+
+        $status = Status::where('category', 'invoice');
+        if ($rest_of_bill != 0) {
+            $status = $status->where('name', 'sebagian')->first();
+        } else {
+            $status = $status->where('name', 'lunas')->first();
+        }
+
         try {
-            $invoice_general = InvoiceGeneral::with('transactions')->where('uuid', '=', $request->invoice_general)->first();
-
-            $rest_of_bill = $this->calculateRestOfBill($invoice_general);
-
-            if ($rest_of_bill < $request->nominal) {
-                return response()->json(['error' => 'Pembayaran melebihi sisa tagihan']);
-            }
-            $rest_of_bill = $rest_of_bill - $request->nominal;
-
-            $status = Status::where('category', 'invoice');
-            if ($rest_of_bill != 0) {
-                $status = $status->where('name', 'sebagian')->first();
-            } else {
-                $status = $status->where('name', 'lunas')->first();
-            }
-
             $transaction = new InvoiceGeneralTransaction();
             $transaction->uuid = Str::uuid();
             $transaction->code = $this->generateCode();
@@ -112,15 +111,15 @@ class InvoiceGeneralTransactionController extends Controller
             $transaction->money = $request->money;
             $transaction->metode = $request->metode['name'];
             $transaction->payment_for = $request->payment_for;
-            $transaction->signature_name = $request->signature['name'];
-            $transaction->signature_image = $request->signature['image'];
+            $transaction->signature_name = "Muh Arif Mahfudin";
+            $transaction->signature_image = "/assets/img/signatures/ttd.png";
             $transaction->created_by = Auth::user()->id;
             $transaction = $this->generateReceipt($transaction);
             $transaction->save();
 
             Activity::create([
                 'log_name' => 'payment',
-                'description' => Auth::user()->name . ' menambah pembayaran Invoice Umum',
+                'description' => Auth::user()->name . ' menambah pembayaran invoice umum',
                 'subject_type' => get_class($transaction),
                 'subject_id' => $transaction->id,
                 'causer_type' => get_class(Auth::user()),
@@ -128,6 +127,7 @@ class InvoiceGeneralTransactionController extends Controller
                 "event" => "payment",
                 'properties' => ["attributes" => ["code" => $invoice_general->code, "partner_name" => $transaction->partner_name, "date" => $transaction->date, "nominal" => $transaction->nominal, "money" => $transaction->money, 'method' => $transaction->method, 'payment_for' => $transaction->payment_for, 'signature_name' => $transaction->signature_name]]
             ]);
+
 
             $invoice_general->update(['rest_of_bill' => $rest_of_bill, 'status_id' => $status->id, 'bill_date' => Carbon::parse($request->date)->setTimezone('GMT+7')->format('Y-m-d H:i:s')]);
 

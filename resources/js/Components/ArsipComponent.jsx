@@ -24,6 +24,7 @@ import { useState } from "react";
 
 const ArsipComponent = ({
     auth,
+    noFilter,
     users,
     showSuccess,
     showError,
@@ -102,18 +103,20 @@ const ArsipComponent = ({
     const headerArsip = () => {
         return (
             <HeaderDatatable filters={filters} setFilters={setFilters}>
-                <Button
-                    className="shadow-md w-[10px] lg:w-[90px] border border-slate-600 bg-transparent text-slate-600 dark:bg-slate-700 dark:text-slate-300 rounded-lg"
-                    onClick={() => setSidebarFilter(true)}
-                >
-                    <span className="w-full flex justify-center items-center gap-1">
-                        <i
-                            className="pi pi-filter"
-                            style={{ fontSize: "0.7rem" }}
-                        ></i>{" "}
-                        {!isMobile && <span>filter</span>}
-                    </span>
-                </Button>
+                {noFilter != true && (
+                    <Button
+                        className="shadow-md w-[10px] lg:w-[90px] border border-slate-600 bg-transparent text-slate-600 dark:bg-slate-700 dark:text-slate-300 rounded-lg"
+                        onClick={() => setSidebarFilter(true)}
+                    >
+                        <span className="w-full flex justify-center items-center gap-1">
+                            <i
+                                className="pi pi-filter"
+                                style={{ fontSize: "0.7rem" }}
+                            ></i>{" "}
+                            {!isMobile && <span>filter</span>}
+                        </span>
+                    </Button>
+                )}
             </HeaderDatatable>
         );
     };
@@ -133,7 +136,10 @@ const ArsipComponent = ({
     };
 
     const handleRestoreData = () => {
-        let url = restoreUrl.replace("{id}", selectedData.uuid);
+        let url = restoreUrl.replace(
+            "{id}",
+            selectedData.uuid ?? selectedData.id
+        );
         confirmDialog({
             message: "Apakah Anda yakin mengembalikan data ini?",
             header: "Konfirmasi pemulihan",
@@ -185,7 +191,10 @@ const ArsipComponent = ({
     };
 
     const handleDeleteData = () => {
-        let url = forceDeleteUrl.replace("{id}", selectedData.uuid);
+        let url = forceDeleteUrl.replace(
+            "{id}",
+            selectedData.uuid ?? selectedData.id
+        );
         destroy(url, {
             onSuccess: () => {
                 getArsip();
@@ -424,7 +433,9 @@ const ArsipComponent = ({
                             header="Diinput Oleh"
                             align="left"
                             body={(rowData) => {
-                                return rowData.created_by.name;
+                                return rowData.created_by
+                                    ? rowData.created_by.name
+                                    : "-";
                             }}
                             style={{
                                 width: "max-content",

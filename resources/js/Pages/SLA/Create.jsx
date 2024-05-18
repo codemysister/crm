@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { Button } from "primereact/button";
 import { DataTable } from "primereact/datatable";
 import { Dialog } from "primereact/dialog";
-import { Head, Link, router, useForm } from "@inertiajs/react";
+import { Head, Link, router, useForm, usePage } from "@inertiajs/react";
 import { Column } from "primereact/column";
 import { useRef } from "react";
 import { FilterMatchMode } from "primereact/api";
@@ -25,11 +25,12 @@ import LoadingDocument from "@/Components/LoadingDocument";
 import { BlockUI } from "primereact/blockui";
 import { getRegencys } from "@/Services/getRegency";
 import { getProvince } from "@/Services/getProvince";
+import { upperCaseEachWord } from "@/Utils/UppercaseEachWord";
 registerPlugin(FilePondPluginFileValidateSize);
 
-const Create = ({ usersProp, leadsProp, signaturesProp, referralsProp }) => {
+const Create = ({ usersProp, partnersProp }) => {
     const [users, setUsers] = useState(usersProp);
-    const [leads, setLeads] = useState(leadsProp);
+    const [partners, setLeads] = useState(partnersProp);
     const [dialogVisible, setDialogVisible] = useState(false);
     const [blocked, setBlocked] = useState(false);
     const [selectedProducts, setSelectedProducts] = useState([]);
@@ -37,8 +38,7 @@ const Create = ({ usersProp, leadsProp, signaturesProp, referralsProp }) => {
     const [provinces, setProvinces] = useState([]);
     const [regencys, setRegencys] = useState([]);
     const [provinceName, setProvinceName] = useState(null);
-    const [signatures, setSignatures] = useState(signaturesProp);
-    const [referrals, setReferrals] = useState(referralsProp);
+    const userLoggin = usePage().props.auth.user.data;
     const [theme, setTheme] = useState(localStorage.theme);
     useEffect(() => {
         theme
@@ -157,7 +157,7 @@ const Create = ({ usersProp, leadsProp, signaturesProp, referralsProp }) => {
                 link_drive_proof: null,
             },
             {
-                activity: "Pendaftaran lead",
+                activity: "Pendaftaran partner",
                 role: "account executive",
                 duration: "1 hari",
                 estimation_date: new Date(
@@ -277,7 +277,7 @@ const Create = ({ usersProp, leadsProp, signaturesProp, referralsProp }) => {
                 link_drive_proof: null,
             },
             {
-                activity: "Live - lead Mandiri dan Mulai Transaksi",
+                activity: "Live - partner Mandiri dan Mulai Transaksi",
                 role: "account manager",
                 duration: "15 hari sejak sosialisasi user",
                 estimation_date: new Date(
@@ -289,7 +289,7 @@ const Create = ({ usersProp, leadsProp, signaturesProp, referralsProp }) => {
                 link_drive_proof: null,
             },
         ],
-        lead: {
+        partner: {
             id: null,
             name: null,
             phone_number: null,
@@ -304,8 +304,8 @@ const Create = ({ usersProp, leadsProp, signaturesProp, referralsProp }) => {
         referral_signature: { name: null, image: null, institution: null },
         referral_logo: null,
         signature: {
-            name: null,
-            image: null,
+            name: userLoggin.name,
+            image: userLoggin.signature ?? null,
         },
     });
 
@@ -362,7 +362,6 @@ const Create = ({ usersProp, leadsProp, signaturesProp, referralsProp }) => {
 
     const selectedOptionTemplate = (option, props) => {
         if (option) {
-            console.log(option);
             const name = option.name;
             return (
                 <div className="flex align-items-center">
@@ -593,18 +592,38 @@ const Create = ({ usersProp, leadsProp, signaturesProp, referralsProp }) => {
                                         </label>
 
                                         <Dropdown
-                                            value={data.lead}
+                                            value={data.partner}
                                             dataKey="id"
                                             onChange={(e) => {
-                                                setData("lead", {
-                                                    ...data.lead,
+                                                setData("partner", {
+                                                    ...data.partner,
                                                     id: e.target.value.id,
                                                     name: e.target.value.name,
                                                     phone_number:
                                                         e.target.value
                                                             .phone_number,
-                                                    pic: e.target.value.pic,
+                                                    pic:
+                                                        e.target.value.pic
+                                                            ?.name ?? "",
+                                                    pic_number:
+                                                        e.target.value.pic
+                                                            ?.number ?? "",
+                                                    pic_email:
+                                                        e.target.value.pic
+                                                            ?.email ?? "",
+                                                    province:
+                                                        e.target.value.province,
+                                                    regency:
+                                                        e.target.value.regency,
                                                 });
+
+                                                setProvinceName(
+                                                    (prev) =>
+                                                        (prev = JSON.parse(
+                                                            e.target.value
+                                                                .province
+                                                        ).code)
+                                                );
                                             }}
                                             onFocus={() => {
                                                 triggerInputFocus(
@@ -621,7 +640,7 @@ const Create = ({ usersProp, leadsProp, signaturesProp, referralsProp }) => {
                                                     animateleadNameRef
                                                 );
                                             }}
-                                            options={leads}
+                                            options={partners}
                                             optionLabel="name"
                                             placeholder="Pilih Lembaga"
                                             filter
@@ -639,9 +658,9 @@ const Create = ({ usersProp, leadsProp, signaturesProp, referralsProp }) => {
 
                                         <Dropdown
                                             value={
-                                                data.lead.province
+                                                data.partner.province
                                                     ? JSON.parse(
-                                                          data.lead.province
+                                                          data.partner.province
                                                       )
                                                     : null
                                             }
@@ -651,15 +670,15 @@ const Create = ({ usersProp, leadsProp, signaturesProp, referralsProp }) => {
                                                         (prev =
                                                             e.target.value.code)
                                                 );
-                                                setData("lead", {
-                                                    ...data.lead,
+                                                setData("partner", {
+                                                    ...data.partner,
                                                     province: JSON.stringify(
                                                         e.target.value
                                                     ),
                                                     regency: null,
                                                 });
                                             }}
-                                            dataKey="name"
+                                            dataKey="code"
                                             options={provinces}
                                             optionLabel="name"
                                             placeholder="Pilih Provinsi"
@@ -693,15 +712,15 @@ const Create = ({ usersProp, leadsProp, signaturesProp, referralsProp }) => {
                                         </label>
                                         <Dropdown
                                             value={
-                                                data.lead.regency
+                                                data.partner.regency
                                                     ? JSON.parse(
-                                                          data.lead.regency
+                                                          data.partner.regency
                                                       )
                                                     : null
                                             }
                                             onChange={(e) => {
-                                                setData("lead", {
-                                                    ...data.lead,
+                                                setData("partner", {
+                                                    ...data.partner,
                                                     regency: JSON.stringify(
                                                         e.target.value
                                                     ),
@@ -722,7 +741,7 @@ const Create = ({ usersProp, leadsProp, signaturesProp, referralsProp }) => {
                                                     animateleadRegencyRef
                                                 );
                                             }}
-                                            dataKey="name"
+                                            dataKey="code"
                                             options={regencys}
                                             optionLabel="name"
                                             placeholder="Pilih Kabupaten"
@@ -739,10 +758,10 @@ const Create = ({ usersProp, leadsProp, signaturesProp, referralsProp }) => {
                                             Nomor Telepon Lembaga *
                                         </label>
                                         <InputText
-                                            value={data.lead.phone_number}
+                                            value={data.partner.phone_number}
                                             onChange={(e) =>
-                                                setData("lead", {
-                                                    ...data.lead,
+                                                setData("partner", {
+                                                    ...data.partner,
                                                     phone_number:
                                                         e.target.value,
                                                 })
@@ -768,10 +787,10 @@ const Create = ({ usersProp, leadsProp, signaturesProp, referralsProp }) => {
                                             Penanggungjawab *
                                         </label>
                                         <InputText
-                                            value={data.lead.pic}
+                                            value={data.partner.pic}
                                             onChange={(e) =>
-                                                setData("lead", {
-                                                    ...data.lead,
+                                                setData("partner", {
+                                                    ...data.partner,
                                                     pic: e.target.value,
                                                 })
                                             }
@@ -795,10 +814,10 @@ const Create = ({ usersProp, leadsProp, signaturesProp, referralsProp }) => {
                                             Email Penanggungjawab *
                                         </label>
                                         <InputText
-                                            value={data.lead.pic_email}
+                                            value={data.partner.pic_email}
                                             onChange={(e) => {
-                                                setData("lead", {
-                                                    ...data.lead,
+                                                setData("partner", {
+                                                    ...data.partner,
                                                     pic_email: e.target.value,
                                                 });
                                             }}
@@ -822,10 +841,10 @@ const Create = ({ usersProp, leadsProp, signaturesProp, referralsProp }) => {
                                             Nomor HP Penanggungjawab *
                                         </label>
                                         <InputText
-                                            value={data.lead.pic_number}
+                                            value={data.partner.pic_number}
                                             onChange={(e) =>
-                                                setData("lead", {
-                                                    ...data.lead,
+                                                setData("partner", {
+                                                    ...data.partner,
                                                     pic_number: e.target.value,
                                                 })
                                             }
@@ -845,7 +864,7 @@ const Create = ({ usersProp, leadsProp, signaturesProp, referralsProp }) => {
                                             aria-describedby="lead_pic_number-help"
                                         />
                                     </div>
-                                    <div className="flex flex-col mt-3">
+                                    {/* <div className="flex flex-col mt-3">
                                         <label htmlFor="signature">
                                             Tanda Tangan Pihak Pertama*
                                         </label>
@@ -881,22 +900,61 @@ const Create = ({ usersProp, leadsProp, signaturesProp, referralsProp }) => {
                                                 );
                                             }}
                                         />
-                                    </div>
+                                    </div> */}
 
+                                    {userLoggin.signature == null && (
+                                        <div className="flex flex-col mt-3">
+                                            <label htmlFor="signature">
+                                                Tanda Tangan Pihak Pertama
+                                            </label>
+
+                                            <div className="App">
+                                                <FilePond1
+                                                    onaddfile={(
+                                                        error,
+                                                        fileItems
+                                                    ) => {
+                                                        if (!error) {
+                                                            setData({
+                                                                ...data,
+                                                                signature: {
+                                                                    ...data.signature,
+                                                                    image: fileItems.file,
+                                                                },
+                                                            });
+                                                        }
+                                                    }}
+                                                    onremovefile={() => {
+                                                        setData({
+                                                            ...data,
+                                                            signature: {
+                                                                ...data.signature,
+                                                                image: null,
+                                                            },
+                                                        });
+                                                    }}
+                                                    maxFileSize="2mb"
+                                                    labelMaxFileSizeExceeded="File terlalu besar"
+                                                    labelIdle='Drag & Drop your files or <span class="filepond--label-action">Browse</span>'
+                                                />
+                                            </div>
+                                        </div>
+                                    )}
                                     <div className="flex flex-col mt-3">
                                         <label htmlFor="signature">
                                             Tanda Tangan PIC
                                         </label>
 
                                         <div className="App">
-                                            {data.lead.pic_signature !== null &&
-                                            typeof data.lead.pic_signature ==
+                                            {data.partner.pic_signature !==
+                                                null &&
+                                            typeof data.partner.pic_signature ==
                                                 "string" ? (
                                                 <>
                                                     <FilePond2
                                                         files={
                                                             "/storage/" +
-                                                            data.lead
+                                                            data.partner
                                                                 .pic_signature
                                                         }
                                                         onaddfile={(
@@ -905,9 +963,9 @@ const Create = ({ usersProp, leadsProp, signaturesProp, referralsProp }) => {
                                                         ) => {
                                                             if (!error) {
                                                                 setData(
-                                                                    "lead",
+                                                                    "partner",
                                                                     {
-                                                                        ...data.lead,
+                                                                        ...data.partner,
                                                                         pic_signature:
                                                                             fileItems.file,
                                                                     }
@@ -915,8 +973,8 @@ const Create = ({ usersProp, leadsProp, signaturesProp, referralsProp }) => {
                                                             }
                                                         }}
                                                         onremovefile={() => {
-                                                            setData("lead", {
-                                                                ...data.lead,
+                                                            setData("partner", {
+                                                                ...data.partner,
                                                                 pic_signature:
                                                                     null,
                                                             });
@@ -935,9 +993,9 @@ const Create = ({ usersProp, leadsProp, signaturesProp, referralsProp }) => {
                                                         ) => {
                                                             if (!error) {
                                                                 setData(
-                                                                    "lead",
+                                                                    "partner",
                                                                     {
-                                                                        ...data.lead,
+                                                                        ...data.partner,
                                                                         pic_signature:
                                                                             fileItems.file,
                                                                     }
@@ -945,8 +1003,8 @@ const Create = ({ usersProp, leadsProp, signaturesProp, referralsProp }) => {
                                                             }
                                                         }}
                                                         onremovefile={() => {
-                                                            setData("lead", {
-                                                                ...data.lead,
+                                                            setData("partner", {
+                                                                ...data.partner,
                                                                 pic_signature:
                                                                     null,
                                                             });
@@ -959,116 +1017,6 @@ const Create = ({ usersProp, leadsProp, signaturesProp, referralsProp }) => {
                                             )}
                                         </div>
                                     </div>
-
-                                    <div className="flex flex-col mt-3">
-                                        <label htmlFor="referral">
-                                            Referral
-                                        </label>
-                                        <div className="flex items-center gap-2 my-2">
-                                            <Checkbox
-                                                onChange={(e) => {
-                                                    if (e.checked) {
-                                                        setData(
-                                                            "referral",
-                                                            e.checked
-                                                        );
-                                                    } else {
-                                                        setData((data) => ({
-                                                            ...data,
-                                                            referral: e.checked,
-                                                            referral_name: null,
-                                                            referral_signature:
-                                                                null,
-                                                        }));
-                                                    }
-                                                }}
-                                                checked={data.referral}
-                                                onFocus={() => {
-                                                    triggerInputFocus(
-                                                        animateReferralRef
-                                                    );
-                                                }}
-                                                onBlur={() => {
-                                                    stopAnimateInputFocus(
-                                                        animateReferralRef
-                                                    );
-                                                }}
-                                            ></Checkbox>
-                                            <p className="text-xs">
-                                                melibatkan referral
-                                            </p>
-                                        </div>
-                                    </div>
-
-                                    {data.referral && (
-                                        <>
-                                            <div className="flex flex-col mt-3">
-                                                <label htmlFor="signature">
-                                                    Pilih Referral
-                                                </label>
-                                                <Dropdown
-                                                    value={
-                                                        data.referral_signature
-                                                    }
-                                                    onChange={(e) => {
-                                                        setData({
-                                                            ...data,
-                                                            referral_signature:
-                                                                {
-                                                                    name: e
-                                                                        .target
-                                                                        .value
-                                                                        .user
-                                                                        .name,
-                                                                    image: e
-                                                                        .target
-                                                                        .value
-                                                                        .signature,
-                                                                    institution:
-                                                                        e.target
-                                                                            .value
-                                                                            .institution,
-                                                                },
-                                                            referral_logo:
-                                                                e.target.value
-                                                                    .logo,
-                                                        });
-                                                    }}
-                                                    dataKey="institution"
-                                                    options={referrals}
-                                                    optionLabel="name"
-                                                    placeholder="Pilih Tanda Tangan"
-                                                    filter
-                                                    valueTemplate={
-                                                        selectedOptionTemplate
-                                                    }
-                                                    itemTemplate={
-                                                        optionSignatureTemplate
-                                                    }
-                                                    className={`w-full md:w-14rem ${
-                                                        errors.referral_signature &&
-                                                        "p-invalid"
-                                                    }`}
-                                                    onFocus={() => {
-                                                        triggerInputFocus(
-                                                            animateReferralRef
-                                                        );
-                                                    }}
-                                                    onShow={() => {
-                                                        triggerInputFocus(
-                                                            animateReferralRef
-                                                        );
-                                                    }}
-                                                    onHide={() => {
-                                                        stopAnimateInputFocus(
-                                                            animateReferralRef
-                                                        );
-                                                    }}
-                                                    showOnFocus
-                                                />
-                                            </div>
-                                        </>
-                                    )}
 
                                     <div className="flex-flex-col mt-3">
                                         <form onSubmit={handleSubmitForm}>
@@ -1360,7 +1308,7 @@ const Create = ({ usersProp, leadsProp, signaturesProp, referralsProp }) => {
                                             </td>
                                             <td className="text-xs w-7/12">
                                                 <span ref={animateleadNameRef}>
-                                                    {data.lead.name ??
+                                                    {data.partner.name ??
                                                         "{{nama_lembaga}}"}
                                                 </span>
                                             </td>
@@ -1376,20 +1324,26 @@ const Create = ({ usersProp, leadsProp, signaturesProp, referralsProp }) => {
                                                 <span
                                                     ref={animateleadRegencyRef}
                                                 >
-                                                    {data.lead.regency
-                                                        ? JSON.parse(
-                                                              data.lead.regency
-                                                          ).name
+                                                    {data.partner.regency
+                                                        ? upperCaseEachWord(
+                                                              JSON.parse(
+                                                                  data.partner
+                                                                      .regency
+                                                              ).name
+                                                          )
                                                         : "{{kabupaten}}"}
                                                 </span>
                                                 ,{" "}
                                                 <span
                                                     ref={animateleadProvinceRef}
                                                 >
-                                                    {data.lead.province
-                                                        ? JSON.parse(
-                                                              data.lead.province
-                                                          ).name
+                                                    {data.partner.province
+                                                        ? upperCaseEachWord(
+                                                              JSON.parse(
+                                                                  data.partner
+                                                                      .province
+                                                              ).name
+                                                          )
                                                         : "{{provinsi}}"}
                                                 </span>
                                             </td>
@@ -1407,7 +1361,8 @@ const Create = ({ usersProp, leadsProp, signaturesProp, referralsProp }) => {
                                                         animateleadPhoneNumberRef
                                                     }
                                                 >
-                                                    {data.lead.phone_number ??
+                                                    {data.partner
+                                                        .phone_number ??
                                                         "{{nomor_hp_lembaga}}"}
                                                 </span>
                                             </td>
@@ -1421,7 +1376,7 @@ const Create = ({ usersProp, leadsProp, signaturesProp, referralsProp }) => {
                                             </td>
                                             <td className="text-xs w-7/12">
                                                 <span ref={animateleadPicRef}>
-                                                    {data.lead.pic ??
+                                                    {data.partner.pic ??
                                                         "{{pic_lembaga}}"}
                                                 </span>
                                             </td>
@@ -1437,7 +1392,7 @@ const Create = ({ usersProp, leadsProp, signaturesProp, referralsProp }) => {
                                                 <span
                                                     ref={animateleadPicEmailRef}
                                                 >
-                                                    {data.lead.pic_email ??
+                                                    {data.partner.pic_email ??
                                                         "{{pic_email}}"}
                                                 </span>
                                             </td>
@@ -1455,7 +1410,7 @@ const Create = ({ usersProp, leadsProp, signaturesProp, referralsProp }) => {
                                                         animateleadPicNumberRef
                                                     }
                                                 >
-                                                    {data.lead.pic_number ??
+                                                    {data.partner.pic_number ??
                                                         "{{nomor_hp_pic}}"}
                                                 </span>
                                             </td>
@@ -1564,14 +1519,23 @@ const Create = ({ usersProp, leadsProp, signaturesProp, referralsProp }) => {
                                 >
                                     <p>Pihak Pertama</p>
                                     <div className="h-[100px] w-[170px] py-2">
-                                        <img
-                                            src={
-                                                "/storage/" +
-                                                data.signature.image
-                                            }
-                                            alt=""
-                                            className="w-full h-full object-fill"
-                                        />
+                                        {data.signature.image !== null ? (
+                                            <img
+                                                src={
+                                                    typeof data.signature
+                                                        .image === "string"
+                                                        ? data.signature.image
+                                                        : URL.createObjectURL(
+                                                              data.signature
+                                                                  .image
+                                                          )
+                                                }
+                                                alt=""
+                                                className="w-full h-full object-fill"
+                                            />
+                                        ) : (
+                                            <div className="min-h-20"></div>
+                                        )}
                                     </div>
                                     <p>
                                         <b>
@@ -1583,11 +1547,11 @@ const Create = ({ usersProp, leadsProp, signaturesProp, referralsProp }) => {
                                 </div>
                                 <div className="w-[30%]">
                                     <p>Pihak Kedua</p>
-                                    {data.lead.pic_signature ? (
+                                    {data.partner.pic_signature ? (
                                         <div className="h-[100px] w-[170px] py-2">
                                             <img
                                                 src={URL.createObjectURL(
-                                                    data.lead.pic_signature
+                                                    data.partner.pic_signature
                                                 )}
                                                 className="w-full h-full object-fill"
                                             />
@@ -1597,7 +1561,7 @@ const Create = ({ usersProp, leadsProp, signaturesProp, referralsProp }) => {
                                     )}
                                     <p>
                                         <b>
-                                            {data.lead.pic ??
+                                            {data.partner.pic ??
                                                 "{{nama_pihak_kedua}}"}
                                         </b>
                                     </p>

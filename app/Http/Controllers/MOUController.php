@@ -20,6 +20,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
@@ -49,21 +50,11 @@ class MOUController extends Controller
             return $user;
         });
         $partnersProp = Partner::with([
-            'pics' => function ($query) {
-                $query->latest();
-            },
-            'subscriptions' => function ($query) {
-                $query->latest();
-            },
-            'price_list' => function ($query) {
-                $query->latest();
-            },
-            'accounts' => function ($query) {
-                $query->latest();
-            },
-            'banks' => function ($query) {
-                $query->latest();
-            },
+            'pic',
+            'subscription',
+            'price_list',
+            'account',
+            'bank',
             'status'
         ])->get();
         $signaturesProp = Signature::all();
@@ -202,13 +193,7 @@ class MOUController extends Controller
             $mou->code = $code;
             $mou->day = $request->day;
             $mou->date = Carbon::parse($request->date)->setTimezone('GMT+7')->format('Y-m-d H:i:s');
-            if ($request['partner']['type'] == 'partner') {
-                $partnerExist = Partner::where('uuid', $request['partner']["uuid"])->first();
-                $mou->partner_id = $partnerExist->id;
-            } else {
-                $leadExist = Lead::where('uuid', $request['partner']["uuid"])->first();
-                $mou->lead_id = $leadExist->id;
-            }
+            $mou->partner_id = $request->partner['id'];
             $mou->partner_name = $request->partner['name'];
             $mou->partner_pic = $request->partner['pic'];
             $mou->partner_pic_position = $request->partner['pic_position'];
@@ -239,11 +224,13 @@ class MOUController extends Controller
             $mou->signature_position = $request->signature['position'];
             $mou->signature_image = $request->signature['image'];
 
-            $mou = $this->generateMOUDocx($mou);
+            // $mou = $this->generateMOUDocx($mou);
             $mou = $this->generateMOU($mou);
             $mou->save();
 
             DB::commit();
+
+            return Redirect::back();
         } catch (Exception $e) {
             DB::rollback();
             Log::error('Error tambah MOU: ' . $e->getMessage());
@@ -268,21 +255,12 @@ class MOUController extends Controller
             return $user;
         });
         $partnersProp = Partner::with([
-            'pics' => function ($query) {
-                $query->latest();
-            },
-            'subscriptions' => function ($query) {
-                $query->latest();
-            },
-            'price_list' => function ($query) {
-                $query->latest();
-            },
-            'accounts' => function ($query) {
-                $query->latest();
-            },
-            'banks' => function ($query) {
-                $query->latest();
-            },
+            'pic',
+            'subscription',
+            'price_list',
+            'account',
+            'bank',
+            'status'
         ])->get();
         $mou = MOU::with('partner')->where('uuid', '=', $uuid)->first();
         $signaturesProp = Signature::all();
@@ -292,10 +270,9 @@ class MOUController extends Controller
     public function update(MOURequest $request, $uuid)
     {
         $mou = MOU::where('uuid', '=', $uuid)->first();
-
         $pathSignaturePic = null;
-        if ($request->hasFile('pic_signature')) {
-            $file = $request->file('pic_signature');
+        if ($request->hasFile('partner.pic_signature')) {
+            $file = $request->file('partner.pic_signature');
             if ($file->getClientOriginalName() == 'blob') {
                 $pathSignaturePic = $mou->partner_pic_signature;
             } else {
@@ -318,17 +295,12 @@ class MOUController extends Controller
             }
         }
 
+
         DB::beginTransaction();
         try {
             $mou->day = $request->day;
             $mou->date = Carbon::parse($request->date)->setTimezone('GMT+7')->format('Y-m-d H:i:s');
-            if ($request['partner']['type'] == 'partner') {
-                $partnerExist = Partner::where('uuid', $request['partner']["uuid"])->first();
-                $mou->partner_id = $partnerExist->id;
-            } else {
-                $leadExist = Lead::where('uuid', $request['partner']["uuid"])->first();
-                $mou->lead_id = $leadExist->id;
-            }
+            $mou->partner_id = $request->partner['id'];
             $mou->partner_name = $request->partner['name'];
             $mou->partner_pic = $request->partner['pic'];
             $mou->partner_pic_position = $request->partner['pic_position'];
@@ -358,20 +330,18 @@ class MOUController extends Controller
             $mou->signature_name = $request->signature['name'];
             $mou->signature_position = $request->signature['position'];
             $mou->signature_image = $request->signature['image'];
-            $mou = $this->generateMOUDocx($mou);
             $mou = $this->generateMOU($mou);
             $mou->save();
 
             DB::commit();
+            return Redirect::back();
         } catch (Exception $e) {
             DB::rollback();
-            Log::error('Error tambah MOU: ' . $e->getMessage());
+            Log::error('Error update MOU: ' . $e->getMessage());
             return redirect()->back()->withErrors([
                 'error' => $e->getMessage()
             ]);
         }
-        $this->generateMOUDocx($mou);
-        GenerateMOUJob::dispatch($mou);
     }
     public function apiGetMou()
     {

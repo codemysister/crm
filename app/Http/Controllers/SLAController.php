@@ -4,8 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\SLARequest;
 use App\Jobs\GenerateSLAJob;
-use App\Models\Lead;
-use App\Models\Referral;
+use App\Models\Partner;
 use App\Models\Signature;
 use App\Models\SLA;
 use App\Models\SlaActivity;
@@ -37,7 +36,7 @@ class SLAController extends Controller
             'slaActivities' => function ($query) {
                 $query->orderBy('id', 'asc');
             },
-            'lead',
+            'partner',
             'createdBy'
         ])->latest()->get();
         $roles = DB::table('roles')->distinct()->get("name");
@@ -60,13 +59,13 @@ class SLAController extends Controller
             unset ($user->roles);
             return $user;
         });
-        $leadsProp = Lead::with(
-            'status'
+        $partnersProp = Partner::with(
+            'status',
+            'pic'
         )->get();
 
-        $referralsProp = Referral::with('user')->get();
         $signaturesProp = Signature::all();
-        return Inertia::render('SLA/Create', compact('leadsProp', 'usersProp', 'referralsProp', 'signaturesProp'));
+        return Inertia::render('SLA/Create', compact('partnersProp', 'usersProp', 'signaturesProp'));
     }
 
     public function generateCode()
@@ -174,17 +173,24 @@ class SLAController extends Controller
 
     public function store(SLARequest $request)
     {
+        $pathSignature = $request->signature['image'] ?? null;
+        if ($request->hasFile('signature.image')) {
+            $file = $request->file('signature.image');
+            $filename = time() . '_' . rand() . '_' . $request->partner['id'] . '.' . $file->getClientOriginalExtension();
+            $pathSignature = '/storage/images/tanda_tangan/' . $filename;
+            Storage::putFileAs('public/images/tanda_tangan', $file, $filename);
+        }
         $pathSignaturePic = null;
-        if ($request->hasFile('lead.pic_signature')) {
-            $file = $request->file('lead.pic_signature');
-            $filename = time() . '_' . rand() . '_' . $request->lead['id'] . '.' . $file->getClientOriginalExtension();
-            $pathSignaturePic = 'images/tanda_tangan/' . $filename;
+        if ($request->hasFile('partner.pic_signature')) {
+            $file = $request->file('partner.pic_signature');
+            $filename = time() . '_' . rand() . '_' . $request->partner['id'] . '.' . $file->getClientOriginalExtension();
+            $pathSignaturePic = '/storage/images/tanda_tangan/' . $filename;
             Storage::putFileAs('public/images/tanda_tangan', $file, $filename);
         }
         $logo = "/assets/img/logo/sla_logo.png";
         if ($request->hasFile('logo')) {
             $file = $request->file('logo');
-            $filename = time() . '_' . rand() . '_' . $request->lead['id'] . '.' . $file->guessExtension();
+            $filename = time() . '_' . rand() . '_' . $request->partner['id'] . '.' . $file->guessExtension();
             $logo = '/storage/images/logo/' . $filename;
 
             Storage::putFileAs('public/images/logo/', $file, $filename);
@@ -200,23 +206,18 @@ class SLAController extends Controller
             $sla->uuid = Str::uuid();
             $sla->code = $code;
             $sla->logo = $logo;
-            $sla->lead_id = $request->lead['id'];
-            $sla->lead_name = $request->lead['name'];
-            $sla->lead_province = $request->lead['province'];
-            $sla->lead_regency = $request->lead['regency'];
-            $sla->lead_phone_number = $request->lead['phone_number'];
-            $sla->lead_pic = $request->lead['pic'];
-            $sla->lead_pic_email = $request->lead['pic_email'];
-            $sla->lead_pic_number = $request->lead['pic_number'];
-            $sla->lead_pic_signature = $pathSignaturePic;
-            $sla->referral = $request->referral;
-            $sla->referral_logo = $request->referral_logo ?? null;
-            $sla->referral_name = $request->referral_signature['name'] ?? null;
-            $sla->referral_institution = $request->referral_signature['institution'] ?? null;
-            $sla->referral_signature = $request->referral_signature['image'] ?? null;
+            $sla->partner_id = $request->partner['id'];
+            $sla->partner_name = $request->partner['name'];
+            $sla->partner_province = $request->partner['province'];
+            $sla->partner_regency = $request->partner['regency'];
+            $sla->partner_phone_number = $request->partner['phone_number'];
+            $sla->partner_pic = $request->partner['pic'];
+            $sla->partner_pic_email = $request->partner['pic_email'];
+            $sla->partner_pic_number = $request->partner['pic_number'];
+            $sla->partner_pic_signature = $pathSignaturePic;
             $sla->created_by = Auth::user()->id;
             $sla->signature_name = $request->signature['name'];
-            $sla->signature_image = $request->signature['image'];
+            $sla->signature_image = $pathSignature;
             $sla = $this->generateSla($sla, $request->activities);
             $sla->save();
 
@@ -245,11 +246,11 @@ class SLAController extends Controller
                 'causer_type' => get_class(Auth::user()),
                 'causer_id' => Auth::user()->id,
                 "event" => "created",
-                'properties' => ["attributes" => ["code" => $sla->code, "lead_name" => $sla->lead_name, "lead_phone_number" => $sla->lead_phone_number, "lead_pic" => $sla->lead_pic, "lead_pic_email" => $sla->lead_pic_email, "lead_pic_number" => $sla->lead_pic_number, "signature_name" => $sla->signature_name, 'referral_name' => $sla->referral_name, 'activities' => $slaActivitiesLog]]
+                'properties' => ["attributes" => ["code" => $sla->code, "partner_name" => $sla->partner_name, "partner_phone_number" => $sla->partner_phone_number, "partner_pic" => $sla->partner_pic, "partner_pic_email" => $sla->partner_pic_email, "partner_pic_number" => $sla->partner_pic_number, "signature_name" => $sla->signature_name, 'activities' => $slaActivitiesLog]]
             ]);
 
             DB::commit();
-
+            return redirect()->back();
         } catch (Exception $e) {
             DB::rollback();
             Log::error('Error tambah sla: ' . $e->getMessage());
@@ -275,34 +276,54 @@ class SLAController extends Controller
             unset ($user->roles);
             return $user;
         });
-        $leadsProp = lead::with(
+        $partnersProp = Partner::with(
             'status',
+            'pic'
         )->get();
 
         $sla = SLA::with('slaActivities')->where('uuid', '=', $uuid)->first();
-        $referralsProp = Referral::with('user')->get();
         $signaturesProp = Signature::all();
-        return Inertia::render('SLA/Edit', compact('leadsProp', 'usersProp', 'sla', 'referralsProp', 'signaturesProp'));
+        return Inertia::render('SLA/Edit', compact('partnersProp', 'usersProp', 'sla', 'signaturesProp'));
     }
 
     public function update(SLARequest $request, $uuid)
     {
         $sla = SLA::with('slaActivities')->where('uuid', '=', $uuid)->first();
 
-        $pathSignaturePic = $sla->lead_pic_signature;
+        $pathSignature = $sla->signature_image;
+        if ($request->hasFile('signature.image')) {
+            $file = $request->file('signature.image');
+            if ($file->getClientOriginalName() == 'blob') {
+                $pathSignature = $sla->signature_image;
+            } else {
+                if ($sla->signature_image) {
+                    unlink($sla->signature_image);
+                    $filename = time() . '_' . rand() . '_' . $request->partner['id'] . '.' . $file->getClientOriginalExtension();
+                    $pathSignature = "/storage/images/tanda_tangan/" . $filename;
+                    Storage::putFileAs('public/images/tanda_tangan', $file, $filename);
+                } else {
+                    $filename = time() . '_' . rand() . '_' . $request->partner['id'] . '.' . $file->getClientOriginalExtension();
+                    $pathSignature = "/storage/images/tanda_tangan/" . $filename;
+                    Storage::putFileAs('public/images/tanda_tangan', $file, $filename);
+
+                }
+            }
+
+        }
+        $pathSignaturePic = $sla->partner_pic_signature;
         if ($request->hasFile('pic_signature')) {
             $file = $request->file('pic_signature');
             if ($file->getClientOriginalName() == 'blob') {
-                $pathSignaturePic = $sla->lead_pic_signature;
+                $pathSignaturePic = $sla->partner_pic_signature;
             } else {
-                if ($sla->lead_pic_signature) {
-                    Storage::delete('public/' . $sla->lead_pic_signature);
-                    $filename = time() . '_' . rand() . '_' . $request->lead['id'] . '.' . $file->getClientOriginalExtension();
-                    $pathSignaturePic = "images/tanda_tangan/" . $filename;
+                if ($sla->partner_pic_signature) {
+                    unlink($sla->partner_pic_signature);
+                    $filename = time() . '_' . rand() . '_' . $request->partner['id'] . '.' . $file->getClientOriginalExtension();
+                    $pathSignaturePic = "/storage/images/tanda_tangan/" . $filename;
                     Storage::putFileAs('public/images/tanda_tangan', $file, $filename);
                 } else {
-                    $filename = time() . '_' . rand() . '_' . $request->lead['id'] . '.' . $file->getClientOriginalExtension();
-                    $pathSignaturePic = "images/tanda_tangan/" . $filename;
+                    $filename = time() . '_' . rand() . '_' . $request->partner['id'] . '.' . $file->getClientOriginalExtension();
+                    $pathSignaturePic = "/storage/images/tanda_tangan/" . $filename;
                     Storage::putFileAs('public/images/tanda_tangan', $file, $filename);
 
                 }
@@ -310,7 +331,7 @@ class SLAController extends Controller
         }
 
         if ($request->pic_signature == null) {
-            Storage::delete('public/' . $sla->lead_pic_signature);
+            Storage::delete('public/' . $sla->partner_pic_signature);
             $pathSignaturePic = null;
         }
 
@@ -323,11 +344,11 @@ class SLAController extends Controller
             } else {
                 if ($sla->logo) {
                     Storage::delete('public/' . $sla->logo);
-                    $filename = time() . '_' . rand() . '_' . $request->lead['id'] . '.' . $file->getClientOriginalExtension();
+                    $filename = time() . '_' . rand() . '_' . $request->partner['id'] . '.' . $file->getClientOriginalExtension();
                     $pathLogo = "/storage/images/logo/" . $filename;
                     Storage::putFileAs('public/images/logo', $file, $filename);
                 } else {
-                    $filename = time() . '_' . rand() . '_' . $request->lead['id'] . '.' . $file->getClientOriginalExtension();
+                    $filename = time() . '_' . rand() . '_' . $request->partner['id'] . '.' . $file->getClientOriginalExtension();
                     $pathLogo = "/storage/images/logo/" . $filename;
                     Storage::putFileAs('public/images/logo', $file, $filename);
                 }
@@ -350,30 +371,25 @@ class SLAController extends Controller
             'causer_type' => get_class(Auth::user()),
             'causer_id' => Auth::user()->id,
             "event" => "updated",
-            'properties' => ["attributes" => ["code" => $sla->code, "lead_name" => $sla->lead_name, "lead_phone_number" => $sla->lead_phone_number, "lead_pic" => $sla->lead_pic, "lead_pic_email" => $sla->lead_pic_email, "lead_pic_number" => $sla->lead_pic_number, "signature_name" => $sla->signature_name, 'referral_name' => $sla->referral_name, 'activities' => $slaOldActivitiesLog], "old" => ["code" => $sla->code, "lead_name" => $request->lead['name'], "lead_phone_number" => $request->lead['phone_number'], "lead_pic" => $request->lead['pic'], "lead_pic_email" => $request->lead['pic_email'], "lead_pic_number" => $request->lead['pic_number'], "signature_name" => $request->signature['name'], 'referral_name' => $request->referral_signature['name'], 'activities' => $slaNewActivitiesLog]]
+            'properties' => ["attributes" => ["code" => $sla->code, "partner_name" => $sla->partner_name, "partner_phone_number" => $sla->partner_phone_number, "partner_pic" => $sla->partner_pic, "partner_pic_email" => $sla->partner_pic_email, "partner_pic_number" => $sla->partner_pic_number, "signature_name" => $sla->signature_name, 'activities' => $slaOldActivitiesLog], "old" => ["code" => $sla->code, "partner_name" => $request->partner['name'], "partner_phone_number" => $request->partner['phone_number'], "partner_pic" => $request->partner['pic'], "partner_pic_email" => $request->partner['pic_email'], "partner_pic_number" => $request->partner['pic_number'], "signature_name" => $request->signature['name'], 'activities' => $slaNewActivitiesLog]]
         ]);
 
         DB::beginTransaction();
 
         try {
             $sla->logo = $pathLogo;
-            $sla->lead_id = $request->lead['id'];
-            $sla->lead_name = $request->lead['name'];
-            $sla->lead_province = $request->lead['province'];
-            $sla->lead_regency = $request->lead['regency'];
-            $sla->lead_phone_number = $request->lead['phone_number'];
-            $sla->lead_pic = $request->lead['pic'];
-            $sla->lead_pic_email = $request->lead['pic_email'];
-            $sla->lead_pic_number = $request->lead['pic_number'];
-            $sla->lead_pic_signature = $pathSignaturePic;
-            $sla->referral = $request->referral;
-            $sla->referral_logo = $request->referral_logo ?? null;
-            $sla->referral_name = $request->referral_signature['name'] ?? null;
-            $sla->referral_institution = $request->referral_signature['institution'] ?? null;
-            $sla->referral_signature = $request->referral_signature['image'] ?? null;
+            $sla->partner_id = $request->partner['id'];
+            $sla->partner_name = $request->partner['name'];
+            $sla->partner_province = $request->partner['province'];
+            $sla->partner_regency = $request->partner['regency'];
+            $sla->partner_phone_number = $request->partner['phone_number'];
+            $sla->partner_pic = $request->partner['pic'];
+            $sla->partner_pic_email = $request->partner['pic_email'];
+            $sla->partner_pic_number = $request->partner['pic_number'];
+            $sla->partner_pic_signature = $pathSignaturePic;
             $sla->created_by = Auth::user()->id;
             $sla->signature_name = $request->signature['name'];
-            $sla->signature_image = $request->signature['image'];
+            $sla->signature_image = $pathSignature;
             $this->updateActivities($sla, $sla->activities, $request->activities);
             $sla = $this->generateSla($sla, $request->activities);
             $sla->save();
@@ -447,7 +463,7 @@ class SLAController extends Controller
                 'causer_type' => get_class(Auth::user()),
                 'causer_id' => Auth::user()->id,
                 "event" => "deleted",
-                'properties' => ["old" => ["code" => $sla->code, "lead_name" => $sla->lead_name, "lead_phone_number" => $sla->lead_phone_number, "lead_pic" => $sla->lead_pic, "lead_pic_email" => $sla->lead_pic_email, "lead_pic_number" => $sla->lead_pic_number, "signature_name" => $sla->signature_name, 'referral_name' => $sla->referral_name, 'activities' => $slaActivitiesLog]]
+                'properties' => ["old" => ["code" => $sla->code, "partner_name" => $sla->partner_name, "partner_phone_number" => $sla->partner_phone_number, "partner_pic" => $sla->partner_pic, "partner_pic_email" => $sla->partner_pic_email, "partner_pic_number" => $sla->partner_pic_number, "signature_name" => $sla->signature_name, 'activities' => $slaActivitiesLog]]
             ]);
             $sla->delete();
             DB::commit();
@@ -485,7 +501,7 @@ class SLAController extends Controller
                 'causer_type' => get_class(Auth::user()),
                 'causer_id' => Auth::user()->id,
                 "event" => "force",
-                'properties' => ["old" => ["code" => $sla->code, "lead_name" => $sla->lead_name, "lead_phone_number" => $sla->lead_phone_number, "lead_pic" => $sla->lead_pic, "lead_pic_email" => $sla->lead_pic_email, "lead_pic_number" => $sla->lead_pic_number, "signature_name" => $sla->signature_name, 'referral_name' => $sla->referral_name, 'activities' => $slaActivitiesLog]]
+                'properties' => ["old" => ["code" => $sla->code, "partner_name" => $sla->partner_name, "partner_phone_number" => $sla->partner_phone_number, "partner_pic" => $sla->partner_pic, "partner_pic_email" => $sla->partner_pic_email, "partner_pic_number" => $sla->partner_pic_number, "signature_name" => $sla->signature_name, 'activities' => $slaActivitiesLog]]
             ]);
             unlink($sla->sla_doc);
             $sla->forceDelete();
@@ -520,7 +536,7 @@ class SLAController extends Controller
             'slaActivities' => function ($query) {
                 $query->orderBy('id', 'asc');
             },
-            'lead',
+            'partner',
             'createdBy'
         ]);
 
@@ -574,14 +590,14 @@ class SLAController extends Controller
 
     public function apiGetArsip()
     {
-        $arsip = SLA::withTrashed()->with(['createdBy', 'lead', 'activities'])->whereNotNull('deleted_at')->get();
+        $arsip = SLA::withTrashed()->with(['createdBy', 'partner', 'activities'])->whereNotNull('deleted_at')->get();
 
         return response()->json($arsip);
     }
 
     public function arsipFilter(Request $request)
     {
-        $arsip = SLA::withTrashed()->with(['createdBy', 'lead', 'activities'])->whereNotNull('deleted_at');
+        $arsip = SLA::withTrashed()->with(['createdBy', 'partner', 'activities'])->whereNotNull('deleted_at');
 
         if ($request->user) {
             $arsip->where('created_by', '=', $request->user['id']);

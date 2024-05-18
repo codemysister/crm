@@ -17,7 +17,10 @@ return new class extends Migration {
             $table->string('number')->nullable();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
+            $table->string('profile_picture')->nullable();
+            $table->string('signature')->nullable();
             $table->rememberToken();
+            $table->softDeletes();
             $table->timestamps();
         });
     }

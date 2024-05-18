@@ -590,7 +590,7 @@ export default function Index({
 
     const rowExpansionTemplate = (data) => {
         return (
-            <div className="md:px-14">
+            <div className="md:px-14 relative">
                 <div className="flex">
                     <DataTable
                         headerClassName="bg-red-500"
@@ -680,7 +680,10 @@ export default function Index({
                                 ) : (
                                     <div className="flex w-full h-full items-center justify-center">
                                         <a
-                                            href={rowData.receipt_doc}
+                                            href={
+                                                "/storage/" +
+                                                rowData.receipt_doc
+                                            }
                                             download={`Kwitansi_${rowData.partner_name}`}
                                             class="font-bold  w-full h-full text-center rounded-full "
                                         >
@@ -774,6 +777,7 @@ export default function Index({
                     // setDataTransaction("rest_bill", response.data.rest_of_bill);
                     if (response.data.error) {
                         showError(response.data.error);
+                        setBlocked(false);
                     } else {
                         setBlocked(false);
                         showSuccess("Tambah");
@@ -1642,7 +1646,6 @@ export default function Index({
                                     onValueChange={(e) => {
                                         convertRupiah(e.value);
                                     }}
-                                    on
                                     defaultValue={0}
                                     className="dark:bg-gray-300"
                                     id="nominal"
@@ -1652,6 +1655,7 @@ export default function Index({
                             </div>
                             <div className="flex flex-col mt-3">
                                 <label htmlFor="money">Uang Terbilang *</label>
+
                                 <InputText
                                     value={data.money}
                                     onChange={(e) =>
@@ -1659,6 +1663,7 @@ export default function Index({
                                     }
                                     className="dark:bg-gray-300"
                                     id="money"
+                                    required
                                     aria-describedby="money-help"
                                 />
                             </div>
@@ -1694,7 +1699,7 @@ export default function Index({
                                     editable
                                 />
                             </div>
-                            <div className="flex flex-col mt-3">
+                            {/* <div className="flex flex-col mt-3">
                                 <label htmlFor="signature">
                                     Tanda tangan *
                                 </label>
@@ -1717,7 +1722,7 @@ export default function Index({
                                     itemTemplate={optionSignatureTemplate}
                                     className="w-full md:w-14rem"
                                 />
-                            </div>
+                            </div> */}
                             <div className="flex justify-center my-5">
                                 <Button
                                     label="Submit"

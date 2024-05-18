@@ -13,12 +13,11 @@ return new class extends Migration {
         Schema::create('partner_account_settings', function (Blueprint $table) {
             $table->id();
             $table->uuid('uuid');
-            $table->foreignId('partner_id')->constrained('partners', 'id')->onDelete('cascade');
+            $table->foreignId('partner_id')->constrained()->onDelete('cascade');
             $table->foreignId('created_by')->nullable()->constrained('users', 'id')->onDelete('cascade');
             $table->string('subdomain')->nullable();
             $table->string('email_super_admin')->nullable();
             $table->string('cas_link_partner')->nullable();
-            $table->string('card_number')->nullable();
             $table->softDeletes();
             $table->timestamps();
         });

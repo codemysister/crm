@@ -24,13 +24,13 @@ import { InputMask } from "primereact/inputmask";
 import DetailStatusLog from "./DetailStatusLog";
 import DetailLog from "./DetailLog";
 import { upperCaseEachWord } from "@/Utils/UppercaseEachWord";
+import DetailAccount from "./DetailAccount";
 
 const DetailPartner = ({
     partners,
     detailPartner,
     handleSelectedDetailPartner,
     sales,
-    referrals,
     status,
     account_managers,
     showSuccess,
@@ -68,7 +68,6 @@ const DetailPartner = ({
             name: null,
             id: null,
         },
-        referral: {},
         name: "",
         logo: null,
         npwp: null,
@@ -110,6 +109,13 @@ const DetailPartner = ({
             className: `${activeMenu == "bank" ? "p-menuitem-active" : ""}`,
             command: () => {
                 setActiveMenu((prev) => (prev = "bank"));
+            },
+        },
+        {
+            label: "Akun Setting",
+            className: `${activeMenu == "account" ? "p-menuitem-active" : ""}`,
+            command: () => {
+                setActiveMenu((prev) => (prev = "account"));
             },
         },
         {
@@ -221,7 +227,6 @@ const DetailPartner = ({
             logo: partner.logo,
             phone_number: partner.phone_number,
             sales: partner.sales,
-            referral: partner.referral,
             account_manager: partner.account_manager,
             onboarding_date: partner.onboarding_date,
             onboarding_age: partner.onboarding_age,
@@ -497,21 +502,6 @@ const DetailPartner = ({
                                                 </tr>
                                                 <tr class="border-b">
                                                     <td class="pt-2 pb-1  text-base font-bold w-1/5">
-                                                        Referral
-                                                    </td>
-                                                    <td class="pt-2 pb-1  text-base w-[2%]">
-                                                        :
-                                                    </td>
-                                                    <td class="pt-2 pb-1  text-base w-7/12">
-                                                        {partner.referral !==
-                                                        null
-                                                            ? partner.referral
-                                                                  .name
-                                                            : "-"}
-                                                    </td>
-                                                </tr>
-                                                <tr class="border-b">
-                                                    <td class="pt-2 pb-1  text-base font-bold w-1/5">
                                                         Tanggal Onboarding
                                                     </td>
                                                     <td class="pt-2 pb-1  text-base w-[2%]">
@@ -613,6 +603,18 @@ const DetailPartner = ({
 
                                         {activeMenu === "bank" && (
                                             <DetailBank
+                                                partner={partner}
+                                                partners={partners}
+                                                handleSelectedDetailPartner={
+                                                    handleSelectedDetailPartner
+                                                }
+                                                showSuccess={showSuccess}
+                                                showError={showError}
+                                            />
+                                        )}
+
+                                        {activeMenu === "account" && (
+                                            <DetailAccount
                                                 partner={partner}
                                                 partners={partners}
                                                 handleSelectedDetailPartner={
@@ -850,24 +852,6 @@ const DetailPartner = ({
                                     options={account_managers}
                                     optionLabel="name"
                                     placeholder="Pilih Account Manager (AM)"
-                                    filter
-                                    valueTemplate={selectedOptionTemplate}
-                                    itemTemplate={optionTemplate}
-                                    className="w-full md:w-14rem"
-                                />
-                            </div>
-
-                            <div className="flex flex-col">
-                                <label htmlFor="referral">Referral</label>
-                                <Dropdown
-                                    dataKey="id"
-                                    value={data.referral}
-                                    onChange={(e) =>
-                                        setData("referral", e.target.value)
-                                    }
-                                    options={referrals}
-                                    optionLabel="name"
-                                    placeholder="Pilih Referral"
                                     filter
                                     valueTemplate={selectedOptionTemplate}
                                     itemTemplate={optionTemplate}
