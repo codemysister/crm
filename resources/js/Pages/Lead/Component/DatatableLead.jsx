@@ -40,30 +40,7 @@ export const DatatableLead = memo(
                         ? data.phone_number
                         : "-",
                     Sales: data.sales ? data.sales.name : "-",
-                    Account_Manager: data.account_manager
-                        ? data.account_manager.name
-                        : "-",
-                    PIC: data.pics.length !== 0 ? data.pics[0].name : "-",
-                    Nomor_Telepon_PIC:
-                        data.pics.length !== 0 ? data.pics[0].number : "-",
-                    Provinsi: data.province
-                        ? JSON.parse(data.province).name
-                        : "-",
-                    Kabupaten: data.regency
-                        ? JSON.parse(data.regency).name
-                        : "-",
-                    Tanggal_Onboarding: data.onboarding_date
-                        ? formateDate(data.onboarding_date)
-                        : "-",
-                    Tanggal_Live: data.live_date
-                        ? formateDate(data.live_date)
-                        : "-",
-                    Tanggal_Monitoring_3_Bulan_After_Live:
-                        data.monitoring_date_after_3_month_live
-                            ? formateDate(
-                                  data.monitoring_date_after_3_month_live
-                              )
-                            : "-",
+                    PIC: data.pic ?? "-",
                 };
             });
             import("xlsx").then((xlsx) => {
@@ -77,7 +54,7 @@ export const DatatableLead = memo(
                     type: "array",
                 });
 
-                saveAsExcelFile(excelBuffer, "partner");
+                saveAsExcelFile(excelBuffer, "lead");
             });
         };
 

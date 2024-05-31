@@ -35,6 +35,10 @@ import LogComponent from "@/Components/LogComponent";
 import ArsipComponent from "@/Components/ArsipComponent";
 import { BlockUI } from "primereact/blockui";
 import LoadingDocument from "@/Components/LoadingDocument";
+import { FilePond, registerPlugin } from "react-filepond";
+import FilePondPluginFileValidateSize from "filepond-plugin-file-validate-size";
+import "filepond/dist/filepond.min.css";
+registerPlugin(FilePondPluginFileValidateSize);
 
 export default function Index({
     auth,
@@ -126,6 +130,7 @@ export default function Index({
         nominal: null,
         money: null,
         payment_for: null,
+        proof_of_transaction: null,
         metode: null,
     });
 
@@ -253,6 +258,7 @@ export default function Index({
             money: transaction.money,
             metode: transaction.metode,
             payment_for: transaction.payment_for,
+            proof_of_transaction: transaction.proof_of_transaction,
             signature: {
                 name: transaction.signature_name,
                 image: transaction.signature_image,
@@ -653,6 +659,28 @@ export default function Index({
                             }}
                             headerClassName="dark:border-none bg-gray-50 dark:bg-transparent dark:text-gray-300"
                         ></Column>
+
+                        <Column
+                            field="proof_of_transaction"
+                            header="Bukti"
+                            style={{
+                                width: "max-content",
+                                whiteSpace: "nowrap",
+                            }}
+                            headerClassName="dark:border-none bg-gray-50 dark:bg-transparent dark:text-gray-300"
+                            body={(rowData) => {
+                                return (
+                                    <div
+                                        className="w-[100px] h-[100px] bg-no-repeat bg-contain rounded-t-xl"
+                                        style={{
+                                            backgroundImage: `url(${rowData.proof_of_transaction})`,
+                                            backgroundPosition: "center",
+                                            backgroundSize: "contain",
+                                        }}
+                                    ></div>
+                                );
+                            }}
+                        ></Column>
                         <Column
                             field="created_by"
                             header="Diinput Oleh"
@@ -680,10 +708,7 @@ export default function Index({
                                 ) : (
                                     <div className="flex w-full h-full items-center justify-center">
                                         <a
-                                            href={
-                                                "/storage/" +
-                                                rowData.receipt_doc
-                                            }
+                                            href={rowData.receipt_doc}
                                             download={`Kwitansi_${rowData.partner_name}`}
                                             class="font-bold  w-full h-full text-center rounded-full "
                                         >
@@ -756,23 +781,18 @@ export default function Index({
     const handleSubmitForm = (e, type) => {
         e.preventDefault();
         setBlocked(true);
+        let formData = { ...data };
         const csrfToken = document
             .querySelector('meta[name="csrf-token"]')
             .getAttribute("content");
         if (type === "tambah") {
             axios
-                .post(
-                    "/invoice_generals/transaction",
-                    {
-                        ...data,
+                .post("/invoice_generals/transaction", formData, {
+                    headers: {
+                        "Content-Type": "multipart/form-data",
+                        "X-CSRF-TOKEN": csrfToken,
                     },
-                    {
-                        headers: {
-                            "Content-Type": "application/json",
-                            "X-CSRF-TOKEN": csrfToken,
-                        },
-                    }
-                )
+                })
                 .then((response) => {
                     // setDataTransaction("rest_bill", response.data.rest_of_bill);
                     if (response.data.error) {
@@ -789,6 +809,7 @@ export default function Index({
                             "money",
                             "payment_for",
                             "metode",
+                            "proof_of_transaction",
                             "signature"
                         );
                         setData((prev) => ({
@@ -799,24 +820,20 @@ export default function Index({
                 });
         } else {
             axios
-                .put(
-                    "/invoice_generals/transaction/" + data.uuid,
-                    {
-                        ...data,
+                .post("/invoice_generals/transaction/" + data.uuid, formData, {
+                    headers: {
+                        "Content-Type": "multipart/form-data",
+                        "X-CSRF-TOKEN": csrfToken,
                     },
-                    {
-                        headers: {
-                            "Content-Type": "application/json",
-                            "X-CSRF-TOKEN": csrfToken,
-                        },
-                    }
-                )
+                })
                 .then((response) => {
                     if (response.data.error) {
                         showError(response.data.error);
+                        setBlocked(false);
                     } else {
                         showSuccess("Tambah");
                         setModalEditTransactionIsVisible((prev) => false);
+                        setBlocked(false);
 
                         getInvoiceGenerals();
                         reset(
@@ -825,6 +842,7 @@ export default function Index({
                             "money",
                             "payment_for",
                             "metode",
+                            "proof_of_transaction",
                             "signature"
                         );
                         setData((prev) => ({
@@ -1681,6 +1699,7 @@ export default function Index({
                                     aria-describedby="payment_for-help"
                                 />
                             </div>
+
                             <div className="flex flex-col mt-3">
                                 <label htmlFor="metode">Metode *</label>
                                 <Dropdown
@@ -1698,6 +1717,69 @@ export default function Index({
                                     className="w-full md:w-14rem"
                                     editable
                                 />
+                            </div>
+                            <div className="flex flex-col mt-3">
+                                <label htmlFor="proof_of_transaction">
+                                    Bukti (foto)
+                                </label>
+                                <div className="App">
+                                    {data.proof_of_transaction !== null &&
+                                    typeof data.proof_of_transaction ==
+                                        "string" ? (
+                                        <>
+                                            <FilePond
+                                                files={
+                                                    data.proof_of_transaction
+                                                }
+                                                onaddfile={(
+                                                    error,
+                                                    fileItems
+                                                ) => {
+                                                    if (!error) {
+                                                        setData(
+                                                            "proof_of_transaction",
+                                                            fileItems.file
+                                                        );
+                                                    }
+                                                }}
+                                                onremovefile={() => {
+                                                    setData(
+                                                        "proof_of_transaction",
+                                                        null
+                                                    );
+                                                }}
+                                                maxFileSize="2mb"
+                                                labelMaxFileSizeExceeded="File terlalu besar"
+                                                labelIdle='Drag & Drop your files or <span class="filepond--label-action">Browse</span>'
+                                            />
+                                        </>
+                                    ) : (
+                                        <>
+                                            <FilePond
+                                                onaddfile={(
+                                                    error,
+                                                    fileItems
+                                                ) => {
+                                                    if (!error) {
+                                                        setData(
+                                                            "proof_of_transaction",
+                                                            fileItems.file
+                                                        );
+                                                    }
+                                                }}
+                                                onremovefile={() => {
+                                                    setData(
+                                                        "proof_of_transaction",
+                                                        null
+                                                    );
+                                                }}
+                                                maxFileSize="2mb"
+                                                labelMaxFileSizeExceeded="File terlalu besar"
+                                                labelIdle='Drag & Drop your files or <span class="filepond--label-action">Browse</span>'
+                                            />
+                                        </>
+                                    )}
+                                </div>
                             </div>
                             {/* <div className="flex flex-col mt-3">
                                 <label htmlFor="signature">
@@ -1837,6 +1919,70 @@ export default function Index({
                                     aria-describedby="payment_for-help"
                                 />
                             </div>
+
+                            <div className="flex flex-col mt-3">
+                                <label htmlFor="proof_of_transaction">
+                                    Bukti (foto)
+                                </label>
+                                <div className="App">
+                                    {data.proof_of_transaction !== null &&
+                                    typeof data.proof_of_transaction ==
+                                        "string" ? (
+                                        <>
+                                            <FilePond
+                                                files={
+                                                    data.proof_of_transaction
+                                                }
+                                                onaddfile={(
+                                                    error,
+                                                    fileItems
+                                                ) => {
+                                                    if (!error) {
+                                                        setData(
+                                                            "proof_of_transaction",
+                                                            fileItems.file
+                                                        );
+                                                    }
+                                                }}
+                                                onremovefile={() => {
+                                                    setData(
+                                                        "proof_of_transaction",
+                                                        null
+                                                    );
+                                                }}
+                                                maxFileSize="2mb"
+                                                labelMaxFileSizeExceeded="File terlalu besar"
+                                                labelIdle='Drag & Drop your files or <span class="filepond--label-action">Browse</span>'
+                                            />
+                                        </>
+                                    ) : (
+                                        <>
+                                            <FilePond
+                                                onaddfile={(
+                                                    error,
+                                                    fileItems
+                                                ) => {
+                                                    if (!error) {
+                                                        setData(
+                                                            "proof_of_transaction",
+                                                            fileItems.file
+                                                        );
+                                                    }
+                                                }}
+                                                onremovefile={() => {
+                                                    setData(
+                                                        "proof_of_transaction",
+                                                        null
+                                                    );
+                                                }}
+                                                maxFileSize="2mb"
+                                                labelMaxFileSizeExceeded="File terlalu besar"
+                                                labelIdle='Drag & Drop your files or <span class="filepond--label-action">Browse</span>'
+                                            />
+                                        </>
+                                    )}
+                                </div>
+                            </div>
                             <div className="flex flex-col mt-3">
                                 <label htmlFor="metode">Metode *</label>
                                 <Dropdown
@@ -1855,30 +2001,7 @@ export default function Index({
                                     editable
                                 />
                             </div>
-                            <div className="flex flex-col mt-3">
-                                <label htmlFor="signature">
-                                    Tanda tangan *
-                                </label>
-                                <Dropdown
-                                    value={data.signature}
-                                    onChange={(e) => {
-                                        setData("signature", {
-                                            ...data.signature,
-                                            name: e.target.value.name,
-                                            position: e.target.value.position,
-                                            image: e.target.value.image,
-                                        });
-                                    }}
-                                    dataKey="name"
-                                    options={signatures}
-                                    optionLabel="name"
-                                    placeholder="Pilih Tanda Tangan"
-                                    filter
-                                    valueTemplate={selectedOptionTemplate}
-                                    itemTemplate={optionSignatureTemplate}
-                                    className="w-full md:w-14rem"
-                                />
-                            </div>
+
                             <div className="flex justify-center my-5">
                                 <Button
                                     label="Submit"

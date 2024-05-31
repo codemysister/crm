@@ -118,19 +118,6 @@ class UserSeeder extends Seeder
         ]);
         $am->assignRole("account manager");
 
-
-        // Account Representative
-        $am = User::create([
-            "name" => "Account Representative",
-            "email" => "account_representative@gmail.com",
-            "number" => "085178612434",
-            "password" => bcrypt("ar123")
-        ]);
-
-        $am->assignRole("account representative");
-
-
-
         // Admin
         $admin = User::create([
             "name" => "Admin",

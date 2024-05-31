@@ -25,11 +25,6 @@ class RoleSeeder extends Seeder
         ]);
 
         Role::create([
-            "name" => "account representative",
-            "guard_name" => "web"
-        ]);
-
-        Role::create([
             "name" => "account manager",
             "guard_name" => "web"
         ]);

@@ -21,7 +21,7 @@ class DashboardController extends Controller
             ->groupBy('province_name')
             ->get();
 
-        $statusNames = ['proses', 'aktif', 'clbk', 'cancel', 'non aktif'];
+        $statusNames = ['proses', 'aktif', 'non aktif'];
         $statuses = Status::whereIn('name', $statusNames)->get()->keyBy('name');
 
         $totalPartner = Partner::count();
@@ -33,8 +33,6 @@ class DashboardController extends Controller
 
         $totalProses = $counts[$statuses['proses']->id] ?? 0;
         $totalAktif = $counts[$statuses['aktif']->id] ?? 0;
-        $totalCLBK = $counts[$statuses['clbk']->id] ?? 0;
-        $totalCancel = $counts[$statuses['cancel']->id] ?? 0;
         $totalNonaktif = $counts[$statuses['non aktif']->id] ?? 0;
 
         $statisticGeneralProp = [
@@ -42,8 +40,6 @@ class DashboardController extends Controller
             "totalPartner" => $totalPartner,
             "totalProses" => $totalProses,
             "totalAktif" => $totalAktif,
-            "totalCLBK" => $totalCLBK,
-            "totalCancel" => $totalCancel,
             "totalNonaktif" => $totalNonaktif,
             "partnersByProvince" => $partnersByProvince
         ];
@@ -59,7 +55,7 @@ class DashboardController extends Controller
             ->groupBy('province_name')->where('sales_id', $id)->orWhere('account_manager_id', $id)->orwhere('created_by', $id)
             ->get();
 
-        $statusNames = ['proses', 'aktif', 'clbk', 'cancel', 'non aktif'];
+        $statusNames = ['proses', 'aktif', 'non aktif'];
         $statuses = Status::whereIn('name', $statusNames)->get()->keyBy('name');
 
         $counts = Partner::where('sales_id', $id)->orWhere('account_manager_id', $id)->orwhere('created_by', $id)
@@ -73,8 +69,6 @@ class DashboardController extends Controller
 
         $totalProses = $counts[$statuses['proses']->id] ?? 0;
         $totalAktif = $counts[$statuses['aktif']->id] ?? 0;
-        $totalCLBK = $counts[$statuses['clbk']->id] ?? 0;
-        $totalCancel = $counts[$statuses['cancel']->id] ?? 0;
         $totalNonaktif = $counts[$statuses['non aktif']->id] ?? 0;
 
         $statisticAM = [
@@ -82,8 +76,6 @@ class DashboardController extends Controller
             "totalPartner" => $totalPartner,
             "totalProses" => $totalProses,
             "totalAktif" => $totalAktif,
-            "totalCLBK" => $totalCLBK,
-            "totalCancel" => $totalCancel,
             "totalNonaktif" => $totalNonaktif,
             "partnersByProvince" => $partnersByProvince
         ];
@@ -100,7 +92,7 @@ class DashboardController extends Controller
             ->groupBy('province_name')
             ->get();
 
-        $statusNames = ['proses', 'aktif', 'clbk', 'cancel', 'non aktif'];
+        $statusNames = ['proses', 'aktif', 'non aktif'];
         $statuses = Status::whereIn('name', $statusNames)->get()->keyBy('name');
 
         $totalPartner = Partner::count();
@@ -112,8 +104,6 @@ class DashboardController extends Controller
 
         $totalProses = $counts[$statuses['proses']->id] ?? 0;
         $totalAktif = $counts[$statuses['aktif']->id] ?? 0;
-        $totalCLBK = $counts[$statuses['clbk']->id] ?? 0;
-        $totalCancel = $counts[$statuses['cancel']->id] ?? 0;
         $totalNonaktif = $counts[$statuses['non aktif']->id] ?? 0;
 
         $statisticGeneral = [
@@ -121,8 +111,6 @@ class DashboardController extends Controller
             "totalPartner" => $totalPartner,
             "totalProses" => $totalProses,
             "totalAktif" => $totalAktif,
-            "totalCLBK" => $totalCLBK,
-            "totalCancel" => $totalCancel,
             "totalNonaktif" => $totalNonaktif,
             "partnersByProvince" => $partnersByProvince
         ];

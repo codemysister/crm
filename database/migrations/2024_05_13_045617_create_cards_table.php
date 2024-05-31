@@ -19,7 +19,9 @@ return new class extends Migration {
             $table->integer('pcs');
             $table->integer('price');
             $table->bigInteger('total');
+            $table->string('revision_detail')->nullable();
             $table->text('google_drive_link');
+            $table->string('address');
             $table->enum('type', ['cetak', 'digital']);
             $table->dateTime('approval_date')->nullable();
             $table->dateTime('design_date')->nullable();

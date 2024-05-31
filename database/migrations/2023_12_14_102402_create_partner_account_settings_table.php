@@ -17,7 +17,7 @@ return new class extends Migration {
             $table->foreignId('created_by')->nullable()->constrained('users', 'id')->onDelete('cascade');
             $table->string('subdomain')->nullable();
             $table->string('email_super_admin')->nullable();
-            $table->string('cas_link_partner')->nullable();
+            $table->string('password')->nullable();
             $table->softDeletes();
             $table->timestamps();
         });

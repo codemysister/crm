@@ -228,7 +228,7 @@ class InvoiceSubscriptionController extends Controller
     {
         $path = "invoice_langganan/invoice_langganan-" . $invoice_subscription->uuid . ".pdf";
 
-        $invoice_subscription->invoice_subscription_doc = 'storage/' . $path;
+        $invoice_subscription->invoice_subscription_doc = $path;
 
         $html = view('pdf.invoice_subscription', ["invoice_subscription" => $invoice_subscription, "bills" => $bills])->render();
 
@@ -523,7 +523,7 @@ class InvoiceSubscriptionController extends Controller
 
     public function storeBatch(Request $request)
     {
-        $imported = Excel::import(new InvoiceSubscriptionImport($request['partner']['signature']), request()->file('partner.excell'), null, ExcelExcel::CSV);
+        $imported = Excel::import(new InvoiceSubscriptionImport(), request()->file('partner.excell'), null, ExcelExcel::CSV);
     }
 
     public function edit($uuid)

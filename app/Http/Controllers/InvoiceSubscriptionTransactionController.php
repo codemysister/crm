@@ -84,14 +84,14 @@ class InvoiceSubscriptionTransactionController extends Controller
     public function store(Request $request)
     {
         try {
-            $invoice_subscription = InvoiceSubscription::with('transactions')->where('uuid', '=', $request->dataTransaction['invoice_subscription'])->first();
+            $invoice_subscription = InvoiceSubscription::with('transactions')->where('uuid', '=', $request->invoice_subscription)->first();
             $rest_of_bill = $this->calculateRestOfBill($invoice_subscription);
-            if ($rest_of_bill < $request->dataTransaction['nominal']) {
+            if ($rest_of_bill < $request->nominal) {
 
                 return response()->json(['error' => 'Pembayaran melebihi sisa tagihan']);
 
             }
-            $rest_of_bill = $rest_of_bill - $request->dataTransaction['nominal'];
+            $rest_of_bill = $rest_of_bill - $request->nominal;
             $status = Status::where('category', 'invoice');
             if ($rest_of_bill != 0) {
                 $status = $status->where('name', 'sebagian')->first();
@@ -99,18 +99,28 @@ class InvoiceSubscriptionTransactionController extends Controller
                 $status = $status->where('name', 'lunas')->first();
             }
 
+            $pathProofImage = null;
+            if ($request->hasFile('proof_of_transaction')) {
+                $file = $request->file('proof_of_transaction');
+                $filename = time() . '_' . Auth::user()->id . '.' . $file->getClientOriginalExtension();
+                $pathProofImage = 'storage/images/transaksi/' . $filename;
+                Storage::putFileAs('public/images/transaksi', $file, $filename);
+            }
+
+
             $transaction = new InvoiceSubscriptionTransaction();
             $transaction->uuid = Str::uuid();
             $transaction->code = $this->generateCode();
             $transaction->invoice_id = $invoice_subscription->id;
-            $transaction->partner_id = $request->dataTransaction['partner']['id'];
-            $transaction->partner_name = $request->dataTransaction['partner']['name'];
-            $transaction->date = Carbon::parse($request->dataTransaction['date'])->setTimezone('GMT+7')->format('Y-m-d H:i:s');
-            $transaction->nominal = $request->dataTransaction['nominal'];
-            $transaction->money = $request->dataTransaction['money'];
-            $transaction->metode = $request->dataTransaction['metode']['name'];
-            $transaction->payment_for = $request->dataTransaction['payment_for'];
+            $transaction->partner_id = $request->partner['id'];
+            $transaction->partner_name = $request->partner['name'];
+            $transaction->date = Carbon::parse($request->date)->setTimezone('GMT+7')->format('Y-m-d H:i:s');
+            $transaction->nominal = $request->nominal;
+            $transaction->money = $request->money;
+            $transaction->metode = $request->metode['name'];
+            $transaction->payment_for = $request->payment_for;
             $transaction->receipt_doc = '';
+            $transaction->proof_of_transaction = $pathProofImage;
             $transaction->signature_name = "Muh Arif Mahfudin";
             $transaction->signature_image = "/assets/img/signatures/ttd.png";
             $transaction->created_by = Auth::user()->id;
@@ -128,7 +138,7 @@ class InvoiceSubscriptionTransactionController extends Controller
                 'properties' => ["attributes" => ["code" => $invoice_subscription->code, "partner_name" => $transaction->partner_name, "date" => $transaction->date, "nominal" => $transaction->nominal, "money" => $transaction->money, 'method' => $transaction->method, 'payment_for' => $transaction->payment_for, 'signature_name' => $transaction->signature_name]]
             ]);
 
-            $invoice_subscription->update(['rest_of_bill' => $rest_of_bill, 'status_id' => $status->id, 'bill_date' => Carbon::parse($request->dataTransaction['date'])->setTimezone('GMT+7')->format('Y-m-d H:i:s')]);
+            $invoice_subscription->update(['rest_of_bill' => $rest_of_bill, 'status_id' => $status->id, 'bill_date' => Carbon::parse($request->date)->setTimezone('GMT+7')->format('Y-m-d H:i:s')]);
 
             DB::commit();
             return response()->json(['rest_of_bill' => $rest_of_bill]);
@@ -147,17 +157,32 @@ class InvoiceSubscriptionTransactionController extends Controller
         DB::beginTransaction();
         try {
             $transaction = InvoiceSubscriptionTransaction::where('uuid', '=', $uuid)->first();
-            $transaction->invoice_id = $request->dataTransaction['invoice_subscription'];
-            $transaction->partner_id = $request->dataTransaction['partner']['id'];
-            $transaction->partner_name = $request->dataTransaction['partner']['name'];
-            $transaction->date = Carbon::parse($request->dataTransaction['date'])->setTimezone('GMT+7')->format('Y-m-d H:i:s');
-            $transaction->nominal = $request->dataTransaction['nominal'];
-            $transaction->money = $request->dataTransaction['money'];
-            $transaction->metode = $request->dataTransaction['metode']['name'] ?? $request->dataTransaction['metode'];
-            $transaction->payment_for = $request->dataTransaction['payment_for'];
+
+            $pathProofImage = $transaction->proof_of_transaction;
+            if ($request->hasFile('proof_of_transaction')) {
+                unlink($transaction->proof_of_transaction);
+                $file = $request->file('proof_of_transaction');
+                $filename = time() . '_' . Auth::user()->id . '.' . $file->guessExtension();
+                $pathProofImage = 'storage/images/transaksi/' . $filename;
+                Storage::putFileAs('public/images/transaksi', $file, $filename);
+            } else {
+                if ($request->proof_of_transaction !== null) {
+                    $pathProofImage = $transaction->proof_of_transaction;
+                }
+            }
+
+            $transaction->invoice_id = $request->invoice_subscription;
+            $transaction->partner_id = $request->partner['id'];
+            $transaction->partner_name = $request->partner['name'];
+            $transaction->date = Carbon::parse($request->date)->setTimezone('GMT+7')->format('Y-m-d H:i:s');
+            $transaction->nominal = $request->nominal;
+            $transaction->money = $request->money;
+            $transaction->metode = $request->metode['name'] ?? $request->metode;
+            $transaction->payment_for = $request->payment_for;
             $transaction->receipt_doc = '';
-            $transaction->signature_name = $request->dataTransaction['signature']['name'];
-            $transaction->signature_image = $request->dataTransaction['signature']['image'];
+            $transaction->proof_of_transaction = $pathProofImage;
+            $transaction->signature_name = $request->signature['name'];
+            $transaction->signature_image = $request->signature['image'];
             $transaction->created_by = Auth::user()->id;
             $transaction = $this->generateReceipt($transaction);
             $transaction->save();
@@ -167,7 +192,7 @@ class InvoiceSubscriptionTransactionController extends Controller
                 'transactions' => function ($query) {
                     $query->latest();
                 }
-            ])->where('id', '=', $request->dataTransaction['invoice_subscription'])->first();
+            ])->where('id', '=', $request->invoice_subscription)->first();
 
             $rest_of_bill = $this->calculateRestOfBill($invoice_subscription);
 

@@ -12,7 +12,7 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule): void
     {
-        $schedule->command('app:update-invoice-age')->daily();
+        $schedule->command('app:update-invoice-age')->everyMinute();
         // $schedule->command('inspire')->hourly();
     }
 

@@ -90,89 +90,6 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
-    // Status
-    Route::get('/status', [StatusController::class, 'index'])->name('status.index');
-    Route::post('/status', [StatusController::class, 'store'])->name('status.store');
-    Route::put('/status/{status:uuid}/restore', [StatusController::class, 'restore'])->name('status.restore');
-    Route::patch('/status/{status:uuid}', [StatusController::class, 'update'])->name('status.update');
-    Route::delete('/status/{status:uuid}/force', [StatusController::class, 'destroyForce'])->name('status.destroy.force');
-    Route::delete('/status/{status:uuid}', [StatusController::class, 'destroy'])->name('status.destroy');
-    Route::get('/api/status/arsip', [StatusController::class, 'apiGetStatusArsip'])->name('api.status.arsip');
-    Route::get('/api/status/log', [StatusController::class, 'apiGetStatusLog'])->name('api.status.log');
-    Route::get('/api/status', [StatusController::class, 'apiGetStatus'])->name('api.status');
-
-
-    // Role
-    Route::get('/role-permission', [RoleController::class, 'index'])->name('role-permission.view');
-    Route::post('/roles', [RoleController::class, 'store'])->name('roles.store')->middleware(['can:tambah role']);
-    Route::get('/api/roles', [RoleController::class, 'apiGetRole'])->name('api.roles');
-    Route::put('/api/roles/{id}', [RoleController::class, 'apiUpdateRole'])->name('api.roles.update')->middleware(['can:edit role']);
-    Route::delete('/api/roles/{id}', [RoleController::class, 'apiDeleteRole'])->name('api.roles.delete')->middleware(['can:hapus role']);
-
-
-    // Perizinan
-    Route::get('/permissions', [PermissionController::class, 'index'])->name('permissions.view')->middleware(['can:lihat permission']);
-    Route::post('/permissions', [PermissionController::class, 'store'])->name('permissions.store')->middleware(['can:tambah permission']);
-    Route::get('/api/permissions', [PermissionController::class, 'apiGetPermission'])->name('api.permissions');
-    Route::put('/api/permissions/{id}', [PermissionController::class, 'apiUpdatePermission'])->name('api.permissions.update')->middleware(['can:edit permission']);
-    Route::delete('/api/permissions/{id}', [PermissionController::class, 'apiDeletePermission'])->name('api.permissions.delete')->middleware(['can:hapus permission']);
-
-
-    // Role & Perizinan
-    Route::put('/role-permission-sync/{id}', [PermissionController::class, 'permissionSync'])->name('permissions.sync')->middleware(['can:setting role permission']);
-
-    // Tanda Tangan
-    Route::get('/signatures', [SignatureController::class, 'index'])->name('signatures.view')->middleware(['can:lihat user']);
-    Route::post('/signatures', [SignatureController::class, 'store'])->name('signatures.store')->middleware(['can:tambah user']);
-    Route::post('/signatures/{signature:uuid}', [SignatureController::class, 'update'])->name('signatures.update')->middleware(['can:edit user']);
-    Route::delete('/signatures/{signature:uuid}', [SignatureController::class, 'destroy'])->name('signatures.delete')->middleware(['can:hapus user']);
-    Route::get('api/signatures', [SignatureController::class, 'apiGetSignatures'])->name('api.signatures');
-
-
-    // User
-    Route::get('/users', [UserController::class, 'index'])->name('users.view')->middleware(['can:lihat user']);
-    Route::get('api/users', [UserController::class, 'apiGetUsers'])->name('api.users');
-    Route::post('/users/filter', [UserController::class, 'filter'])->name('users.filter');
-    Route::post('/users/arsip/filter', [UserController::class, 'arsipFilter'])->name('users.arsip.filter');
-    Route::post('/users/logs/filter', [UserController::class, 'logFilter'])->name('users.log.filter');
-    Route::post('/users', [UserController::class, 'store'])->name('users.store')->middleware(['can:tambah user']);
-    Route::put('/users/{users:uuid}/restore', [UserController::class, 'restore'])->name('users.restore');
-    Route::delete('/users/{users:uuid}/anjirlah', [UserController::class, 'destroyForce'])->name('users.destroy.force');
-    Route::put('/users/{id}', [UserController::class, 'update'])->name('users.update')->middleware(['can:edit user']);
-    Route::delete('/users/logs', [UserController::class, 'destroyLogs'])->name('users.logs.destroy');
-    Route::delete('/users/{id}', [UserController::class, 'destroy'])->name('users.delete')->middleware(['can:hapus user']);
-    Route::get('/api/users/logs', [UserController::class, 'apiGetLogs'])->name('api.users.logs');
-    Route::get('api/users/arsip', [UserController::class, 'apiGetArsip'])->name('users.arsip');
-
-    // Produk
-    Route::get('/products', [ProductController::class, 'index'])->name('products.view')->middleware(['can:lihat produk']);
-    Route::post('/products', [ProductController::class, 'store'])->name('products.store')->middleware(['can:tambah produk']);
-    Route::put('/products/{product:uuid}/restore', [ProductController::class, 'restore'])->name('products.restore');
-    Route::delete('/products/{uuid}/force', [ProductController::class, 'destroyForce'])->name('products.destroy.force');
-    Route::put('/products/{product:uuid}', [ProductController::class, 'update'])->name('products.update')->middleware(['can:edit produk']);
-    Route::delete('/products/logs', [ProductController::class, 'destroyLogs'])->name('products.log.destroy');
-    Route::delete('/products/{product:uuid}', [ProductController::class, 'destroy'])->name('products.destroy')->middleware(['can:hapus produk']);
-    Route::get('/api/products', [ProductController::class, 'apiGetProducts'])->name('api.products');
-    Route::get('api/products/arsip', [ProductController::class, 'apiGetArsip'])->name('products.arsip');
-    Route::get('api/products/logs', [ProductController::class, 'apiGetLogs'])->name('products.logs');
-    Route::post('/products/logs/filter', [ProductController::class, 'logFilter'])->name('products.log.filter');
-    Route::resource('signature', SignatureController::class);
-    Route::get('/api/signature', [SignatureController::class, 'apiGetSignature'])->name('api.signature');
-
-    // Kartu
-    Route::get('/cards', [CardController::class, 'index'])->name('cards.view');
-    Route::get('api/cards', [CardController::class, 'apiGetCards'])->name('api.cards');
-    Route::post('/cards/arsip/filter', [CardController::class, 'arsipFilter'])->name('cards.arsip.filter');
-    Route::post('/cards/logs/filter', [CardController::class, 'logFilter'])->name('cards.log.filter');
-    Route::post('/cards', [CardController::class, 'store'])->name('cards.store')->middleware(['can:tambah user']);
-    Route::put('/cards/{cards:uuid}/restore', [CardController::class, 'restore'])->name('cards.restore');
-    Route::delete('/cards/{cards:uuid}/force', [CardController::class, 'destroyForce'])->name('cards.destroy.force');
-    Route::put('/cards/{id}', [CardController::class, 'update'])->name('cards.update')->middleware(['can:edit user']);
-    Route::delete('/cards/logs', [CardController::class, 'destroyLogs'])->name('cards.logs.destroy');
-    Route::delete('/cards/{id}', [CardController::class, 'destroy'])->name('cards.delete')->middleware(['can:hapus user']);
-    Route::get('/api/cards/logs', [CardController::class, 'apiGetLogs'])->name('api.cards.logs');
-    Route::get('api/cards/arsip', [CardController::class, 'apiGetArsip'])->name('cards.arsip');
-
     // Lead
     Route::get('/leads', [LeadController::class, 'index'])->name('leads.view')->middleware(['can:lihat lead']);
     Route::get('/leads/{lead:uuid}', [LeadController::class, 'show'])->name('leads.show')->middleware(['can:edit lead']);
@@ -183,12 +100,12 @@ Route::middleware(['auth'])->group(function () {
     Route::get('api/leads', [LeadController::class, 'apiGetLeads'])->name('api.leads')->middleware(['can:lihat lead']);
     Route::post('/leads/import', [LeadController::class, 'import'])->name('leads.import')->middleware(['can:tambah lead']);
     Route::post('/leads/filter', [LeadController::class, 'filter'])->name('leads.filter')->middleware(['can:lihat lead']);
-    Route::post('/leads/arsip/filter', [LeadController::class, 'arsipFilter'])->name('lead.arsip.filter')->middleware(['can:lihat arsip']);
-    Route::post('/leads/logs/filter', [LeadController::class, 'logFilter'])->name('leads.log.filter')->middleware(['can:lihat arsip']);
-    Route::put('/leads/{lead:uuid}/restore', [LeadController::class, 'restore'])->name('lead.restore')->middleware(['can:restore lead']);
-    Route::delete('/leads/{lead:uuid}/force', [LeadController::class, 'destroyForce'])->name('lead.destroy.force')->middleware(['can:delete permanen lead']);
+    Route::post('/leads/arsip/filter', [LeadController::class, 'arsipFilter'])->name('lead.arsip.filter');
+    Route::post('/leads/logs/filter', [LeadController::class, 'logFilter'])->name('leads.log.filter');
+    Route::put('/leads/{lead:uuid}/restore', [LeadController::class, 'restore'])->name('lead.restore');
+    Route::delete('/leads/{lead:uuid}/force', [LeadController::class, 'destroyForce'])->name('lead.destroy.force');
     Route::get('api/leads/logs', [LeadController::class, 'apiGetLeadLogs'])->name('leads.logs');
-    Route::get('api/leads/arsip', [LeadController::class, 'apiGetLeadArsip'])->name('leads.arsip')->middleware(['can:lihat arsip']);
+    Route::get('api/leads/arsip', [LeadController::class, 'apiGetLeadArsip'])->name('leads.arsip');
     Route::get('/api/leads/logs/status', [LeadController::class, 'apiGetStatusLogs'])->name('api.lead.status.logs')->middleware(['can:lihat lead']);
 
     // Partner
@@ -197,7 +114,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/partners', [PartnerController::class, 'index'])->name('partners.view')->middleware(['can:lihat partner']);
     Route::post('/partners', [PartnerController::class, 'store'])->name('partners.store')->middleware(['can:tambah partner']);
     Route::post('/partners/import', [PartnerController::class, 'import'])->name('partners.import')->middleware(['can:tambah partner']);
-    Route::delete('/partners/logs', [PartnerController::class, 'destroyLogs'])->name('partner.log.destroy');
+    Route::delete('/partners/logs', [PartnerController::class, 'destroyLogs'])->name('partner.log.destroy')->middleware(['can:hapus log']);
     Route::get('/partners/{partner:uuid}', [PartnerController::class, 'show'])->name('partners.show')->middleware(['can:edit partner']);
     Route::post('/partners/{partner}', [PartnerController::class, 'update'])->name('partners.update')->middleware(['can:edit partner']);
     Route::put('/partners/{partner:uuid}/restore', [PartnerController::class, 'restore'])->name('partner.restore');
@@ -212,73 +129,29 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/api/partners/logs/status', [PartnerController::class, 'apiGetStatusLogs'])->name('api.partner.logs.status');
 
     // Partner Langganan
-    Route::get('/subscriptions', [PartnerSubscriptionController::class, 'index'])->name('partners.subscriptions.index');
-    Route::post('/subscriptions/filter', [PartnerSubscriptionController::class, 'filter'])->name('partners.subscriptions.filter');
-    Route::get('/api/subscriptions', [PartnerSubscriptionController::class, 'apiGetSubscription'])->name('api.partners.subscriptions');
+    Route::post('/subscriptions', [PartnerSubscriptionController::class, 'store'])->name('partners.subscriptions.store')->middleware(['can:tambah langganan partner']);
+    Route::put('/subscriptions/{uuid}', [PartnerSubscriptionController::class, 'update'])->name('partners.subscriptions.update')->middleware(['can:tambah langganan partner']);
     Route::get('/api/subscriptions/{partner:uuid}/logs', [PartnerSubscriptionController::class, 'apiGetLogs'])->name('api.partners.subscriptions.log');
-    Route::post('/subscriptions', [PartnerSubscriptionController::class, 'store'])->name('partners.subscriptions.store');
-    Route::put('/subscriptions/{uuid}', [PartnerSubscriptionController::class, 'update'])->name('partners.subscriptions.update');
-    Route::delete('/subscriptions/{uuid}', [PartnerSubscriptionController::class, 'destroy'])->name('partners.subscriptions.destroy');
 
     // Partner PIC
-    Route::get('/pics', [PartnerPicController::class, 'index'])->name('partners.pics.index');
     Route::post('/pics', [PartnerPicController::class, 'store'])->name('partners.pics.store');
-    Route::post('/pics/filter', [PartnerPicController::class, 'filter'])->name('partners.pics.filter');
-    Route::get('/api/pics', [PartnerPicController::class, 'apiGetPIC'])->name('api.partners.pics');
     Route::put('/pics/{uuid}', [PartnerPicController::class, 'update'])->name('partners.pics.update');
-    Route::put('/pics/{pic:uuid}/restore', [PartnerPicController::class, 'restore'])->name('partners.pic.restore');
-    Route::delete('/pics/{pic:uuid}/force', [PartnerPicController::class, 'destroyForce'])->name('partners.pic.destroy.force');
-    Route::delete('/pics/logs', [PartnerPicController::class, 'destroyLogs'])->name('partners.pics.log.destroy');
-    Route::delete('/pics/{uuid}', [PartnerPicController::class, 'destroy'])->name('partners.pics.destroy');
     Route::get('/api/pics/{partner:uuid}/logs', [PartnerPicController::class, 'apiGetLogs'])->name('api.partners.pic.log');
-    Route::post('/pics/logs/filter', [PartnerPicController::class, 'logFilter'])->name('partners.pics.logs.filter');
-    Route::get('/api/pics/arsip', [PartnerPicController::class, 'apiGetArsip'])->name('api.partners.pics.arsip');
-
 
     // Partner Bank
-    Route::get('/banks', [PartnerBankController::class, 'index'])->name('partners.banks.index');
-    Route::post('/banks', [PartnerBankController::class, 'store'])->name('partners.banks.store');
-    Route::post('/banks/filter', [PartnerBankController::class, 'filter'])->name('partners.banks.filter');
-    Route::get('/api/banks', [PartnerBankController::class, 'apiGetPIC'])->name('api.partners.banks');
-    Route::get('/api/banks/{partner:uuid}/logs', [PartnerBankController::class, 'apiGetLogs'])->name('api.partners.banks.log');
+    Route::post('/banks', [PartnerBankController::class, 'store'])->name('partners.banks.store')->middleware(['can:tambah bank partner']);
+    Route::get('/api/banks/{partner:uuid}/logs', [PartnerBankController::class, 'apiGetLogs'])->name('api.partners.banks.log')->middleware(['can:tambah bank partner']);
     Route::put('/banks/{uuid}', [PartnerBankController::class, 'update'])->name('partners.banks.update');
-    Route::delete('/banks/{uuid}', [PartnerBankController::class, 'destroy'])->name('partners.banks.destroy');
 
     // Partner Akun
-    Route::get('/accounts', [PartnerAccountSettingController::class, 'index'])->name('partners.accounts.index');
-    Route::post('/accounts/filter', [PartnerAccountSettingController::class, 'filter'])->name('partners.accounts.filter');
-    Route::post('/accounts', [PartnerAccountSettingController::class, 'store'])->name('partners.accounts.store');
+    Route::post('/accounts', [PartnerAccountSettingController::class, 'store'])->name('partners.accounts.store')->middleware(['can:tambah akun partner']);
     Route::get('/api/accounts/{partner:uuid}/logs', [PartnerAccountSettingController::class, 'apiGetLogs'])->name('api.partners.accounts.log');
-    Route::get('/api/accounts', [PartnerAccountSettingController::class, 'apiGetAccounts'])->name('api.partners.accounts');
-    Route::put('/accounts/{uuid}', [PartnerAccountSettingController::class, 'update'])->name('partners.accounts.update');
-    Route::delete('/accounts/{uuid}', [PartnerAccountSettingController::class, 'destroy'])->name('partners.accounts.destroy');
+    Route::put('/accounts/{uuid}', [PartnerAccountSettingController::class, 'update'])->name('partners.accounts.update')->middleware(['can:tambah akun partner']);
 
     // Partner Tarif
-    Route::get('/prices', [PartnerPriceListController::class, 'index'])->name('partners.prices.index');
-    Route::post('/prices/filter', [PartnerPriceListController::class, 'filter'])->name('partners.prices.filter');
-    Route::post('/prices', [PartnerPriceListController::class, 'store'])->name('partners.prices.store');
+    Route::post('/prices', [PartnerPriceListController::class, 'store'])->name('partners.prices.store')->middleware(['can:tambah harga partner']);
     Route::get('/api/prices/{partner:uuid}/logs', [PartnerPriceListController::class, 'apiGetLogs'])->name('api.partners.prices.log');
-    Route::get('/api/prices', [PartnerPriceListController::class, 'apiGetPriceLists'])->name('api.partners.prices');
-    Route::put('/prices/{uuid}', [PartnerPriceListController::class, 'update'])->name('partners.prices.update');
-    Route::delete('/prices/{uuid}', [PartnerPriceListController::class, 'destroy'])->name('partners.prices.destroy');
-
-    // STPD
-    Route::get('/stpd', [STPDController::class, 'index'])->name('stpd.view')->middleware(['can:lihat stpd']);
-    Route::get('/stpd/create', [STPDController::class, 'create'])->name('stpd.create');
-    Route::post('/stpd/filter', [STPDController::class, 'filter'])->name('stpd.filter');
-    Route::post('/stpd', [STPDController::class, 'store'])->name('stpd.store')->middleware(['can:tambah stpd']);
-    Route::get('/stpd/{stpd:uuid}', [STPDController::class, 'edit'])->name('stpd.edit')->middleware(['can:edit stpd']);
-    Route::put('/stpd/{stpd:uuid}/restore', [STPDController::class, 'restore'])->name('stpd.restore');
-    Route::put('/stpd/{stpd:uuid}', [STPDController::class, 'update'])->name('stpd.update')->middleware(['can:edit stpd']);
-    Route::post('/stpd/arsip/filter', [STPDController::class, 'arsipFilter'])->name('stpd.arsip.filter');
-    Route::post('/stpd/logs/filter', [STPDController::class, 'logFilter'])->name('stpd.log.filter');
-    Route::delete('/stpd/logs', [STPDController::class, 'destroyLogs'])->name('stpd.log.destroy');
-    Route::delete('/stpd/{stpd:uuid}/force', [STPDController::class, 'destroyForce'])->name('stpd.destroy.force');
-    Route::delete('/stpd/{stpd:uuid}', [STPDController::class, 'destroy'])->name('stpd.destroy')->middleware(['can:hapus stpd']);
-    Route::get('/api/stpd/logs', [STPDController::class, 'apiGetLogs'])->name('api.stpd.logs');
-    Route::get('api/stpd/arsip', [STPDController::class, 'apiGetArsip'])->name('stpd.arsip');
-    Route::get('/api/stpd', [STPDController::class, 'apiGetSTPD'])->name('api.stpd');
-
+    Route::put('/prices/{uuid}', [PartnerPriceListController::class, 'update'])->name('partners.prices.update')->middleware(['can:tambah harga partner']);
 
     // SPH
     Route::get('/sph', [SPHController::class, 'index'])->name('sph.view')->middleware(['can:lihat sph']);
@@ -287,9 +160,9 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/sph/filter', [SPHController::class, 'filter'])->name('sph.filter');
     Route::get('/sph/{sph:uuid}', [SPHController::class, 'edit'])->name('sph.edit')->middleware(['can:edit sph']);
     Route::put('/sph/{sph:uuid}', [SPHController::class, 'update'])->name('sph.update')->middleware(['can:edit sph']);
-    Route::delete('/sph/logs', [SPHController::class, 'destroyLogs'])->name('sph.log.destroy')->middleware(['can:hapus sph']);
-    Route::put('/sph/{sph:uuid}/restore', [SPHController::class, 'restore'])->name('sph.restore');
-    Route::delete('/sph/{sph:uuid}/force', [SPHController::class, 'destroyForce'])->name('sph.destroy.force');
+    Route::delete('/sph/logs', [SPHController::class, 'destroyLogs'])->name('sph.log.destroy')->middleware(['can:hapus log']);
+    Route::put('/sph/{sph:uuid}/restore', [SPHController::class, 'restore'])->name('sph.restore')->middleware(['can:tambah sph']);
+    Route::delete('/sph/{sph:uuid}/force', [SPHController::class, 'destroyForce'])->name('sph.destroy.force')->middleware(['can:hapus sph']);
     Route::delete('/sph/{sph:uuid}', [SPHController::class, 'destroy'])->name('sph.destroy')->middleware(['can:hapus sph']);
     Route::get('/api/sph/logs', [SPHController::class, 'apiGetLogs'])->name('api.sph.logs');
     Route::get('api/sph/arsip', [SPHController::class, 'apiGetArsip'])->name('sph.arsip')->middleware(['can:tambah partner']);
@@ -302,14 +175,14 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/mou/create', [MOUController::class, 'create'])->name('mou.create')->middleware(['can:tambah mou']);
     Route::post('/mou', [MOUController::class, 'store'])->name('mou.store')->middleware(['can:tambah mou']);
     Route::post('/mou/filter', [MOUController::class, 'filter'])->name('mou.filter');
-    Route::put('/mou/{mou:uuid}/restore', [MOUController::class, 'restore'])->name('mou.restore');
-    Route::delete('/mou/{mou:uuid}/force', [MOUController::class, 'destroyForce'])->name('mou.destroy.force')->middleware(['can:hapus memo']);
+    Route::put('/mou/{mou:uuid}/restore', [MOUController::class, 'restore'])->name('mou.restore')->middleware(['can:tambah mou']);
+    Route::delete('/mou/{mou:uuid}/force', [MOUController::class, 'destroyForce'])->name('mou.destroy.force')->middleware(['can:hapus mou']);
     Route::get('/mou/{mou:uuid}', [MOUController::class, 'edit'])->name('mou.edit')->middleware(['can:edit mou']);
     Route::post('/mou/{mou:uuid}', [MOUController::class, 'update'])->name('mou.update')->middleware(['can:edit mou']);
     Route::delete('/mou/{mou:uuid}', [MOUController::class, 'destroy'])->name('mou.destroy')->middleware(['can:hapus mou']);
     Route::get('/api/mou', [MOUController::class, 'apiGetmou'])->name('api.mou');
     Route::get('/api/mou/logs', [MOUController::class, 'apiGetLogs'])->name('api.mou.logs');
-    Route::delete('/mou/logs', [MOUController::class, 'destroyLogs'])->name('mou.log.destroy')->middleware(['can:hapus mou']);
+    Route::delete('/mou/logs', [MOUController::class, 'destroyLogs'])->name('mou.log.destroy')->middleware(['can:hapus log']);
     Route::get('api/mou/arsip', [MOUController::class, 'apiGetArsip'])->name('mou.arsip');
     Route::post('/mou/logs/filter', [MOUController::class, 'logFilter'])->name('mou.log.filter')->middleware(['can:tambah mou']);
 
@@ -317,20 +190,20 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/sla', [SLAController::class, 'index'])->name('sla.view')->middleware(['can:lihat sla']);
     Route::get('/sla/create', [SLAController::class, 'create'])->name('sla.create')->middleware(['can:tambah sla']);
     Route::post('/sla', [SLAController::class, 'store'])->name('sla.store')->middleware(['can:tambah sla']);
-    Route::delete('/sla/logs', [SLAController::class, 'destroyLogs'])->name('sla.log.destroy');
+    Route::delete('/sla/logs', [SLAController::class, 'destroyLogs'])->name('sla.log.destroy')->middleware(['can:hapus log']);
     Route::post('/sla/logs/filter', [SLAController::class, 'logFilter'])->name('sla.log.filter');
     Route::post('/sla/filter', [SLAController::class, 'filter'])->name('partners.sla.filter');
     Route::post('/sla/arsip/filter', [SLAController::class, 'arsipFilter'])->name('sla.arsip.filter');
     Route::get('/sla/{sla:uuid}', [SLAController::class, 'edit'])->name('sla.edit')->middleware(['can:edit sla']);
     Route::post('/sla/{sla:uuid}', [SLAController::class, 'update'])->name('sla.update')->middleware(['can:edit sla']);
-    Route::put('/sla/{sla:uuid}/restore', [SLAController::class, 'restore'])->name('sla.restore');
+    Route::put('/sla/{sla:uuid}/restore', [SLAController::class, 'restore'])->name('sla.restore')->middleware(['can:tambah sla']);
     Route::delete('/sla/{sla:uuid}/force', [SLAController::class, 'destroyForce'])->name('sla.destroy.force')->middleware(['can:hapus sla']);
     Route::delete('/sla/{sla:uuid}', [SLAController::class, 'destroy'])->name('sla.destroy')->middleware(['can:hapus sla']);
     Route::get('/api/sla/logs', [SLAController::class, 'apiGetLogs'])->name('api.sla.logs');
     Route::get('api/sla/arsip', [SLAController::class, 'apiGetArsip'])->name('sla.arsip');
     Route::get('/api/sla', [SLAController::class, 'apiGetSla'])->name('api.sla');
     Route::get('api/activity/{sla:id}', [SLAController::class, 'apiGetActivities'])->name('api.activity')->middleware(['can:lihat sla']);
-    Route::post('/activity/{activity:uuid}', [SLAController::class, 'activityUpdate'])->name('activity.update')->middleware(['can:tambah sla']);
+    Route::post('/activity/{activity:uuid}', [SLAController::class, 'activityUpdate'])->name('activity.update')->middleware(['can:edit aktifitas sla']);
     Route::delete('/activity/{activity:uuid}', [SLAController::class, 'activityDestroy'])->name('activity.destroy')->middleware(['can:hapus sla']);
 
     // Invoice Umum
@@ -340,12 +213,12 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/invoice_generals', [InvoiceGeneralController::class, 'store'])->name('invoice_generals.store')->middleware(['can:tambah invoice umum']);
     Route::post('/invoice_generals/arsip/filter', [InvoiceGeneralController::class, 'arsipFilter'])->name('invoice_generals.arsip.filter');
     Route::post('/invoice_generals/logs/filter', [InvoiceGeneralController::class, 'logFilter'])->name('invoice_generals.log.filter');
-    Route::delete('/invoice_generals/logs', [InvoiceGeneralController::class, 'destroyLogs'])->name('sla.invoice_generals.destroy');
-    Route::put('/invoice_generals/{invoice_generals:uuid}/restore', [InvoiceGeneralController::class, 'restore'])->name('invoice_generals.restore');
+    Route::delete('/invoice_generals/logs', [InvoiceGeneralController::class, 'destroyLogs'])->name('sla.invoice_generals.destroy')->middleware(['can:hapus log']);
+    Route::put('/invoice_generals/{invoice_generals:uuid}/restore', [InvoiceGeneralController::class, 'restore'])->name('invoice_generals.restore')->middleware(['can:tambah invoice umum']);
     Route::put('/invoice_generals/{invoice_generals:uuid}/xendit', [InvoiceGeneralController::class, 'updateXendit'])->name('invoice_generals.update.xendit')->middleware(['can:edit invoice umum']);
     Route::get('/invoice_generals/{invoice_generals:uuid}', [InvoiceGeneralController::class, 'edit'])->name('invoice_generals.edit')->middleware(['can:edit invoice umum']);
     Route::put('/invoice_generals/{invoice_generals:uuid}', [InvoiceGeneralController::class, 'update'])->name('invoice_generals.update')->middleware(['can:edit invoice umum']);
-    Route::delete('/invoice_generals/{invoice_generals:uuid}/force', [InvoiceGeneralController::class, 'destroyForce'])->name('invoice_generals.destroy.force')->middleware(['can:hapus sla']);
+    Route::delete('/invoice_generals/{invoice_generals:uuid}/force', [InvoiceGeneralController::class, 'destroyForce'])->name('invoice_generals.destroy.force')->middleware(['can:hapus invoice umum']);
     Route::delete('/invoice_generals/{invoice_generals:uuid}', [InvoiceGeneralController::class, 'destroy'])->name('invoice_generals.destroy')->middleware(['can:hapus invoice umum']);
     Route::get('/api/invoice_generals/logs', [InvoiceGeneralController::class, 'apiGetLogs'])->name('api.invoice_generals.logs');
     Route::get('api/invoice_generals/arsip', [InvoiceGeneralController::class, 'apiGetArsip'])->name('invoice_generals.arsip');
@@ -354,42 +227,117 @@ Route::middleware(['auth'])->group(function () {
     // Invoice Umum Transaksi
     Route::get('/invoice_generals/transaction', [InvoiceGeneralTransactionController::class, 'index'])->name('invoice_generals.transaction.view')->middleware(['can:lihat transaksi']);
     Route::post('/invoice_generals/transaction', [InvoiceGeneralTransactionController::class, 'store'])->name('invoice_generals.transaction.store')->middleware(['can:tambah transaksi']);
-    Route::put('/invoice_generals/transaction/{transaction:uuid}', [InvoiceGeneralTransactionController::class, 'update'])->name('invoice_generals.transaction.update')->middleware(['can:edit transaksi']);
-    Route::delete('/invoice_generals/transaction/{transaction:uuid}', [InvoiceGeneralTransactionController::class, 'destroy'])->name('invoice_generals.transaction.destroy')->middleware(['can:edit transaksi']);
+    Route::post('/invoice_generals/transaction/{transaction:uuid}', [InvoiceGeneralTransactionController::class, 'update'])->name('invoice_generals.transaction.update')->middleware(['can:edit transaksi']);
+    Route::delete('/invoice_generals/transaction/{transaction:uuid}', [InvoiceGeneralTransactionController::class, 'destroy'])->name('invoice_generals.transaction.destroy')->middleware(['can:hapus transaksi']);
 
     // Invoice Langganan
     Route::get('/invoice_subscriptions', [InvoiceSubscriptionController::class, 'index'])->name('invoice_subscriptions.view')->middleware(['can:lihat invoice langganan']);
-    Route::get('/invoice_subscriptions/create', [InvoiceSubscriptionController::class, 'create'])->name('invoice_subscriptions.create');
+    Route::get('/invoice_subscriptions/create', [InvoiceSubscriptionController::class, 'create'])->name('invoice_subscriptions.create')->middleware(['can:tambah invoice langganan']);
     Route::post('/invoice_subscriptions/filter', [InvoiceSubscriptionController::class, 'filter'])->name('invoice_subscriptions.filter')->middleware(['can:tambah invoice langganan']);
     Route::post('/invoice_subscriptions/logs/filter', [InvoiceSubscriptionController::class, 'logFilter'])->name('invoice_subscriptions.log.filter');
     Route::post('/invoice_subscriptions', [InvoiceSubscriptionController::class, 'store'])->name('invoice_subscriptions.store')->middleware(['can:tambah invoice langganan']);
     Route::post('/invoice_subscriptions/batch', [InvoiceSubscriptionController::class, 'storeBatch'])->name('invoice_subscriptions.store.batch')->middleware(['can:tambah invoice langganan']);
     Route::post('/invoice_subscriptions/zip', [InvoiceSubscriptionController::class, 'zipAll'])->name('invoice_subscriptions.zip')->middleware(['can:lihat invoice langganan']);
-    Route::put('/invoice_subscriptions/{invoice_subscriptions:uuid}/restore', [InvoiceSubscriptionController::class, 'restore'])->name('invoice_subscriptions.restore');
+    Route::put('/invoice_subscriptions/{invoice_subscriptions:uuid}/restore', [InvoiceSubscriptionController::class, 'restore'])->name('invoice_subscriptions.restore')->middleware(['can:tambah invoice langganan']);
     Route::put('/invoice_subscriptions/{invoice_subscriptions:uuid}', [InvoiceSubscriptionController::class, 'update'])->name('invoice_subscriptions.update')->middleware(['can:edit invoice langganan']);
-    Route::delete('/invoice_subscriptions/logs', [InvoiceSubscriptionController::class, 'destroyLogs'])->name('invoice_subscriptions.logs.destroy');
-    Route::delete('/invoice_subscriptions/{invoice_subscriptions:uuid}/force', [InvoiceSubscriptionController::class, 'destroyForce'])->name('invoice_subscriptions.destroy.force')->middleware(['can:hapus sla']);
+    Route::delete('/invoice_subscriptions/logs', [InvoiceSubscriptionController::class, 'destroyLogs'])->name('invoice_subscriptions.logs.destroy')->middleware(['can:hapus log']);
+    Route::delete('/invoice_subscriptions/{invoice_subscriptions:uuid}/force', [InvoiceSubscriptionController::class, 'destroyForce'])->name('invoice_subscriptions.destroy.force')->middleware(['can:hapus invoice langganan']);
     Route::delete('/invoice_subscriptions/{invoice_subscriptions:uuid}', [InvoiceSubscriptionController::class, 'destroy'])->name('invoice_subscriptions.destroy')->middleware(['can:hapus invoice langganan']);
     Route::get('/api/invoice_subscriptions/logs', [InvoiceSubscriptionController::class, 'apiGetLogs'])->name('api.invoice_subscriptions.logs');
-    Route::get('/api/invoice_subscriptions/bundle', [InvoiceSubscriptionController::class, 'apiGetInvoiceSubscriptionsWithBundle'])->name('api.invoice_subscriptions.bundle');
     Route::get('api/invoice_subscriptions/arsip', [InvoiceSubscriptionController::class, 'apiGetArsip'])->name('invoice_subscriptions.arsip');
     Route::get('/api/invoice_subscriptions', [InvoiceSubscriptionController::class, 'apiGetInvoiceSubscriptions'])->name('api.invoice_subscriptions');
-    Route::get('/invoice_langganan/{uuid}', [InvoiceSubscriptionController::class, 'editInvoice']);
+    Route::get('/invoice_langganan/{uuid}', [InvoiceSubscriptionController::class, 'editInvoice'])->middleware(['can:edit invoice langganan']);
 
     // Invoice Langganan Transaksi
     Route::get('/invoice_subscriptions/transaction', [InvoiceSubscriptionTransactionController::class, 'index'])->name('invoice_subscriptions.transaction.view')->middleware(['can:lihat transaksi']);
     Route::post('/invoice_subscriptions/transaction', [InvoiceSubscriptionTransactionController::class, 'store'])->name('invoice_subscriptions.transaction.store')->middleware(['can:tambah transaksi']);
-    Route::put('/invoice_subscriptions/transaction/{transaction:uuid}', [InvoiceSubscriptionTransactionController::class, 'update'])->name('invoice_subscriptions.transaction.update')->middleware(['can:edit transaksi']);
-    Route::delete('/invoice_subscriptions/transaction/{transaction:uuid}', [InvoiceSubscriptionTransactionController::class, 'destroy'])->name('invoice_subscriptions.transaction.destroy')->middleware(['can:edit transaksi']);
+    Route::post('/invoice_subscriptions/transaction/{transaction:uuid}', [InvoiceSubscriptionTransactionController::class, 'update'])->name('invoice_subscriptions.transaction.update')->middleware(['can:edit transaksi']);
+    Route::delete('/invoice_subscriptions/transaction/{transaction:uuid}', [InvoiceSubscriptionTransactionController::class, 'destroy'])->name('invoice_subscriptions.transaction.destroy')->middleware(['can:hapus transaksi']);
+
+    // STPD
+    Route::get('/stpd', [STPDController::class, 'index'])->name('stpd.view')->middleware(['can:lihat stpd']);
+    Route::get('/stpd/create', [STPDController::class, 'create'])->name('stpd.create');
+    Route::post('/stpd/filter', [STPDController::class, 'filter'])->name('stpd.filter');
+    Route::post('/stpd', [STPDController::class, 'store'])->name('stpd.store')->middleware(['can:tambah stpd']);
+    Route::get('/stpd/{stpd:uuid}', [STPDController::class, 'edit'])->name('stpd.edit')->middleware(['can:edit stpd']);
+    Route::put('/stpd/{stpd:uuid}/restore', [STPDController::class, 'restore'])->name('stpd.restore')->middleware(['can:tambah stpd']);
+    Route::put('/stpd/{stpd:uuid}', [STPDController::class, 'update'])->name('stpd.update')->middleware(['can:edit stpd']);
+    Route::post('/stpd/arsip/filter', [STPDController::class, 'arsipFilter'])->name('stpd.arsip.filter');
+    Route::post('/stpd/logs/filter', [STPDController::class, 'logFilter'])->name('stpd.log.filter');
+    Route::delete('/stpd/logs', [STPDController::class, 'destroyLogs'])->name('stpd.log.destroy')->middleware(['can:hapus log']);
+    Route::delete('/stpd/{stpd:uuid}/force', [STPDController::class, 'destroyForce'])->name('stpd.destroy.force')->middleware(['can:hapus stpd']);
+    Route::delete('/stpd/{stpd:uuid}', [STPDController::class, 'destroy'])->name('stpd.destroy')->middleware(['can:hapus stpd']);
+    Route::get('/api/stpd/logs', [STPDController::class, 'apiGetLogs'])->name('api.stpd.logs');
+    Route::get('api/stpd/arsip', [STPDController::class, 'apiGetArsip'])->name('stpd.arsip');
+    Route::get('/api/stpd', [STPDController::class, 'apiGetSTPD'])->name('api.stpd');
+
+    // Status
+    Route::get('/status', [StatusController::class, 'index'])->name('status.index')->middleware(['can:lihat status']);
+    Route::post('/status', [StatusController::class, 'store'])->name('status.store')->middleware(['can:tambah status']);
+    Route::put('/status/{status:uuid}/restore', [StatusController::class, 'restore'])->name('status.restore')->middleware(['can:tambah status']);
+    Route::patch('/status/{status:uuid}', [StatusController::class, 'update'])->name('status.update')->middleware(['can:edit status']);
+    Route::delete('/status/{status:uuid}/force', [StatusController::class, 'destroyForce'])->name('status.destroy.force')->middleware(['can:hapus status']);
+    Route::delete('/status/{status:uuid}', [StatusController::class, 'destroy'])->name('status.destroy')->middleware(['can:hapus status']);
+    Route::get('/api/status/arsip', [StatusController::class, 'apiGetStatusArsip'])->name('api.status.arsip');
+    Route::get('/api/status/log', [StatusController::class, 'apiGetStatusLog'])->name('api.status.log');
+    Route::get('/api/status', [StatusController::class, 'apiGetStatus'])->name('api.status');
+
+    // Role & Perizinan
+    Route::get('/role-permission', [RoleController::class, 'index'])->name('role-permission.view');
+    Route::get('/api/roles', [RoleController::class, 'apiGetRole'])->name('api.roles');
+    Route::put('/role-permission-sync/{id}', [PermissionController::class, 'permissionSync'])->name('permissions.sync')->middleware(['can:setting role permission']);
+    Route::get('/api/permissions', [PermissionController::class, 'apiGetPermission'])->name('api.permissions');
+
+    // User
+    Route::get('/users', [UserController::class, 'index'])->name('users.view')->middleware(['can:lihat user']);
+    Route::get('api/users', [UserController::class, 'apiGetUsers'])->name('api.users');
+    Route::post('/users/filter', [UserController::class, 'filter'])->name('users.filter');
+    Route::post('/users/arsip/filter', [UserController::class, 'arsipFilter'])->name('users.arsip.filter');
+    Route::post('/users/logs/filter', [UserController::class, 'logFilter'])->name('users.log.filter');
+    Route::post('/users', [UserController::class, 'store'])->name('users.store')->middleware(['can:tambah user']);
+    Route::put('/users/{users:uuid}/restore', [UserController::class, 'restore'])->name('users.restore')->middleware(['can:tambah user']);
+    Route::delete('/users/{users:uuid}/anjirlah', [UserController::class, 'destroyForce'])->name('users.destroy.force')->middleware(['can:hapus user']);
+    Route::put('/users/{id}', [UserController::class, 'update'])->name('users.update')->middleware(['can:edit user']);
+    Route::delete('/users/logs', [UserController::class, 'destroyLogs'])->name('users.logs.destroy')->middleware(['can:hapus log']);
+    Route::delete('/users/{id}', [UserController::class, 'destroy'])->name('users.delete')->middleware(['can:hapus user']);
+    Route::get('/api/users/logs', [UserController::class, 'apiGetLogs'])->name('api.users.logs');
+    Route::get('api/users/arsip', [UserController::class, 'apiGetArsip'])->name('users.arsip');
+
+    // Produk
+    Route::get('/products', [ProductController::class, 'index'])->name('products.view')->middleware(['can:lihat produk']);
+    Route::post('/products', [ProductController::class, 'store'])->name('products.store')->middleware(['can:tambah produk']);
+    Route::put('/products/{product:uuid}/restore', [ProductController::class, 'restore'])->name('products.restore')->middleware(['can:tambah produk']);
+    Route::delete('/products/{uuid}/force', [ProductController::class, 'destroyForce'])->name('products.destroy.force')->middleware(['can:hapus produk']);
+    Route::put('/products/{product:uuid}', [ProductController::class, 'update'])->name('products.update')->middleware(['can:edit produk']);
+    Route::delete('/products/logs', [ProductController::class, 'destroyLogs'])->name('products.log.destroy')->middleware(['can:hapus log']);
+    Route::delete('/products/{product:uuid}', [ProductController::class, 'destroy'])->name('products.destroy')->middleware(['can:hapus produk']);
+    Route::get('/api/products', [ProductController::class, 'apiGetProducts'])->name('api.products');
+    Route::get('api/products/arsip', [ProductController::class, 'apiGetArsip'])->name('products.arsip');
+    Route::get('api/products/logs', [ProductController::class, 'apiGetLogs'])->name('products.logs');
+    Route::post('/products/logs/filter', [ProductController::class, 'logFilter'])->name('products.log.filter');
+
+    // Kartu
+    Route::get('/cards', [CardController::class, 'index'])->name('cards.view')->middleware(['can:lihat kartu']);
+    Route::get('api/cards', [CardController::class, 'apiGetCards'])->name('api.cards')->middleware(['can:lihat kartu']);
+    Route::post('/cards/arsip/filter', [CardController::class, 'arsipFilter'])->name('cards.arsip.filter');
+    Route::post('/cards/logs/filter', [CardController::class, 'logFilter'])->name('cards.log.filter');
+    Route::post('/cards', [CardController::class, 'store'])->name('cards.store')->middleware(['can:tambah kartu']);
+    Route::put('/cards/{cards:uuid}/restore', [CardController::class, 'restore'])->name('cards.restore')->middleware(['can:tambah kartu']);
+    Route::delete('/cards/{cards:uuid}/force', [CardController::class, 'destroyForce'])->name('cards.destroy.force')->middleware(['can:hapus kartu']);
+    Route::put('/cards/{id}', [CardController::class, 'update'])->name('cards.update')->middleware(['can:edit kartu']);
+    Route::delete('/cards/logs', [CardController::class, 'destroyLogs'])->name('cards.logs.destroy')->middleware(['can:hapus log']);
+    Route::delete('/cards/{id}', [CardController::class, 'destroy'])->name('cards.delete')->middleware(['can:hapus kartu']);
+    Route::get('/api/cards/logs', [CardController::class, 'apiGetLogs'])->name('api.cards.logs');
+    Route::get('api/cards/arsip', [CardController::class, 'apiGetArsip'])->name('cards.arsip');
 
     // Playlist
-    Route::get('/playlists', [PlaylistController::class, 'index'])->name('playlists.view');
-    Route::post('/playlists', [PlaylistController::class, 'store'])->name('playlists.store');
-    Route::post('/playlists/{playlist:uuid}', [PlaylistController::class, 'update'])->name('playlists.update');
-    Route::delete('/playlists/logs', [PlaylistController::class, 'destroyLogs'])->name('playlists.logs.destroy');
-    Route::put('/playlists/{playlists:uuid}/restore', [PlaylistController::class, 'restore'])->name('playlists.restore');
-    Route::delete('/playlists/{playlists:uuid}/force', [PlaylistController::class, 'destroyForce'])->name('playlists.destroy.force');
-    Route::delete('/playlists/{playlist:uuid}', [PlaylistController::class, 'destroy'])->name('playlists.destroy');
+    Route::get('/playlists', [PlaylistController::class, 'index'])->name('playlists.view')->middleware(['can:lihat video']);
+    Route::post('/playlists', [PlaylistController::class, 'store'])->name('playlists.store')->middleware(['can:tambah video']);
+    Route::post('/playlists/{playlist:uuid}', [PlaylistController::class, 'update'])->name('playlists.update')->middleware(['can:edit video']);
+    Route::delete('/playlists/logs', [PlaylistController::class, 'destroyLogs'])->name('playlists.logs.destroy')->middleware(['can:hapus video']);
+    Route::put('/playlists/{playlists:uuid}/restore', [PlaylistController::class, 'restore'])->name('playlists.restore')->middleware(['can:tambah video']);
+    Route::delete('/playlists/{playlists:uuid}/force', [PlaylistController::class, 'destroyForce'])->name('playlists.destroy.force')->middleware(['can:hapus log']);
+    Route::delete('/playlists/{playlist:uuid}', [PlaylistController::class, 'destroy'])->name('playlists.destroy')->middleware(['can:hapus video']);
     Route::post('/playlists/arsip/filter', [PlaylistController::class, 'arsipFilter'])->name('playlists.arsip.filter');
     Route::post('/playlists/logs/filter', [PlaylistController::class, 'logFilter'])->name('playlists.log.filter');
     Route::get('/api/playlists/logs', [PlaylistController::class, 'apiGetLogs'])->name('api.playlists.logs');
@@ -397,14 +345,14 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/api/playlists', [PlaylistController::class, 'apiGetPlaylists'])->name('api.playlists');
 
     // Video
-    Route::post('/videos', [VideoController::class, 'store'])->name('videos.store');
-    Route::post('/videos/{playlist:uuid}', [VideoController::class, 'update'])->name('videos.update');
-    Route::delete('/videos/{playlist:uuid}', [VideoController::class, 'destroy'])->name('videos.destroy');
+    Route::post('/videos', [VideoController::class, 'store'])->name('videos.store')->middleware(['can:tambah video']);
+    Route::post('/videos/{playlist:uuid}', [VideoController::class, 'update'])->name('videos.update')->middleware(['can:update stpd']);
+    Route::delete('/videos/{playlist:uuid}', [VideoController::class, 'destroy'])->name('videos.destroy')->middleware(['can:hapus stpd']);
 });
 
 Route::middleware(['auth', 'role:partner'])->group(function () {
-    Route::get('/e-learning', [ElearningController::class, 'index']);
-    Route::get('/e-learning/{slug}', [ElearningController::class, 'detail'])->name('detail');
+    Route::get('/e-learning', [ElearningController::class, 'index'])->middleware(['can:akses e-learning']);
+    Route::get('/e-learning/{slug}', [ElearningController::class, 'detail'])->name('detail')->middleware(['can:akses e-learning']);
 
 });
 require __DIR__ . '/auth.php';

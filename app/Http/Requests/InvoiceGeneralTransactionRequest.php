@@ -11,7 +11,7 @@ class InvoiceGeneralTransactionRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return T_REQUIRE;
+        return true;
     }
 
     /**

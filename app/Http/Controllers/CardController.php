@@ -35,7 +35,7 @@ class CardController extends Controller
 
         try {
 
-            $status = Status::where('name', 'pengajuan')->first();
+            $status = Status::where('name', 'pengajuan design')->first();
 
             $card = Card::create([
                 'uuid' => Str::uuid(),
@@ -46,6 +46,7 @@ class CardController extends Controller
                 'price' => $request->price,
                 'total' => $request->total,
                 'google_drive_link' => $request->google_drive_link,
+                'address' => $request->address,
                 'approval_date' => Carbon::now(),
                 'created_by' => Auth::user()->id
             ]);
@@ -85,7 +86,9 @@ class CardController extends Controller
                 'pcs' => $request->pcs,
                 'price' => $request->price,
                 'type' => $request->type,
+                'revision_detail' => $request->revision_detail,
                 'google_drive_link' => $request->google_drive_link,
+                'address' => $request->address,
                 'total' => $request->total,
                 'approval_date' => $approval_date ?? $card->approval_date,
                 'design_date' => $design_date ?? $card->design_date,

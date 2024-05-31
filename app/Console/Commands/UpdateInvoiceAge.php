@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use App\Models\InvoiceGeneral;
 use App\Models\InvoiceSubscription;
+use App\Models\Status;
 use Illuminate\Console\Command;
 
 class UpdateInvoiceAge extends Command
@@ -27,20 +28,26 @@ class UpdateInvoiceAge extends Command
      */
     public function handle()
     {
-        $invoices = InvoiceGeneral::whereNotIn('status', ['lunas', 'telat'])->get();
+        $invoices = InvoiceGeneral::with('status')->whereHas('status', function ($query) {
+            return $query->whereNotIn('name', ['lunas', 'telat']);
+        })->get();
         foreach ($invoices as $invoice) {
             $age = $invoice->invoice_age + 1;
             if (now()->gt($invoice->due_date)) {
-                $invoice->update(['invoice_age' => $age, 'status' => 'telat']);
+                $statusTelat = Status::where('category', 'invoice')->where('name', 'telat')->first();
+                $invoice->update(['invoice_age' => $age, 'status_id' => $statusTelat->id]);
             } else {
                 $invoice->update(['invoice_age' => $age]);
             }
         }
 
-        $invoices = InvoiceSubscription::whereNotIn('status', ['lunas', 'telat'])->get();
+        $invoices = InvoiceSubscription::with('status')->whereHas('status', function ($query) {
+            return $query->whereNotIn('name', ['lunas', 'telat']);
+        })->get();
         foreach ($invoices as $invoice) {
             $age = $invoice->invoice_age + 1;
             if (now()->gt($invoice->due_date)) {
+                $statusTelat = Status::where('category', 'invoice')->where('name', 'telat')->first();
                 $invoice->update(['invoice_age' => $age, 'status' => 'telat']);
             } else {
                 $invoice->update(['invoice_age' => $age]);

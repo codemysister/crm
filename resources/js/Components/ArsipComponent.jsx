@@ -21,6 +21,7 @@ import React from "react";
 import { useRef } from "react";
 import { useEffect } from "react";
 import { useState } from "react";
+import PermissionErrorDialog from "./PermissionErrorDialog";
 
 const ArsipComponent = ({
     auth,
@@ -48,6 +49,9 @@ const ArsipComponent = ({
     const [filters, setFilters] = useState({
         global: { value: null, matchMode: FilterMatchMode.CONTAINS },
     });
+    const [permissionErrorIsVisible, setPermissionErrorIsVisible] =
+        useState(false);
+    const { roles, permissions, data: currentUser } = auth.user;
 
     const {
         put,
@@ -247,6 +251,10 @@ const ArsipComponent = ({
                 icon="pi pi-info-circle"
                 accept={handleDeleteData}
             />
+            <PermissionErrorDialog
+                dialogIsVisible={permissionErrorIsVisible}
+                setDialogVisible={setPermissionErrorIsVisible}
+            />
 
             {/* Sidebar filter */}
             <Sidebar
@@ -348,7 +356,13 @@ const ArsipComponent = ({
                         label="pulihkan"
                         className="bg-transparent hover:bg-slate-200 w-full text-slate-500 border-b-2 border-slate-400"
                         onClick={() => {
-                            handleRestoreData(selectedData);
+                            if (selectedData.created_by.id == currentUser.id) {
+                                handleRestoreData(selectedData);
+                            } else {
+                                setPermissionErrorIsVisible(
+                                    (prev) => (prev = true)
+                                );
+                            }
                         }}
                     />
                     <Button
@@ -356,7 +370,13 @@ const ArsipComponent = ({
                         label="hapus permanen"
                         className="bg-transparent hover:bg-slate-200 w-full text-slate-500 border-b-2 border-slate-400"
                         onClick={() => {
-                            confirmDeleteData();
+                            if (selectedData.created_by.id == currentUser.id) {
+                                confirmDeleteData();
+                            } else {
+                                setPermissionErrorIsVisible(
+                                    (prev) => (prev = true)
+                                );
+                            }
                         }}
                     />
                 </div>

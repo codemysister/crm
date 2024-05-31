@@ -16,6 +16,10 @@ const DetailBank = ({
     handleSelectedDetailPartner,
     showSuccess,
     showError,
+    permissions,
+    currentUser,
+    permissionErrorIsVisible,
+    setPermissionErrorIsVisible,
 }) => {
     const [modalBankIsVisible, setModalBankIsVisible] = useState(false);
     const [modalEditBankIsVisible, setModalEditBankIsVisible] = useState(false);
@@ -176,7 +180,21 @@ const DetailBank = ({
                                 <Button
                                     label="edit"
                                     className="p-0 underline bg-transparent text-blue-700 text-left"
-                                    onClick={() => handleEditBank(partner.bank)}
+                                    onClick={() => {
+                                        if (
+                                            permissions.includes(
+                                                "tambah bank partner"
+                                            ) &&
+                                            partner.account_manager_id ==
+                                                currentUser.id
+                                        ) {
+                                            handleEditBank(partner.bank);
+                                        } else {
+                                            setPermissionErrorIsVisible(
+                                                (prev) => (prev = true)
+                                            );
+                                        }
+                                    }}
                                 />
                             </td>
                         </tr>
@@ -188,9 +206,20 @@ const DetailBank = ({
                         Tidak ada data bank,{" "}
                         <Button
                             onClick={() => {
-                                resetBank();
-                                setDataBank("partner", partner);
-                                setModalBankIsVisible(true);
+                                if (
+                                    permissions.includes(
+                                        "tambah bank partner"
+                                    ) &&
+                                    partner.account_manager_id == currentUser.id
+                                ) {
+                                    resetBank();
+                                    setDataBank("partner", partner);
+                                    setModalBankIsVisible(true);
+                                } else {
+                                    setPermissionErrorIsVisible(
+                                        (prev) => (prev = true)
+                                    );
+                                }
                             }}
                             className="bg-transparent p-0 cursor-pointer text-blue-700 underline "
                         >

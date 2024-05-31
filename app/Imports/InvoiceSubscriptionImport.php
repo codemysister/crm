@@ -34,9 +34,9 @@ class InvoiceSubscriptionImport implements ToCollection, WithStartRow, WithHeadi
      */
     protected $signature;
 
-    public function __construct($signature)
+    public function __construct()
     {
-        $this->signature = $signature;
+        $this->signature = ['name' => 'Hari Yuliawan', 'image' => '/assets/img/signatures/ttd_cto.png'];
     }
     public function startRow(): int
     {

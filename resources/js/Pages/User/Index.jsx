@@ -26,6 +26,7 @@ import { TabPanel, TabView } from "primereact/tabview";
 import { formateDate } from "@/Utils/formatDate";
 import LogComponent from "@/Components/LogComponent";
 import ArsipComponent from "@/Components/ArsipComponent";
+import InputError from "@/Components/InputError";
 
 export default function Index({ auth }) {
     const [users, setUsers] = useState("");
@@ -35,6 +36,7 @@ export default function Index({ auth }) {
     const [isLoadingData, setIsLoadingData] = useState(false);
     const [confirmIsVisible, setConfirmIsVisible] = useState(false);
     const [activeIndexTab, setActiveIndexTab] = useState(0);
+    const toast = useRef(null);
     const action = useRef(null);
     const btnFilterRef = useRef(null);
     const [sidebarFilter, setSidebarFilter] = useState(null);
@@ -214,6 +216,9 @@ export default function Index({ auth }) {
             style: {
                 width: "max-content",
                 whiteSpace: "nowrap",
+            },
+            body: (rowData) => {
+                return rowData.number ?? "-";
             },
         },
         {
@@ -700,7 +705,7 @@ export default function Index({ auth }) {
                     <form onSubmit={(e) => handleSubmitForm(e, "tambah")}>
                         <div className="flex flex-col justify-around gap-4 mt-4">
                             <div className="flex flex-col">
-                                <label htmlFor="name">Nama</label>
+                                <label htmlFor="name">Nama *</label>
                                 <InputText
                                     value={data.name}
                                     onChange={(e) =>
@@ -710,9 +715,13 @@ export default function Index({ auth }) {
                                     id="name"
                                     aria-describedby="name-help"
                                 />
+                                <InputError
+                                    message={errors.name}
+                                    className="mt-2"
+                                />
                             </div>
                             <div className="flex flex-col">
-                                <label htmlFor="email">Email</label>
+                                <label htmlFor="email">Email *</label>
                                 <InputText
                                     value={data.email}
                                     onChange={(e) =>
@@ -721,6 +730,10 @@ export default function Index({ auth }) {
                                     className="dark:bg-gray-300"
                                     id="email"
                                     aria-describedby="email-help"
+                                />
+                                <InputError
+                                    message={errors.email}
+                                    className="mt-2"
                                 />
                             </div>
                             <div className="flex flex-col">
@@ -737,7 +750,7 @@ export default function Index({ auth }) {
                                 />
                             </div>
                             <div className="flex flex-col">
-                                <label htmlFor="password">Password</label>
+                                <label htmlFor="password">Password *</label>
                                 <Password
                                     inputClassName="w-full dark:bg-gray-300"
                                     className="flex justify-center items-center align-middle justify-items-center"
@@ -748,10 +761,14 @@ export default function Index({ auth }) {
                                     toggleMask
                                     feedback={false}
                                 />
+                                <InputError
+                                    message={errors.password}
+                                    className="mt-2"
+                                />
                             </div>
                             <div className="flex flex-col">
                                 <label htmlFor="password_confirmation">
-                                    Konfirmasi Password
+                                    Konfirmasi Password *
                                 </label>
                                 <Password
                                     inputClassName="w-full dark:bg-gray-300"
@@ -778,6 +795,10 @@ export default function Index({ auth }) {
                                     optionLabel="name"
                                     placeholder="Pilih Role"
                                     className="w-full md:w-14rem dark:bg-gray-300"
+                                />
+                                <InputError
+                                    message={errors.role}
+                                    className="mt-2"
                                 />
                             </div>
                         </div>

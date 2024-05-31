@@ -11,6 +11,9 @@ const DetailPIC = ({
     handleSelectedDetailPartner,
     showSuccess,
     showError,
+    currentUser,
+    permissionErrorIsVisible,
+    setPermissionErrorIsVisible,
 }) => {
     const [modalEditPicIsVisible, setModalEditPicIsVisible] = useState(false);
     const [modalLogIsVisible, setModalLogIsVisible] = useState(false);
@@ -147,7 +150,18 @@ const DetailPIC = ({
                                 <Button
                                     label="edit"
                                     className="p-0 underline bg-transparent text-blue-700 text-left"
-                                    onClick={() => handleEditPIC(partner.pic)}
+                                    onClick={() => {
+                                        if (
+                                            partner.created_by.id ==
+                                            currentUser.id
+                                        ) {
+                                            handleEditPIC(partner.pic);
+                                        } else {
+                                            setPermissionErrorIsVisible(
+                                                (prev) => (prev = true)
+                                            );
+                                        }
+                                    }}
                                 />
                             </td>
                         </tr>

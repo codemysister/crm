@@ -83,7 +83,7 @@ class LeadController extends Controller
         $lead = Lead::with('status')->where('uuid', $uuid)->first();
         Activity::create([
             'log_name' => 'deleted',
-            'description' => Auth::user()->name . ' menghapus data lead',
+            'description' => ' menghapus data lead',
             'subject_type' => get_class($lead),
             'subject_id' => $lead->id,
             'causer_type' => get_class(Auth::user()),

@@ -720,7 +720,7 @@ const Index = ({ auth }) => {
 
                                         <tr className="border dark:border-none">
                                             <td className="py-2 text-left px-4 border-r dark:border-none">
-                                                {permission.name.split(" ")[0]}
+                                                {permission.name}
                                             </td>
                                             {roles.map((role) => (
                                                 <td

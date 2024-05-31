@@ -18,6 +18,7 @@ return new class extends Migration {
             $table->string('code')->default("KW/0104/XI/2023");
             $table->string('partner_name');
             $table->date('date');
+            $table->string('proof_of_transaction');
             $table->bigInteger('nominal');
             $table->text('money');
             $table->string('metode');

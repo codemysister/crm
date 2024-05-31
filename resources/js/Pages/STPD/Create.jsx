@@ -122,9 +122,9 @@ const Create = ({ usersDefault, partnersDefault, signaturesProp }) => {
         transportation: "",
         accommodation: "",
         signature: {
-            name: null,
-            image: null,
-            position: null,
+            name: "Muh Arif Mahmudin",
+            position: "CEO",
+            image: "/assets/img/signatures/ttd.png",
         },
         stpd_doc: "",
     });
@@ -601,40 +601,6 @@ const Create = ({ usersDefault, partnersDefault, signaturesProp }) => {
                                             aria-describedby="accommodation-help"
                                         />
                                     </div>
-                                    <div className="flex flex-col mt-3">
-                                        <label htmlFor="signature">
-                                            Tanda Tangan *
-                                        </label>
-                                        <Dropdown
-                                            dataKey="name"
-                                            value={data.signature}
-                                            onChange={(e) => {
-                                                setData({
-                                                    ...data,
-                                                    signature: {
-                                                        name: e.target.value
-                                                            .name,
-                                                        image: e.target.value
-                                                            .image,
-                                                        position:
-                                                            e.target.value
-                                                                .position,
-                                                    },
-                                                });
-                                            }}
-                                            options={signatures}
-                                            optionLabel="name"
-                                            placeholder="Pilih Tanda Tangan"
-                                            filter
-                                            valueTemplate={
-                                                selectedOptionTemplate
-                                            }
-                                            itemTemplate={
-                                                optionSignatureTemplate
-                                            }
-                                            className="w-full md:w-14rem"
-                                        />
-                                    </div>
 
                                     <div className="flex-flex-col mt-3">
                                         <form onSubmit={handleSubmitForm}>
@@ -909,7 +875,7 @@ const Create = ({ usersDefault, partnersDefault, signaturesProp }) => {
                                 <p>Purwokerto, {new Date().getFullYear()}</p>
                                 <div className="h-[100px] w-[170px] py-2">
                                     <img
-                                        src={"/storage/" + data.signature.image}
+                                        src={data.signature.image}
                                         alt=""
                                         className="w-full h-full object-fill"
                                     />

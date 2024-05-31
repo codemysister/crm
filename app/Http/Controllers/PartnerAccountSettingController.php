@@ -34,7 +34,7 @@ class PartnerAccountSettingController extends Controller
             'partner_id' => $request["partner"]["id"],
             'subdomain' => $request->subdomain,
             'email_super_admin' => $request->email_super_admin,
-            'cas_link_partner' => $request->cas_link_partner,
+            'password' => $request->password,
             'created_by' => Auth::user()->id
         ]);
     }
@@ -45,7 +45,7 @@ class PartnerAccountSettingController extends Controller
             'partner_id' => $request["partner"]["id"],
             'subdomain' => $request->subdomain,
             'email_super_admin' => $request->email_super_admin,
-            'cas_link_partner' => $request->cas_link_partner,
+            'password' => $request->password,
         ]);
     }
 

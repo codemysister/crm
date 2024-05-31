@@ -10,6 +10,7 @@ use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Maatwebsite\Excel\Concerns\SkipsEmptyRows;
 use Maatwebsite\Excel\Concerns\ToCollection;
@@ -106,6 +107,23 @@ class PartnerImport implements ToCollection, WithValidation, SkipsEmptyRows, Wit
         return $liveAge;
     }
 
+    public static function partnerNameToEmail($string)
+    {
+        // Ambil substring sebelum koma
+        $string = explode(',', $string)[0];
+
+        // Hilangkan karakter selain huruf, angka, dan spasi
+        $string = preg_replace('/[^A-Za-z0-9\s]/', '', $string);
+
+        // Ganti spasi dengan underscore
+        $string = str_replace(' ', '_', $string);
+
+        // Ubah ke huruf kecil
+        $string = strtolower($string);
+
+        return $string;
+    }
+
 
     public function collection(Collection $rows)
     {
@@ -161,11 +179,18 @@ class PartnerImport implements ToCollection, WithValidation, SkipsEmptyRows, Wit
             $province = collect($province->first());
             $regency = collect($regency->first());
 
-
             $tanggal_live = $row["tanggal_live"] ? Carbon::parse(Date::excelToDateTimeObject($row["tanggal_live"]))->format('Y-m-d H:i:s') : null;
             $tanggal_onboarding = $row["tanggal_onboarding"] ? Carbon::parse(Date::excelToDateTimeObject($row["tanggal_onboarding"]))->format('Y-m-d H:i:s') : null;
+            $user = User::create([
+                'name' => $row['nama_partner'],
+                'email' => $this->partnerNameToEmail($row['nama_partner']) . '@cazh.id',
+                'number' => $row['nomor_telepon_lembaga'],
+                'password' => Hash::make('partner123')
+            ]);
+            $user->assignRole('partner');
             $partner = Partner::create([
                 'uuid' => Str::uuid(),
+                'user_id' => $user->id,
                 'name' => $row["nama_partner"],
                 'phone_number' => $row["nomor_telepon_lembaga"],
                 'npwp' => $row['npwp'],

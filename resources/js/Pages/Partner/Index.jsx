@@ -43,6 +43,8 @@ import { upperCaseEachWord } from "@/Utils/UppercaseEachWord.js";
 import LogComponent from "@/Components/LogComponent.jsx";
 import ArsipComponent from "@/Components/ArsipComponent.jsx";
 import { Password } from "primereact/password";
+import PermissionErrorDialog from "@/Components/PermissionErrorDialog.jsx";
+import DialogOnboarding from "@/Components/DialogOnboarding.jsx";
 registerPlugin(FilePondPluginFileValidateSize);
 
 export default function Index({
@@ -50,6 +52,7 @@ export default function Index({
     partner,
     usersProp,
     statusProp,
+    leadOnboardingProp,
     queryParamsProp,
 }) {
     const [partners, setPartners] = useState(null);
@@ -81,9 +84,13 @@ export default function Index({
     const [modalStatusIsVisible, setModalStatusIsVisible] = useState(false);
     const [modalEditPartnersIsVisible, setModalEditPartnersIsVisible] =
         useState(false);
+    const [dialogOnboardingVisible, setDialogOnboardingVisible] =
+        useState(false);
     const toast = useRef(null);
     const modalPartner = useRef(null);
-    const { roles, permissions } = auth.user;
+    const [permissionErrorIsVisible, setPermissionErrorIsVisible] =
+        useState(false);
+    const { roles, permissions, data: currentUser } = auth.user;
     const [preRenderLoad, setPreRenderLoad] = useState(true);
 
     const [filters, setFilters] = useState({
@@ -941,6 +948,18 @@ export default function Index({
                             className="pi pi-filter"
                             style={{ fontSize: "0.7rem" }}
                         ></i>{" "}
+                        {!isMobile && <span>onboarding</span>}
+                    </span>
+                </Button>
+                <Button
+                    className="shadow-md w-[10px] lg:w-[90px] border border-slate-600 bg-transparent text-slate-600 dark:bg-slate-700 dark:text-slate-300 rounded-lg"
+                    onClick={() => setSidebarFilter(true)}
+                >
+                    <span className="w-full flex justify-center items-center gap-1">
+                        <i
+                            className="pi pi-filter"
+                            style={{ fontSize: "0.7rem" }}
+                        ></i>{" "}
                         {!isMobile && <span>filter</span>}
                     </span>
                 </Button>
@@ -1058,31 +1077,50 @@ export default function Index({
     return (
         <DashboardLayout auth={auth.user} className="">
             <Toast ref={toast} />
+            <PermissionErrorDialog
+                dialogIsVisible={permissionErrorIsVisible}
+                setDialogVisible={setPermissionErrorIsVisible}
+            />
             <OverlayPanel
                 className=" shadow-md p-1 dark:bg-slate-800 dark:text-gray-300"
                 ref={action}
             >
                 <div className="flex flex-col flex-wrap w-full">
-                    {permissions.includes("edit partner") && (
-                        <Button
-                            icon="pi pi-pencil"
-                            label="edit"
-                            className="bg-transparent hover:bg-slate-200 w-full text-slate-500 dark:hover:text-slate-900 dark:text-white border-b-2 border-slate-400"
-                            onClick={() => {
+                    <Button
+                        icon="pi pi-pencil"
+                        label="edit"
+                        className="bg-transparent hover:bg-slate-200 w-full text-slate-500 dark:hover:text-slate-900 dark:text-white border-b-2 border-slate-400"
+                        onClick={() => {
+                            if (
+                                permissions.includes("edit partner") &&
+                                selectedPartner.created_by.id == currentUser.id
+                            ) {
                                 handleEditPartner(selectedPartner);
-                            }}
-                        />
-                    )}
-                    {permissions.includes("hapus partner") && (
-                        <Button
-                            icon="pi pi-trash"
-                            label="hapus"
-                            className="bg-transparent hover:bg-slate-200 w-full text-slate-500 dark:hover:text-slate-900 dark:text-white border-b-2 border-slate-400"
-                            onClick={() => {
+                            } else {
+                                setPermissionErrorIsVisible(
+                                    (prev) => (prev = true)
+                                );
+                            }
+                        }}
+                    />
+
+                    <Button
+                        icon="pi pi-trash"
+                        label="hapus"
+                        className="bg-transparent hover:bg-slate-200 w-full text-slate-500 dark:hover:text-slate-900 dark:text-white border-b-2 border-slate-400"
+                        onClick={() => {
+                            if (
+                                permissions.includes("hapus partner") &&
+                                selectedPartner.created_by.id == currentUser.id
+                            ) {
                                 confirmDeletePartner();
-                            }}
-                        />
-                    )}
+                            } else {
+                                setPermissionErrorIsVisible(
+                                    (prev) => (prev = true)
+                                );
+                            }
+                        }}
+                    />
                 </div>
             </OverlayPanel>
 
@@ -2725,6 +2763,7 @@ export default function Index({
                                                     ...data.partner,
                                                     status: e.target.value,
                                                 });
+                                                setModalStatusIsVisible(true);
                                             }}
                                             options={status}
                                             optionLabel="name"
@@ -2757,7 +2796,6 @@ export default function Index({
                         contentClassName="dark:bg-slate-900 dark:text-white"
                         visible={modalStatusIsVisible}
                         modal={false}
-                        closable={false}
                         onHide={() => setModalStatusIsVisible(false)}
                     >
                         <div className="flex flex-col justify-around gap-4 mt-3">
@@ -2796,6 +2834,12 @@ export default function Index({
                         <div className="card p-fluid w-full h-full flex justify-center rounded-lg">
                             {
                                 <DatatablePartner
+                                    dialogOnboardingVisible={
+                                        dialogOnboardingVisible
+                                    }
+                                    setDialogOnboardingVisible={
+                                        setDialogOnboardingVisible
+                                    }
                                     partners={partners}
                                     isLoadingData={isLoadingData}
                                     setSelectedPartner={setSelectedPartner}
@@ -2805,6 +2849,20 @@ export default function Index({
                             }
                         </div>
                     </div>
+
+                    <DialogOnboarding
+                        dialogOnboardingVisible={dialogOnboardingVisible}
+                        setDialogOnboardingVisible={setDialogOnboardingVisible}
+                        setModalPartnersIsVisible={setModalPartnersIsVisible}
+                        filters={filters}
+                        setFilters={setFilters}
+                        isLoadingData={isLoadingData}
+                        setIsLoadingData={setIsLoadingData}
+                        leads={leadOnboardingProp}
+                        data={data}
+                        setData={setData}
+                        reset={reset}
+                    />
                 </TabPanel>
 
                 <TabPanel header="Log">
@@ -2842,6 +2900,7 @@ export default function Index({
                 <TabPanel header="Detail Partner">
                     {activeIndexTab == 3 && (
                         <DetailPartner
+                            auth={auth}
                             partners={partners}
                             detailPartner={detailPartner}
                             handleSelectedDetailPartner={

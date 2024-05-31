@@ -16,6 +16,10 @@ const DetailPriceList = ({
     handleSelectedDetailPartner,
     showSuccess,
     showError,
+    currentUser,
+    permissions,
+    permissionErrorIsVisible,
+    setPermissionErrorIsVisible,
 }) => {
     const [modalPriceListIsVisible, setModalPriceListIsVisible] =
         useState(false);
@@ -386,9 +390,23 @@ const DetailPriceList = ({
                                 <Button
                                     label="edit"
                                     className="p-0 underline bg-transparent text-blue-700 text-left"
-                                    onClick={() =>
-                                        handleEditPriceList(partner.price_list)
-                                    }
+                                    onClick={() => {
+                                        if (
+                                            permissions.includes(
+                                                "tambah harga partner"
+                                            ) &&
+                                            partner.account_manager_id ==
+                                                currentUser.id
+                                        ) {
+                                            handleEditPriceList(
+                                                partner.price_list
+                                            );
+                                        } else {
+                                            setPermissionErrorIsVisible(
+                                                (prev) => (prev = true)
+                                            );
+                                        }
+                                    }}
                                 />
                             </td>
                         </tr>
@@ -848,9 +866,20 @@ const DetailPriceList = ({
                         Tidak ada data harga
                         <Button
                             onClick={() => {
-                                resetPriceList();
-                                setDataPriceList("partner", partner);
-                                setModalPriceListIsVisible(true);
+                                if (
+                                    permissions.includes(
+                                        "tambah harga partner"
+                                    ) &&
+                                    partner.account_manager_id == currentUser.id
+                                ) {
+                                    resetPriceList();
+                                    setDataPriceList("partner", partner);
+                                    setModalPriceListIsVisible(true);
+                                } else {
+                                    setPermissionErrorIsVisible(
+                                        (prev) => (prev = true)
+                                    );
+                                }
                             }}
                             className="bg-transparent p-0 cursor-pointer text-blue-700 underline "
                         >

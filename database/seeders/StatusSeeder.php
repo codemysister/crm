@@ -37,23 +37,9 @@ class StatusSeeder extends Seeder
 
         Status::create([
             'uuid' => Str::uuid(),
-            'name' => 'clbk',
-            'category' => 'partner',
-            'color' => '7C3AED'
-        ]);
-
-        Status::create([
-            'uuid' => Str::uuid(),
-            'name' => 'cancel',
-            'category' => 'partner',
-            'color' => 'DC2626'
-        ]);
-
-        Status::create([
-            'uuid' => Str::uuid(),
             'name' => 'prospek',
             'category' => 'lead',
-            'color' => '00ff48'
+            'color' => '2196f3'
         ]);
 
         Status::create([
@@ -62,6 +48,14 @@ class StatusSeeder extends Seeder
             'category' => 'lead',
             'color' => '4f4f4f'
         ]);
+
+        Status::create([
+            'uuid' => Str::uuid(),
+            'name' => 'pengajuan onboarding',
+            'category' => 'lead',
+            'color' => '00ff48'
+        ]);
+
 
         Status::create([
             'uuid' => Str::uuid(),
@@ -86,7 +80,21 @@ class StatusSeeder extends Seeder
 
         Status::create([
             'uuid' => Str::uuid(),
-            'name' => 'pengajuan',
+            'name' => 'pengajuan design',
+            'category' => 'kartu',
+            'color' => '2196f3'
+        ]);
+
+        Status::create([
+            'uuid' => Str::uuid(),
+            'name' => 'revisi',
+            'category' => 'kartu',
+            'color' => '2196f3'
+        ]);
+
+        Status::create([
+            'uuid' => Str::uuid(),
+            'name' => 'submit design',
             'category' => 'kartu',
             'color' => '2196f3'
         ]);

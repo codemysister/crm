@@ -114,34 +114,6 @@ export default function InvoiceSubscription({
         processing,
         errors,
     } = useForm({
-        partner: {
-            excell: null,
-            signature: {
-                name: null,
-                image: null,
-            },
-        },
-        signature: {
-            name: null,
-            image: null,
-        },
-        date: null,
-        due_date: null,
-        period_subscription: null,
-        selectedPartners: null,
-        excel: null,
-    });
-
-    const {
-        data: dataTransaction,
-        setData: setDataTransaction,
-        post: postTransaction,
-        put: putTransaction,
-        delete: destroyTransaction,
-        reset: resetTransaction,
-        processing: processingTransaction,
-        errors: errorsTransaction,
-    } = useForm({
         id: "",
         invoice_subscription: null,
         partner: {
@@ -152,12 +124,30 @@ export default function InvoiceSubscription({
             name: null,
             image: null,
         },
+        proof_of_transaction: null,
         date: null,
         nominal: null,
         money: null,
         payment_for: null,
         metode: null,
         rest_bill: null,
+    });
+
+    const {
+        data: dataInvoiceBundle,
+        setData: setDataInvoiceBundle,
+        post: postInvoiceBundle,
+        reset: resetInvoideBundle,
+        processing: processingInvoiceBundle,
+        errors: errorInvoiceBundle,
+    } = useForm({
+        partner: {
+            excell: null,
+            signature: {
+                name: null,
+                image: null,
+            },
+        },
     });
 
     const {
@@ -435,7 +425,9 @@ export default function InvoiceSubscription({
                 return (
                     <div className="flex w-full h-full items-center justify-center">
                         <a
-                            href={rowData.invoice_subscription_doc}
+                            href={
+                                "/storage/" + rowData.invoice_subscription_doc
+                            }
                             download={`Invoice_Subscription_${rowData.partner_name}`}
                             class="font-bold  w-full h-full text-center rounded-full "
                         >
@@ -578,8 +570,8 @@ export default function InvoiceSubscription({
         try {
             const response = await axios.request(options);
             const converted = response.data;
-            setDataTransaction((data) => ({
-                ...dataTransaction,
+            setData((data) => ({
+                ...data,
                 nominal: nominal,
                 money: converted,
             }));
@@ -622,8 +614,8 @@ export default function InvoiceSubscription({
     };
 
     const handleEditTransaction = (transaction) => {
-        setDataTransaction({
-            ...dataTransaction,
+        setData({
+            ...data,
             uuid: transaction.uuid,
             invoice_subscription: transaction.invoice_id,
             partner: {
@@ -634,6 +626,7 @@ export default function InvoiceSubscription({
             nominal: transaction.nominal,
             money: transaction.money,
             metode: transaction.metode,
+            proof_of_transaction: transaction.proof_of_transaction,
             payment_for: transaction.payment_for,
             signature: {
                 name: transaction.signature_name,
@@ -681,7 +674,7 @@ export default function InvoiceSubscription({
                             setModalTransactionIsVisible((prev) => false);
 
                             getInvoiceSubscriptions();
-                            resetTransaction(
+                            reset(
                                 "nominal",
                                 "date",
                                 "money",
@@ -689,7 +682,7 @@ export default function InvoiceSubscription({
                                 "metode",
                                 "signature"
                             );
-                            setDataTransaction((prev) => ({
+                            setData((prev) => ({
                                 ...prev,
                                 rest_bill: response.data.rest_of_bill,
                             }));
@@ -1001,7 +994,7 @@ export default function InvoiceSubscription({
                             setModalTransactionIsVisible(
                                 (prev) => (prev = true)
                             );
-                            // resetTransaction("nominal");
+                            // reset("nominal");
                         }}
                         aria-controls="popup_menu_right"
                         aria-haspopup
@@ -1016,16 +1009,9 @@ export default function InvoiceSubscription({
     };
 
     const onRowExpand = (event) => {
-        resetTransaction(
-            "nominal",
-            "date",
-            "money",
-            "payment_for",
-            "metode",
-            "signature"
-        );
+        reset("nominal", "date", "money", "payment_for", "metode", "signature");
 
-        setDataTransaction((prev) => ({
+        setData((prev) => ({
             ...prev,
             invoice_subscription: event.data.uuid,
             partner: {
@@ -1117,6 +1103,28 @@ export default function InvoiceSubscription({
                             style={{ minWidth: "8rem" }}
                             headerClassName="dark:border-none bg-gray-50 dark:bg-transparent dark:text-gray-300"
                         ></Column>
+
+                        <Column
+                            field="proof_of_transaction"
+                            header="Bukti"
+                            style={{
+                                width: "max-content",
+                                whiteSpace: "nowrap",
+                            }}
+                            headerClassName="dark:border-none bg-gray-50 dark:bg-transparent dark:text-gray-300"
+                            body={(rowData) => {
+                                return (
+                                    <div
+                                        className="w-[100px] h-[100px] bg-no-repeat bg-contain rounded-t-xl"
+                                        style={{
+                                            backgroundImage: `url(${rowData.proof_of_transaction})`,
+                                            backgroundPosition: "center",
+                                            backgroundSize: "contain",
+                                        }}
+                                    ></div>
+                                );
+                            }}
+                        ></Column>
                         <Column
                             field="created_by"
                             header="Diinput Oleh"
@@ -1141,10 +1149,7 @@ export default function InvoiceSubscription({
                                 ) : (
                                     <div className="flex w-full h-full items-center justify-center">
                                         <a
-                                            href={
-                                                "/storage/" +
-                                                rowData.receipt_doc
-                                            }
+                                            href={rowData.receipt_doc}
                                             download={`Kwitansi_${rowData.partner_name}`}
                                             class="font-bold  w-full h-full text-center rounded-full "
                                         >
@@ -1191,10 +1196,11 @@ export default function InvoiceSubscription({
                 .post(
                     "/invoice_subscriptions/transaction",
                     {
-                        dataTransaction,
+                        ...data,
                     },
                     {
                         headers: {
+                            "Content-Type": "multipart/form-data",
                             "X-CSRF-TOKEN": csrfToken,
                         },
                     }
@@ -1202,13 +1208,14 @@ export default function InvoiceSubscription({
                 .then((response) => {
                     if (response.data.error) {
                         showError(response.data.error);
+                        setBlocked(false);
                     } else {
                         setBlocked(false);
                         showSuccess("Tambah");
                         setModalTransactionIsVisible((prev) => false);
 
                         getInvoiceSubscriptions();
-                        resetTransaction(
+                        reset(
                             "nominal",
                             "date",
                             "money",
@@ -1216,7 +1223,7 @@ export default function InvoiceSubscription({
                             "metode",
                             "signature"
                         );
-                        setDataTransaction((prev) => ({
+                        setData((prev) => ({
                             ...prev,
                             rest_bill: response.data.rest_of_bill,
                         }));
@@ -1224,14 +1231,14 @@ export default function InvoiceSubscription({
                 });
         } else {
             axios
-                .put(
-                    "/invoice_subscriptions/transaction/" +
-                        dataTransaction.uuid,
+                .post(
+                    "/invoice_subscriptions/transaction/" + data.uuid,
                     {
-                        dataTransaction,
+                        ...data,
                     },
                     {
                         headers: {
+                            "Content-Type": "multipart/form-data",
                             "X-CSRF-TOKEN": document.head.querySelector(
                                 'meta[name="csrf-token"]'
                             ).content,
@@ -1241,14 +1248,15 @@ export default function InvoiceSubscription({
                 .then((response) => {
                     if (response.data.error) {
                         showError(response.data.error);
+                        setBlocked(false);
                     } else {
                         showSuccess("Update");
                         setModalEditTransactionIsVisible(
                             (prev) => (prev = false)
                         );
-
+                        setBlocked(false);
                         getInvoiceSubscriptions();
-                        resetTransaction(
+                        reset(
                             "nominal",
                             "date",
                             "money",
@@ -1256,7 +1264,7 @@ export default function InvoiceSubscription({
                             "metode",
                             "signature"
                         );
-                        setDataTransaction((prev) => ({
+                        setData((prev) => ({
                             ...prev,
                             rest_bill: response.data.rest_of_bill,
                         }));
@@ -1308,38 +1316,26 @@ export default function InvoiceSubscription({
 
     const handleSubmitFormMassal = (e, type) => {
         e.preventDefault();
-
+        setBlocked(true);
         // showDocumentLoading();
         setModalBundleIsVisible((prev) => false);
-        if (type === "tambah") {
-            post("/invoice_subscriptions/batch", {
-                onSuccess: () => {
-                    showSuccess("Tambah");
-                    getInvoiceSubscriptions();
-                    setIsImportSuccess(true);
 
-                    reset();
-                    clear();
-                },
-                onError: (e) => {
-                    showError("Tambah");
-                    clear();
-                    setErrorMessages(e.error);
-                },
-            });
-        } else {
-            post(`activity/${data.uuid}`, {
-                onSuccess: () => {
-                    showSuccess("Update");
-                    setModalEditTransactionIsVisible((prev) => false);
-                    getSlas();
-                    reset();
-                },
-                onError: () => {
-                    showError("Update");
-                },
-            });
-        }
+        postInvoiceBundle("/invoice_subscriptions/batch", {
+            onSuccess: () => {
+                showSuccess("Tambah");
+                getInvoiceSubscriptions();
+                setIsImportSuccess(true);
+                setBlocked(false);
+                resetInvoideBundle();
+                clear();
+            },
+            onError: (e) => {
+                showError("Tambah");
+                clear();
+                setBlocked(false);
+                setErrorMessages(e.error);
+            },
+        });
     };
 
     const confirmDeleteInvoice = () => {
@@ -1875,7 +1871,7 @@ export default function InvoiceSubscription({
                     visible={modalBundleIsVisible}
                     onHide={() => setModalBundleIsVisible(false)}
                 >
-                    <form onSubmit={(e) => handleSubmitFormMassal(e, "tambah")}>
+                    <form onSubmit={(e) => handleSubmitFormMassal(e)}>
                         <div className="flex flex-col justify-around gap-4 mt-4">
                             <div className="flex bg-green-600 text-white text-xs p-3 rounded-lg justify-between w-full h-full">
                                 <p>Template</p>
@@ -1897,8 +1893,8 @@ export default function InvoiceSubscription({
                                 <div className="App">
                                     <FilePond
                                         onaddfile={(error, fileItems) => {
-                                            setData("partner", {
-                                                ...data.partner,
+                                            setDataInvoiceBundle("partner", {
+                                                ...dataInvoiceBundle.partner,
                                                 excell: fileItems.file,
                                             });
                                         }}
@@ -1941,7 +1937,7 @@ export default function InvoiceSubscription({
                         <div className="flex justify-center mt-5">
                             <Button
                                 label="Submit"
-                                disabled={processing}
+                                disabled={processingInvoiceBundle}
                                 className="bg-purple-600 text-sm shadow-md rounded-lg"
                             />
                         </div>
@@ -1964,8 +1960,8 @@ export default function InvoiceSubscription({
                                     <p>Sisa tagihan</p>
                                     <p className="font-semibold">
                                         Rp{" "}
-                                        {dataTransaction.rest_bill
-                                            ? dataTransaction.rest_bill.toLocaleString(
+                                        {data.rest_bill
+                                            ? data.rest_bill.toLocaleString(
                                                   "id-ID"
                                               )
                                             : 0}
@@ -1976,16 +1972,11 @@ export default function InvoiceSubscription({
                                 <label htmlFor="date">Tanggal *</label>
                                 <Calendar
                                     value={
-                                        dataTransaction.date
-                                            ? new Date(dataTransaction.date)
-                                            : null
+                                        data.date ? new Date(data.date) : null
                                     }
                                     style={{ height: "35px" }}
                                     onChange={(e) => {
-                                        setDataTransaction(
-                                            "date",
-                                            e.target.value
-                                        );
+                                        setData("date", e.target.value);
                                     }}
                                     showIcon
                                     dateFormat="dd-mm-yy"
@@ -1998,11 +1989,11 @@ export default function InvoiceSubscription({
                                 <label htmlFor="money">Diterima Dari *</label>
 
                                 <Dropdown
-                                    value={dataTransaction.partner}
+                                    value={data.partner}
                                     dataKey="id"
                                     onChange={(e) => {
-                                        setDataTransaction("partner", {
-                                            ...dataTransaction.partner,
+                                        setData("partner", {
+                                            ...data.partner,
                                             id: e.target.value.id,
                                             name: e.target.value.name,
                                         });
@@ -2020,7 +2011,7 @@ export default function InvoiceSubscription({
                             <div className="flex flex-col justify-around mt-3">
                                 <label htmlFor="nominal">Nominal *</label>
                                 <InputNumber
-                                    value={dataTransaction.nominal}
+                                    value={data.nominal}
                                     onValueChange={(e) => {
                                         convertRupiah(e.value);
                                     }}
@@ -2034,12 +2025,9 @@ export default function InvoiceSubscription({
                             <div className="flex flex-col mt-3">
                                 <label htmlFor="money">Uang Terbilang *</label>
                                 <InputText
-                                    value={dataTransaction.money}
+                                    value={data.money}
                                     onChange={(e) =>
-                                        setDataTransaction(
-                                            "money",
-                                            e.target.value
-                                        )
+                                        setData("money", e.target.value)
                                     }
                                     className="dark:bg-gray-300"
                                     id="money"
@@ -2051,12 +2039,9 @@ export default function InvoiceSubscription({
                                     Pembayaran Untuk *
                                 </label>
                                 <InputText
-                                    value={dataTransaction.payment_for}
+                                    value={data.payment_for}
                                     onChange={(e) =>
-                                        setDataTransaction(
-                                            "payment_for",
-                                            e.target.value
-                                        )
+                                        setData("payment_for", e.target.value)
                                     }
                                     className="dark:bg-gray-300"
                                     id="payment_for"
@@ -2066,12 +2051,9 @@ export default function InvoiceSubscription({
                             <div className="flex flex-col mt-3">
                                 <label htmlFor="metode">Metode *</label>
                                 <Dropdown
-                                    value={dataTransaction.metode}
+                                    value={data.metode}
                                     onChange={(e) =>
-                                        setDataTransaction(
-                                            "metode",
-                                            e.target.value
-                                        )
+                                        setData("metode", e.target.value)
                                     }
                                     options={[
                                         { name: "Tunai" },
@@ -2084,30 +2066,69 @@ export default function InvoiceSubscription({
                                     editable
                                 />
                             </div>
-                            {/* <div className="flex flex-col mt-3">
-                                <label htmlFor="signature">
-                                    Tanta tangan *
+                            <div className="flex flex-col mt-3">
+                                <label htmlFor="proof_of_transaction">
+                                    Bukti (foto) *
                                 </label>
-                                <Dropdown
-                                    value={dataTransaction.signature}
-                                    onChange={(e) => {
-                                        setDataTransaction("signature", {
-                                            ...dataTransaction.signature,
-                                            name: e.target.value.name,
-                                            position: e.target.value.position,
-                                            image: e.target.value.image,
-                                        });
-                                    }}
-                                    dataKey="name"
-                                    options={signatures}
-                                    optionLabel="name"
-                                    placeholder="Pilih Tanda Tangan"
-                                    filter
-                                    valueTemplate={selectedOptionTemplate}
-                                    itemTemplate={optionSignatureTemplate}
-                                    className="w-full md:w-14rem"
-                                />
-                            </div> */}
+                                <div className="App">
+                                    {data.proof_of_transaction !== null &&
+                                    typeof data.proof_of_transaction ==
+                                        "string" ? (
+                                        <>
+                                            <FilePond
+                                                files={
+                                                    data.proof_of_transaction
+                                                }
+                                                onaddfile={(
+                                                    error,
+                                                    fileItems
+                                                ) => {
+                                                    if (!error) {
+                                                        setData(
+                                                            "proof_of_transaction",
+                                                            fileItems.file
+                                                        );
+                                                    }
+                                                }}
+                                                onremovefile={() => {
+                                                    setData(
+                                                        "proof_of_transaction",
+                                                        null
+                                                    );
+                                                }}
+                                                maxFileSize="2mb"
+                                                labelMaxFileSizeExceeded="File terlalu besar"
+                                                labelIdle='Drag & Drop your files or <span class="filepond--label-action">Browse</span>'
+                                            />
+                                        </>
+                                    ) : (
+                                        <>
+                                            <FilePond
+                                                onaddfile={(
+                                                    error,
+                                                    fileItems
+                                                ) => {
+                                                    if (!error) {
+                                                        setData(
+                                                            "proof_of_transaction",
+                                                            fileItems.file
+                                                        );
+                                                    }
+                                                }}
+                                                onremovefile={() => {
+                                                    setData(
+                                                        "proof_of_transaction",
+                                                        null
+                                                    );
+                                                }}
+                                                maxFileSize="2mb"
+                                                labelMaxFileSizeExceeded="File terlalu besar"
+                                                labelIdle='Drag & Drop your files or <span class="filepond--label-action">Browse</span>'
+                                            />
+                                        </>
+                                    )}
+                                </div>
+                            </div>
                             <div className="flex justify-center my-5">
                                 <Button
                                     label="Submit"
@@ -2134,8 +2155,8 @@ export default function InvoiceSubscription({
                                     <p>Sisa tagihan</p>
                                     <p className="font-semibold">
                                         Rp{" "}
-                                        {dataTransaction.rest_bill
-                                            ? dataTransaction.rest_bill.toLocaleString(
+                                        {data.rest_bill
+                                            ? data.rest_bill.toLocaleString(
                                                   "id-ID"
                                               )
                                             : 0}
@@ -2146,16 +2167,11 @@ export default function InvoiceSubscription({
                                 <label htmlFor="date">Tanggal *</label>
                                 <Calendar
                                     value={
-                                        dataTransaction.date
-                                            ? new Date(dataTransaction.date)
-                                            : null
+                                        data.date ? new Date(data.date) : null
                                     }
                                     style={{ height: "35px" }}
                                     onChange={(e) => {
-                                        setDataTransaction(
-                                            "date",
-                                            e.target.value
-                                        );
+                                        setData("date", e.target.value);
                                     }}
                                     showIcon
                                     dateFormat="dd-mm-yy"
@@ -2168,11 +2184,11 @@ export default function InvoiceSubscription({
                                 <label htmlFor="money">Diterima Dari *</label>
 
                                 <Dropdown
-                                    value={dataTransaction.partner}
+                                    value={data.partner}
                                     dataKey="id"
                                     onChange={(e) => {
-                                        setDataTransaction("partner", {
-                                            ...dataTransaction.partner,
+                                        setData("partner", {
+                                            ...data.partner,
                                             id: e.target.value.id,
                                             name: e.target.value.name,
                                         });
@@ -2189,7 +2205,7 @@ export default function InvoiceSubscription({
                             <div className="flex flex-col justify-around mt-3">
                                 <label htmlFor="nominal">Nominal *</label>
                                 <InputNumber
-                                    value={dataTransaction.nominal}
+                                    value={data.nominal}
                                     onValueChange={(e) => {
                                         convertRupiah(e.value);
                                     }}
@@ -2203,12 +2219,9 @@ export default function InvoiceSubscription({
                             <div className="flex flex-col mt-3">
                                 <label htmlFor="money">Uang Terbilang *</label>
                                 <InputText
-                                    value={dataTransaction.money}
+                                    value={data.money}
                                     onChange={(e) =>
-                                        setDataTransaction(
-                                            "money",
-                                            e.target.value
-                                        )
+                                        setData("money", e.target.value)
                                     }
                                     className="dark:bg-gray-300"
                                     id="money"
@@ -2220,12 +2233,9 @@ export default function InvoiceSubscription({
                                     Pembayaran Untuk *
                                 </label>
                                 <InputText
-                                    value={dataTransaction.payment_for}
+                                    value={data.payment_for}
                                     onChange={(e) =>
-                                        setDataTransaction(
-                                            "payment_for",
-                                            e.target.value
-                                        )
+                                        setData("payment_for", e.target.value)
                                     }
                                     className="dark:bg-gray-300"
                                     id="payment_for"
@@ -2235,12 +2245,9 @@ export default function InvoiceSubscription({
                             <div className="flex flex-col mt-3">
                                 <label htmlFor="metode">Metode *</label>
                                 <Dropdown
-                                    value={dataTransaction.metode}
+                                    value={data.metode}
                                     onChange={(e) =>
-                                        setDataTransaction(
-                                            "metode",
-                                            e.target.value
-                                        )
+                                        setData("metode", e.target.value)
                                     }
                                     options={[
                                         { name: "Tunai" },
@@ -2253,15 +2260,15 @@ export default function InvoiceSubscription({
                                     editable
                                 />
                             </div>
-                            <div className="flex flex-col mt-3">
+                            {/* <div className="flex flex-col mt-3">
                                 <label htmlFor="signature">
                                     Tanta tangan *
                                 </label>
                                 <Dropdown
-                                    value={dataTransaction.signature}
+                                    value={data.signature}
                                     onChange={(e) => {
-                                        setDataTransaction("signature", {
-                                            ...dataTransaction.signature,
+                                        setData("signature", {
+                                            ...data.signature,
                                             name: e.target.value.name,
                                             position: e.target.value.position,
                                             image: e.target.value.image,
@@ -2276,6 +2283,69 @@ export default function InvoiceSubscription({
                                     itemTemplate={optionSignatureTemplate}
                                     className="w-full md:w-14rem"
                                 />
+                            </div> */}
+                            <div className="flex flex-col mt-3">
+                                <label htmlFor="proof_of_transaction">
+                                    Bukti (foto) *
+                                </label>
+                                <div className="App">
+                                    {data.proof_of_transaction !== null &&
+                                    typeof data.proof_of_transaction ==
+                                        "string" ? (
+                                        <>
+                                            <FilePond
+                                                files={
+                                                    data.proof_of_transaction
+                                                }
+                                                onaddfile={(
+                                                    error,
+                                                    fileItems
+                                                ) => {
+                                                    if (!error) {
+                                                        setData(
+                                                            "proof_of_transaction",
+                                                            fileItems.file
+                                                        );
+                                                    }
+                                                }}
+                                                onremovefile={() => {
+                                                    setData(
+                                                        "proof_of_transaction",
+                                                        null
+                                                    );
+                                                }}
+                                                maxFileSize="2mb"
+                                                labelMaxFileSizeExceeded="File terlalu besar"
+                                                labelIdle='Drag & Drop your files or <span class="filepond--label-action">Browse</span>'
+                                            />
+                                        </>
+                                    ) : (
+                                        <>
+                                            <FilePond
+                                                onaddfile={(
+                                                    error,
+                                                    fileItems
+                                                ) => {
+                                                    if (!error) {
+                                                        setData(
+                                                            "proof_of_transaction",
+                                                            fileItems.file
+                                                        );
+                                                    }
+                                                }}
+                                                onremovefile={() => {
+                                                    setData(
+                                                        "proof_of_transaction",
+                                                        null
+                                                    );
+                                                }}
+                                                maxFileSize="2mb"
+                                                labelMaxFileSizeExceeded="File terlalu besar"
+                                                labelIdle='Drag & Drop your files or <span class="filepond--label-action">Browse</span>'
+                                            />
+                                        </>
+                                    )}
+                                </div>
                             </div>
                             <div className="flex justify-center my-5">
                                 <Button

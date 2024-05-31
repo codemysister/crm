@@ -29,6 +29,9 @@ class PartnerController extends Controller
     {
         $uuid = $request->query('detail');
         $usersProp = User::with('roles')->get();
+        $leadOnboardingProp = Lead::with('status', 'sales')->whereHas('status', function ($query) {
+            return $query->where('name', 'pengajuan onboarding');
+        })->get();
         $partner = null;
         if ($uuid) {
             $partner = Partner::with([
@@ -47,7 +50,7 @@ class PartnerController extends Controller
         $queryParamsProp = $request->all(['onboarding']);
 
         $statusProp = Status::where('category', 'partner')->get();
-        return Inertia::render("Partner/Index", compact('partner', 'usersProp', 'statusProp', 'queryParamsProp'));
+        return Inertia::render("Partner/Index", compact('partner', 'usersProp', 'leadOnboardingProp', 'statusProp', 'queryParamsProp'));
     }
 
     public function filter(Request $request)
@@ -178,6 +181,21 @@ class PartnerController extends Controller
                 'name' => $request['partner']['pic'],
                 'created_by' => Auth::user()->id
             ]);
+
+            if ($request['partner']['lead_id']) {
+                $lead = Lead::with('status')->where('id', $request['partner']['lead_id'])->first();
+                Activity::create([
+                    'log_name' => 'onboarding',
+                    'description' => ' onboardingkan lead',
+                    'subject_type' => get_class($lead),
+                    'subject_id' => $lead->id,
+                    'causer_type' => "App\Models\User",
+                    'causer_id' => $request['partner']['sales']['id'],
+                    "event" => "onboarding",
+                    'properties' => ["attributes" => ['name' => $lead->name, 'address' => $lead->address, 'pic' => $lead->pic, 'total_members' => $lead->total_members, 'status.name' => $lead->status->name, 'status.color' => $lead->status->color]]
+                ]);
+                $lead->forceDelete();
+            }
 
             DB::commit();
 
@@ -482,7 +500,7 @@ class PartnerController extends Controller
     public function apiGetStatusLogs()
     {
         $logs = Activity::with(['causer', 'subject'])
-            ->where('subject_type', 'App\Models\Partner')
+            ->where('subject_type', Partner::class)
             ->where('event', 'updated')
             ->where('note_status', '!=', null)
             ->latest()

@@ -15,6 +15,23 @@ class PermissionSeeder extends Seeder
     public function run(): void
     {
 
+        // Lead
+        Permission::create(['name' => 'lihat lead', 'group_name' => 'Lead']);
+        Permission::create(['name' => 'tambah lead', 'group_name' => 'Lead']);
+        Permission::create(['name' => 'edit lead', 'group_name' => 'Lead']);
+        Permission::create(['name' => 'hapus lead', 'group_name' => 'Lead']);
+
+        // Partner
+        Permission::create(['name' => 'lihat partner', 'group_name' => 'Partner']);
+        Permission::create(['name' => 'tambah partner', 'group_name' => 'Partner']);
+        Permission::create(['name' => 'edit partner', 'group_name' => 'Partner']);
+        Permission::create(['name' => 'hapus partner', 'group_name' => 'Partner']);
+        Permission::create(['name' => 'tambah bank partner', 'group_name' => 'Partner']);
+        Permission::create(['name' => 'tambah langganan partner', 'group_name' => 'Partner']);
+        Permission::create(['name' => 'tambah harga partner', 'group_name' => 'Partner']);
+        Permission::create(['name' => 'tambah akun partner', 'group_name' => 'Partner']);
+
+
         // Quotation letter / sph
         Permission::create(['name' => 'lihat sph', 'group_name' => 'Surat Penawaran Harga (SPH)']);
         Permission::create(['name' => 'tambah sph', 'group_name' => 'Surat Penawaran Harga (SPH)']);
@@ -32,6 +49,7 @@ class PermissionSeeder extends Seeder
         Permission::create(['name' => 'tambah sla', 'group_name' => 'SLA']);
         Permission::create(['name' => 'edit sla', 'group_name' => 'SLA']);
         Permission::create(['name' => 'hapus sla', 'group_name' => 'SLA']);
+        Permission::create(['name' => 'edit aktifitas sla', 'group_name' => 'SLA']);
 
         // General Invoice
         Permission::create(['name' => 'lihat invoice umum', 'group_name' => 'Invoice Umum']);
@@ -45,11 +63,11 @@ class PermissionSeeder extends Seeder
         Permission::create(['name' => 'edit invoice langganan', 'group_name' => 'Invoice Langganan']);
         Permission::create(['name' => 'hapus invoice langganan', 'group_name' => 'Invoice Langganan']);
 
-        // Receipt
-        Permission::create(['name' => 'lihat kwitansi', 'group_name' => 'Kwitansi']);
-        Permission::create(['name' => 'tambah kwitansi', 'group_name' => 'Kwitansi']);
-        Permission::create(['name' => 'edit kwitansi', 'group_name' => 'Kwitansi']);
-        Permission::create(['name' => 'hapus kwitansi', 'group_name' => 'Kwitansi']);
+        // Transaction
+        Permission::create(['name' => 'lihat transaksi', 'group_name' => 'Transaksi']);
+        Permission::create(['name' => 'tambah transaksi', 'group_name' => 'Transaksi']);
+        Permission::create(['name' => 'edit transaksi', 'group_name' => 'Transaksi']);
+        Permission::create(['name' => 'hapus transaksi', 'group_name' => 'Transaksi']);
 
         // Official travel letter / stpd
         Permission::create(['name' => 'lihat stpd', 'group_name' => 'Surat Perjalanan Dinas (stpd)']);
@@ -69,45 +87,9 @@ class PermissionSeeder extends Seeder
         Permission::create(['name' => 'edit user', 'group_name' => 'User']);
         Permission::create(['name' => 'hapus user', 'group_name' => 'User']);
 
-        // Role
-        Permission::create(['name' => 'lihat role', 'group_name' => 'Role']);
-        Permission::create(['name' => 'tambah role', 'group_name' => 'Role']);
-        Permission::create(['name' => 'edit role', 'group_name' => 'Role']);
-        Permission::create(['name' => 'hapus role', 'group_name' => 'Role']);
-
-        // Permission
-        Permission::create(['name' => 'lihat permission', 'group_name' => 'Permission']);
-        Permission::create(['name' => 'tambah permission', 'group_name' => 'Permission']);
-        Permission::create(['name' => 'edit permission', 'group_name' => 'Permission']);
-        Permission::create(['name' => 'hapus permission', 'group_name' => 'Permission']);
 
         // Role & permission
         Permission::create(['name' => 'setting role permission', 'group_name' => 'Permission & Role']);
-
-
-        // Lead
-        Permission::create(['name' => 'lihat lead', 'group_name' => 'Lead']);
-        Permission::create(['name' => 'tambah lead', 'group_name' => 'Lead']);
-        Permission::create(['name' => 'edit lead', 'group_name' => 'Lead']);
-        Permission::create(['name' => 'hapus lead', 'group_name' => 'Lead']);
-
-        // Partner
-        Permission::create(['name' => 'lihat partner', 'group_name' => 'Partner']);
-        Permission::create(['name' => 'tambah partner', 'group_name' => 'Partner']);
-        Permission::create(['name' => 'edit partner', 'group_name' => 'Partner']);
-        Permission::create(['name' => 'hapus partner', 'group_name' => 'Partner']);
-
-        // PIC
-        Permission::create(['name' => 'lihat pic', 'group_name' => 'Partner PIC']);
-        Permission::create(['name' => 'tambah pic', 'group_name' => 'Partner PIC']);
-        Permission::create(['name' => 'edit pic', 'group_name' => 'Partner PIC']);
-        Permission::create(['name' => 'hapus pic', 'group_name' => 'Partner PIC']);
-
-        // Referral
-        Permission::create(['name' => 'lihat referral', 'group_name' => 'Referral']);
-        Permission::create(['name' => 'tambah referral', 'group_name' => 'Referral']);
-        Permission::create(['name' => 'edit referral', 'group_name' => 'Referral']);
-        Permission::create(['name' => 'hapus referral', 'group_name' => 'Referral']);
 
         // Status
         Permission::create(['name' => 'lihat status', 'group_name' => 'Status']);
@@ -115,48 +97,23 @@ class PermissionSeeder extends Seeder
         Permission::create(['name' => 'edit status', 'group_name' => 'Status']);
         Permission::create(['name' => 'hapus status', 'group_name' => 'Status']);
 
-        // Tanda Tangan
-        Permission::create(['name' => 'lihat tanda tangan', 'group_name' => 'Tanda Tangan']);
-        Permission::create(['name' => 'tambah tanda tangan', 'group_name' => 'Tanda Tangan']);
-        Permission::create(['name' => 'edit tanda tangan', 'group_name' => 'Tanda Tangan']);
-        Permission::create(['name' => 'hapus tanda tangan', 'group_name' => 'Tanda Tangan']);
+        // Kartu
+        Permission::create(['name' => 'lihat kartu', 'group_name' => 'Kartu']);
+        Permission::create(['name' => 'tambah kartu', 'group_name' => 'Kartu']);
+        Permission::create(['name' => 'edit kartu', 'group_name' => 'Kartu']);
+        Permission::create(['name' => 'hapus kartu', 'group_name' => 'Kartu']);
 
-        // Akun
-        Permission::create(['name' => 'lihat akun', 'group_name' => 'Partner Akun']);
-        Permission::create(['name' => 'tambah akun', 'group_name' => 'Partner Akun']);
-        Permission::create(['name' => 'edit akun', 'group_name' => 'Partner Akun']);
-        Permission::create(['name' => 'hapus akun', 'group_name' => 'Partner Akun']);
+        // Video
+        Permission::create(['name' => 'lihat video', 'group_name' => 'Video']);
+        Permission::create(['name' => 'tambah video', 'group_name' => 'Video']);
+        Permission::create(['name' => 'edit video', 'group_name' => 'Video']);
+        Permission::create(['name' => 'hapus video', 'group_name' => 'Video']);
 
-        // Bank
-        Permission::create(['name' => 'lihat bank', 'group_name' => 'Partner Bank']);
-        Permission::create(['name' => 'tambah bank', 'group_name' => 'Partner Bank']);
-        Permission::create(['name' => 'edit bank', 'group_name' => 'Partner Bank']);
-        Permission::create(['name' => 'hapus bank', 'group_name' => 'Partner Bank']);
+        // Log
+        Permission::create(['name' => 'hapus log', 'group_name' => 'Log']);
 
-        // Langganan
-        Permission::create(['name' => 'lihat langganan', 'group_name' => 'Partner Langganan']);
-        Permission::create(['name' => 'tambah langganan', 'group_name' => 'Partner Langganan']);
-        Permission::create(['name' => 'edit langganan', 'group_name' => 'Partner Langganan']);
-        Permission::create(['name' => 'hapus langganan', 'group_name' => 'Partner Langganan']);
-
-        // Harga
-        Permission::create(['name' => 'lihat harga', 'group_name' => 'Partner Harga']);
-        Permission::create(['name' => 'tambah harga', 'group_name' => 'Partner Harga']);
-        Permission::create(['name' => 'edit harga', 'group_name' => 'Partner Harga']);
-        Permission::create(['name' => 'hapus harga', 'group_name' => 'Partner Harga']);
-
-        // Memo
-        Permission::create(['name' => 'lihat memo', 'group_name' => 'Memo']);
-        Permission::create(['name' => 'tambah memo', 'group_name' => 'Memo']);
-        Permission::create(['name' => 'edit memo', 'group_name' => 'Memo']);
-        Permission::create(['name' => 'hapus memo', 'group_name' => 'Memo']);
-
-        // Transaction
-        Permission::create(['name' => 'lihat transaksi', 'group_name' => 'Transaksi']);
-        Permission::create(['name' => 'tambah transaksi', 'group_name' => 'Transaksi']);
-        Permission::create(['name' => 'edit transaksi', 'group_name' => 'Transaksi']);
-        Permission::create(['name' => 'hapus transaksi', 'group_name' => 'Transaksi']);
-
+        // e-learning
+        Permission::create(['name' => 'akses e-learning', 'group_name' => 'E-learning']);
 
     }
 }

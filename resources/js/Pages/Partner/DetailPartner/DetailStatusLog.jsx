@@ -68,8 +68,9 @@ const DetailStatusLog = ({
     };
     return (
         <>
-            {logs.length < 0 ? (
+            {logs.length > 0 ? (
                 <div className="flex mx-auto flex-col justify-center gap-5">
+                    {console.log("oke")}
                     <div className="card p-fluid w-full h-full flex justify-center rounded-lg">
                         <DataTable
                             id="tablelog"

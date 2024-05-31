@@ -82,6 +82,7 @@ const Index = ({ auth, usersProp, partnersProp, statusesProp }) => {
         design_date: null,
         print_date: null,
         delivery_date: null,
+        revision_detail: null,
     });
 
     const [globalFilterValue, setGlobalFilterValue] = useState("");
@@ -709,6 +710,26 @@ const Index = ({ auth, usersProp, partnersProp, statusesProp }) => {
                         </div>
 
                         <div className="flex flex-col">
+                            <label htmlFor="address">Alamat pengiriman *</label>
+                            <InputText
+                                value={data.address}
+                                onChange={(e) => {
+                                    setData({
+                                        ...data,
+                                        address: e.target.value,
+                                    });
+                                }}
+                                className="dark:bg-gray-300"
+                                id="address"
+                                aria-describedby="address-help"
+                            />
+                            <InputError
+                                message={errors.address}
+                                className="mt-2"
+                            />
+                        </div>
+
+                        <div className="flex flex-col">
                             <label htmlFor="price">Harga *</label>
                             <InputNumber
                                 value={data.price}
@@ -888,6 +909,25 @@ const Index = ({ auth, usersProp, partnersProp, statusesProp }) => {
                             />
                         </div>
                         <div className="flex flex-col">
+                            <label htmlFor="address">Alamat pengiriman *</label>
+                            <InputText
+                                value={data.address}
+                                onChange={(e) => {
+                                    setData({
+                                        ...data,
+                                        address: e.target.value,
+                                    });
+                                }}
+                                className="dark:bg-gray-300"
+                                id="address"
+                                aria-describedby="address-help"
+                            />
+                            <InputError
+                                message={errors.address}
+                                className="mt-2"
+                            />
+                        </div>
+                        <div className="flex flex-col">
                             <label htmlFor="price">Harga *</label>
                             <InputNumber
                                 value={data.price}
@@ -981,6 +1021,27 @@ const Index = ({ auth, usersProp, partnersProp, statusesProp }) => {
                             />
                             <InputError
                                 message={errors.google_drive_link}
+                                className="mt-2"
+                            />
+                        </div>
+                        <div className="flex flex-col">
+                            <label htmlFor="revision_detail">
+                                Detail Revisi *
+                            </label>
+                            <InputText
+                                value={data.revision_detail}
+                                onChange={(e) => {
+                                    setData({
+                                        ...data,
+                                        revision_detail: e.target.value,
+                                    });
+                                }}
+                                className="dark:bg-gray-300"
+                                id="revision_detail"
+                                aria-describedby="revision_detail-help"
+                            />
+                            <InputError
+                                message={errors.revision_detail}
                                 className="mt-2"
                             />
                         </div>

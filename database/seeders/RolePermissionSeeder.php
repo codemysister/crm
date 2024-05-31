@@ -19,7 +19,13 @@ class RolePermissionSeeder extends Seeder
         $permissions = Permission::all();
         $role = Role::find(1);
         $role->syncPermissions($permissions);
-        $role = Role::find(2);
+
+        // Set permission account executive
+        $permissionsAccountExecutive = Permission::where('group_name', 'Lead')->orWhere('group_name', 'Surat Penawaran Harga (SPH)')->orWhere('group_name', 'Mou')->orWhere('name', 'edit aktifitas sla')->get();
+        $accountExecutive = Role::find(2);
+        $accountExecutive->syncPermissions($permissionsAccountExecutive);
+
+
         $role->syncPermissions($permissions);
         $role = Role::find(3);
         $role->syncPermissions($permissions);
@@ -28,8 +34,6 @@ class RolePermissionSeeder extends Seeder
         $role = Role::find(5);
         $role->syncPermissions($permissions);
         $role = Role::find(6);
-        $role->syncPermissions($permissions);
-        $role = Role::find(7);
         $role->syncPermissions($permissions);
     }
 }

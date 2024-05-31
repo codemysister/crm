@@ -39,20 +39,7 @@ class Lead extends Model
                     ]);
                     $sph->forceDelete();
                 });
-                $lead->memo()->get()->each(function ($memo) {
-                    unlink($memo->memo_doc);
-                    Activity::create([
-                        'log_name' => 'force',
-                        'description' => 'menghapus permanen data memo',
-                        'subject_type' => get_class($memo),
-                        'subject_id' => $memo->id,
-                        'causer_type' => get_class(Auth::user()),
-                        'causer_id' => Auth::user()->id,
-                        "event" => "force",
-                        'properties' => ["old" => ["code" => $memo->code, "partner_name" => $memo->partner_name, "price_card" => $memo->price_card, "price_e_card" => $memo->price_e_card, "price_subscription" => $memo->price_subscription, "consideration" => $memo->consideration, 'signature_applicant_name' => $memo->signature_applicant_name, 'signature_acknowledges_name' => $memo->signature_acknowledges_name, 'signature_agrees_name' => $memo->signature_agrees_name]]
-                    ]);
-                    $memo->forceDelete();
-                });
+
                 $lead->mou()->get()->each(function ($mou) {
                     $mou->forceDelete();
                 });
@@ -71,19 +58,7 @@ class Lead extends Model
 
                     $sph->delete();
                 });
-                $lead->memo()->get()->each(function ($memo) {
-                    Activity::create([
-                        'log_name' => 'deleted',
-                        'description' => 'menghapus permanen data memo',
-                        'subject_type' => get_class($memo),
-                        'subject_id' => $memo->id,
-                        'causer_type' => get_class(Auth::user()),
-                        'causer_id' => Auth::user()->id,
-                        "event" => "deleted",
-                        'properties' => ["old" => ["code" => $memo->code, "partner_name" => $memo->partner_name, "price_card" => $memo->price_card, "price_e_card" => $memo->price_e_card, "price_subscription" => $memo->price_subscription, "consideration" => $memo->consideration, 'signature_applicant_name' => $memo->signature_applicant_name, 'signature_acknowledges_name' => $memo->signature_acknowledges_name, 'signature_agrees_name' => $memo->signature_agrees_name]]
-                    ]);
-                    $memo->delete();
-                });
+
                 $lead->mou()->get()->each(function ($mou) {
                     $mou->delete();
                 });

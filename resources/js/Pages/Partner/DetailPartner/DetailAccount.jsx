@@ -16,6 +16,10 @@ const DetailAccount = ({
     handleSelectedDetailPartner,
     showSuccess,
     showError,
+    currentUser,
+    permissions,
+    permissionErrorIsVisible,
+    setPermissionErrorIsVisible,
 }) => {
     const [modalAccountIsVisible, setModalAccountIsVisible] = useState(false);
     const [modalEditAccountIsVisible, setModalEditAccountIsVisible] =
@@ -37,7 +41,7 @@ const DetailAccount = ({
         partner: {},
         subdomain: "",
         email_super_admin: "",
-        cas_link_partner: "",
+        password: "",
     });
 
     const handleEditAccount = (account) => {
@@ -48,7 +52,7 @@ const DetailAccount = ({
             partner: partner,
             subdomain: account.subdomain,
             email_super_admin: account.email_super_admin,
-            cas_link_partner: account.cas_link_partner,
+            password: account.password,
         }));
 
         setModalEditAccountIsVisible(true);
@@ -92,7 +96,7 @@ const DetailAccount = ({
             keyIndo = "Subdomain";
         } else if (key == "email_super_admin") {
             keyIndo = "Email super admin";
-        } else if (key == "cas_link_partner") {
+        } else if (key == "password") {
             keyIndo = "CAS link partner";
         }
 
@@ -148,7 +152,7 @@ const DetailAccount = ({
                             </td>
                             <td class="pt-2 pb-1  text-base w-[2%]">:</td>
                             <td class="pt-2 pb-1  text-base w-7/12">
-                                {partner.account?.cas_link_partner ?? "-"}
+                                {partner.account?.password ?? "-"}
                             </td>
                         </tr>
                         <tr class="border-b">
@@ -177,7 +181,19 @@ const DetailAccount = ({
                                     label="edit"
                                     className="p-0 underline bg-transparent text-blue-700 text-left"
                                     onClick={() => {
-                                        handleEditAccount(partner.account);
+                                        if (
+                                            permissions.includes(
+                                                "tambah akun partner"
+                                            ) &&
+                                            partner.account_manager_id ==
+                                                currentUser.id
+                                        ) {
+                                            handleEditAccount(partner.account);
+                                        } else {
+                                            setPermissionErrorIsVisible(
+                                                (prev) => (prev = true)
+                                            );
+                                        }
                                     }}
                                 />
                             </td>
@@ -190,9 +206,20 @@ const DetailAccount = ({
                         Tidak ada data akun setting,{" "}
                         <Button
                             onClick={() => {
-                                resetAccount();
-                                setDataAccount("partner", partner);
-                                setModalAccountIsVisible(true);
+                                if (
+                                    permissions.includes(
+                                        "tambah akun partner"
+                                    ) &&
+                                    partner.account_manager_id == currentUser.id
+                                ) {
+                                    resetAccount();
+                                    setDataAccount("partner", partner);
+                                    setModalAccountIsVisible(true);
+                                } else {
+                                    setPermissionErrorIsVisible(
+                                        (prev) => (prev = true)
+                                    );
+                                }
                             }}
                             className="bg-transparent p-0 cursor-pointer text-blue-700 underline "
                         >
@@ -291,10 +318,10 @@ const DetailAccount = ({
                                     CAS link partner
                                 </label>
                                 <InputText
-                                    value={dataAccount.cas_link_partner}
+                                    value={dataAccount.password}
                                     onChange={(e) =>
                                         setDataAccount(
-                                            "cas_link_partner",
+                                            "password",
                                             e.target.value
                                         )
                                     }
@@ -303,7 +330,7 @@ const DetailAccount = ({
                                     aria-describedby="cars_link_partner-help"
                                 />
                                 <InputError
-                                    message={errorAccount.cas_link_partner}
+                                    message={errorAccount.password}
                                     className="mt-2"
                                 />
                             </div>
@@ -408,10 +435,10 @@ const DetailAccount = ({
                                     CAS link partner
                                 </label>
                                 <InputText
-                                    value={dataAccount.cas_link_partner}
+                                    value={dataAccount.password}
                                     onChange={(e) =>
                                         setDataAccount(
-                                            "cas_link_partner",
+                                            "password",
                                             e.target.value
                                         )
                                     }
@@ -420,7 +447,7 @@ const DetailAccount = ({
                                     aria-describedby="cars_link_partner-help"
                                 />
                                 <InputError
-                                    message={errorAccount.cas_link_partner}
+                                    message={errorAccount.password}
                                     className="mt-2"
                                 />
                             </div>

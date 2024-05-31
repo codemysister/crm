@@ -87,13 +87,9 @@ const Index = ({ statisticGeneralProp, usersProp }) => {
                 data[0].totalProses,
                 data[0].totalAktif,
                 data[0].totalNonaktif,
-                data[0].totalCancel,
-                data[0].totalCLBK,
             ],
             totalPartner: data[0].totalPartner,
             totalAktif: data[0].totalAktif,
-            totalCLBK: data[0].totalCLBK,
-            totalCancel: data[0].totalCancel,
             totalProses: data[0].totalProses,
             totalNonaktif: data[0].totalNonaktif,
             partnersByProvince: data[0].partnersByProvince,
@@ -196,7 +192,7 @@ const Index = ({ statisticGeneralProp, usersProp }) => {
                 />
             </HeaderModule>
             <div className="flex mx-auto flex-col justify-center gap-5 mt-5">
-                <div className="grid gap-6 mb-8 grid-cols-2 md:grid-cols-3 xl:grid-cols-3">
+                <div className="grid gap-6 mb-8 grid-cols-2 md:grid-cols-3 xl:grid-cols-4">
                     <div className="flex items-center p-4 bg-white rounded-lg shadow-md dark:bg-slate-900">
                         <div className="p-3 mr-4 text-pink-500 bg-pink-100 rounded-full dark:text-pink-100 dark:bg-pink-500">
                             <svg
@@ -305,66 +301,7 @@ const Index = ({ statisticGeneralProp, usersProp }) => {
                             </p>
                         </div>
                     </div>
-
-                    <div className="flex items-center p-4 bg-white rounded-lg shadow-md dark:bg-slate-900">
-                        <div className="p-3 mr-4 text-purple-500 bg-purple-100 rounded-full dark:text-purple-100 dark:bg-purple-500">
-                            <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                fill="none"
-                                stroke-width="1.5"
-                                stroke="currentColor"
-                                class="w-6 h-6"
-                            >
-                                <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    d="m9.75 9.75 4.5 4.5m0-4.5-4.5 4.5M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
-                                />
-                            </svg>
-                        </div>
-                        <div>
-                            <p className="mb-2 text-sm font-medium text-gray-600 dark:text-gray-400">
-                                Total Cancel
-                            </p>
-                            <p className="text-lg font-semibold text-gray-700 dark:text-gray-200">
-                                {selectedAM
-                                    ? statisticUser.totalCancel
-                                    : statisticGeneralProp.totalCancel}
-                            </p>
-                        </div>
-                    </div>
-
-                    <div className="flex items-center p-4 bg-white rounded-lg shadow-md dark:bg-slate-900">
-                        <div className="p-3 mr-4 text-blue-500 bg-blue-100 rounded-full dark:text-blue-100 dark:bg-blue-500">
-                            <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                stroke-width="1.5"
-                                stroke="currentColor"
-                                class="w-6 h-6"
-                            >
-                                <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    d="M9 15 3 9m0 0 6-6M3 9h12a6 6 0 0 1 0 12h-3"
-                                />
-                            </svg>
-                        </div>
-
-                        <div>
-                            <p className="mb-2 text-sm font-medium text-gray-600 dark:text-gray-400">
-                                Total CLBK
-                            </p>
-                            <p className="text-lg font-semibold text-gray-700 dark:text-gray-200">
-                                {selectedAM
-                                    ? statisticUser.totalCLBK
-                                    : statisticGeneralProp.totalCLBK}
-                            </p>
-                        </div>
-                    </div>
                 </div>
-                {console.log(statisticUser)}
 
                 <div className="card flex flex-col -mt-7 w-full md:max-h-[320px] md:flex-row mx-auto justify-between gap-7">
                     <div className="flex flex-col text-center md:w-[50%] justify-center border p-8 bg-white dark:bg-slate-900 dark:border-none dark:text-gray-400  shadow-md rounded-lg">
@@ -374,13 +311,7 @@ const Index = ({ statisticGeneralProp, usersProp }) => {
                         <Doughnut
                             className="mx-auto"
                             data={{
-                                labels: [
-                                    "Proses",
-                                    "Aktif",
-                                    "Non Aktif",
-                                    "Cancel",
-                                    "CLBK",
-                                ],
+                                labels: ["Proses", "Aktif", "Non Aktif"],
                                 datasets: [
                                     {
                                         label: "Presentase",
@@ -394,19 +325,11 @@ const Index = ({ statisticGeneralProp, usersProp }) => {
                                             (statisticUser.totalNonaktif /
                                                 statisticUser.totalPartner) *
                                                 100,
-                                            (statisticUser.totalCLBK /
-                                                statisticUser.totalPartner) *
-                                                100,
-                                            (statisticUser.totalCancel /
-                                                statisticUser.totalPartner) *
-                                                100,
                                         ],
                                         backgroundColor: [
                                             "orange",
                                             "green",
                                             "gray",
-                                            "purple",
-                                            "blue",
                                         ],
                                     },
                                 ],
@@ -421,13 +344,7 @@ const Index = ({ statisticGeneralProp, usersProp }) => {
                         <Doughnut
                             className="mx-auto"
                             data={{
-                                labels: [
-                                    "Proses",
-                                    "Aktif",
-                                    "Non Aktif",
-                                    "Cancel",
-                                    "CLBK",
-                                ],
+                                labels: ["Proses", "Aktif", "Non Aktif"],
                                 datasets: [
                                     {
                                         label: "Persentase",
@@ -441,19 +358,11 @@ const Index = ({ statisticGeneralProp, usersProp }) => {
                                             (statisticGeneralProp.totalNonaktif /
                                                 statisticGeneralProp.totalPartner) *
                                                 100,
-                                            (statisticGeneralProp.totalCLBK /
-                                                statisticGeneralProp.totalPartner) *
-                                                100,
-                                            (statisticGeneralProp.totalCancel /
-                                                statisticGeneralProp.totalPartner) *
-                                                100,
                                         ],
                                         backgroundColor: [
                                             "orange",
                                             "green",
                                             "gray",
-                                            "purple",
-                                            "blue",
                                         ],
                                     },
                                 ],

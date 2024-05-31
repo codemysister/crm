@@ -19,6 +19,7 @@ return new class extends Migration {
             $table->string('partner_name');
             $table->date('date');
             $table->bigInteger('nominal');
+            $table->string('proof_of_transaction');
             $table->text('money');
             $table->string('metode');
             $table->string('payment_for');

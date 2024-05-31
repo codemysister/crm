@@ -16,6 +16,10 @@ const DetailSubscription = ({
     handleSelectedDetailPartner,
     showSuccess,
     showError,
+    currentUser,
+    permissions,
+    permissionErrorIsVisible,
+    setPermissionErrorIsVisible,
 }) => {
     const [modalSubscriptionIsVisible, setModalSubscriptionIsVisible] =
         useState(false);
@@ -214,11 +218,23 @@ const DetailSubscription = ({
                                 <Button
                                     label="edit"
                                     className="p-0 underline bg-transparent text-blue-700 text-left"
-                                    onClick={() =>
-                                        handleEditSubscription(
-                                            partner.subscription
-                                        )
-                                    }
+                                    onClick={() => {
+                                        if (
+                                            permissions.includes(
+                                                "tambah langganan partner"
+                                            ) &&
+                                            partner.account_manager_id ==
+                                                currentUser.id
+                                        ) {
+                                            handleEditSubscription(
+                                                partner.subscription
+                                            );
+                                        } else {
+                                            setPermissionErrorIsVisible(
+                                                (prev) => (prev = true)
+                                            );
+                                        }
+                                    }}
                                 />
                             </td>
                         </tr>
@@ -353,9 +369,20 @@ const DetailSubscription = ({
                         Tidak ada data langganan
                         <Button
                             onClick={() => {
-                                resetSubscription();
-                                setDataSubscription("partner", partner);
-                                setModalSubscriptionIsVisible(true);
+                                if (
+                                    permissions.includes(
+                                        "tambah langganan partner"
+                                    ) &&
+                                    partner.account_manager_id == currentUser.id
+                                ) {
+                                    resetSubscription();
+                                    setDataSubscription("partner", partner);
+                                    setModalSubscriptionIsVisible(true);
+                                } else {
+                                    setPermissionErrorIsVisible(
+                                        (prev) => (prev = true)
+                                    );
+                                }
                             }}
                             className="bg-transparent p-0 cursor-pointer text-blue-700 underline "
                         >

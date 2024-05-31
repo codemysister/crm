@@ -15,6 +15,8 @@ import { handleSelectedDetailInstitution } from "@/Utils/handleSelectedDetailIns
 export const DatatablePartner = memo(
     ({
         children,
+        dialogOnboarding,
+        setDialogOnboardingVisible,
         isLoadingData,
         partners,
         handleSelectedDetailPartner,
@@ -352,6 +354,20 @@ export const DatatablePartner = memo(
         const header = () => {
             return (
                 <HeaderDatatable filters={filters} setFilters={setFilters}>
+                    <Button
+                        className="shadow-md w-[10px] lg:w-[120px] border border-slate-600 bg-transparent text-slate-600 dark:bg-slate-700 dark:text-slate-300 rounded-lg"
+                        onClick={() => {
+                            setDialogOnboardingVisible(true);
+                        }}
+                    >
+                        <span className="w-full flex justify-center items-center gap-1">
+                            <i
+                                className="pi pi-filter"
+                                style={{ fontSize: "0.7rem" }}
+                            ></i>{" "}
+                            {!isMobile && <span>onboarding</span>}
+                        </span>
+                    </Button>
                     <Button
                         className="shadow-md w-[10px] lg:w-[90px] border border-slate-600 bg-transparent text-slate-600 dark:bg-slate-700 dark:text-slate-300 rounded-lg"
                         onClick={() => setSidebarFilter(true)}

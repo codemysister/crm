@@ -25,8 +25,10 @@ import DetailStatusLog from "./DetailStatusLog";
 import DetailLog from "./DetailLog";
 import { upperCaseEachWord } from "@/Utils/UppercaseEachWord";
 import DetailAccount from "./DetailAccount";
+import PermissionErrorDialog from "@/Components/PermissionErrorDialog";
 
 const DetailPartner = ({
+    auth,
     partners,
     detailPartner,
     handleSelectedDetailPartner,
@@ -47,6 +49,9 @@ const DetailPartner = ({
     const [modalStatusIsVisible, setModalStatusIsVisible] = useState(false);
     const [modalEditPartnersIsVisible, setModalEditPartnersIsVisible] =
         useState(false);
+    const [permissionErrorIsVisible, setPermissionErrorIsVisible] =
+        useState(false);
+    const { roles, permissions, data: currentUser } = auth.user;
 
     useEffect(() => {
         setPartner((prev) => (prev = detailPartner));
@@ -321,6 +326,10 @@ const DetailPartner = ({
 
     return (
         <>
+            <PermissionErrorDialog
+                dialogIsVisible={permissionErrorIsVisible}
+                setDialogVisible={setPermissionErrorIsVisible}
+            />
             <Card title={title} className="mt-5 mx-auto p-3 rounded-lg">
                 <div className="flex flex-col lg:flex-row gap-5 min-h-[300px]">
                     <div className="w-full lg:w-[40%]">
@@ -590,11 +599,23 @@ const DetailPartner = ({
                                                         <Button
                                                             label="edit"
                                                             className="p-0 underline bg-transparent text-blue-700 text-left"
-                                                            onClick={() =>
-                                                                handleEditPartner(
-                                                                    partner
-                                                                )
-                                                            }
+                                                            onClick={() => {
+                                                                if (
+                                                                    partner.created_by ==
+                                                                    currentUser.id
+                                                                ) {
+                                                                    handleEditPartner(
+                                                                        partner
+                                                                    );
+                                                                } else {
+                                                                    setPermissionErrorIsVisible(
+                                                                        (
+                                                                            prev
+                                                                        ) =>
+                                                                            (prev = true)
+                                                                    );
+                                                                }
+                                                            }}
                                                         />
                                                     </td>
                                                 </tr>
@@ -610,6 +631,14 @@ const DetailPartner = ({
                                                 }
                                                 showSuccess={showSuccess}
                                                 showError={showError}
+                                                permissions={permissions}
+                                                currentUser={currentUser}
+                                                permissionErrorIsVisible={
+                                                    permissionErrorIsVisible
+                                                }
+                                                setPermissionErrorIsVisible={
+                                                    setPermissionErrorIsVisible
+                                                }
                                             />
                                         )}
 
@@ -620,8 +649,16 @@ const DetailPartner = ({
                                                 handleSelectedDetailPartner={
                                                     handleSelectedDetailPartner
                                                 }
+                                                currentUser={currentUser}
                                                 showSuccess={showSuccess}
                                                 showError={showError}
+                                                permissions={permissions}
+                                                permissionErrorIsVisible={
+                                                    permissionErrorIsVisible
+                                                }
+                                                setPermissionErrorIsVisible={
+                                                    setPermissionErrorIsVisible
+                                                }
                                             />
                                         )}
 
@@ -632,8 +669,16 @@ const DetailPartner = ({
                                                 handleSelectedDetailPartner={
                                                     handleSelectedDetailPartner
                                                 }
+                                                currentUser={currentUser}
+                                                permissions={permissions}
                                                 showSuccess={showSuccess}
                                                 showError={showError}
+                                                permissionErrorIsVisible={
+                                                    permissionErrorIsVisible
+                                                }
+                                                setPermissionErrorIsVisible={
+                                                    setPermissionErrorIsVisible
+                                                }
                                             />
                                         )}
 
@@ -644,8 +689,16 @@ const DetailPartner = ({
                                                 handleSelectedDetailPartner={
                                                     handleSelectedDetailPartner
                                                 }
+                                                currentUser={currentUser}
                                                 showSuccess={showSuccess}
                                                 showError={showError}
+                                                permissions={permissions}
+                                                permissionErrorIsVisible={
+                                                    permissionErrorIsVisible
+                                                }
+                                                setPermissionErrorIsVisible={
+                                                    setPermissionErrorIsVisible
+                                                }
                                             />
                                         )}
 
@@ -656,8 +709,16 @@ const DetailPartner = ({
                                                 handleSelectedDetailPartner={
                                                     handleSelectedDetailPartner
                                                 }
+                                                currentUser={currentUser}
                                                 showSuccess={showSuccess}
                                                 showError={showError}
+                                                permissions={permissions}
+                                                permissionErrorIsVisible={
+                                                    permissionErrorIsVisible
+                                                }
+                                                setPermissionErrorIsVisible={
+                                                    setPermissionErrorIsVisible
+                                                }
                                             />
                                         )}
 

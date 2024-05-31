@@ -43,6 +43,7 @@ const LogComponent = ({
     const [preRenderLoad, setPreRenderLoad] = useState(true);
     const [logs, setLogs] = useState(null);
     const op = useRef();
+    const { roles, permissions, data: currentUser } = auth.user;
 
     const {
         data: dataFilter,
@@ -127,20 +128,25 @@ const LogComponent = ({
                         <span>filter</span>
                     </span>
                 </Button>
-                <Button
-                    severity="danger"
-                    className="rounded-md shadow-md text-sm"
-                    onClick={confirmDeleteLog}
-                    disabled={!selectedLogDelete || !selectedLogDelete.length}
-                >
-                    <span className="w-full flex justify-center items-center gap-1">
-                        <i
-                            className="pi pi-trash"
-                            style={{ fontSize: "0.7rem" }}
-                        ></i>{" "}
-                        <span>hapus</span>
-                    </span>
-                </Button>
+
+                {permissions.includes("hapus log") && (
+                    <Button
+                        severity="danger"
+                        className="rounded-md shadow-md text-sm"
+                        onClick={confirmDeleteLog}
+                        disabled={
+                            !selectedLogDelete || !selectedLogDelete.length
+                        }
+                    >
+                        <span className="w-full flex justify-center items-center gap-1">
+                            <i
+                                className="pi pi-trash"
+                                style={{ fontSize: "0.7rem" }}
+                            ></i>{" "}
+                            <span>hapus</span>
+                        </span>
+                    </Button>
+                )}
             </HeaderDatatable>
         );
     };
@@ -340,11 +346,13 @@ const LogComponent = ({
                     selection={selectedLogDelete}
                     onSelectionChange={(e) => setSelectedLogDelete(e.value)}
                 >
-                    <Column
-                        selectionMode="multiple"
-                        exportable={false}
-                        className="w-[1%]"
-                    ></Column>
+                    {permissions.includes("hapus log") && (
+                        <Column
+                            selectionMode="multiple"
+                            exportable={false}
+                            className="w-[1%]"
+                        ></Column>
+                    )}
 
                     <Column
                         field="causer"

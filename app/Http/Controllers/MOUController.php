@@ -87,7 +87,7 @@ class MOUController extends Controller
         $codeInteger = intval($code) + 1;
         $latestCode = str_pad($codeInteger, strlen($code), "0", STR_PAD_LEFT);
         $romanMonth = intToRoman($currentMonth);
-        $newCode = "PKS/$latestCode/$romanMonth/$currentYear";
+        $newCode = "MOU/$latestCode/$romanMonth/$currentYear";
         return $newCode;
     }
 

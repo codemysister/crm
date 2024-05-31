@@ -337,7 +337,7 @@ const Index = ({ auth, usersProp }) => {
     const headerVideo = (
         <div className="flex flex-row gap-2 bg-gray-50 dark:bg-transparent p-2 rounded-lg align-items-center items-center justify-between justify-content-between">
             <div className="w-[30%]">
-                {permissions.includes("tambah transaksi") && (
+                {permissions.includes("tambah video") && (
                     <Button
                         label="Input Video"
                         className="bg-purple-600 w-[100px] max-w-[100px] text-xs shadow-md rounded-lg mr-2"
@@ -561,7 +561,7 @@ const Index = ({ auth, usersProp }) => {
             </OverlayPanel>
 
             <HeaderModule title="Playlist">
-                {permissions.includes("tambah playlist") && (
+                {permissions.includes("tambah video") && (
                     <Button
                         label="Tambah"
                         className="bg-purple-600 text-sm shadow-md rounded-lg mr-2"

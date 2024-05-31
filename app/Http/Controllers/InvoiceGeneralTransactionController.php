@@ -82,7 +82,6 @@ class InvoiceGeneralTransactionController extends Controller
 
     public function store(InvoiceGeneralTransactionRequest $request)
     {
-
         $invoice_general = InvoiceGeneral::with('transactions')->where('uuid', '=', $request->invoice_general)->first();
 
         $rest_of_bill = $this->calculateRestOfBill($invoice_general);
@@ -99,7 +98,18 @@ class InvoiceGeneralTransactionController extends Controller
             $status = $status->where('name', 'lunas')->first();
         }
 
+
+
         try {
+
+            $pathProofImage = null;
+            if ($request->hasFile('proof_of_transaction')) {
+                $file = $request->file('proof_of_transaction');
+                $filename = time() . '_' . Auth::user()->id . '.' . $file->getClientOriginalExtension();
+                $pathProofImage = 'storage/images/transaksi/' . $filename;
+                Storage::putFileAs('public/images/transaksi', $file, $filename);
+            }
+
             $transaction = new InvoiceGeneralTransaction();
             $transaction->uuid = Str::uuid();
             $transaction->code = $this->generateCode();
@@ -113,6 +123,7 @@ class InvoiceGeneralTransactionController extends Controller
             $transaction->payment_for = $request->payment_for;
             $transaction->signature_name = "Muh Arif Mahfudin";
             $transaction->signature_image = "/assets/img/signatures/ttd.png";
+            $transaction->proof_of_transaction = $pathProofImage;
             $transaction->created_by = Auth::user()->id;
             $transaction = $this->generateReceipt($transaction);
             $transaction->save();
@@ -145,11 +156,24 @@ class InvoiceGeneralTransactionController extends Controller
     }
     public function update(InvoiceGeneralTransactionRequest $request, $uuid)
     {
-
         DB::beginTransaction();
 
         try {
             $transaction = InvoiceGeneralTransaction::where('uuid', '=', $uuid)->first();
+
+            $pathProofImage = $transaction->proof_of_transaction;
+            if ($request->hasFile('proof_of_transaction')) {
+                unlink($transaction->proof_of_transaction);
+                $file = $request->file('proof_of_transaction');
+                $filename = time() . '_' . Auth::user()->id . '.' . $file->guessExtension();
+                $pathProofImage = 'storage/images/transaksi/' . $filename;
+                Storage::putFileAs('public/images/transaksi', $file, $filename);
+            } else {
+                if ($request->proof_of_transaction !== null) {
+                    $pathProofImage = $transaction->proof_of_transaction;
+                }
+            }
+
             $transaction->invoice_general_id = $request->invoice_general_id;
             $transaction->partner_id = $request['partner']['id'];
             $transaction->partner_name = $request['partner']['name'];
@@ -159,6 +183,7 @@ class InvoiceGeneralTransactionController extends Controller
             $transaction->metode = $request->metode['name'] ?? $request->metode;
             $transaction->payment_for = $request->payment_for;
             $transaction->receipt_doc = '';
+            $transaction->proof_of_transaction = $pathProofImage;
             $transaction->signature_name = $request->signature['name'];
             $transaction->signature_image = $request->signature['image'];
             $transaction->created_by = Auth::user()->id;

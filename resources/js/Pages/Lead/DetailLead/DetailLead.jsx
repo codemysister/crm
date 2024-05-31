@@ -15,17 +15,21 @@ import DetailLog from "./DetailLog";
 
 const DetailLead = ({
     leads,
+    auth,
     DetailLead,
     handleSelectedDetailLead,
     status,
     showSuccess,
     showError,
     isLoading,
+    permissionErrorIsVisible,
+    setPermissionErrorIsVisible,
 }) => {
     const [lead, setLead] = useState(DetailLead);
     const [activeMenu, setActiveMenu] = useState("lembaga");
     const [modalStatusIsVisible, setModalStatusIsVisible] = useState(false);
     const [modalEditLeadIsVisible, setModalEditLeadIsVisible] = useState(false);
+    const { roles, permissions, data: currentUser } = auth.user;
 
     useEffect(() => {
         setLead((prev) => (prev = DetailLead));
@@ -295,11 +299,22 @@ const DetailLead = ({
                                                         <Button
                                                             label="edit"
                                                             className="p-0 underline bg-transparent text-blue-700 text-left"
-                                                            onClick={() =>
-                                                                handleEditLead(
+                                                            onClick={() => {
+                                                                if (
                                                                     lead
-                                                                )
-                                                            }
+                                                                        .created_by
+                                                                        .id ==
+                                                                    currentUser.id
+                                                                ) {
+                                                                    handleEditLead(
+                                                                        lead
+                                                                    );
+                                                                } else {
+                                                                    setPermissionErrorIsVisible(
+                                                                        true
+                                                                    );
+                                                                }
+                                                            }}
                                                         />
                                                     </td>
                                                 </tr>

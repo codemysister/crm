@@ -70,7 +70,7 @@ export default function Index({
         useState(false);
     const [permissionErrorIsVisible, setPermissionErrorIsVisible] =
         useState(false);
-    const { roles, permissions } = auth.user;
+    const { roles, permissions, data: currentUser } = auth.user;
     const [filters, setFilters] = useState({
         global: { value: null, matchMode: FilterMatchMode.CONTAINS },
     });
@@ -567,15 +567,16 @@ export default function Index({
             <Toast ref={toast} />
 
             <HeaderModule title="Lead">
-                {/* {permissions.includes("tambah produk") && ( */}
-                <Button
-                    label="Tambah"
-                    className="bg-purple-600 text-sm shadow-md rounded-lg mr-2"
-                    icon={addButtonIcon}
-                    onClick={(event) => menuAddRef.current.toggle(event)}
-                    aria-controls="popup_menu_right"
-                    aria-haspopup
-                />
+                {permissions.includes("tambah lead") && (
+                    <Button
+                        label="Tambah"
+                        className="bg-purple-600 text-sm shadow-md rounded-lg mr-2"
+                        icon={addButtonIcon}
+                        onClick={(event) => menuAddRef.current.toggle(event)}
+                        aria-controls="popup_menu_right"
+                        aria-haspopup
+                    />
+                )}
 
                 <OverlayPanel
                     ref={menuAddRef}
@@ -890,6 +891,10 @@ export default function Index({
                             status={status}
                             isLoading={isLoadingData}
                             handleSelectedDetailLead={handleSelectedDetailLead}
+                            permissionErrorIsVisible={permissionErrorIsVisible}
+                            setPermissionErrorIsVisible={
+                                setPermissionErrorIsVisible
+                            }
                         />
                     )}
                 </TabPanel>
