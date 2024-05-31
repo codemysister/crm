@@ -1,0 +1,1 @@
+import{y as n}from"./app-183ca207.js";function d(e){let u=null;return e.onboarding_date==null?u=`/leads?detail=${e.lead?e.lead.uuid:e.uuid}`:u=`/partners?detail=${e.partner?e.partner.uuid:e.uuid}`,n.get(u)}export{d as h};

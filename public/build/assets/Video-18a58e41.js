@@ -1,0 +1,1 @@
+import{j as r}from"./app-183ca207.js";import{R as o}from"./index-d8f5d992.js";import"./index-387d7a00.js";const m=({title:i,video:t,data:e,setSelectedVideo:l})=>r.jsx("div",{className:"cursor-pointer shadow-md w-full h-[200px]",onClick:()=>l(s=>e),children:r.jsx(o,{width:"100%",height:"200px",playIcon:null,playing:!1,url:"/"+t})});export{m as default};
