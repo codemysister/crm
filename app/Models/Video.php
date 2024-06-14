@@ -11,7 +11,7 @@ class Video extends Model
 {
     use HasFactory, LogsActivity;
 
-    protected static $recordEvents = ['created', 'updated'];
+    // protected static $recordEvents = ['created', 'updated'];
 
     protected $guarded = [];
 

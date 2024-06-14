@@ -388,7 +388,7 @@ const Index = ({ auth, usersProp }) => {
                         } else {
                             showSuccess("Tambah");
                             getPlaylists();
-                            resetVideo();
+                            resetVideo("title", "video");
                         }
                     });
             },
@@ -398,7 +398,7 @@ const Index = ({ auth, usersProp }) => {
     const actionVideoBodyTemplate = (rowData) => {
         return (
             <React.Fragment>
-                {permissions.includes("edit transaksi") && (
+                {permissions.includes("edit video") && (
                     <Button
                         icon="pi pi-pencil"
                         rounded
@@ -410,7 +410,7 @@ const Index = ({ auth, usersProp }) => {
                         }}
                     />
                 )}
-                {permissions.includes("hapus transaksi") && (
+                {permissions.includes("hapus video") && (
                     <Button
                         icon="pi pi-trash"
                         rounded
@@ -504,7 +504,7 @@ const Index = ({ auth, usersProp }) => {
                         ></Column>
 
                         <Column
-                            header="Action"
+                            header="Aksi"
                             body={actionVideoBodyTemplate}
                             style={{
                                 width: "max-content",
@@ -780,7 +780,7 @@ const Index = ({ auth, usersProp }) => {
                             />
                         </div>
                         <div className="flex flex-col">
-                            <label htmlFor="category">Thumbnail</label>
+                            <label htmlFor="category">Thumbnail *</label>
                             <div className="App">
                                 <FilePond
                                     onaddfile={(error, fileItems) => {
@@ -849,7 +849,7 @@ const Index = ({ auth, usersProp }) => {
                             />
                         </div>
                         <div className="flex flex-col">
-                            <label htmlFor="category">Thumbnail</label>
+                            <label htmlFor="category">Thumbnail *</label>
 
                             <div className="App">
                                 {data.thumbnail !== null &&
@@ -936,7 +936,7 @@ const Index = ({ auth, usersProp }) => {
                             />
                         </div>
                         <div className="flex flex-col">
-                            <label htmlFor="category">Video</label>
+                            <label htmlFor="category">Video *</label>
                             <div className="App">
                                 <FilePond
                                     onaddfile={(error, fileItems) => {
@@ -989,7 +989,7 @@ const Index = ({ auth, usersProp }) => {
                             />
                         </div>
                         <div className="flex flex-col">
-                            <label htmlFor="category">Video</label>
+                            <label htmlFor="category">Video *</label>
 
                             <div className="App">
                                 {dataVideo.video !== null &&

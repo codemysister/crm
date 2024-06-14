@@ -15,7 +15,7 @@ class Lead extends Model
     use HasFactory, SoftDeletes, LogsActivity;
 
     protected $guarded = [];
-    protected static $recordEvents = ['created', 'updated', 'restored'];
+    protected static $recordEvents = ['created', 'restored'];
 
 
     protected static function boot()
@@ -69,13 +69,21 @@ class Lead extends Model
 
     public function tapActivity(Activity $activity, string $eventName)
     {
-        $activity->note_status = $this->note_status;
+        $properties = $activity->properties->toArray();
+
+        if ($eventName === 'updated') {
+            $properties['old']['name'] = $this->name . " ";
+            $properties['attributes']['name'] = $this->name;
+            $properties['attributes']['note_status'] = $this->note_status;
+        }
+
+        $activity->properties = collect($properties);
     }
 
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()
-            ->logOnly(['name', 'address', 'pic', 'total_members', 'status.name', 'status.color'])
+            ->logOnly(['name', 'npwp', 'address', 'pic', 'total_members', 'status.name', 'status.color'])
             ->dontLogIfAttributesChangedOnly(['deleted_at', 'updated_at'])
             ->setDescriptionForEvent(function (string $eventName) {
                 $modelName = strtolower(class_basename($this));

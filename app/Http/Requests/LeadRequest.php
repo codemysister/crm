@@ -19,6 +19,8 @@ class LeadRequest extends FormRequest
         return [
             'name' => 'required|unique:leads',
             'phone_number' => 'required',
+            'npwp' => 'required|unique:leads',
+            'sales' => 'required',
             'address' => 'required',
             'total_members' => 'required',
             'status' => 'required',
@@ -32,6 +34,9 @@ class LeadRequest extends FormRequest
         return [
             'name.required' => 'Lembaga harus diisi',
             'name.unique' => 'Lembaga sudah ada',
+            'npwp.required' => 'NPWP harus diisi',
+            'npwp.unique' => 'NPWP sudah ada',
+            'sales' => 'Sales harus diisi',
             'phone_number' => 'Nomor telepon lembaga harus diisi',
             'address' => 'Alamat lembaga harus diisi',
             'total_members' => 'Total member harus diisi',

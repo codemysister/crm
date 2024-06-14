@@ -37,6 +37,7 @@ import { DatatableLead } from "./Component/DatatableLead";
 import { Calendar } from "primereact/calendar";
 import LogComponent from "@/Components/LogComponent";
 import PermissionErrorDialog from "@/Components/PermissionErrorDialog";
+import { InputMask } from "primereact/inputmask";
 registerPlugin(FilePondPluginFileValidateSize);
 
 export default function Index({
@@ -90,6 +91,7 @@ export default function Index({
         id: null,
         uuid: null,
         name: null,
+        npwp: null,
         address: null,
         pic: null,
         total_members: null,
@@ -192,6 +194,7 @@ export default function Index({
             ...data,
             uuid: lead.uuid,
             name: lead.name,
+            npwp: lead.npwp,
             pic: lead.pic,
             sales: lead.sales,
             phone_number: lead.phone_number,
@@ -387,13 +390,18 @@ export default function Index({
                 reset();
             },
             onError: (e) => {
-                showError("Import");
+                toast.current.show({
+                    severity: "error",
+                    summary: "Error",
+                    detail: e.error,
+                    life: 3000,
+                });
             },
         });
     };
 
     const globalFilterFields = [
-        ["name", "status.name", "address", "phone_number", "pic"],
+        ["name", "status.name", "npwp", "address", "phone_number", "pic"],
     ];
 
     const columns = [
@@ -414,6 +422,15 @@ export default function Index({
                         {rowData.name}
                     </button>
                 );
+            },
+        },
+        {
+            field: "npwp",
+            header: "NPWP",
+            frozen: !isMobile,
+            style: {
+                width: "max-content",
+                whiteSpace: "nowrap",
             },
         },
 
@@ -484,16 +501,20 @@ export default function Index({
             keyIndo = "Lembaga";
         } else if (key == "status.name") {
             keyIndo = "Status";
+        } else if (key == "npwp") {
+            keyIndo = "NPWP";
         } else if (key == "pic") {
             keyIndo = "PIC";
         } else if (key == "sales.name") {
             keyIndo = "Sales";
-        } else if (key == "npwp") {
-            keyIndo = "NPWP";
         } else if (key == "total_members") {
             keyIndo = "Jumlah Member";
         } else if (key == "address") {
             keyIndo = "Alamat";
+        } else if (key == "status.color") {
+            keyIndo = "Warna status";
+        } else if (key == "note_status") {
+            keyIndo = "Keterangan perubahan status";
         }
 
         return keyIndo;
@@ -517,16 +538,6 @@ export default function Index({
                 ref={action}
             >
                 <div className="flex flex-col flex-wrap w-full">
-                    <Button
-                        icon="pi pi-verified"
-                        label="onboarding"
-                        className="bg-transparent hover:bg-slate-200 w-full text-slate-500 border-b-2 border-slate-400"
-                        onClick={() => {
-                            router.get(
-                                "/partners?onboarding=" + selectedLead.uuid
-                            );
-                        }}
-                    />
                     <Button
                         icon="pi pi-pencil"
                         label="edit"
@@ -761,80 +772,6 @@ export default function Index({
 
                             <div className="flex mx-auto flex-col justify-center mt-5 gap-5">
                                 <div className="card p-fluid w-full h-full flex justify-center rounded-lg">
-                                    {/* <DataTable
-                                        loading={isLoadingData}
-                                        className="w-full h-auto rounded-lg dark:glass border-none text-center shadow-md"
-                                        pt={{
-                                            bodyRow:
-                                                "dark:bg-transparent bg-transparent dark:text-gray-300",
-                                            table: "dark:bg-transparent bg-white dark:text-gray-300",
-                                            header: "",
-                                        }}
-                                        paginator
-                                        rowsPerPageOptions={[5, 10, 25, 50]}
-                                        paginatorTemplate="RowsPerPageDropdown FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink"
-                                        currentPageReportTemplate="{first} - {last} dari {totalRecords}"
-                                        filters={filters}
-                                        rows={10}
-                                        emptyMessage="Lead tidak ditemukan."
-                                        paginatorClassName="dark:bg-transparent paginator-custome dark:text-gray-300 rounded-b-lg"
-                                        header={headerLead}
-                                        globalFilterFields={[
-                                            "name",
-                                            "status.name",
-                                            "address",
-                                            "phone_number",
-                                            "pic",
-                                        ]}
-                                        value={leads}
-                                        dataKey="id"
-                                        // lazy
-                                        // first={lazyState.first}
-                                        // totalRecords={totalRecords}
-                                        // onPage={onPage}
-                                    >
-                                        <Column
-                                            header="Aksi"
-                                            body={actionBodyTemplate}
-                                            style={{
-                                                width: "max-content",
-                                                whiteSpace: "nowrap",
-                                            }}
-                                            align="center"
-                                            className="dark:border-none"
-                                            headerClassName="dark:border-none  bg-transparent dark:bg-transparent dark:text-gray-300"
-                                        ></Column>
-
-                                        {columns.map((col) => {
-                                            return (
-                                                <Column
-                                                    field={col.field}
-                                                    header={col.header}
-                                                    body={col.body}
-                                                    style={col.style}
-                                                    frozen={col.frozen}
-                                                    align="left"
-                                                    className="dark:border-none bg-white"
-                                                    headerClassName="dark:border-none bg-white dark:bg-slate-900 dark:text-gray-300"
-                                                ></Column>
-                                            );
-                                        })}
-                                        <Column
-                                            field="created_by"
-                                            className="dark:border-none"
-                                            headerClassName="dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300"
-                                            header="Diinput Oleh"
-                                            align="left"
-                                            style={{
-                                                width: "max-content",
-                                                whiteSpace: "nowrap",
-                                            }}
-                                            body={(rowData) => {
-                                                return rowData.created_by.name;
-                                            }}
-                                        ></Column>
-                                    </DataTable> */}
-
                                     <DatatableLead
                                         leads={leads}
                                         isLoadingData={isLoadingData}
@@ -921,11 +858,29 @@ export default function Index({
                                     }
                                     className="dark:bg-gray-300"
                                     id="name"
-                                    required
                                     aria-describedby="name-help"
                                 />
                                 <InputError
                                     message={errors["name"]}
+                                    className="mt-2"
+                                />
+                            </div>
+                            <div className="flex flex-col">
+                                <label htmlFor="name">NPWP *</label>
+                                <InputMask
+                                    keyfilter="int"
+                                    value={data.npwp}
+                                    onChange={(e) =>
+                                        setData("npwp", e.target.value)
+                                    }
+                                    placeholder="99.999.999.9-999.999"
+                                    mask="99.999.999.9-999.999"
+                                    className="dark:bg-gray-300"
+                                    id="npwp"
+                                    aria-describedby="npwp-help"
+                                />
+                                <InputError
+                                    message={errors["npwp"]}
                                     className="mt-2"
                                 />
                             </div>
@@ -938,7 +893,6 @@ export default function Index({
                                     }
                                     className="dark:bg-gray-300"
                                     id="pic"
-                                    required
                                     aria-describedby="pic-help"
                                 />
                                 <InputError
@@ -963,6 +917,10 @@ export default function Index({
                                     valueTemplate={selectedOptionTemplate}
                                     itemTemplate={optionTemplate}
                                     className="w-full md:w-14rem"
+                                />
+                                <InputError
+                                    message={errors["sales"]}
+                                    className="mt-2"
                                 />
                             </div>
 
@@ -995,6 +953,10 @@ export default function Index({
                                     }
                                     rows={5}
                                     cols={30}
+                                />
+                                <InputError
+                                    message={errors["address"]}
+                                    className="mt-2"
                                 />
                             </div>
 
@@ -1079,6 +1041,25 @@ export default function Index({
                                 />
                             </div>
                             <div className="flex flex-col">
+                                <label htmlFor="name">NPWP *</label>
+                                <InputMask
+                                    keyfilter="int"
+                                    value={data.npwp}
+                                    onChange={(e) =>
+                                        setData("npwp", e.target.value)
+                                    }
+                                    placeholder="99.999.999.9-999.999"
+                                    mask="99.999.999.9-999.999"
+                                    className="dark:bg-gray-300"
+                                    id="npwp"
+                                    aria-describedby="npwp-help"
+                                />
+                                <InputError
+                                    message={errors["npwp"]}
+                                    className="mt-2"
+                                />
+                            </div>
+                            <div className="flex flex-col">
                                 <label htmlFor="pic">PIC *</label>
                                 <InputText
                                     value={data.pic}
@@ -1099,6 +1080,7 @@ export default function Index({
                             <div className="flex flex-col">
                                 <label htmlFor="sales">Pilih Sales *</label>
                                 <Dropdown
+                                    dataKey="id"
                                     value={data.sales}
                                     onChange={(e) =>
                                         setData("sales", e.target.value)
@@ -1189,7 +1171,7 @@ export default function Index({
                         <div className="flex justify-center mt-5">
                             <Button
                                 label="Submit"
-                                disabled={processing}
+                                disabled={processing || modalStatusIsVisible}
                                 className="bg-purple-600 text-sm shadow-md rounded-lg"
                             />
                         </div>

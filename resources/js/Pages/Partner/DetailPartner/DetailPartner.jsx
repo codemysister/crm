@@ -601,7 +601,9 @@ const DetailPartner = ({
                                                             className="p-0 underline bg-transparent text-blue-700 text-left"
                                                             onClick={() => {
                                                                 if (
-                                                                    partner.created_by ==
+                                                                    partner
+                                                                        .created_by
+                                                                        .id ==
                                                                     currentUser.id
                                                                 ) {
                                                                     handleEditPartner(
@@ -855,7 +857,7 @@ const DetailPartner = ({
                                 />
                             </div>
 
-                            <div className="flex flex-col">
+                            {/* <div className="flex flex-col">
                                 <label htmlFor="name">Password</label>
                                 <InputText
                                     value={data.password}
@@ -866,7 +868,7 @@ const DetailPartner = ({
                                     id="password"
                                     aria-describedby="password-help"
                                 />
-                            </div>
+                            </div> */}
                             <div className="flex flex-col">
                                 <label htmlFor="name">Nomor Telepon</label>
                                 <InputText

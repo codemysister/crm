@@ -146,7 +146,7 @@
         <div class="flex flex-col justify-start mt-8 float-left">
             <div>Purwokerto, {{date("d/m/Y")}}</div>
             <div style="width: 170px; height: 100px; overflow: hidden;" class="py-2">
-                <img class="h-20 w-[15%]" src='{{ public_path("/storage/$stpd->signature_image") }}'
+                <img class="h-20 w-[15%]" src='{{ public_path("$stpd->signature_image") }}'
                     style="object-fit:fill; width:100%; height:100%;" alt="Signature">
             </div>
             <div>{{ ucwords($stpd->signature_name) }}</div>

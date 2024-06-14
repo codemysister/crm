@@ -43,7 +43,7 @@ class STPDController extends Controller
         $usersDefault->transform(function ($user) {
             $user->position = $user->roles->first()->name;
             $user->user_id = $user->id;
-            unset ($user->roles);
+            unset($user->roles);
             return $user;
         });
         $partnersDefault = Partner::with([
@@ -60,7 +60,7 @@ class STPDController extends Controller
         $usersDefault->transform(function ($user) {
             $user->position = $user->roles->first()->name;
             $user->user_id = $user->id;
-            unset ($user->roles);
+            unset($user->roles);
             return $user;
         });
 
@@ -300,6 +300,7 @@ class STPDController extends Controller
         } else if ($request->institution_type == 'Partner') {
             $stpd->orWhereHas('partner');
         }
+
 
         if ($request->input_date['start'] && $request->input_date['end']) {
             $stpd->whereBetween('created_at', [Carbon::parse($request->input_date['start'])->setTimezone('GMT+7')->startOfDay(), Carbon::parse($request->input_date['end'])->setTimezone('GMT+7')->endOfDay()]);

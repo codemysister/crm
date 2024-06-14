@@ -405,8 +405,28 @@ const Edit = ({
                                                     phone_number:
                                                         e.target.value
                                                             .phone_number,
-                                                    pic: e.target.value.pic,
+                                                    pic:
+                                                        e.target.value.pic
+                                                            ?.name ?? "",
+                                                    pic_number:
+                                                        e.target.value.pic
+                                                            ?.number ?? "",
+                                                    pic_email:
+                                                        e.target.value.pic
+                                                            ?.email ?? "",
+                                                    province:
+                                                        e.target.value.province,
+                                                    regency:
+                                                        e.target.value.regency,
                                                 });
+
+                                                setProvinceName(
+                                                    (prev) =>
+                                                        (prev = JSON.parse(
+                                                            e.target.value
+                                                                .province
+                                                        ).code)
+                                                );
                                             }}
                                             onFocus={() => {
                                                 triggerInputFocus(

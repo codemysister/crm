@@ -40,6 +40,7 @@ class LeadController extends Controller
             $lead = Lead::create([
                 'uuid' => Str::uuid(),
                 'name' => $request->name,
+                'npwp' => $request->npwp,
                 'sales_id' => $request->sales['id'],
                 'pic' => $request->pic,
                 'phone_number' => $request->phone_number,
@@ -60,9 +61,26 @@ class LeadController extends Controller
     {
         $lead = Lead::where('uuid', $uuid)->first();
 
+        Activity::create([
+            'log_name' => 'updated',
+            'description' => ' memperbaharui data lead',
+            'subject_type' => get_class($lead),
+            'subject_id' => $lead->id,
+            'causer_type' => get_class(Auth::user()),
+            'causer_id' => Auth::user()->id,
+            "event" => "updated",
+            "note_status" => $request->note_status,
+            'properties' => [
+                "attributes" => ['name' => $request->name, 'npwp' => $request->npwp, 'address' => $request->address, 'pic' => $request->pic, 'total_members' => $request->total_members, 'status.name' => $request->status['name']],
+                "old" =>
+                    ['name' => $lead->name, 'npwp' => $lead->npwp, 'address' => $lead->address, 'pic' => $lead->pic, 'total_members' => $lead->total_members, 'status.name' => $lead->status->name, 'status.color' => $lead->status->color]
+            ]
+        ]);
+
         $lead->update([
             'name' => $request->name,
             'sales_id' => $request->sales['id'] ?? null,
+            'npwp' => $request->npwp,
             'pic' => $request->pic,
             'phone_number' => $request->phone_number,
             'address' => $request->address,
@@ -70,6 +88,8 @@ class LeadController extends Controller
             'status_id' => $request->status['id'],
             'note_status' => $request->note_status
         ]);
+
+
     }
 
     public function show($uuid)
@@ -89,7 +109,7 @@ class LeadController extends Controller
             'causer_type' => get_class(Auth::user()),
             'causer_id' => Auth::user()->id,
             "event" => "deleted",
-            'properties' => ["old" => ['name' => $lead->name, 'address' => $lead->address, 'pic' => $lead->pic, 'total_members' => $lead->total_members, 'status.name' => $lead->status->name, 'status.color' => $lead->status->color]]
+            'properties' => ["old" => ['name' => $lead->name, 'npwp' => $lead->npwp, 'address' => $lead->address, 'pic' => $lead->pic, 'total_members' => $lead->total_members, 'status.name' => $lead->status->name, 'status.color' => $lead->status->color]]
         ]);
         $lead->delete();
     }
@@ -120,7 +140,8 @@ class LeadController extends Controller
     {
         $leads = Lead::with([
             'status',
-            'createdBy'
+            'createdBy',
+            'sales'
         ]);
 
         if ($request->user) {
@@ -234,4 +255,6 @@ class LeadController extends Controller
             ->get();
         return response()->json($logs);
     }
+
+
 }

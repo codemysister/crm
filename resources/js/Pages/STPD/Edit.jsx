@@ -588,7 +588,7 @@ const Edit = ({ stpd, usersDefault, partnersDefault, signaturesProp }) => {
                                             aria-describedby="accommodation-help"
                                         />
                                     </div>
-                                    <div className="flex flex-col mt-3">
+                                    {/* <div className="flex flex-col mt-3">
                                         <label htmlFor="signature">
                                             Tanda Tangan *
                                         </label>
@@ -621,7 +621,7 @@ const Edit = ({ stpd, usersDefault, partnersDefault, signaturesProp }) => {
                                             }
                                             className="w-full md:w-14rem"
                                         />
-                                    </div>
+                                    </div> */}
 
                                     <div className="flex-flex-col mt-3">
                                         <form onSubmit={handleSubmitForm}>
@@ -894,7 +894,7 @@ const Edit = ({ stpd, usersDefault, partnersDefault, signaturesProp }) => {
                                 <p>Purwokerto, {new Date().getFullYear()}</p>
                                 <div className="h-[100px] w-[170px] py-2">
                                     <img
-                                        src={"/storage/" + data.signature.image}
+                                        src={data.signature.image}
                                         alt=""
                                         className="w-full h-full object-fill"
                                     />

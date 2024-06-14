@@ -1017,7 +1017,7 @@ export default function Index({ auth }) {
                         className="bg-transparent hover:bg-slate-200 w-full text-slate-500 border-b-2 border-slate-400"
                         onClick={() => {
                             if (
-                                permissions.includes("edit sla") &&
+                                permissions.includes("edit aktifitas sla") &&
                                 selectedActivity.user_id == currentUser.id
                             ) {
                                 handleEditActivity(selectedActivity);

@@ -535,6 +535,10 @@ export default function Index({ auth, usersProp }) {
             keyIndo = "Harga QRIS";
         } else if (firstKey == "fee_purchase_cazhpoin") {
             keyIndo = "Harga Pembelian Cazhpoin";
+        } else if (firstKey == "fee_topup_cazhpos") {
+            keyIndo = "Harga Topup Cazhpos";
+        } else if (firstKey == "fee_bill_cazhpoin") {
+            keyIndo = "Harga Pembayaran Cazhpoin";
         } else if (firstKey == "fee_withdraw_cazhpos") {
             keyIndo = "Harga Penarikan Cazhpos";
         } else if (firstKey == "fee_bill_saldokartu") {
@@ -644,7 +648,7 @@ export default function Index({ auth, usersProp }) {
                         />
                     </div>
 
-                    <div className="flex flex-col mt-3">
+                    {/* <div className="flex flex-col mt-3">
                         <label htmlFor="institution_type">Tipe Lembaga</label>
                         <Dropdown
                             value={dataFilter.institution_type}
@@ -661,7 +665,7 @@ export default function Index({ auth, usersProp }) {
                             placeholder="Pilih tipe"
                             className="w-full md:w-14rem"
                         />
-                    </div>
+                    </div> */}
 
                     <div className="flex flex-col mt-3">
                         <label htmlFor="">Tanggal Input</label>

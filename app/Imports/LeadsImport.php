@@ -67,10 +67,12 @@ class LeadsImport implements ToCollection, SkipsEmptyRows, WithValidation, WithS
     {
         foreach ($rows as $key => $row) {
             try {
-                $leadExist = Lead::where('name', 'like', '%' . $row["lembaga"] . '%')->first();
+                $leadExist = Lead::where('name', 'like', '%' . $row["lembaga"] . '%')->orWhere('npwp', $row['npwp'])->first();
 
                 if ($leadExist) {
-                    continue;
+                    return redirect()->back()->withErrors([
+                        'error' => "Lembaga " . $row['lembaga'] . " sudah terdaftar"
+                    ]);
                 }
 
                 $sales = User::where('name', $row['sales'])->first();

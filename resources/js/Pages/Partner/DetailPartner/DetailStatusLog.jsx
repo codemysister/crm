@@ -41,7 +41,9 @@ const DetailStatusLog = ({
 
     const getLog = async () => {
         setIsLoadingData(true);
-        let response = await fetch("/api/partners/logs/status");
+        let response = await fetch(
+            "/api/partners/logs/status?partner=" + partner.id
+        );
         let data = await response.json();
 
         setLogs((prev) => data);

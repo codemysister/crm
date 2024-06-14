@@ -266,13 +266,13 @@ class InvoiceGeneralController extends Controller
 
             Activity::create([
                 'log_name' => 'created',
-                'description' => Auth::user()->name . ' menambah data Invoice Umum',
+                'description' => ' menambah data Invoice Umum',
                 'subject_type' => get_class($invoice_general),
                 'subject_id' => $invoice_general->id,
                 'causer_type' => get_class(Auth::user()),
                 'causer_id' => Auth::user()->id,
                 "event" => "created",
-                'properties' => ["attributes" => ["code" => $invoice_general->code, "institution_name" => $invoice_general->institution_name, "institution_npwp" => $invoice_general->institution_npwp, "date" => $invoice_general->date, "due_date" => $invoice_general->due_date, "invoice_age" => $invoice_general->invoice_age, "bill_date" => $invoice_general->bill_date, 'total' => $invoice_general->total, 'total_all_ppn' => $invoice_general->total_all_ppn, 'paid_off' => $invoice_general->paid_off, 'rest_of_bill' => $invoice_general->rest_of_bill, 'signature_name' => $invoice_general->signature_name, 'products' => $invoiceProductsLog]]
+                'properties' => ["attributes" => ["code" => $invoice_general->code, "institution_name" => $invoice_general->institution_name, "date" => $invoice_general->date, "due_date" => $invoice_general->due_date, "invoice_age" => $invoice_general->invoice_age, "bill_date" => $invoice_general->bill_date, 'total' => $invoice_general->total, 'total_all_ppn' => $invoice_general->total_all_ppn, 'paid_off' => $invoice_general->paid_off, 'rest_of_bill' => $invoice_general->rest_of_bill, 'signature_name' => $invoice_general->signature_name, 'products' => $invoiceProductsLog]]
             ]);
 
 
@@ -420,13 +420,13 @@ class InvoiceGeneralController extends Controller
 
             Activity::create([
                 'log_name' => 'updated',
-                'description' => Auth::user()->name . ' mengubah data invoice umum',
+                'description' => ' mengubah data invoice umum',
                 'subject_type' => get_class($invoice_general),
                 'subject_id' => $invoice_general->id,
                 'causer_type' => get_class(Auth::user()),
                 'causer_id' => Auth::user()->id,
                 "event" => "updated",
-                'properties' => ["attributes" => ["code" => $invoice_general->code, "institution_name" => $invoice_general->institution_name, "institution_npwp" => $invoice_general->institution_npwp, "date" => $invoice_general->date, "due_date" => $invoice_general->due_date, "invoice_age" => $invoice_general->invoice_age, "bill_date" => $invoice_general->bill_date, 'total' => $invoice_general->total, 'total_all_ppn' => $invoice_general->total_all_ppn, 'paid_off' => $invoice_general->paid_off, 'rest_of_bill' => $invoice_general->rest_of_bill, 'signature_name' => $invoice_general->signature_name, 'products' => $invoiceNewProductsLog], "old" => ["code" => $invoice_general->code, "institution_name" => $invoice_general->institution_name, "institution_npwp" => $invoice_general->institution_npwp, "date" => $invoice_general->date, "due_date" => $invoice_general->due_date, "invoice_age" => $invoice_general->invoice_age, "bill_date" => $invoice_general->bill_date, 'total' => $invoice_general->total, 'total_all_ppn' => $invoice_general->total_all_ppn, 'paid_off' => $invoice_general->paid_off, 'rest_of_bill' => $invoice_general->rest_of_bill, 'signature_name' => $invoice_general->signature_name, 'products' => $invoiceOldProductsLog]]
+                'properties' => ["attributes" => ["code" => $invoice_general->code, "institution_name" => $request['partner']['name'], "date" => $request->date, "due_date" => $request->due_date, "invoice_age" => $request->invoice_age, "bill_date" => $request->bill_date, 'total' => $request->total, 'total_all_ppn' => $request->total_all_ppn, 'paid_off' => $request->paid_off, 'rest_of_bill' => $request->rest_of_bill, 'signature_name' => $request->signature_name, 'products' => $invoiceNewProductsLog], "old" => ["code" => $invoice_general->code, "institution_name" => $invoice_general->institution_name, "institution_npwp" => $invoice_general->institution_npwp, "date" => $invoice_general->date, "due_date" => $invoice_general->due_date, "invoice_age" => $invoice_general->invoice_age, "bill_date" => $invoice_general->bill_date, 'total' => $invoice_general->total, 'total_all_ppn' => $invoice_general->total_all_ppn, 'paid_off' => $invoice_general->paid_off, 'rest_of_bill' => $invoice_general->rest_of_bill, 'signature_name' => $invoice_general->signature_name, 'products' => $invoiceOldProductsLog]]
             ]);
 
             if ($request['partner']['type'] == 'partner') {
@@ -487,7 +487,7 @@ class InvoiceGeneralController extends Controller
         }
 
         if ($request->input_date['start'] && $request->input_date['end']) {
-            $invoice_generals->whereBetween('created_at', [$request->input_date['start'], $request->input_date['end']]);
+            $invoice_generals->whereBetween('created_at', [Carbon::parse($request->input_date['start'])->setTimezone('GMT+7')->startOfDay(), Carbon::parse($request->input_date['end'])->setTimezone('GMT+7')->endOfDay()]);
         }
 
 

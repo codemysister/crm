@@ -43,20 +43,7 @@ class Partner extends Authenticatable
                     ]);
                     $sph->forceDelete();
                 });
-                $lead->memo()->get()->each(function ($memo) {
-                    unlink($memo->memo_doc);
-                    Activity::create([
-                        'log_name' => 'force',
-                        'description' => 'menghapus permanen data memo',
-                        'subject_type' => get_class($memo),
-                        'subject_id' => $memo->id,
-                        'causer_type' => get_class(Auth::user()),
-                        'causer_id' => Auth::user()->id,
-                        "event" => "force",
-                        'properties' => ["old" => ["code" => $memo->code, "partner_name" => $memo->partner_name, "price_card" => $memo->price_card, "price_e_card" => $memo->price_e_card, "price_subscription" => $memo->price_subscription, "consideration" => $memo->consideration, 'signature_applicant_name' => $memo->signature_applicant_name, 'signature_acknowledges_name' => $memo->signature_acknowledges_name, 'signature_agrees_name' => $memo->signature_agrees_name]]
-                    ]);
-                    $memo->forceDelete();
-                });
+
                 $lead->mou()->get()->each(function ($mou) {
                     $mou->forceDelete();
                 });
@@ -75,19 +62,7 @@ class Partner extends Authenticatable
 
                     $sph->delete();
                 });
-                $lead->memo()->get()->each(function ($memo) {
-                    Activity::create([
-                        'log_name' => 'deleted',
-                        'description' => 'menghapus permanen data memo',
-                        'subject_type' => get_class($memo),
-                        'subject_id' => $memo->id,
-                        'causer_type' => get_class(Auth::user()),
-                        'causer_id' => Auth::user()->id,
-                        "event" => "deleted",
-                        'properties' => ["old" => ["code" => $memo->code, "partner_name" => $memo->partner_name, "price_card" => $memo->price_card, "price_e_card" => $memo->price_e_card, "price_subscription" => $memo->price_subscription, "consideration" => $memo->consideration, 'signature_applicant_name' => $memo->signature_applicant_name, 'signature_acknowledges_name' => $memo->signature_acknowledges_name, 'signature_agrees_name' => $memo->signature_agrees_name]]
-                    ]);
-                    $memo->delete();
-                });
+
                 $lead->mou()->get()->each(function ($mou) {
                     $mou->delete();
                 });
@@ -98,13 +73,12 @@ class Partner extends Authenticatable
     public function tapActivity(Activity $activity, string $eventName)
     {
         $activity->note_status = $this->note_status;
-
     }
 
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()
-            ->logOnly(['name', 'npwp', 'password', 'phone_number', 'status.name', 'status.color', 'pic.name', 'bank.bank', 'bank.account_bank_name', 'bank.account_bank_number', 'sales.name', 'account_manager.name', 'onboarding_date', 'live_date', 'monitoring_date_after_3_month_live', 'province', 'regency', 'address', 'payment_metode', 'period'])
+            ->logOnly(['name', 'npwp', 'password', 'phone_number', 'status.name', 'pic.name', 'bank.bank', 'bank.account_bank_name', 'bank.account_bank_number', 'sales.name', 'account_manager.name', 'onboarding_date', 'live_date', 'monitoring_date_after_3_month_live', 'province', 'regency', 'address', 'payment_metode', 'period'])
             ->dontLogIfAttributesChangedOnly(['deleted_at', 'updated_at'])
             ->setDescriptionForEvent(function (string $eventName) {
                 $modelName = class_basename($this);

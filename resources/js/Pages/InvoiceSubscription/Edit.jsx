@@ -258,11 +258,11 @@ const Edit = ({
         });
     };
 
-    const showError = (type) => {
+    const showError = (message) => {
         toast.current.show({
             severity: "error",
             summary: "Error",
-            detail: `${type} data gagal`,
+            detail: message,
             life: 3000,
         });
     };
@@ -292,8 +292,8 @@ const Edit = ({
                 router.get("/invoice_subscriptions");
             },
 
-            onError: () => {
-                showError("Tambah");
+            onError: (data) => {
+                showError(data.error);
             },
         });
     };

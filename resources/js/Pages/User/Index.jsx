@@ -257,10 +257,7 @@ export default function Index({ auth }) {
 
     const header = () => {
         return (
-            <HeaderDatatable
-                globalFilterValue={globalFilterValue}
-                onGlobalFilterChange={onGlobalFilterChange}
-            >
+            <HeaderDatatable filters={filters} setFilters={setFilters}>
                 <Button
                     className="shadow-md w-[10px] lg:w-[90px] border border-slate-600 bg-transparent text-slate-600 dark:bg-slate-700 dark:text-slate-300 rounded-lg"
                     onClick={() => setSidebarFilter(true)}
@@ -402,7 +399,7 @@ export default function Index({ auth }) {
             keyIndo = "Nama";
         } else if (key == "email") {
             keyIndo = "Email";
-        } else if (key == "phone_number") {
+        } else if (key == "number") {
             keyIndo = "Nomor Telepon";
         } else if (key == "role") {
             keyIndo = "Role";
@@ -515,7 +512,7 @@ export default function Index({ auth }) {
                 ref={action}
             >
                 <div className="flex flex-col flex-wrap w-full">
-                    {permissionAuth.includes("edit sph") && (
+                    {permissionAuth.includes("edit user") && (
                         <Button
                             icon="pi pi-pencil"
                             label="edit"
@@ -525,7 +522,7 @@ export default function Index({ auth }) {
                             }}
                         />
                     )}
-                    {permissionAuth.includes("hapus sph") && (
+                    {permissionAuth.includes("hapus user") && (
                         <Button
                             icon="pi pi-trash"
                             label="hapus"
@@ -785,7 +782,7 @@ export default function Index({ auth }) {
                                 />
                             </div>
                             <div className="flex flex-col">
-                                <label htmlFor="role">Role</label>
+                                <label htmlFor="role">Role *</label>
                                 <Dropdown
                                     value={data.role}
                                     onChange={(e) =>
@@ -863,7 +860,7 @@ export default function Index({ auth }) {
                                 />
                             </div>
                             <div className="flex flex-col">
-                                <label htmlFor="role">Role</label>
+                                <label htmlFor="role">Role *</label>
                                 <Dropdown
                                     value={data.role}
                                     onChange={(e) =>

@@ -44,7 +44,7 @@ class SPHController extends Controller
         $usersProp->transform(function ($user) {
             $user->position = $user->roles->first()->name;
             $user->user_id = $user->id;
-            unset ($user->roles);
+            unset($user->roles);
             return $user;
         });
         $partnersProp = Partner::with([
@@ -223,7 +223,7 @@ class SPHController extends Controller
         $usersProp->transform(function ($user) {
             $user->position = $user->roles->first()->name;
             $user->user_id = $user->id;
-            unset ($user->roles);
+            unset($user->roles);
             return $user;
         });
         $partnersProp = Partner::with([
@@ -248,9 +248,11 @@ class SPHController extends Controller
             if ($request['partner']['type'] == 'partner') {
                 $partnerExist = Partner::where('uuid', $request['partner']["uuid"])->first();
                 $sph->partner_id = $partnerExist->id;
+                $sph->lead_id = null;
             } else {
                 $leadExist = Lead::where('uuid', $request['partner']["uuid"])->first();
                 $sph->lead_id = $leadExist->id;
+                $sph->partner_id = null;
             }
             $sph->partner_name = $request['partner']['name'];
             $sph->partner_pic = $request['partner']['pic'];

@@ -109,8 +109,6 @@ class PartnerImport implements ToCollection, WithValidation, SkipsEmptyRows, Wit
 
     public static function partnerNameToEmail($string)
     {
-        // Ambil substring sebelum koma
-        $string = explode(',', $string)[0];
 
         // Hilangkan karakter selain huruf, angka, dan spasi
         $string = preg_replace('/[^A-Za-z0-9\s]/', '', $string);

@@ -26,6 +26,7 @@ class CardRequest extends FormRequest
             'status.name' => 'required',
             'pcs' => 'required',
             'price' => 'required',
+            'address' => 'required',
             'type' => 'required',
             'google_drive_link' => 'required',
             'total' => 'required',
@@ -39,6 +40,7 @@ class CardRequest extends FormRequest
             'status.name.required' => 'Status harus diiisi',
             'pcs.required' => 'Jumlah kartu harus diiisi',
             'price.required' => 'Harga kartu harus diiisi',
+            'address.required' => 'Alamat pengiriman harus diisi',
             'type.required' => 'Tipe kartu harus diiisi',
             'google_drive_link.required' => 'Link google drive harus diisi',
         ];

@@ -356,12 +356,18 @@ const ArsipComponent = ({
                         label="pulihkan"
                         className="bg-transparent hover:bg-slate-200 w-full text-slate-500 border-b-2 border-slate-400"
                         onClick={() => {
-                            if (selectedData.created_by.id == currentUser.id) {
-                                handleRestoreData(selectedData);
+                            if (selectedData.created_by) {
+                                if (
+                                    selectedData.created_by.id == currentUser.id
+                                ) {
+                                    handleRestoreData(selectedData);
+                                } else {
+                                    setPermissionErrorIsVisible(
+                                        (prev) => (prev = true)
+                                    );
+                                }
                             } else {
-                                setPermissionErrorIsVisible(
-                                    (prev) => (prev = true)
-                                );
+                                handleRestoreData(selectedData);
                             }
                         }}
                     />
@@ -370,12 +376,18 @@ const ArsipComponent = ({
                         label="hapus permanen"
                         className="bg-transparent hover:bg-slate-200 w-full text-slate-500 border-b-2 border-slate-400"
                         onClick={() => {
-                            if (selectedData.created_by.id == currentUser.id) {
-                                confirmDeleteData();
+                            if (selectedData.created_by) {
+                                if (
+                                    selectedData.created_by.id == currentUser.id
+                                ) {
+                                    confirmDeleteData();
+                                } else {
+                                    setPermissionErrorIsVisible(
+                                        (prev) => (prev = true)
+                                    );
+                                }
                             } else {
-                                setPermissionErrorIsVisible(
-                                    (prev) => (prev = true)
-                                );
+                                confirmDeleteData();
                             }
                         }}
                     />
@@ -446,6 +458,7 @@ const ArsipComponent = ({
                                 whiteSpace: "nowrap",
                             }}
                         ></Column>
+
                         <Column
                             field="created_by"
                             className="dark:border-none bg-white lg:whitespace-nowrap lg:w-max"

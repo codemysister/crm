@@ -41,8 +41,9 @@ class PartnerAccountSettingController extends Controller
 
     public function update(PartnerAccountSettingRequest $request, $uuid)
     {
-        PartnerAccountSetting::where('uuid', $uuid)->first()->update([
-            'partner_id' => $request["partner"]["id"],
+        $partner = PartnerAccountSetting::where('uuid', $uuid)->first();
+        $partner->update([
+            // 'partner_id' => $request["partner"]["id"],
             'subdomain' => $request->subdomain,
             'email_super_admin' => $request->email_super_admin,
             'password' => $request->password,

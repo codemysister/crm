@@ -48,6 +48,7 @@ const DetailLead = ({
     } = useForm({
         uuid: "",
         name: null,
+        sales: { id: null },
         address: null,
         pic: null,
         total_members: null,
@@ -144,6 +145,7 @@ const DetailLead = ({
             pic: lead.pic,
             phone_number: lead.phone_number,
             address: lead.address,
+            sales: { id: lead.sales_id },
             total_members: lead.total_members,
             status: lead.status,
         });

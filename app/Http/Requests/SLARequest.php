@@ -31,7 +31,22 @@ class SLARequest extends FormRequest
             "partner.pic" => "required",
             "partner.pic_email" => "required",
             "partner.pic_number" => "required",
-            "referral" => "required",
+            "signature.image" => "required",
         ];
     }
+
+    public function messages(): array
+    {
+        return [
+            'partner.name.required' => 'Lembaga harus diiisi',
+            'partner.province.required' => 'Provinsi harus diiisi',
+            'partner.regency.required' => 'Kabupaten harus diiisi',
+            'partner.pic.required' => 'PIC harus diiisi',
+            'partner.pic_email.required' => 'Email PIC harus diiisi',
+            'partner.pic_number.required' => 'Nomor PIC harus diiisi',
+            'signature.image.required' => 'Tanda tangan harus diiisi',
+
+        ];
+    }
+
 }

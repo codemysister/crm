@@ -23,6 +23,8 @@ class PlaylistRequest extends FormRequest
     {
         return [
             'title' => 'required',
+            'description' => 'required',
+            'thumbnail' => 'required'
         ];
     }
 
@@ -30,6 +32,8 @@ class PlaylistRequest extends FormRequest
     {
         return [
             'title.required' => 'Judul harus diiisi',
+            'description.required' => 'Deskripsi harus diisi',
+            'thumbnail.required' => 'Thumbnail harus diisi'
         ];
     }
 }

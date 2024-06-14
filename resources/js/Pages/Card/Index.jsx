@@ -41,6 +41,7 @@ const Index = ({ auth, usersProp, partnersProp, statusesProp }) => {
     const [activeIndexTab, setActiveIndexTab] = useState(0);
     const [cards, setCards] = useState(null);
     const [partners, setPartners] = useState(partnersProp);
+    const [status, setStatus] = useState();
     const [users, setUsers] = useState(usersProp);
     const [statuses, setStatuses] = useState(statusesProp);
     const [confirmIsVisible, setConfirmIsVisible] = useState(false);
@@ -54,7 +55,7 @@ const Index = ({ auth, usersProp, partnersProp, statusesProp }) => {
     const [modalCardIsVisible, setModalCardIsVisible] = useState(false);
     const [modalEditCardIsVisible, setModalEditCardIsVisible] = useState(false);
 
-    const { roles, permissions } = auth.user;
+    const { roles, permissions, data: currentUser } = auth.user;
     const [filters, setFilters] = useState({
         global: { value: null, matchMode: FilterMatchMode.CONTAINS },
     });
@@ -133,6 +134,7 @@ const Index = ({ auth, usersProp, partnersProp, statusesProp }) => {
 
     useEffect(() => {
         fetchData(getCards);
+        setStatus((prev) => data.status?.name ?? null);
     }, []);
 
     const addButtonIcon = () => {
@@ -166,6 +168,8 @@ const Index = ({ auth, usersProp, partnersProp, statusesProp }) => {
             status: card.status,
             price: card.price,
             type: card.type,
+            address: card.address,
+            revision_detail: card.revision_detail,
             pcs: card.pcs,
             total: card.total,
             google_drive_link: card.google_drive_link,
@@ -174,6 +178,7 @@ const Index = ({ auth, usersProp, partnersProp, statusesProp }) => {
             print_date: card.print_date,
             delivery_date: card.delivery_date,
         });
+        setStatus((prev) => card.status.name);
         clearErrors();
         setModalEditCardIsVisible(true);
     };
@@ -365,6 +370,15 @@ const Index = ({ auth, usersProp, partnersProp, statusesProp }) => {
             },
         },
         {
+            field: "address",
+            header: "Alamat pengiriman",
+            style: {
+                width: "max-content",
+                whiteSpace: "nowrap",
+            },
+        },
+
+        {
             field: "google_drive_link",
             header: "Link Google Drive",
             style: {
@@ -435,6 +449,19 @@ const Index = ({ auth, usersProp, partnersProp, statusesProp }) => {
                     : "-";
             },
         },
+        {
+            field: "arrive_date",
+            header: "Tanggal Sampai",
+            style: {
+                width: "max-content",
+                whiteSpace: "nowrap",
+            },
+            body: (rowData) => {
+                return rowData.arrive_date
+                    ? formateDate(rowData.arrive_date)
+                    : "-";
+            },
+        },
     ];
 
     let cardCategories = [{ type: "digital" }, { type: "cetak" }];
@@ -461,12 +488,14 @@ const Index = ({ auth, usersProp, partnersProp, statusesProp }) => {
             keyIndo = "Tanggal Design";
         } else if (key == "delivery_date") {
             keyIndo = "Tanggal Pengiriman";
+        } else if (key == "arrive_date") {
+            keyIndo = "Tanggal Sampai";
         }
 
         return keyIndo;
     };
 
-    const globalFilterFields = ["title"];
+    const globalFilterFields = ["partner.name", "status.name", "category"];
 
     if (preRenderLoad) {
         return <SkeletonDatatable auth={auth} />;
@@ -710,26 +739,6 @@ const Index = ({ auth, usersProp, partnersProp, statusesProp }) => {
                         </div>
 
                         <div className="flex flex-col">
-                            <label htmlFor="address">Alamat pengiriman *</label>
-                            <InputText
-                                value={data.address}
-                                onChange={(e) => {
-                                    setData({
-                                        ...data,
-                                        address: e.target.value,
-                                    });
-                                }}
-                                className="dark:bg-gray-300"
-                                id="address"
-                                aria-describedby="address-help"
-                            />
-                            <InputError
-                                message={errors.address}
-                                className="mt-2"
-                            />
-                        </div>
-
-                        <div className="flex flex-col">
                             <label htmlFor="price">Harga *</label>
                             <InputNumber
                                 value={data.price}
@@ -805,6 +814,26 @@ const Index = ({ auth, usersProp, partnersProp, statusesProp }) => {
                             />
                             <InputError
                                 message={errors.total}
+                                className="mt-2"
+                            />
+                        </div>
+
+                        <div className="flex flex-col">
+                            <label htmlFor="address">Alamat pengiriman *</label>
+                            <InputText
+                                value={data.address}
+                                onChange={(e) => {
+                                    setData({
+                                        ...data,
+                                        address: e.target.value,
+                                    });
+                                }}
+                                className="dark:bg-gray-300"
+                                id="address"
+                                aria-describedby="address-help"
+                            />
+                            <InputError
+                                message={errors.address}
                                 className="mt-2"
                             />
                         </div>
@@ -849,6 +878,181 @@ const Index = ({ auth, usersProp, partnersProp, statusesProp }) => {
             >
                 <form onSubmit={(e) => handleSubmitForm(e, "update")}>
                     <div className="flex flex-col justify-around gap-4 mt-4">
+                        {currentUser.roles[0].name == "account manager" && (
+                            <>
+                                <div className="flex flex-col">
+                                    <label htmlFor="lembaga">Lembaga *</label>
+                                    <Dropdown
+                                        value={data.partner}
+                                        dataKey="id"
+                                        onChange={(e) => {
+                                            setData((data) => ({
+                                                ...data,
+                                                partner: {
+                                                    ...data.partner,
+                                                    id: e.target.value.id,
+                                                    name: e.target.value.name,
+                                                },
+                                                pcs: e.target.value
+                                                    .total_members,
+                                                type: e.target.value.price_list
+                                                    ? JSON.parse(
+                                                          e.target.value
+                                                              .price_list
+                                                              .price_card
+                                                      ).type
+                                                    : null,
+                                                price: e.target.value.price_list
+                                                    ? JSON.parse(
+                                                          e.target.value
+                                                              .price_list
+                                                              .price_card
+                                                      ).price
+                                                    : 0,
+                                            }));
+                                        }}
+                                        options={partners}
+                                        optionLabel="name"
+                                        placeholder="Pilih Lembaga"
+                                        filter
+                                        valueTemplate={selectedOptionTemplate}
+                                        itemTemplate={optionTemplate}
+                                        className="w-full md:w-14rem"
+                                    />
+                                    <InputError
+                                        message={errors["partner.name"]}
+                                        className="mt-2"
+                                    />
+                                </div>
+                                <div className="flex flex-col">
+                                    <label htmlFor="address">
+                                        Alamat pengiriman *
+                                    </label>
+                                    <InputText
+                                        value={data.address}
+                                        onChange={(e) => {
+                                            setData({
+                                                ...data,
+                                                address: e.target.value,
+                                            });
+                                        }}
+                                        className="dark:bg-gray-300"
+                                        id="address"
+                                        aria-describedby="address-help"
+                                    />
+                                    <InputError
+                                        message={errors.address}
+                                        className="mt-2"
+                                    />
+                                </div>
+                                <div className="flex flex-col">
+                                    <label htmlFor="price">Harga *</label>
+                                    <InputNumber
+                                        value={data.price}
+                                        onChange={(e) => {
+                                            let total = e.value * data.pcs;
+                                            setData({
+                                                ...data,
+                                                price: e.value,
+                                                total: total,
+                                            });
+                                        }}
+                                        className="dark:bg-gray-300"
+                                        id="price"
+                                        aria-describedby="price-help"
+                                        defaultValue={0}
+                                        locale="id-ID"
+                                    />
+                                    <InputError
+                                        message={errors.price}
+                                        className="mt-2"
+                                    />
+                                </div>
+                                <div className="flex flex-col">
+                                    <label htmlFor="type">Tipe *</label>
+                                    <Dropdown
+                                        dataKey="type"
+                                        value={data.type}
+                                        onChange={(e) =>
+                                            setData("type", e.value)
+                                        }
+                                        options={cardCategories}
+                                        optionLabel="type"
+                                        optionValue="type"
+                                        placeholder="kategori"
+                                        className="w-full md:w-14rem"
+                                    />
+                                    <InputError
+                                        message={errors.type}
+                                        className="mt-2"
+                                    />
+                                </div>
+                                <div className="flex flex-col">
+                                    <label htmlFor="pcs">Jumlah (pcs) *</label>
+                                    <InputNumber
+                                        value={data.pcs}
+                                        onChange={(e) => {
+                                            let total = e.value * data.price;
+                                            setData({
+                                                ...data,
+                                                pcs: e.value,
+                                                total: total,
+                                            });
+                                        }}
+                                        className="dark:bg-gray-300"
+                                        id="pcs"
+                                        locale="id-ID"
+                                        aria-describedby="pcs-help"
+                                    />
+                                    <InputError
+                                        message={errors.pcs}
+                                        className="mt-2"
+                                    />
+                                </div>
+                                <div className="flex flex-col">
+                                    <label htmlFor="total">Total *</label>
+                                    <InputNumber
+                                        value={data.total}
+                                        onChange={(e) =>
+                                            setData("total", e.value)
+                                        }
+                                        className="dark:bg-gray-300"
+                                        id="total"
+                                        aria-describedby="total-help"
+                                        defaultValue={0}
+                                        disabled
+                                        locale="id-ID"
+                                    />
+                                    <InputError
+                                        message={errors.total}
+                                        className="mt-2"
+                                    />
+                                </div>
+                                <div className="flex flex-col">
+                                    <label htmlFor="google_drive_link">
+                                        Link Google Drive *
+                                    </label>
+                                    <InputText
+                                        value={data.google_drive_link}
+                                        onChange={(e) => {
+                                            setData({
+                                                ...data,
+                                                google_drive_link:
+                                                    e.target.value,
+                                            });
+                                        }}
+                                        className="dark:bg-gray-300"
+                                        id="google_drive_link"
+                                        aria-describedby="google_drive_link-help"
+                                    />
+                                    <InputError
+                                        message={errors.google_drive_link}
+                                        className="mt-2"
+                                    />
+                                </div>
+                            </>
+                        )}
+
                         <div className="flex flex-col">
                             <label htmlFor="status">Status *</label>
                             <Dropdown
@@ -856,6 +1060,7 @@ const Index = ({ auth, usersProp, partnersProp, statusesProp }) => {
                                 value={data.status}
                                 onChange={(e) => {
                                     setData("status", e.target.value);
+                                    setStatus((prev) => e.target.value.name);
                                 }}
                                 options={statuses}
                                 optionLabel="name"
@@ -867,184 +1072,34 @@ const Index = ({ auth, usersProp, partnersProp, statusesProp }) => {
                                 className="mt-2"
                             />
                         </div>
-                        <div className="flex flex-col">
-                            <label htmlFor="lembaga">Lembaga *</label>
-                            <Dropdown
-                                value={data.partner}
-                                dataKey="id"
-                                onChange={(e) => {
-                                    setData((data) => ({
-                                        ...data,
-                                        partner: {
-                                            ...data.partner,
-                                            id: e.target.value.id,
-                                            name: e.target.value.name,
-                                        },
-                                        pcs: e.target.value.total_members,
-                                        type: e.target.value.price_list
-                                            ? JSON.parse(
-                                                  e.target.value.price_list
-                                                      .price_card
-                                              ).type
-                                            : null,
-                                        price: e.target.value.price_list
-                                            ? JSON.parse(
-                                                  e.target.value.price_list
-                                                      .price_card
-                                              ).price
-                                            : 0,
-                                    }));
-                                }}
-                                options={partners}
-                                optionLabel="name"
-                                placeholder="Pilih Lembaga"
-                                filter
-                                valueTemplate={selectedOptionTemplate}
-                                itemTemplate={optionTemplate}
-                                className="w-full md:w-14rem"
-                            />
-                            <InputError
-                                message={errors["partner.name"]}
-                                className="mt-2"
-                            />
-                        </div>
-                        <div className="flex flex-col">
-                            <label htmlFor="address">Alamat pengiriman *</label>
-                            <InputText
-                                value={data.address}
-                                onChange={(e) => {
-                                    setData({
-                                        ...data,
-                                        address: e.target.value,
-                                    });
-                                }}
-                                className="dark:bg-gray-300"
-                                id="address"
-                                aria-describedby="address-help"
-                            />
-                            <InputError
-                                message={errors.address}
-                                className="mt-2"
-                            />
-                        </div>
-                        <div className="flex flex-col">
-                            <label htmlFor="price">Harga *</label>
-                            <InputNumber
-                                value={data.price}
-                                onChange={(e) => {
-                                    let total = e.value * data.pcs;
-                                    setData({
-                                        ...data,
-                                        price: e.value,
-                                        total: total,
-                                    });
-                                }}
-                                className="dark:bg-gray-300"
-                                id="price"
-                                aria-describedby="price-help"
-                                defaultValue={0}
-                                locale="id-ID"
-                            />
-                            <InputError
-                                message={errors.price}
-                                className="mt-2"
-                            />
-                        </div>
-                        <div className="flex flex-col">
-                            <label htmlFor="type">Tipe *</label>
-                            <Dropdown
-                                dataKey="type"
-                                value={data.type}
-                                onChange={(e) => setData("type", e.value)}
-                                options={cardCategories}
-                                optionLabel="type"
-                                optionValue="type"
-                                placeholder="kategori"
-                                className="w-full md:w-14rem"
-                            />
-                            <InputError
-                                message={errors.type}
-                                className="mt-2"
-                            />
-                        </div>
-                        <div className="flex flex-col">
-                            <label htmlFor="pcs">Jumlah (pcs) *</label>
-                            <InputNumber
-                                value={data.pcs}
-                                onChange={(e) => {
-                                    let total = e.value * data.price;
-                                    setData({
-                                        ...data,
-                                        pcs: e.value,
-                                        total: total,
-                                    });
-                                }}
-                                className="dark:bg-gray-300"
-                                id="pcs"
-                                locale="id-ID"
-                                aria-describedby="pcs-help"
-                            />
-                            <InputError message={errors.pcs} className="mt-2" />
-                        </div>
-                        <div className="flex flex-col">
-                            <label htmlFor="total">Total *</label>
-                            <InputNumber
-                                value={data.total}
-                                onChange={(e) => setData("total", e.value)}
-                                className="dark:bg-gray-300"
-                                id="total"
-                                aria-describedby="total-help"
-                                defaultValue={0}
-                                disabled
-                                locale="id-ID"
-                            />
-                            <InputError
-                                message={errors.total}
-                                className="mt-2"
-                            />
-                        </div>
-                        <div className="flex flex-col">
-                            <label htmlFor="google_drive_link">
-                                Link Google Drive *
-                            </label>
-                            <InputText
-                                value={data.google_drive_link}
-                                onChange={(e) => {
-                                    setData({
-                                        ...data,
-                                        google_drive_link: e.target.value,
-                                    });
-                                }}
-                                className="dark:bg-gray-300"
-                                id="google_drive_link"
-                                aria-describedby="google_drive_link-help"
-                            />
-                            <InputError
-                                message={errors.google_drive_link}
-                                className="mt-2"
-                            />
-                        </div>
-                        <div className="flex flex-col">
-                            <label htmlFor="revision_detail">
-                                Detail Revisi *
-                            </label>
-                            <InputText
-                                value={data.revision_detail}
-                                onChange={(e) => {
-                                    setData({
-                                        ...data,
-                                        revision_detail: e.target.value,
-                                    });
-                                }}
-                                className="dark:bg-gray-300"
-                                id="revision_detail"
-                                aria-describedby="revision_detail-help"
-                            />
-                            <InputError
-                                message={errors.revision_detail}
-                                className="mt-2"
-                            />
-                        </div>
+                        {status == "revisi" && (
+                            <div className="flex flex-col">
+                                <label htmlFor="revision_detail">
+                                    Detail Revisi
+                                </label>
+                                <InputText
+                                    value={data.revision_detail}
+                                    onChange={(e) => {
+                                        {
+                                            currentUser.roles[0].name ==
+                                                "account manager" &&
+                                                setData({
+                                                    ...data,
+                                                    revision_detail:
+                                                        e.target.value,
+                                                });
+                                        }
+                                    }}
+                                    className="dark:bg-gray-300"
+                                    id="revision_detail"
+                                    aria-describedby="revision_detail-help"
+                                />
+                                <InputError
+                                    message={errors.revision_detail}
+                                    className="mt-2"
+                                />
+                            </div>
+                        )}
                     </div>
                     <div className="flex justify-center mt-5">
                         <Button

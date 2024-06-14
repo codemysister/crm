@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Spatie\Activitylog\LogOptions;
+use Spatie\Activitylog\Models\Activity;
 use Spatie\Activitylog\Traits\LogsActivity;
 
 class Card extends Model
@@ -16,26 +17,61 @@ class Card extends Model
 
     protected static $recordEvents = ['created', 'updated', 'restored'];
 
+    protected static $logAttributes = [
+        'partner.name',
+        'status.name',
+        'pcs',
+        'price',
+        'type',
+        'total',
+        'google_drive_link',
+        'approval_date',
+        'design_date',
+        'print_date',
+        'delivery_date',
+        'arrive_date',
+        'revision_detail'
+    ];
+
+    protected static $ignoreChangedAttributes = ['deleted_at', 'updated_at', 'thumbnail'];
+
+    protected static $logOnlyDirty = true;
+
+    protected static $logName = 'card';
 
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()
-            ->logOnly(['partner.name', 'status.name', 'pcs', 'price', 'type', 'total', 'google_drive_link', 'approval_date', 'design_date', 'print_date', 'delivery_date'])
-            ->dontLogIfAttributesChangedOnly(['deleted_at', 'updated_at', 'thumbnail'])
+            ->logOnly(static::$logAttributes)
+            ->dontLogIfAttributesChangedOnly(static::$ignoreChangedAttributes)
             ->setDescriptionForEvent(function (string $eventName) {
-                if ($eventName === 'created') {
-                    return "menambah data kartu baru";
-                } else if ($eventName === 'updated') {
-                    return "memperbarui data kartu";
-                } else if ($eventName === 'deleted') {
-                    return "menghapus data kartu";
-                } else if ($eventName === 'restored') {
-                    return "memulihkan data kartu";
-                } else {
-                    return "melakukan aksi {$eventName} pada data kartu";
+                switch ($eventName) {
+                    case 'created':
+                        return "menambah data kartu baru";
+                    case 'updated':
+                        return "memperbarui data kartu";
+                    case 'deleted':
+                        return "menghapus data kartu";
+                    case 'restored':
+                        return "memulihkan data kartu";
+                    default:
+                        return "melakukan aksi {$eventName} pada data kartu";
                 }
             });
     }
+
+    public function tapActivity(Activity $activity, string $eventName)
+    {
+        $properties = $activity->properties->toArray();
+
+        if ($eventName === 'updated') {
+            $properties['old']['partner.name'] = $this->partner->name . " ";
+            $properties['attributes']['partner.name'] = $this->partner->name;
+        }
+
+        $activity->properties = collect($properties);
+    }
+
 
     public function partner()
     {

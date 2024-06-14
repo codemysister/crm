@@ -350,7 +350,7 @@ const DetailBank = ({
                 >
                     <form onSubmit={(e) => handleSubmitFormBank(e, "update")}>
                         <div className="flex flex-col justify-around gap-4 mt-4">
-                            <div className="flex flex-col">
+                            {/* <div className="flex flex-col">
                                 <label htmlFor="partner_subcription">
                                     Partner
                                 </label>
@@ -372,7 +372,7 @@ const DetailBank = ({
                                     message={errorBank.partner}
                                     className="mt-2"
                                 />
-                            </div>
+                            </div> */}
 
                             <div className="flex flex-col">
                                 <label htmlFor="bank">Bank</label>

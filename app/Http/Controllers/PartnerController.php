@@ -182,7 +182,7 @@ class PartnerController extends Controller
                 'created_by' => Auth::user()->id
             ]);
 
-            if ($request['partner']['lead_id']) {
+            if (isset($request['partner']['lead_id'])) {
                 $lead = Lead::with('status')->where('id', $request['partner']['lead_id'])->first();
                 Activity::create([
                     'log_name' => 'onboarding',
@@ -283,6 +283,7 @@ class PartnerController extends Controller
                 'address' => $request['partner']['address'],
                 'payment_metode' => $request['partner']['payment_metode'],
                 'period' => $request['partner']['period']['name'] ?? $request['partner']['period'],
+                'billing_date' => $request['partner']['billing_date'] != null ? Carbon::parse($request['partner']['billing_date'])->setTimezone('GMT+7')->format('Y-m-d H:i:s') : null,
                 'note_status' => $request['partner']['note_status'],
                 'created_at' => now()
             ]);
@@ -440,6 +441,14 @@ class PartnerController extends Controller
         ]);
     }
 
+    public function apiGetSubscriptionPartners(Request $request)
+    {
+        $partner = Partner::with(['subscription'])->where('period', $request->period['name'])->whereHas('status', function ($query) {
+            return $query->where('name', 'aktif');
+        })->get();
+        return response()->json(['partner' => $partner]);
+    }
+
     public function show($uuid)
     {
         $partner = Partner::with([
@@ -453,8 +462,8 @@ class PartnerController extends Controller
             'sph' => function ($query) {
                 $query->with(['user', 'products'])->latest();
             },
-            'price_list'
-
+            'price_list',
+            'createdBy'
 
         ])->where('uuid', '=', $uuid)->first();
         return response()->json($partner);
@@ -499,8 +508,10 @@ class PartnerController extends Controller
 
     public function apiGetStatusLogs()
     {
+
         $logs = Activity::with(['causer', 'subject'])
-            ->where('subject_type', Partner::class)
+            ->whereMorphedTo('subject', Partner::class)
+            ->whereMorphRelation('subject', Partner::class, 'subject_id', '=', request()->query('partner'))
             ->where('event', 'updated')
             ->where('note_status', '!=', null)
             ->latest()

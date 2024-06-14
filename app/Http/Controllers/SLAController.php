@@ -56,7 +56,7 @@ class SLAController extends Controller
         $usersProp->transform(function ($user) {
             $user->position = $user->roles->first()->name;
             $user->user_id = $user->id;
-            unset ($user->roles);
+            unset($user->roles);
             return $user;
         });
         $partnersProp = Partner::with(
@@ -273,7 +273,7 @@ class SLAController extends Controller
         $usersProp->transform(function ($user) {
             $user->position = $user->roles->first()->name;
             $user->user_id = $user->id;
-            unset ($user->roles);
+            unset($user->roles);
             return $user;
         });
         $partnersProp = Partner::with(
@@ -437,7 +437,7 @@ class SLAController extends Controller
         $activity->realization_date = $request['realization_date'] !== null ? Carbon::parse($request['realization_date'])->format('Y-m-d H:i:s') : null;
         $activity->realization = $pathRealization;
         $activity->information = $request['information'];
-        $activity->created_by = Auth::user()->id;
+        $activity->user_id = Auth::user()->id;
         $activity->save();
 
         $sla = SLA::where('id', '=', $request['sla_id'])->with('slaActivities')->first();

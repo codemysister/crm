@@ -86,16 +86,18 @@ class UserController extends Controller
         if ($request->new_password) {
             $user->update(['password' => Hash::make($request->new_password)]);
         }
-        Activity::create([
-            'log_name' => 'updated',
-            'description' => 'memperbaharui data user',
-            'subject_type' => get_class($user),
-            'subject_id' => $user->id,
-            'causer_type' => get_class(Auth::user()),
-            'causer_id' => Auth::user()->id,
-            "event" => "updated",
-            'properties' => ["old" => ["name" => $user->name, "email" => $user->email, "phone_number" => $user->phone_number, "role" => $user->roles->first()->name], "attributes" => ["name" => $request->name, "email" => $request->email, "phone_number" => $request->phone_number, "role" => $request->role]]
-        ]);
+        if ($user->name !== $request->name || $user->email !== $request->email || $user->number !== $request->number || $user->roles->first()->name !== $request->role) {
+            Activity::create([
+                'log_name' => 'updated',
+                'description' => 'memperbaharui data user',
+                'subject_type' => get_class($user),
+                'subject_id' => $user->id,
+                'causer_type' => get_class(Auth::user()),
+                'causer_id' => Auth::user()->id,
+                "event" => "updated",
+                'properties' => ["old" => ["name" => $user->name, "email" => $user->email, "number" => $user->number, "role" => $user->roles->first()->name], "attributes" => ["name" => $request->name, "email" => $request->email, "number" => $request->number, "role" => $request->role]]
+            ]);
+        }
         $user->update([
             'name' => $request->name,
             'email' => $request->email,

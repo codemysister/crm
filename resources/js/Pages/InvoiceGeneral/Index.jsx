@@ -184,7 +184,7 @@ export default function Index({
     const actionTransactionBodyTemplate = (rowData) => {
         return (
             <React.Fragment>
-                {permissions.includes("edit transaksi") && (
+                {permissions.includes("edit invoice umum") && (
                     <Button
                         icon="pi pi-pencil"
                         rounded
@@ -196,7 +196,7 @@ export default function Index({
                         }}
                     />
                 )}
-                {permissions.includes("hapus transaksi") && (
+                {permissions.includes("hapus invoice umum") && (
                     <Button
                         icon="pi pi-trash"
                         rounded
@@ -493,7 +493,7 @@ export default function Index({
     const headerTransaction = (
         <div className="flex flex-row gap-2 bg-gray-50 dark:bg-transparent p-2 rounded-lg align-items-center items-center justify-between justify-content-between">
             <div className="w-[30%]">
-                {permissions.includes("tambah transaksi") && (
+                {permissions.includes("tambah invoice umum") && (
                     <Button
                         label="Input Pembayaran"
                         className="bg-purple-600 max-w-[146px] w-full text-xs shadow-md rounded-lg mr-2"

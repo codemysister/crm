@@ -27,6 +27,7 @@ return new class extends Migration {
             $table->dateTime('design_date')->nullable();
             $table->dateTime('print_date')->nullable();
             $table->dateTime('delivery_date')->nullable();
+            $table->dateTime('arrive_date')->nullable();
             $table->softDeletes();
             $table->timestamps();
         });

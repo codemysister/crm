@@ -26,6 +26,7 @@ import { BlockUI } from "primereact/blockui";
 import { getRegencys } from "@/Services/getRegency";
 import { getProvince } from "@/Services/getProvince";
 import { upperCaseEachWord } from "@/Utils/UppercaseEachWord";
+import InputError from "@/Components/InputError";
 registerPlugin(FilePondPluginFileValidateSize);
 
 const Create = ({ usersProp, partnersProp }) => {
@@ -584,6 +585,10 @@ const Create = ({ usersProp, partnersProp }) => {
                                                 </>
                                             )}
                                         </div>
+                                        <InputError
+                                            message={errors["logo"]}
+                                            className="mt-2"
+                                        />
                                     </div>
 
                                     <div className="flex flex-col mt-3">
@@ -650,6 +655,10 @@ const Create = ({ usersProp, partnersProp }) => {
                                             itemTemplate={optionTemplate}
                                             className="w-full md:w-14rem"
                                         />
+                                        <InputError
+                                            message={errors["partner.name"]}
+                                            className="mt-2"
+                                        />
                                     </div>
                                     <div className="flex flex-col mt-3">
                                         <label htmlFor="province">
@@ -704,6 +713,10 @@ const Create = ({ usersProp, partnersProp }) => {
                                                 );
                                             }}
                                         />
+                                        <InputError
+                                            message={errors["partner.province"]}
+                                            className="mt-2"
+                                        />
                                     </div>
 
                                     <div className="flex flex-col mt-3">
@@ -752,6 +765,10 @@ const Create = ({ usersProp, partnersProp }) => {
                                             itemTemplate={optionTemplate}
                                             className="w-full md:w-14rem"
                                         />
+                                        <InputError
+                                            message={errors["partner.regency"]}
+                                            className="mt-2"
+                                        />
                                     </div>
                                     <div className="flex flex-col mt-3">
                                         <label htmlFor="lead_address">
@@ -781,6 +798,12 @@ const Create = ({ usersProp, partnersProp }) => {
                                             id="lead_phone_number"
                                             aria-describedby="lead_phone_number-help"
                                         />
+                                        <InputError
+                                            message={
+                                                errors["partner.phone_number"]
+                                            }
+                                            className="mt-2"
+                                        />
                                     </div>
                                     <div className="flex flex-col mt-3">
                                         <label htmlFor="lead_pic">
@@ -807,6 +830,10 @@ const Create = ({ usersProp, partnersProp }) => {
                                             className="dark:bg-gray-300"
                                             id="lead_pic"
                                             aria-describedby="lead_pic-help"
+                                        />
+                                        <InputError
+                                            message={errors["partner.pic"]}
+                                            className="mt-2"
                                         />
                                     </div>
                                     <div className="flex flex-col mt-3">
@@ -835,6 +862,12 @@ const Create = ({ usersProp, partnersProp }) => {
                                             id="lead_pic_email"
                                             aria-describedby="lead_pic_email-help"
                                         />
+                                        <InputError
+                                            message={
+                                                errors["partner.pic_email"]
+                                            }
+                                            className="mt-2"
+                                        />
                                     </div>
                                     <div className="flex flex-col mt-3">
                                         <label htmlFor="lead_pic_number">
@@ -862,6 +895,12 @@ const Create = ({ usersProp, partnersProp }) => {
                                             className="dark:bg-gray-300"
                                             id="lead_pic_number"
                                             aria-describedby="lead_pic_number-help"
+                                        />
+                                        <InputError
+                                            message={
+                                                errors["partner.pic_number"]
+                                            }
+                                            className="mt-2"
                                         />
                                     </div>
                                     {/* <div className="flex flex-col mt-3">
@@ -938,6 +977,12 @@ const Create = ({ usersProp, partnersProp }) => {
                                                     labelIdle='Drag & Drop your files or <span class="filepond--label-action">Browse</span>'
                                                 />
                                             </div>
+                                            <InputError
+                                                message={
+                                                    errors["signature.image"]
+                                                }
+                                                className="mt-2"
+                                            />
                                         </div>
                                     )}
                                     <div className="flex flex-col mt-3">

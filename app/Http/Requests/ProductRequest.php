@@ -4,7 +4,7 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class PartnerAccountSettingRequest extends FormRequest
+class ProductRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -22,21 +22,24 @@ class PartnerAccountSettingRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'partner' => 'required',
-            'subdomain' => 'required',
-            'email_super_admin' => 'required',
-            'password' => 'required',
+            'name' => 'required',
+            'category' => 'required',
+            'unit' => 'required',
+            'price' => 'required',
+            'description' => 'required',
         ];
     }
+
 
 
     public function messages(): array
     {
         return [
-            'partner.required' => 'Lembaga harus diiisi',
-            'subdomain.required' => 'Subdomain harus diiisi',
-            'email_super_admin.required' => 'Email super admin harus diiisi',
-            'password.required' => 'CAS link partner harus diiisi',
+            'name.required' => 'Nama harus diiisi',
+            'category.required' => 'Kategori harus diiisi',
+            'unit.required' => 'Unit harus diiisi',
+            'price.required' => 'Harga harus diiisi',
+            'description.required' => 'Deskripsi harus diiisi',
         ];
     }
 }

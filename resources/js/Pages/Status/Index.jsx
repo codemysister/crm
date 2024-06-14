@@ -29,8 +29,11 @@ import { Menu } from "primereact/menu";
 import { OverlayPanel } from "primereact/overlaypanel";
 import Arsip from "./Arsip";
 import Log from "./Log";
+import LogComponent from "@/Components/LogComponent";
+import ArsipComponent from "@/Components/ArsipComponent";
 
-export default function Index({ auth }) {
+export default function Index({ auth, usersProp }) {
+    const [users, setUsers] = useState(usersProp);
     const [activeIndexTab, setActiveIndexTab] = useState(0);
     const [statuses, setStatuses] = useState(null);
     const [confirmIsVisible, setConfirmIsVisible] = useState(false);
@@ -116,7 +119,11 @@ export default function Index({ auth }) {
         fetchData(getStatuses);
     }, []);
 
-    let categories = [{ name: "lead" }, { name: "partner" }];
+    let categories = [
+        { name: "lead" },
+        { name: "partner" },
+        { name: "invoice" },
+    ];
 
     const addButtonIcon = () => {
         return (
@@ -181,8 +188,8 @@ export default function Index({ auth }) {
     const headerStatus = () => {
         return (
             <HeaderDatatable
-                globalFilterValue={globalFilterValue}
-                onGlobalFilterChange={onGlobalFilterChange}
+                filters={filters}
+                setFilters={setFilters}
             ></HeaderDatatable>
         );
     };
@@ -234,6 +241,48 @@ export default function Index({ auth }) {
             });
         }
     };
+
+    const objectKeyToIndo = (key) => {
+        let keyIndo;
+        if (key == "name") {
+            keyIndo = "Status";
+        } else if (key == "category") {
+            keyIndo = "Kategori";
+        } else if (key == "color") {
+            keyIndo = "Warna";
+        }
+
+        return keyIndo;
+    };
+
+    const globalFilterFields = ["name", "category"];
+
+    const columns = [
+        {
+            field: "name",
+            header: "Nama",
+            style: {
+                width: "max-content",
+                whiteSpace: "nowrap",
+            },
+        },
+        {
+            field: "category",
+            header: "Kategori",
+            style: {
+                width: "max-content",
+                whiteSpace: "nowrap",
+            },
+        },
+        {
+            field: "color",
+            header: "Color",
+            style: {
+                width: "max-content",
+                whiteSpace: "nowrap",
+            },
+        },
+    ];
 
     if (preRenderLoad) {
         return <SkeletonDatatable auth={auth} />;
@@ -409,8 +458,13 @@ export default function Index({ auth }) {
 
                 <TabPanel header="Log">
                     {activeIndexTab == 1 && (
-                        <Log
+                        <LogComponent
                             auth={auth}
+                            fetchUrl={"/api/status/logs"}
+                            filterUrl={"/status/logs/filter"}
+                            deleteUrl={"/status/logs"}
+                            objectKeyToIndo={objectKeyToIndo}
+                            users={users}
                             showSuccess={showSuccess}
                             showError={showError}
                         />
@@ -419,10 +473,17 @@ export default function Index({ auth }) {
 
                 <TabPanel header="Arsip">
                     {activeIndexTab == 2 && (
-                        <Arsip
+                        <ArsipComponent
                             auth={auth}
+                            users={users}
+                            fetchUrl={"/api/status/arsip"}
+                            forceDeleteUrl={"/status/{id}/force"}
+                            restoreUrl={"/status/{id}/restore"}
+                            filterUrl={"/status/arsip/filter"}
+                            columns={columns}
                             showSuccess={showSuccess}
                             showError={showError}
+                            globalFilterFields={globalFilterFields}
                         />
                     )}
                 </TabPanel>
@@ -437,7 +498,7 @@ export default function Index({ auth }) {
                 <form onSubmit={(e) => handleSubmitForm(e, "tambah")}>
                     <div className="flex flex-col justify-around gap-4 mt-4">
                         <div className="flex flex-col">
-                            <label htmlFor="name">Nama</label>
+                            <label htmlFor="name">Nama *</label>
                             <InputText
                                 value={data.name}
                                 onChange={(e) =>
@@ -453,10 +514,9 @@ export default function Index({ auth }) {
                             />
                         </div>
                         <div className="flex flex-col">
-                            <label htmlFor="category">Kategori</label>
+                            <label htmlFor="category">Kategori *</label>
                             <Dropdown
                                 key="name"
-                                editable
                                 optionValue="name"
                                 value={data.category}
                                 optionLabel="name"
@@ -473,7 +533,7 @@ export default function Index({ auth }) {
                             />
                         </div>
                         <div className="flex flex-col">
-                            <label htmlFor="color">Warna</label>
+                            <label htmlFor="color">Warna *</label>
                             <div className="flex gap-1">
                                 <InputText
                                     value={data.color}
@@ -513,7 +573,7 @@ export default function Index({ auth }) {
                 <form onSubmit={(e) => handleSubmitForm(e, "update")}>
                     <div className="flex flex-col justify-around gap-4 mt-4">
                         <div className="flex flex-col">
-                            <label htmlFor="name">Nama</label>
+                            <label htmlFor="name">Nama *</label>
                             <InputText
                                 value={data.name}
                                 onChange={(e) =>
@@ -529,10 +589,9 @@ export default function Index({ auth }) {
                             />
                         </div>
                         <div className="flex flex-col">
-                            <label htmlFor="category">Kategori</label>
+                            <label htmlFor="category">Kategori *</label>
                             <Dropdown
                                 key="name"
-                                editable
                                 optionValue="name"
                                 value={data.category}
                                 optionLabel="name"
@@ -549,7 +608,7 @@ export default function Index({ auth }) {
                             />
                         </div>
                         <div className="flex flex-col">
-                            <label htmlFor="color">Warna</label>
+                            <label htmlFor="color">Warna *</label>
                             <div className="flex gap-1">
                                 <InputText
                                     value={data.color}

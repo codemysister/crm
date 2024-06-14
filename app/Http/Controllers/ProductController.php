@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\ProductRequest;
 use App\Models\Product;
 use App\Models\User;
 use Exception;
@@ -26,13 +27,13 @@ class ProductController extends Controller
 
     public function apiGetProducts()
     {
-        $products = Product::with('createdBy')->get();
+        $products = Product::with('createdBy')->latest()->get();
 
         return response()->json($products);
     }
 
 
-    public function store(Request $request)
+    public function store(ProductRequest $request)
     {
 
         Product::create([
@@ -52,7 +53,6 @@ class ProductController extends Controller
     public function update(Request $request, $uuid)
     {
         Product::where('uuid', $uuid)->first()->update([
-            "uuid" => Str::uuid(),
             "name" => $request->name,
             "category" => $request->category,
             "price" => $request->price,

@@ -17,6 +17,7 @@ return new class extends Migration {
             $table->foreignId('status_id')->constrained('statuses', 'id')->onDelete('cascade');
             $table->foreignId('sales_id')->constrained('users', 'id')->onDelete('cascade');
             $table->string('name')->unique();
+            $table->string('npwp');
             $table->integer('total_members');
             $table->string('phone_number');
             $table->string('address');

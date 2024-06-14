@@ -416,14 +416,15 @@ export const DatatablePartner = memo(
                 scrollable
                 globalFilterFields={[
                     "name",
-                    "status",
-                    "province",
-                    "regency",
-                    "onboarding_date",
-                    "live_date",
-                    "monitoring_date_after_3_month_live",
-                    "sales.name",
-                    "account_manager.name",
+                    "npwp",
+                    // "status",
+                    // "province",
+                    // "regency",
+                    // "onboarding_date",
+                    // "live_date",
+                    // "monitoring_date_after_3_month_live",
+                    // "sales.name",
+                    // "account_manager.name",
                 ]}
                 emptyMessage="Partner tidak ditemukan."
                 paginatorClassName="dark:bg-transparent paginator-custome dark:text-gray-300 rounded-b-lg"

@@ -60,4 +60,9 @@ class InvoiceSubscription extends Model
     {
         return $this->belongsTo(Status::class);
     }
+
+    public function createdBy()
+    {
+        return $this->hasOne(User::class, 'id', 'created_by');
+    }
 }

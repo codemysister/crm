@@ -238,17 +238,17 @@ class InvoiceSubscriptionTransactionController extends Controller
             }
         ])->where('id', '=', $invoice_subcription_id)->first();
         $rest_of_bill = $this->calculateRestOfBill($invoice_subcription);
-        $status = "belum terbayar";
+
+        $status = Status::where('category', 'invoice');
 
         if ($rest_of_bill !== 0 && count($invoice_subcription->transactions) > 0) {
-            $status = "sebagian";
+            $status = $status->where('name', 'sebagian')->first();
         } else if ($rest_of_bill !== 0 && count($invoice_subcription->transactions) == 0) {
-            $status = "belum terbayar";
+            $status = $status->where('name', 'belum bayar')->first();
         } else {
-            $status = "lunas";
+            $status = $status->where('name', 'lunas')->first();
         }
-
-        $invoice_subcription->update(['rest_of_bill' => $rest_of_bill, 'status_id' => $status, 'bill_date' => count($invoice_subcription->transactions) > 0 ? Carbon::parse($invoice_subcription->transactions->first()->date)->setTimezone('GMT+7')->format('Y-m-d H:i:s') : null]);
+        $invoice_subcription->update(['rest_of_bill' => $rest_of_bill, 'status_id' => $status->id, 'bill_date' => count($invoice_subcription->transactions) > 0 ? Carbon::parse($invoice_subcription->transactions->first()->date)->setTimezone('GMT+7')->format('Y-m-d H:i:s') : null]);
         return response()->json(['rest_of_bill' => $rest_of_bill]);
 
     }

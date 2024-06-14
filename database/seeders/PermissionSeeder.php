@@ -26,6 +26,7 @@ class PermissionSeeder extends Seeder
         Permission::create(['name' => 'tambah partner', 'group_name' => 'Partner']);
         Permission::create(['name' => 'edit partner', 'group_name' => 'Partner']);
         Permission::create(['name' => 'hapus partner', 'group_name' => 'Partner']);
+        Permission::create(['name' => 'onboarding partner', 'group_name' => 'Partner']);
         Permission::create(['name' => 'tambah bank partner', 'group_name' => 'Partner']);
         Permission::create(['name' => 'tambah langganan partner', 'group_name' => 'Partner']);
         Permission::create(['name' => 'tambah harga partner', 'group_name' => 'Partner']);
@@ -63,11 +64,6 @@ class PermissionSeeder extends Seeder
         Permission::create(['name' => 'edit invoice langganan', 'group_name' => 'Invoice Langganan']);
         Permission::create(['name' => 'hapus invoice langganan', 'group_name' => 'Invoice Langganan']);
 
-        // Transaction
-        Permission::create(['name' => 'lihat transaksi', 'group_name' => 'Transaksi']);
-        Permission::create(['name' => 'tambah transaksi', 'group_name' => 'Transaksi']);
-        Permission::create(['name' => 'edit transaksi', 'group_name' => 'Transaksi']);
-        Permission::create(['name' => 'hapus transaksi', 'group_name' => 'Transaksi']);
 
         // Official travel letter / stpd
         Permission::create(['name' => 'lihat stpd', 'group_name' => 'Surat Perjalanan Dinas (stpd)']);

@@ -24,7 +24,7 @@ class CardController extends Controller
         $partnersProp = Partner::with('price_list', 'createdBy')->whereHas('status', function ($query) {
             $query->where('name', 'non aktif');
         })->get();
-        $statusesProp = Status::where('category', 'kartu')->get();
+        $statusesProp = Status::where('category', 'kartu')->orderBy('id', 'asc')->get();
         return Inertia::render('Card/Index', compact('statusesProp', 'partnersProp'));
     }
 
@@ -47,7 +47,7 @@ class CardController extends Controller
                 'total' => $request->total,
                 'google_drive_link' => $request->google_drive_link,
                 'address' => $request->address,
-                'approval_date' => Carbon::now(),
+                // 'approval_date' => Carbon::now(),
                 'created_by' => Auth::user()->id
             ]);
 
@@ -69,15 +69,16 @@ class CardController extends Controller
         try {
             $card = Card::where('uuid', '=', $uuid)->first();
 
-
-            if ($request->status['name'] == 'approve') {
+            if ($request->status['name'] == 'disetujui') {
                 $approval_date = Carbon::now();
             } else if ($request->status['name'] == 'design') {
                 $design_date = Carbon::now();
             } else if ($request->status['name'] == 'print') {
                 $print_date = Carbon::now();
-            } else {
+            } else if ($request->status['name'] == 'dikirim') {
                 $delivery_date = Carbon::now();
+            } else if ($request->status['name'] == 'sampai') {
+                $arrive_date = Carbon::now();
             }
 
             $card->update([
@@ -95,6 +96,8 @@ class CardController extends Controller
                 'print_date' => $print_date ?? $card->print_date,
                 'delivery_date' => $delivery_date
                     ?? $card->delivery_date,
+                'arrive_date' => $arrive_date
+                    ?? $card->arrive_date,
             ]);
             DB::commit();
 
@@ -220,7 +223,7 @@ class CardController extends Controller
 
     public function apiGetArsip()
     {
-        $arsip = Card::withTrashed()->with(['partner', 'status'])->whereNotNull('deleted_at')->latest()->get();
+        $arsip = Card::withTrashed()->with(['partner', 'status', 'createdBy'])->whereNotNull('deleted_at')->latest()->get();
         return response()->json($arsip);
     }
 

@@ -148,7 +148,7 @@ const DetailAccount = ({
                         </tr>
                         <tr class="border-b">
                             <td class="pt-2 pb-1  text-base font-bold w-1/5">
-                                Cas Link Partner
+                                Password
                             </td>
                             <td class="pt-2 pb-1  text-base w-[2%]">:</td>
                             <td class="pt-2 pb-1  text-base w-7/12">
@@ -315,7 +315,7 @@ const DetailAccount = ({
 
                             <div className="flex flex-col">
                                 <label htmlFor="cars_link_partner">
-                                    CAS link partner
+                                    Password
                                 </label>
                                 <InputText
                                     value={dataAccount.password}
@@ -432,7 +432,7 @@ const DetailAccount = ({
 
                             <div className="flex flex-col">
                                 <label htmlFor="cars_link_partner">
-                                    CAS link partner
+                                    Password
                                 </label>
                                 <InputText
                                     value={dataAccount.password}

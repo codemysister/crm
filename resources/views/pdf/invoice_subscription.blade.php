@@ -111,20 +111,20 @@
             </thead>
             <tbody>
 
-                @foreach($invoice_subscription->bills as $key => $bill)
+                @foreach($bills as $key => $bill)
                     <tr>
                         <td class="p-1" style="width: 5%; text-align: center; border: 1px solid #ded8ee; padding: 8px;">
                             {{++$key}}
                         </td>
                         <td class="p-1" style="width: 35%; border: 1px solid #ded8ee; padding: 8px;">
-                            {{$bill->bill}}
+                            {{$bill['bill']}}
                         </td>
                         <td class="p-1" style="width: 20%; border: 1px solid #ded8ee; padding: 8px;">
-                            Rp{{number_format($bill->nominal, 0, ',', '.')}}</td>
+                            Rp{{number_format($bill['nominal'], 0, ',', '.')}}</td>
                         <td class="p-1" style="width: 20%; border: 1px solid #ded8ee; padding: 8px;">
-                            Rp{{number_format($bill->total_ppn, 0, ',', '.')}}</td>
+                            Rp{{number_format($bill['total_ppn'], 0, ',', '.')}}</td>
                         <td class="p-1" style="width: 20%; border: 1px solid #ded8ee; padding: 8px;">
-                            Rp{{number_format($bill->total_bill, 0, ',', '.')}}</td>
+                            Rp{{number_format($bill['total_bill'], 0, ',', '.')}}</td>
                     </tr>
                 @endforeach
 
@@ -132,13 +132,14 @@
                     <td class="p-1" colspan="4" style="text-align: right; padding: 8px;">Sub Total
                     </td>
                     <td class="p-1" style="width: 35%; border: 1px solid #ded8ee; padding: 8px;">
-                        Rp{{number_format($invoice_subscription->total_bill, 0, ',', '.')}}</td>
+                        Rp{{number_format($invoice_subscription->total_nominal, 0, ',', '.')}}</td>
 
                 </tr>
                 <tr>
                     <td class="p-1" colspan="4" style="text-align: right; padding: 8px;">Diskon/Uang Muka
                     </td>
-                    <td class="p-1" style="width: 35%; border: 1px solid #ded8ee; padding: 8px;">Rp0</td>
+                    <td class="p-1" style="width: 35%; border: 1px solid #ded8ee; padding: 8px;">
+                        Rp{{number_format($invoice_subscription->paid_off, 0, ',', '.')}}</td>
                 </tr>
                 <tr>
                     <td class="p-1 font-bold" colspan="4" style="text-align: right; padding: 8px;">Total Tagihan

@@ -17,19 +17,19 @@ class PartnerAccountSetting extends Model
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()
-            ->logOnly(['subdomain', 'email_super_admin', 'cas_link_partner'])
+            ->logOnly(['subdomain', 'email_super_admin', 'password'])
             ->dontLogIfAttributesChangedOnly(['deleted_at', 'updated_at'])
             ->setDescriptionForEvent(function (string $eventName) {
                 if ($eventName === 'created') {
-                    return "menambah data pic baru";
+                    return "menambah data akun baru";
                 } elseif ($eventName === 'updated') {
-                    return "memperbarui data pic";
+                    return "memperbarui data akun";
                 } elseif ($eventName === 'deleted') {
-                    return "menghapus data pic";
+                    return "menghapus data akun";
                 } elseif ($eventName === 'restored') {
-                    return "memulihkan data pic";
+                    return "memulihkan data akun";
                 } else {
-                    return "melakukan aksi {$eventName} pada data pic";
+                    return "melakukan aksi {$eventName} pada data akun";
                 }
             });
     }

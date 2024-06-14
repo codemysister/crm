@@ -50,8 +50,9 @@ class InvoiceSubscriptionController extends Controller
     {
         $partnersProp = Partner::with('sales', 'account_manager', 'status')->get();
         $usersProp = User::with('roles')->get();
+        $statusProp = Status::where('category', 'invoice')->get();
         $signaturesProp = Signature::all();
-        return Inertia::render('InvoiceSubscription/InvoiceSubscription', compact('partnersProp', 'signaturesProp', 'usersProp'));
+        return Inertia::render('InvoiceSubscription/InvoiceSubscription', compact('partnersProp', 'signaturesProp', 'usersProp', 'statusProp'));
     }
 
     public function create()
@@ -568,7 +569,7 @@ class InvoiceSubscriptionController extends Controller
             $invoice_subscription = InvoiceSubscription::where('uuid', '=', $uuid)->first();
             Activity::create([
                 'log_name' => 'deleted',
-                'description' => Auth::user()->name . ' menghapus data invoice langganan',
+                'description' => ' menghapus data invoice langganan',
                 'subject_type' => get_class($invoice_subscription),
                 'subject_id' => $invoice_subscription->id,
                 'causer_type' => get_class(Auth::user()),
@@ -590,11 +591,12 @@ class InvoiceSubscriptionController extends Controller
 
     public function destroyForce($uuid)
     {
+        DB::beginTransaction();
         try {
             $invoice_subscription = InvoiceSubscription::withTrashed()->where('uuid', '=', $uuid)->first();
             Activity::create([
                 'log_name' => 'force',
-                'description' => Auth::user()->name . ' menghapus permanen data invoice langganan',
+                'description' => ' menghapus permanen data invoice langganan',
                 'subject_type' => get_class($invoice_subscription),
                 'subject_id' => $invoice_subscription->id,
                 'causer_type' => get_class(Auth::user()),
@@ -603,7 +605,8 @@ class InvoiceSubscriptionController extends Controller
                 'properties' => ["old" => ["code" => $invoice_subscription->code, "partner_name" => $invoice_subscription->partner_name, "partner_npwp" => $invoice_subscription->partner_npwp, "date" => $invoice_subscription->date, "due_date" => $invoice_subscription->due_date, "invoice_age" => $invoice_subscription->invoice_age, "bill_date" => $invoice_subscription->bill_date, 'total' => $invoice_subscription->total, 'total_all_ppn' => $invoice_subscription->total_all_ppn, 'paid_off' => $invoice_subscription->paid_off, 'rest_of_bill' => $invoice_subscription->rest_of_bill, 'signature_name' => $invoice_subscription->signature_name]]
             ]);
 
-            unlink($invoice_subscription->invoice_subscription_doc);
+            Storage::disk('public')->delete($invoice_subscription->invoice_subscription_doc);
+
             $invoice_subscription->forceDelete();
 
             DB::commit();
@@ -633,7 +636,7 @@ class InvoiceSubscriptionController extends Controller
         }
 
         if ($request->input_date['start'] && $request->input_date['end']) {
-            $invoice_subscriptions->whereBetween('created_at', [$request->input_date['start'], $request->input_date['end']]);
+            $invoice_subscriptions->whereBetween('created_at', [Carbon::parse($request->input_date['start'])->setTimezone('GMT+7')->startOfDay(), Carbon::parse($request->input_date['end'])->setTimezone('GMT+7')->endOfDay()]);
         }
 
 
@@ -684,7 +687,7 @@ class InvoiceSubscriptionController extends Controller
 
     public function apiGetArsip()
     {
-        $arsip = InvoiceSubscription::withTrashed()->with(['bills', 'user', 'partner', 'transactions.user', 'status'])->whereNotNull('deleted_at')->latest()->get();
+        $arsip = InvoiceSubscription::withTrashed()->with(['bills', 'user', 'partner', 'transactions.user', 'status', 'createdBy'])->whereNotNull('deleted_at')->latest()->get();
 
         return response()->json($arsip);
     }

@@ -29,7 +29,6 @@ import FilePondPluginFileValidateSize from "filepond-plugin-file-validate-size";
 import "filepond/dist/filepond.min.css";
 import getViewportSize from "../../Utils/getViewportSize";
 import { formateDate } from "../../Utils/formatDate";
-import HeaderDatatable from "@/Components/HeaderDatatable";
 import SkeletonDatatable from "@/Components/SkeletonDatatable";
 import { Sidebar } from "primereact/sidebar";
 import { TabPanel, TabView } from "primereact/tabview";
@@ -39,6 +38,7 @@ import LoadingDocument from "@/Components/LoadingDocument";
 import { BlockUI } from "primereact/blockui";
 import ArsipComponent from "@/Components/ArsipComponent";
 import { handleSelectedDetailInstitution } from "@/Utils/handleSelectedDetailInstitution";
+import HeaderDatatable from "@/Components/HeaderDatatable";
 registerPlugin(FilePondPluginFileValidateSize);
 
 export default function InvoiceSubscription({
@@ -50,6 +50,7 @@ export default function InvoiceSubscription({
 }) {
     const [invoiceSubscriptions, setInvoiceSubscriptions] = useState([]);
     const [partners, setPartners] = useState(partnersProp);
+    const [partnerExported, setPartnerExported] = useState([]);
     const [signatures, setSignatures] = useState(signaturesProp);
     const [status, setStatus] = useState(statusProp);
     const [users, setUsers] = useState(usersProp);
@@ -77,6 +78,7 @@ export default function InvoiceSubscription({
     const [modalEditTransactionIsVisible, setModalEditTransactionIsVisible] =
         useState(false);
     const [modalBundleIsVisible, setModalBundleIsVisible] = useState(false);
+    const [modalExportIsVisible, setModalExportIsVisible] = useState(false);
     const op = useRef(null);
     const add = useRef(null);
     const [preRenderLoad, setPreRenderLoad] = useState(true);
@@ -84,25 +86,10 @@ export default function InvoiceSubscription({
     const { roles, permissions } = auth.user;
     const [expandedRows, setExpandedRows] = useState(null);
     useState(false);
+
     const [filters, setFilters] = useState({
         global: { value: null, matchMode: FilterMatchMode.CONTAINS },
     });
-
-    const [filtersPartner, setFiltersPartner] = useState({
-        global: { value: null, matchMode: FilterMatchMode.CONTAINS },
-    });
-
-    const [globalFilterPartnerValue, setGlobalFilterPartnerValue] =
-        useState("");
-    const onGlobalFilterPartnerChange = (e) => {
-        const value = e.target.value;
-        let _filters = { ...filtersPartner };
-
-        _filters["global"].value = value;
-
-        setFilters(_filters);
-        setGlobalFilterPartnerValue(value);
-    };
 
     const {
         data,
@@ -151,6 +138,17 @@ export default function InvoiceSubscription({
     });
 
     const {
+        data: dataExport,
+        setData: setDataExport,
+        post: postExport,
+        reset: resetExport,
+        processing: processingExport,
+        errors: errorExport,
+    } = useForm({
+        period: null,
+    });
+
+    const {
         data: dataFilter,
         setData: setDataFilter,
         reset: resetFilter,
@@ -178,6 +176,12 @@ export default function InvoiceSubscription({
         }
     }, [isImportSuccess]);
 
+    useEffect(() => {
+        if (partnerExported.length > 0) {
+            exportSubscriptionPartner();
+        }
+    }, [partnerExported]);
+
     const fetchData = async (fnc) => {
         try {
             await Promise.all([fnc()]);
@@ -202,148 +206,6 @@ export default function InvoiceSubscription({
         setFilters(_filters);
         setGlobalFilterValue(value);
     };
-
-    // const columns = [
-    //     { field: "code", header: "Kode", type: "regular", width: "6rem" },
-    //     { field: "date", header: "Tanggal", type: "date", width: "6rem" },
-    //     {
-    //         field: "due_date",
-    //         header: "Jatuh Tempo",
-    //         type: "date",
-    //         width: "8rem",
-    //     },
-    //     {
-    //         field: "partner_province",
-    //         header: "Provinsi",
-    //         type: "location",
-    //         width: "8rem",
-    //     },
-    //     {
-    //         field: "partner_regency",
-    //         header: "Kabupaten",
-    //         type: "location",
-    //         width: "8rem",
-    //     },
-    //     {
-    //         field: "partner_phone_number",
-    //         header: "No Telepon",
-    //         type: "regular",
-    //         width: "6rem",
-    //     },
-    //     {
-    //         field: "bill_date",
-    //         header: "Tanggal Pembayaran",
-    //         type: "date",
-    //         width: "12rem",
-    //     },
-    //     {
-    //         field: "total_nominal",
-    //         header: "Sub Total (include pajak)",
-    //         type: "price",
-    //         width: "12rem",
-    //     },
-    //     // {
-    //     //     field: "total_ppn",
-    //     //     header: "Pajak",
-    //     //     type: "price",
-    //     //     width: "8rem",
-    //     // },
-    //     {
-    //         field: "paid_off",
-    //         header: "Uang Muka",
-    //         type: "price",
-    //         width: "8rem",
-    //     },
-    //     {
-    //         field: "total_bill",
-    //         header: "Total Tagihan",
-    //         type: "price",
-    //         width: "8rem",
-    //     },
-    //     {
-    //         field: "rest_of_bill",
-    //         header: "Sisa Tagihan (include uang muka)",
-    //         type: "price",
-    //         width: "8rem",
-    //     },
-    //     {
-    //         field: "payment_metode",
-    //         header: "Metode Pembayaran",
-    //         type: "regular",
-    //         width: "12rem",
-    //     },
-    //     {
-    //         field: "xendit_link",
-    //         header: "Link Xendit",
-    //         type: "regular",
-    //         width: "8rem",
-    //     },
-    //     {
-    //         field: "reason_late",
-    //         header: "Alasan Terlewat",
-    //         type: "regular",
-    //         width: "10rem",
-    //     },
-    // ];
-
-    // const [visibleColumns, setVisibleColumns] = useState([
-    //     { field: "code", header: "Kode", type: "regular", width: "6rem" },
-    //     { field: "date", header: "Tanggal", type: "date", width: "6rem" },
-    //     {
-    //         field: "due_date",
-    //         header: "Jatuh Tempo",
-    //         type: "date",
-    //         width: "8rem",
-    //     },
-    //     {
-    //         field: "bill_date",
-    //         header: "Tanggal Pembayaran",
-    //         type: "date",
-    //         width: "12rem",
-    //     },
-    //     {
-    //         field: "total_nominal",
-    //         header: "Sub Total (include pajak)",
-    //         type: "price",
-    //         width: "12rem",
-    //     },
-    //     // {
-    //     //     field: "total_ppn",
-    //     //     header: "Pajak",
-    //     //     type: "price",
-    //     //     width: "8rem",
-    //     // },
-    //     {
-    //         field: "paid_off",
-    //         header: "Uang Muka",
-    //         type: "price",
-    //         width: "8rem",
-    //     },
-    //     {
-    //         field: "total_bill",
-    //         header: "Total Tagihan",
-    //         type: "price",
-    //         width: "8rem",
-    //     },
-    //     {
-    //         field: "rest_of_bill",
-    //         header: "Sisa Tagihan",
-    //         type: "price",
-    //         width: "8rem",
-    //     },
-    //     {
-    //         field: "payment_metode",
-    //         header: "Metode Pembayaran",
-    //         type: "regular",
-    //         width: "12rem",
-    //     },
-    //     {
-    //         field: "xendit_link",
-    //         header: "Link Xendit",
-    //         type: "regular",
-    //         width: "15rem",
-    //     },
-    // ]);
 
     const columns = [
         {
@@ -749,6 +611,95 @@ export default function InvoiceSubscription({
         });
     };
 
+    const setInvoiceDate = (bill_date) => {
+        // Get the current date
+        let currentDate = new Date();
+        // Get the current year and month
+        let year = currentDate.getFullYear();
+        let month = currentDate.getMonth(); // Note: January is 0, February is 1, etc.
+
+        // Create a new date for current month
+        let date = new Date(year, month, bill_date);
+
+        let hari = date.getDate();
+        let bulan = date.getMonth() + 1;
+        let tahun = date.getFullYear();
+
+        if (hari < 10) hari = "0" + hari;
+        if (bulan < 10) bulan = "0" + bulan;
+
+        let tanggalFormatted = `${hari}/${bulan}/${tahun}`;
+        return tanggalFormatted;
+    };
+
+    const formateExpiredDate = (start_date) => {
+        // Parse the start_date in DD/MM/YYYY format
+        let [day, month, year] = start_date.split("/").map(Number);
+
+        // Create a new Date object
+        let tanggal = new Date(year, month - 1, day); // Month is zero-based in JavaScript
+
+        // Add 5 days to the date
+        tanggal.setDate(tanggal.getDate() + 5);
+
+        // Get the new day, month, and year
+        let newDay = tanggal.getDate();
+        let newMonth = tanggal.getMonth() + 1; // Adjust for zero-based month
+        let newYear = tanggal.getFullYear();
+
+        // Add leading zeros if necessary
+        if (newDay < 10) newDay = "0" + newDay;
+        if (newMonth < 10) newMonth = "0" + newMonth;
+
+        // Format the date as DD/MM/YYYY
+        let tanggalFormatted = `${newDay}/${newMonth}/${newYear}`;
+        console.log(tanggalFormatted);
+        return tanggalFormatted;
+    };
+
+    const exportSubscriptionPartner = () => {
+        const exports = partnerExported.map((data) => {
+            return {
+                Tanggal: setInvoiceDate(data.billing_date) ?? "-",
+                Expired: formateExpiredDate(setInvoiceDate(data.billing_date)),
+                Partner: data.name,
+                Lokasi: `${JSON.parse(data.regency).name}, ${
+                    JSON.parse(data.province).name
+                }`,
+                No1: 1,
+                Tagihan1: data.subscription ? data.subscription.bill : null,
+                Harga1: data.subscription ? data.subscription.nominal : null,
+                Pajak1: data.subscription ? data.subscription.total_ppn : null,
+                Jumlah1: data.subscription ? data.subscription.nominal : null,
+                No2: null,
+                Tagihan2: null,
+                Harga2: null,
+                Pajak2: null,
+                Jumlah2: null,
+                Tagihan3: null,
+                Harga3: null,
+                Pajak3: null,
+                Jumlah3: null,
+                Sub_Total: data.subscription ? data.subscription.nominal : null,
+                Diskon: 0,
+                Total: data.subscription ? data.subscription.nominal : null,
+                Xendit: null,
+            };
+        });
+
+        import("xlsx").then((xlsx) => {
+            const worksheet = xlsx.utils.json_to_sheet(exports);
+            const csvOutput = xlsx.utils.sheet_to_csv(worksheet);
+
+            import("file-saver").then((fileSaver) => {
+                const blob = new Blob([csvOutput], {
+                    type: "text/csv;charset=utf-8;",
+                });
+                fileSaver.saveAs(blob, "invoice_langganan_partner.csv");
+            });
+        });
+    };
+
     const saveAsExcelFile = (buffer, fileName) => {
         import("file-saver").then((module) => {
             if (module && module.default) {
@@ -795,14 +746,8 @@ export default function InvoiceSubscription({
 
     const header = () => {
         return (
-            <HeaderDatatable
-                globalFilterValue={globalFilterValue}
-                onGlobalFilterChange={onGlobalFilterChange}
-                setSidebarFilter={setSidebarFilter}
-                exportExcel={exportExcel}
-                isMobile={isMobile}
-            >
-                <Button
+            <HeaderDatatable filters={filters} setFilters={setFilters}>
+                {/* <Button
                     className="shadow-md flex justify-center w-[10px] lg:w-[90px] border border-slate-600 bg-transparent text-slate-600 dark:bg-slate-700 dark:text-slate-300 rounded-lg"
                     onClick={(e) => {
                         zipAll();
@@ -816,7 +761,7 @@ export default function InvoiceSubscription({
                         ></i>{" "}
                         {!isMobile && <span>zip</span>}
                     </span>
-                </Button>
+                </Button> */}
                 <Button
                     className="shadow-md w-[10px] lg:w-[90px] border border-slate-600 bg-transparent text-slate-600 dark:bg-slate-700 dark:text-slate-300 rounded-lg"
                     onClick={() => setSidebarFilter(true)}
@@ -985,7 +930,7 @@ export default function InvoiceSubscription({
     const headerTransaction = (
         <div className="flex flex-row gap-2 bg-gray-50 dark:bg-transparent p-2 rounded-lg align-items-center items-center justify-between justify-content-between">
             <div className="w-[15%]">
-                {permissions.includes("tambah transaksi") && (
+                {permissions.includes("tambah invoice langganan") && (
                     <Button
                         label="Input Pembayaran"
                         className="bg-purple-600 max-w-[146px] w-full text-xs shadow-md rounded-lg mr-2"
@@ -1026,7 +971,7 @@ export default function InvoiceSubscription({
     const actionTransactionBodyTemplate = (rowData) => {
         return (
             <React.Fragment>
-                {permissions.includes("edit transaksi") && (
+                {permissions.includes("edit invoice langganan") && (
                     <Button
                         icon="pi pi-pencil"
                         rounded
@@ -1038,7 +983,7 @@ export default function InvoiceSubscription({
                         }}
                     />
                 )}
-                {permissions.includes("hapus transaksi") && (
+                {permissions.includes("hapus invoice langganan") && (
                     <Button
                         icon="pi pi-trash"
                         rounded
@@ -1149,7 +1094,10 @@ export default function InvoiceSubscription({
                                 ) : (
                                     <div className="flex w-full h-full items-center justify-center">
                                         <a
-                                            href={rowData.receipt_doc}
+                                            href={
+                                                "/storage/" +
+                                                rowData.receipt_doc
+                                            }
                                             download={`Kwitansi_${rowData.partner_name}`}
                                             class="font-bold  w-full h-full text-center rounded-full "
                                         >
@@ -1271,6 +1219,32 @@ export default function InvoiceSubscription({
                     }
                 });
         }
+    };
+
+    const handleExportSubscriptionPartner = (e) => {
+        e.preventDefault();
+        const csrfToken = document
+            .querySelector('meta[name="csrf-token"]')
+            .getAttribute("content");
+
+        axios
+            .post(
+                "/api/partner/subscription/export",
+                {
+                    ...dataExport,
+                },
+                {
+                    headers: {
+                        "X-CSRF-TOKEN": csrfToken,
+                    },
+                }
+            )
+            .then((response) => {
+                setModalExportIsVisible((prev) => false);
+                setPartnerExported((prev) => (prev = response.data.partner));
+                // setDataExport((prev) => prev=>response.partner)
+                resetExport();
+            });
     };
 
     const clear = () => {
@@ -1695,13 +1669,13 @@ export default function InvoiceSubscription({
                                                 headerClassName="bg-white dark:bg-slate-900"
                                             />
 
-                                            <Column
+                                            {/* <Column
                                                 selectionMode="multiple"
                                                 exportable={false}
                                                 frozen
                                                 className="bg-white dark:bg-slate-900"
                                                 headerClassName="bg-white dark:bg-slate-900"
-                                            ></Column>
+                                            ></Column> */}
 
                                             <Column
                                                 header="Aksi"
@@ -1876,7 +1850,7 @@ export default function InvoiceSubscription({
                             <div className="flex bg-green-600 text-white text-xs p-3 rounded-lg justify-between w-full h-full">
                                 <p>Template</p>
                                 <p className="font-semibold">
-                                    <a
+                                    {/* <a
                                         href={
                                             "/assets/template/excel/invoice_sample.csv"
                                         }
@@ -1884,7 +1858,16 @@ export default function InvoiceSubscription({
                                         class="font-bold underline w-full h-full text-center rounded-full "
                                     >
                                         sample.csv
-                                    </a>
+                                    </a> */}
+                                    <Button
+                                        type="button"
+                                        onClick={() => {
+                                            resetExport();
+                                            setModalExportIsVisible(true);
+                                        }}
+                                        label="Export"
+                                        className="underline p-0 bg-transparent text-sm "
+                                    />
                                 </p>
                             </div>
                             <div className="flex flex-col mt-3">
@@ -1942,6 +1925,50 @@ export default function InvoiceSubscription({
                             />
                         </div>
                     </form>
+                </Dialog>
+
+                <Dialog
+                    header="Export langganan partner"
+                    headerClassName="dark:glass shadow-md dark:text-white"
+                    className="bg-white w-[80%] md:w-[60%] lg:w-[30%] dark:glass dark:text-white"
+                    contentClassName=" dark:glass dark:text-white"
+                    visible={modalExportIsVisible}
+                    onHide={() => setModalExportIsVisible(false)}
+                >
+                    <div className="flex flex-col justify-around gap-4 mt-4">
+                        <form
+                            onSubmit={(e) => handleExportSubscriptionPartner(e)}
+                        >
+                            <div className="flex flex-col">
+                                <label htmlFor="period">
+                                    Periode Langganan
+                                </label>
+                                <Dropdown
+                                    dataKey="name"
+                                    value={dataExport.period}
+                                    onChange={(e) => {
+                                        setDataExport("period", e.target.value);
+                                    }}
+                                    options={[
+                                        { name: "bulan" },
+                                        { name: "tahun" },
+                                    ]}
+                                    optionLabel="name"
+                                    placeholder="Langganan Per-"
+                                    valueTemplate={selectedOptionTemplate}
+                                    itemTemplate={optionTemplate}
+                                    className={`w-full md:w-14rem`}
+                                />
+                            </div>
+                            <div className="flex justify-center mt-5">
+                                <Button
+                                    label="Export"
+                                    disabled={processingExport}
+                                    className="bg-purple-600 text-sm shadow-md rounded-lg"
+                                />
+                            </div>
+                        </form>
+                    </div>
                 </Dialog>
 
                 {/* Modal tambah transaksi */}

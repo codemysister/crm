@@ -46,7 +46,7 @@ class MOUController extends Controller
         $usersProp->transform(function ($user) {
             $user->position = $user->roles->first()->name;
             $user->user_id = $user->id;
-            unset ($user->roles);
+            unset($user->roles);
             return $user;
         });
         $partnersProp = Partner::with([
@@ -58,8 +58,7 @@ class MOUController extends Controller
             'status'
         ])->get();
         $signaturesProp = Signature::all();
-        $referralsProp = Referral::all();
-        return Inertia::render('MOU/Create', compact('partnersProp', 'usersProp', 'signaturesProp', 'referralsProp'));
+        return Inertia::render('MOU/Create', compact('partnersProp', 'usersProp', 'signaturesProp'));
     }
 
     public function generateCode()
@@ -251,7 +250,7 @@ class MOUController extends Controller
         $usersProp->transform(function ($user) {
             $user->position = $user->roles->first()->name;
             $user->user_id = $user->id;
-            unset ($user->roles);
+            unset($user->roles);
             return $user;
         });
         $partnersProp = Partner::with([

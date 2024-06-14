@@ -26,6 +26,7 @@ import { TabPanel, TabView } from "primereact/tabview";
 import { formateDate } from "@/Utils/formatDate";
 import LogComponent from "@/Components/LogComponent";
 import ArsipComponent from "@/Components/ArsipComponent";
+import InputError from "@/Components/InputError";
 
 export default function Index({ auth, usersProp }) {
     const [activeIndexTab, setActiveIndexTab] = useState(0);
@@ -53,6 +54,7 @@ export default function Index({ auth, usersProp }) {
         setData,
         post,
         put,
+        patch,
         delete: destroy,
         reset,
         processing,
@@ -222,7 +224,7 @@ export default function Index({ auth, usersProp }) {
                 },
             });
         } else {
-            put("/products/" + data.uuid, {
+            patch("/products/" + data.uuid, {
                 onSuccess: () => {
                     showSuccess("Update");
                     setModalEditProductIsVisible((prev) => false);
@@ -528,7 +530,7 @@ export default function Index({ auth, usersProp }) {
                     <form onSubmit={(e) => handleSubmitForm(e, "tambah")}>
                         <div className="flex flex-col justify-around gap-4 mt-4">
                             <div className="flex flex-col">
-                                <label htmlFor="name">Nama</label>
+                                <label htmlFor="name">Nama *</label>
                                 <InputText
                                     value={data.name}
                                     onChange={(e) =>
@@ -538,9 +540,13 @@ export default function Index({ auth, usersProp }) {
                                     id="name"
                                     aria-describedby="name-help"
                                 />
+                                <InputError
+                                    message={errors.name}
+                                    className="mt-2"
+                                />
                             </div>
                             <div className="flex flex-col">
-                                <label htmlFor="category">Kategori</label>
+                                <label htmlFor="category">Kategori *</label>
                                 <Dropdown
                                     value={data.category}
                                     onChange={(e) =>
@@ -551,9 +557,13 @@ export default function Index({ auth, usersProp }) {
                                     placeholder="Pilih Kategori"
                                     className="w-full md:w-14rem"
                                 />
+                                <InputError
+                                    message={errors.category}
+                                    className="mt-2"
+                                />
                             </div>
                             <div className="flex flex-col">
-                                <label htmlFor="price">Harga</label>
+                                <label htmlFor="price">Harga *</label>
                                 {/* <InputNumber id="price"  value={data.price} onValueChange={(e) => setData('price', e.target.value)} locale="id-ID" /> */}
                                 <InputNumber
                                     value={data.price}
@@ -562,11 +572,15 @@ export default function Index({ auth, usersProp }) {
                                     }
                                     locale="id-ID"
                                 />
+                                <InputError
+                                    message={errors.price}
+                                    className="mt-2"
+                                />
 
                                 {/* <InputText id="price" value={data.price} onChange={(e) => setData('price', e.target.value)}  aria-describedby="price-help" /> */}
                             </div>
                             <div className="flex flex-col">
-                                <label htmlFor="unit">Unit</label>
+                                <label htmlFor="unit">Unit *</label>
                                 <InputText
                                     className="dark:bg-gray-300"
                                     value={data.unit}
@@ -576,9 +590,13 @@ export default function Index({ auth, usersProp }) {
                                     id="unit"
                                     aria-describedby="unit-help"
                                 />
+                                <InputError
+                                    message={errors.unit}
+                                    className="mt-2"
+                                />
                             </div>
                             <div className="flex flex-col">
-                                <label htmlFor="description">Description</label>
+                                <label htmlFor="description">Deskripsi *</label>
                                 <InputTextarea
                                     value={data.description}
                                     onChange={(e) =>
@@ -586,6 +604,10 @@ export default function Index({ auth, usersProp }) {
                                     }
                                     rows={5}
                                     cols={30}
+                                />
+                                <InputError
+                                    message={errors.description}
+                                    className="mt-2"
                                 />
                             </div>
                         </div>
@@ -614,7 +636,7 @@ export default function Index({ auth, usersProp }) {
                     <form onSubmit={(e) => handleSubmitForm(e, "update")}>
                         <div className="flex flex-col justify-around gap-4 mt-4">
                             <div className="flex flex-col">
-                                <label htmlFor="name">Nama</label>
+                                <label htmlFor="name">Nama *</label>
                                 <InputText
                                     value={data.name}
                                     onChange={(e) =>
@@ -624,9 +646,13 @@ export default function Index({ auth, usersProp }) {
                                     id="name"
                                     aria-describedby="name-help"
                                 />
+                                <InputError
+                                    message={errors.name}
+                                    className="mt-2"
+                                />
                             </div>
                             <div className="flex flex-col">
-                                <label htmlFor="category">Kategori</label>
+                                <label htmlFor="category">Kategori *</label>
                                 <Dropdown
                                     optionValue="name"
                                     value={data.category}
@@ -638,9 +664,13 @@ export default function Index({ auth, usersProp }) {
                                     placeholder="Pilih Kategori"
                                     className="w-full md:w-14rem dark:bg-gray-300"
                                 />
+                                <InputError
+                                    message={errors.category}
+                                    className="mt-2"
+                                />
                             </div>
                             <div className="flex flex-col">
-                                <label htmlFor="price">Harga</label>
+                                <label htmlFor="price">Harga *</label>
                                 <InputNumber
                                     value={data.price}
                                     onValueChange={(e) =>
@@ -648,9 +678,13 @@ export default function Index({ auth, usersProp }) {
                                     }
                                     locale="id-ID"
                                 />
+                                <InputError
+                                    message={errors.price}
+                                    className="mt-2"
+                                />
                             </div>
                             <div className="flex flex-col">
-                                <label htmlFor="unit">Unit</label>
+                                <label htmlFor="unit">Unit *</label>
                                 <InputText
                                     className="dark:bg-gray-300"
                                     value={data.unit}
@@ -660,9 +694,13 @@ export default function Index({ auth, usersProp }) {
                                     id="unit"
                                     aria-describedby="unit-help"
                                 />
+                                <InputError
+                                    message={errors.unit}
+                                    className="mt-2"
+                                />
                             </div>
                             <div className="flex flex-col">
-                                <label htmlFor="description">Description</label>
+                                <label htmlFor="description">Deskripsi *</label>
                                 <InputTextarea
                                     className="dark:bg-gray-300"
                                     value={data.description}
@@ -671,6 +709,10 @@ export default function Index({ auth, usersProp }) {
                                     }
                                     rows={5}
                                     cols={30}
+                                />
+                                <InputError
+                                    message={errors.description}
+                                    className="mt-2"
                                 />
                             </div>
                         </div>

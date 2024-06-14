@@ -57,8 +57,8 @@ class User extends Authenticatable
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()
-            ->logOnly(['name', 'email', 'phone_number'])
-            ->dontLogIfAttributesChangedOnly(['deleted_at', 'updated_at'])
+            ->logOnly(['name', 'email', 'number'])
+            ->dontLogIfAttributesChangedOnly(['deleted_at', 'updated_at', 'password'])
             ->setDescriptionForEvent(function (string $eventName) {
                 if ($eventName === 'created') {
                     return "menambah data user baru";

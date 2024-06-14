@@ -113,6 +113,16 @@ export const DatatableLead = memo(
             },
 
             {
+                field: "npwp",
+                header: "NPWP",
+                frozen: !isMobile,
+                style: {
+                    width: "max-content",
+                    whiteSpace: "nowrap",
+                },
+            },
+
+            {
                 field: "status",
                 header: "Status",
                 frozen: !isMobile,

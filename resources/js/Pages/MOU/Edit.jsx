@@ -267,12 +267,7 @@ const Edit = ({ usersProp, partnersProp, mou, signaturesProp }) => {
         { name: "Jabodetabek", price: 15000000 },
     ];
 
-    const option_period_subscription = [
-        { name: "kartu/bulan" },
-        { name: "kartu/tahun" },
-        { name: "lembaga/bulan" },
-        { name: "lembaga/tahun" },
-    ];
+    const option_period_subscription = [{ name: "bulan" }, { name: "tahun" }];
 
     const selectedOptionTrainingTemplate = (option, props) => {
         if (option) {
@@ -506,9 +501,7 @@ const Edit = ({ usersProp, partnersProp, mou, signaturesProp }) => {
                                                         "",
                                                     period_subscription:
                                                         e.target.value
-                                                            .price_list
-                                                            ?.period_subscription ??
-                                                        "",
+                                                            ?.period ?? "",
                                                     price_training_offline:
                                                         e.target.value
                                                             .price_list

@@ -28,7 +28,7 @@ import { ProgressSpinner } from "primereact/progressspinner";
 import LoadingDocument from "@/Components/LoadingDocument";
 registerPlugin(FilePondPluginFileValidateSize);
 
-const Create = ({ usersProp, partnersProp, signaturesProp, referralsProp }) => {
+const Create = ({ usersProp, partnersProp, signaturesProp }) => {
     const [users, setUsers] = useState(usersProp);
     const [partners, setPartners] = useState(partnersProp);
     const [selectedPartner, setSelectedPartner] = useState(null);
@@ -36,7 +36,6 @@ const Create = ({ usersProp, partnersProp, signaturesProp, referralsProp }) => {
     const [regencys, setRegencys] = useState([]);
     const [regencyName, setRegencyName] = useState(null);
     const [signatures, setSignatures] = useState(signaturesProp);
-    const [referrals, setReferrals] = useState(referralsProp);
     const [leads, setLeads] = useState(null);
     const [dialogInstitutionVisible, setDialogInstitutionVisible] =
         useState(false);
@@ -241,12 +240,7 @@ const Create = ({ usersProp, partnersProp, signaturesProp, referralsProp }) => {
         { name: "Jabodetabek", price: 15000000 },
     ];
 
-    const option_period_subscription = [
-        { name: "kartu/bulan" },
-        { name: "kartu/tahun" },
-        { name: "lembaga/bulan" },
-        { name: "lembaga/tahun" },
-    ];
+    const option_period_subscription = [{ name: "bulan" }, { name: "tahun" }];
 
     const selectedOptionTrainingTemplate = (option, props) => {
         if (option) {
@@ -475,9 +469,7 @@ const Create = ({ usersProp, partnersProp, signaturesProp, referralsProp }) => {
                                                         "",
                                                     price_subscription_system:
                                                         e.target.value
-                                                            .price_list
-                                                            ?.price_subscription_system ??
-                                                        "",
+                                                            ?.period ?? "",
                                                     period_subscription:
                                                         e.target.value
                                                             .price_list

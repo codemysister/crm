@@ -225,6 +225,7 @@ export default function Index({
             live_age: null,
             monitoring_date_after_3_month_live: null,
             period: null,
+            billing_date: null,
             payment_metode: null,
             status: "",
             note_status: null,
@@ -319,12 +320,7 @@ export default function Index({
         );
     };
 
-    const option_period_subscription = [
-        { name: "kartu/bulan" },
-        { name: "kartu/tahun" },
-        { name: "lembaga/bulan" },
-        { name: "lembaga/tahun" },
-    ];
+    const option_period_subscription = [{ name: "bulan" }, { name: "tahun" }];
 
     // fungsi toast
     const showSuccess = (type) => {
@@ -371,6 +367,7 @@ export default function Index({
                 regency: partner.regency,
                 subdistrict: partner.subdistrict,
                 period: partner.period,
+                billing_date: partner.billing_date,
                 payment_metode: partner.payment_metode,
                 address: partner.address,
                 status: partner.status,
@@ -1444,7 +1441,6 @@ export default function Index({
                                             }
                                             className="dark:bg-gray-300"
                                             id="name"
-                                            required
                                             aria-describedby="name-help"
                                         />
                                         <InputError
@@ -1969,10 +1965,36 @@ export default function Index({
                                     </div>
 
                                     <div className="flex flex-col">
+                                        <label htmlFor="register_date">
+                                            Tanggal Penagihan
+                                        </label>
+                                        <Calendar
+                                            value={
+                                                data.partner.billing_date
+                                                    ? new Date(
+                                                          data.partner.billing_date
+                                                      )
+                                                    : null
+                                            }
+                                            style={{ height: "35px" }}
+                                            onChange={(e) => {
+                                                setData("partner", {
+                                                    ...data.partner,
+                                                    billing_date:
+                                                        e.target.value,
+                                                });
+                                            }}
+                                            showIcon
+                                            dateFormat="dd/mm/yy"
+                                        />
+                                    </div>
+
+                                    <div className="flex flex-col">
                                         <label htmlFor="payment_metode">
                                             Metode Pembayaran
                                         </label>
                                         <Dropdown
+                                            dataKey="name"
                                             value={data.partner.payment_metode}
                                             onChange={(e) => {
                                                 setData("partner", {
@@ -2047,7 +2069,6 @@ export default function Index({
                                             }
                                             className="dark:bg-gray-300"
                                             id="email"
-                                            required
                                             aria-describedby="email-help"
                                         />
                                         <InputError
@@ -2174,7 +2195,6 @@ export default function Index({
                                             }
                                             className="dark:bg-gray-300"
                                             id="name"
-                                            required
                                             aria-describedby="name-help"
                                         />
                                         <InputError
@@ -2717,10 +2737,36 @@ export default function Index({
                                     </div>
 
                                     <div className="flex flex-col">
+                                        <label htmlFor="register_date">
+                                            Tanggal Penagihan
+                                        </label>
+                                        <Calendar
+                                            value={
+                                                data.partner.billing_date
+                                                    ? new Date(
+                                                          data.partner.billing_date
+                                                      )
+                                                    : null
+                                            }
+                                            style={{ height: "35px" }}
+                                            onChange={(e) => {
+                                                setData("partner", {
+                                                    ...data.partner,
+                                                    billing_date:
+                                                        e.target.value,
+                                                });
+                                            }}
+                                            showIcon
+                                            dateFormat="dd/mm/yy"
+                                        />
+                                    </div>
+
+                                    <div className="flex flex-col">
                                         <label htmlFor="payment_metode">
                                             Metode Pembayaran
                                         </label>
                                         <Dropdown
+                                            dataKey="name"
                                             value={data.partner.payment_metode}
                                             onChange={(e) => {
                                                 setData("partner", {

@@ -35,6 +35,7 @@ return new class extends Migration {
             $table->integer('live_age')->nullable();
             $table->date('monitoring_date_after_3_month_live')->nullable();
             $table->string('period')->nullable();
+            $table->integer('billing_date')->nullable();
             $table->string('payment_metode')->nullable()->default('payment link');
             $table->string('note_status')->nullable();
             $table->softDeletes();

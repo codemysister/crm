@@ -98,6 +98,24 @@ class InvoiceSubscriptionImport implements ToCollection, WithStartRow, WithHeadi
         return intval(preg_replace('/[^0-9]/', '', str_replace('Rp', '', $price)));
     }
 
+    public function generateInvoiceSubscription($invoice_subscription, $bills)
+    {
+        $path = "invoice_langganan/invoice_langganan-" . $invoice_subscription->uuid . ".pdf";
+
+        $invoice_subscription->invoice_subscription_doc = $path;
+
+        $html = view('pdf.invoice_subscription', ["invoice_subscription" => $invoice_subscription, "bills" => $bills])->render();
+
+        $pdf = Browsershot::html($html)
+            ->setIncludedPath(config('services.browsershot.included_path'))
+            ->showBackground()
+            ->pdf();
+
+        Storage::put("public/$path", $pdf);
+
+        return $invoice_subscription;
+    }
+
     public function collection(Collection $rows)
     {
         foreach ($rows as $key => $row) {
@@ -127,30 +145,63 @@ class InvoiceSubscriptionImport implements ToCollection, WithStartRow, WithHeadi
 
                 $statusBelumBayar = Status::where('name', 'belum bayar')->where('category', 'invoice')->first();
 
-                $invoice_subscription = InvoiceSubscription::create([
-                    'uuid' => Str::uuid(),
-                    'partner_id' => $partnerExist->id,
-                    'status_id' => $statusBelumBayar->id,
-                    'code' => $this->generateCode(),
-                    'date' => $this->convertDate($row['tanggal']),
-                    'period' => $this->convertDate($row['tanggal']),
-                    'due_date' => $this->convertDate($row['expired']),
-                    'invoice_age' => $invoice_age,
-                    'partner_name' => $partnerExist->name,
-                    'partner_province' => $partnerExist->province,
-                    'partner_regency' => $partnerExist->regency,
-                    'signature_name' => $this->signature['name'],
-                    'signature_image' => $this->signature['image'],
-                    'total_nominal' => $this->convertInteger($row['sub_total']),
-                    'total_ppn' => $this->convertInteger($total_ppn),
-                    'total_bill' => $this->convertInteger($row['total']),
-                    'rest_of_bill' => $this->convertInteger($row['total']),
-                    'rest_of_bill_locked' => $this->convertInteger($row['total']),
-                    'paid_off' => $this->convertInteger($row['diskon']),
-                    'payment_metode' => $row['xendit'] ? 'payment link' : 'cazhbox',
-                    'xendit_link' => $row['xendit'] ? $row['xendit'] : null,
-                    'created_by' => Auth()->user()->id,
-                ]);
+                $bills = [];
+                $bills[] = [
+                    'bill' => $row['tagihan1'],
+                    'nominal' => $this->convertInteger($row['harga1']),
+                    'total_ppn' => $this->convertInteger($row['pajak1']),
+                    'ppn' => $this->convertInteger($row["pajak1"]) / $this->convertInteger($row["harga1"]) * 100,
+                    'total_bill' => $this->convertInteger($row['jumlah1']),
+                ];
+
+                if ($row['tagihan2'] && $row['harga2'] && $row['pajak2'] && $row['jumlah2']) {
+                    $bills[] = [
+                        'bill' => $row['tagihan2'],
+                        'nominal' => $this->convertInteger($row['harga2']),
+                        'total_ppn' => $this->convertInteger($row['pajak2']),
+                        'ppn' => $this->convertInteger($row["pajak2"]) / $this->convertInteger($row["harga2"]) * 100,
+                        'total_bill' => $this->convertInteger($row['jumlah2']),
+                    ];
+                }
+
+                if ($row['tagihan3'] && $row['harga3'] && $row['pajak3'] && $row['jumlah3']) {
+                    $bills[] = [
+                        'bill' => $row['tagihan3'],
+                        'nominal' => $this->convertInteger($row['harga3']),
+                        'total_ppn' => $this->convertInteger($row['pajak3']),
+                        'ppn' => $this->convertInteger($row["pajak3"]) / $this->convertInteger($row["harga3"]) * 100,
+                        'total_bill' => $this->convertInteger($row['jumlah3']),
+                    ];
+                }
+
+
+                $invoice_subscription = new InvoiceSubscription();
+                $invoice_subscription->uuid = Str::uuid();
+                $invoice_subscription->partner_id = $partnerExist->id;
+                $invoice_subscription->status_id = $statusBelumBayar->id;
+                $invoice_subscription->code = $this->generateCode();
+                $invoice_subscription->date = $this->convertDate($row['tanggal']);
+                $invoice_subscription->period = $this->convertDate($row['tanggal']);
+                $invoice_subscription->due_date = $this->convertDate($row['expired']);
+                $invoice_subscription->invoice_age = $invoice_age;
+                $invoice_subscription->partner_name = $partnerExist->name;
+                $invoice_subscription->partner_province = $partnerExist->province;
+                $invoice_subscription->partner_regency = $partnerExist->regency;
+                $invoice_subscription->signature_name = $this->signature['name'];
+                $invoice_subscription->signature_image = $this->signature['image'];
+                $invoice_subscription->total_nominal = $this->convertInteger($row['sub_total']);
+                $invoice_subscription->total_ppn = $this->convertInteger($total_ppn);
+                $invoice_subscription->total_bill = $this->convertInteger($row['total']);
+                $invoice_subscription->rest_of_bill = $this->convertInteger($row['total']);
+                $invoice_subscription->rest_of_bill_locked = $this->convertInteger($row['total']);
+                $invoice_subscription->paid_off = $this->convertInteger($row['diskon']);
+                $invoice_subscription->payment_metode = $row['xendit'] ? 'payment link' : 'cazhbox';
+                $invoice_subscription->xendit_link = $row['xendit'] ? $row['xendit'] : null;
+                $invoice_subscription->created_by = Auth()->user()->id;
+                $invoice_subscription = $this->generateInvoiceSubscription($invoice_subscription, $bills);
+                $invoice_subscription->save();
+
+
 
                 InvoiceSubscriptionBill::create([
                     'uuid' => Str::uuid(),
@@ -186,10 +237,7 @@ class InvoiceSubscriptionImport implements ToCollection, WithStartRow, WithHeadi
                     ]);
                 }
 
-                $invoice_subscription = InvoiceSubscription::with('bills')->where('uuid', '=', $invoice_subscription->uuid)->first();
 
-                // dd($invoice_subscription);
-                GenerateInvoiceSubscriptionJob::dispatch($invoice_subscription, $invoice_subscription->bills);
                 DB::commit();
 
             } catch (Exception $e) {

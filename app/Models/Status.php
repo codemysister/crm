@@ -15,6 +15,7 @@ class Status extends Model
     use HasFactory, SoftDeletes, LogsActivity;
 
     protected $guarded = [];
+    protected static $recordEvents = ['restored', 'created', 'updated'];
 
     public function getActivitylogOptions(): LogOptions
     {

@@ -214,14 +214,10 @@ const Edit = ({
 
     const header = () => {
         return (
-            <HeaderDatatable filters={filters} setFilters={setFilters}>
-                <SelectButton
-                    className="w-full flex justify-end lg:text-md text-center"
-                    value={institutionType}
-                    onChange={(e) => setInstitutionType(e.value)}
-                    options={institutionTypeOptions}
-                />
-            </HeaderDatatable>
+            <HeaderDatatable
+                filters={filters}
+                setFilters={setFilters}
+            ></HeaderDatatable>
         );
     };
 
@@ -852,6 +848,8 @@ const Edit = ({
                                 );
                             })}
 
+                            {/* {console.log(selectedProducts)} */}
+
                             <Dialog
                                 header="Produk"
                                 visible={dialogProductVisible}
@@ -866,26 +864,26 @@ const Edit = ({
                                     value={products}
                                     paginator
                                     filters={filters}
-                                    rows={5}
+                                    rows={10}
                                     header={header}
                                     scrollable
                                     scrollHeight="flex"
                                     tableStyle={{ minWidth: "50rem" }}
                                     selectionMode={rowClick ? null : "checkbox"}
-                                    // onSelectionChange={(e) => {
-                                    //     setData("products", e.value);
-                                    // }}
+                                    rowsPerPageOptions={[10, 25, 50, 100]}
+                                    paginatorTemplate="RowsPerPageDropdown FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink"
+                                    currentPageReportTemplate="{first} - {last} dari {totalRecords}"
                                     selection={selectedProducts}
                                     onSelectionChange={(e) =>
                                         setSelectedProducts(e.value)
                                     }
-                                    dataKey="id"
+                                    dataKey="uuid"
                                 >
                                     <Column
                                         selectionMode="multiple"
                                         headerStyle={{ width: "3rem" }}
                                     ></Column>
-                                    <Column field="name" header="Name"></Column>
+                                    <Column field="name" header="Nama"></Column>
                                     <Column
                                         field="description"
                                         header="Deskripsi"
