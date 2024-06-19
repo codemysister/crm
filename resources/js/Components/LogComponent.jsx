@@ -340,7 +340,16 @@ const LogComponent = ({
                     emptyMessage="Log tidak ditemukan."
                     paginatorClassName="dark:bg-transparent paginator-custome dark:text-gray-300 rounded-b-lg"
                     header={headerStatus}
-                    globalFilterFields={["name", "category", "causer.name"]}
+                    globalFilterFields={[
+                        "name",
+                        "category",
+                        "causer.name",
+                        "subject.name",
+                        "subject.partner_name",
+                        "subject.institution_name",
+                        "subject.npwp",
+                        "subject.code",
+                    ]}
                     value={logs}
                     dataKey="id"
                     selection={selectedLogDelete}

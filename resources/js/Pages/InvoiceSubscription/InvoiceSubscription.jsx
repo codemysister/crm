@@ -962,7 +962,9 @@ export default function InvoiceSubscription({
             partner: {
                 ...prev.partner,
                 name: event.data.partner_name,
-                id: event.data.partner.id,
+                id: event.data.partner
+                    ? event.data.partner.id
+                    : event.data.lead.id,
             },
             rest_bill: event.data.rest_of_bill,
         }));

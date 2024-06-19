@@ -22,8 +22,8 @@ class CardController extends Controller
     public function index()
     {
         $partnersProp = Partner::with('price_list', 'createdBy')->whereHas('status', function ($query) {
-            $query->where('name', 'non aktif');
-        })->get();
+            $query->where('name', 'aktif')->orWhere('name', 'proses');
+        })->latest()->get();
         $statusesProp = Status::where('category', 'kartu')->orderBy('id', 'asc')->get();
         return Inertia::render('Card/Index', compact('statusesProp', 'partnersProp'));
     }

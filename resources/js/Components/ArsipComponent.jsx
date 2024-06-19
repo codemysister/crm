@@ -358,6 +358,7 @@ const ArsipComponent = ({
                         onClick={() => {
                             if (selectedData.created_by) {
                                 if (
+                                    roles.includes("super admin") ||
                                     selectedData.created_by.id == currentUser.id
                                 ) {
                                     handleRestoreData(selectedData);
@@ -378,6 +379,7 @@ const ArsipComponent = ({
                         onClick={() => {
                             if (selectedData.created_by) {
                                 if (
+                                    roles.includes("super admin") ||
                                     selectedData.created_by.id == currentUser.id
                                 ) {
                                     confirmDeleteData();

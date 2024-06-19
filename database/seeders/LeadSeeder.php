@@ -245,11 +245,16 @@ class LeadSeeder extends Seeder
 
         ];
 
-        foreach ($leads as $lead) {
+        foreach ($leads as $key => $lead) {
+            if ($key >= 0 && $key <= 4) {
+                $status_id = 6;
+            } else {
+                $status_id = 4;
+            }
             DB::table('leads')->insert([
                 'uuid' => Str::uuid(),
                 'created_by' => 6,
-                'status_id' => 4,
+                'status_id' => $status_id,
                 'sales_id' => $lead['sales_id'],
                 'name' => $lead['name'],
                 'npwp' => $lead['npwp'],

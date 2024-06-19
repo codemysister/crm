@@ -434,7 +434,7 @@ class SLAController extends Controller
         $activity->cazh_pic = $request['cazh_pic'];
         $activity->duration = $request['duration'];
         $activity->estimation_date = $request['estimation_date'] !== null ? Carbon::parse($request['estimation_date'])->format('Y-m-d H:i:s') : null;
-        $activity->realization_date = $request['realization_date'] !== null ? Carbon::parse($request['realization_date'])->format('Y-m-d H:i:s') : null;
+        $activity->realization_date = Carbon::parse($request['realization_date'])->format('Y-m-d H:i:s');
         $activity->realization = $pathRealization;
         $activity->information = $request['information'];
         $activity->user_id = Auth::user()->id;
@@ -442,6 +442,7 @@ class SLAController extends Controller
 
         $sla = SLA::where('id', '=', $request['sla_id'])->with('slaActivities')->first();
 
+        $this->generateSla($sla, $sla->slaActivities);
 
     }
 

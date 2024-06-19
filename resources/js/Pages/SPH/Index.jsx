@@ -274,14 +274,22 @@ export default function Index({
                 width: "max-content",
                 whiteSpace: "nowrap",
             },
-            body: (rowData) => (
-                <button
-                    onClick={() => handleSelectedDetailInstitution(rowData)}
-                    className="hover:text-blue-700 text-left"
-                >
-                    {rowData.partner_name}
-                </button>
-            ),
+            body: (rowData) => {
+                if (rowData.lead != undefined || rowData.partner != undefined) {
+                    return (
+                        <button
+                            onClick={() =>
+                                handleSelectedDetailInstitution(rowData)
+                            }
+                            className="hover:text-blue-700 text-left"
+                        >
+                            {rowData.partner_name}
+                        </button>
+                    );
+                } else {
+                    return rowData.partner_name;
+                }
+            },
         },
 
         {
@@ -296,11 +304,15 @@ export default function Index({
                 : null,
             body: (rowData) => {
                 if (rowData.lead != undefined) {
-                    return "-";
-                } else {
+                    return rowData.lead?.npwp !== null
+                        ? formatNPWP(rowData.lead.npwp)
+                        : "-";
+                } else if (rowData.partner != undefined) {
                     return rowData.partner?.npwp !== null
                         ? formatNPWP(rowData.partner.npwp)
                         : "-";
+                } else {
+                    return "-";
                 }
             },
         },
@@ -577,8 +589,9 @@ export default function Index({
                         className="bg-transparent hover:bg-slate-200 w-full text-slate-500 border-b-2 border-slate-400"
                         onClick={() => {
                             if (
-                                permissions.includes("edit sph") &&
-                                selectedSph.created_by.id == currentUser.id
+                                roles.includes("super admin") ||
+                                (permissions.includes("edit sph") &&
+                                    selectedSph.created_by.id == currentUser.id)
                             ) {
                                 router.get("/sph/" + selectedSph.uuid);
                             } else {
@@ -595,8 +608,9 @@ export default function Index({
                         className="bg-transparent hover:bg-slate-200 w-full text-slate-500 border-b-2 border-slate-400"
                         onClick={() => {
                             if (
-                                permissions.includes("hapus sph") &&
-                                selectedSph.created_by.id == currentUser.id
+                                roles.includes("super admin") ||
+                                (permissions.includes("hapus sph") &&
+                                    selectedSph.created_by.id == currentUser.id)
                             ) {
                                 confirmDeleteSph();
                             } else {

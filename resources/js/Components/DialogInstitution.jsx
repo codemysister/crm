@@ -125,6 +125,7 @@ const DialogInstitution = ({
                                 id: selectedInstitution.id,
                                 uuid: selectedInstitution.uuid,
                                 phone_number: selectedInstitution.phone_number,
+                                npwp: selectedInstitution.npwp,
                                 name: selectedInstitution.name,
                                 pic: selectedInstitution.pic,
                                 bank: null,

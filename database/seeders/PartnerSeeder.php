@@ -76,6 +76,7 @@ class PartnerSeeder extends Seeder
                 'status_id' => 2, // NON AKTIF
                 'sales_id' => 6,
                 'account_manager_id' => 11,
+                'period' => 'bulan',
                 'pic' => "Nurul Burhan",
                 'pic_phone_number' => "082324070501",
             ],
@@ -92,6 +93,7 @@ class PartnerSeeder extends Seeder
                 'status_id' => 1, // AKTIF
                 'sales_id' => 6,
                 'account_manager_id' => 11,
+                'period' => 'bulan',
                 'pic' => "M. Baitul ilmi",
                 'pic_phone_number' => "085211641461",
             ],
@@ -106,8 +108,9 @@ class PartnerSeeder extends Seeder
                 'regency' => "Kab. Sukabumi",
                 'province' => "Jawa Barat",
                 'status_id' => 1, // AKTIF
-                'sales_id' => 6,
+                'sales_id' => 5,
                 'account_manager_id' => 11,
+                'period' => 'bulan',
                 'pic' => "Kyai Luthfi",
                 'pic_phone_number' => "628996433333",
             ],
@@ -122,8 +125,9 @@ class PartnerSeeder extends Seeder
                 'regency' => "Kab. Banyuwangi",
                 'province' => "Jawa Timur",
                 'status_id' => 1, // AKTIF
-                'sales_id' => 6,
+                'sales_id' => 5,
                 'account_manager_id' => 11,
+                'period' => 'bulan',
                 'pic' => "KH. Ahmad Abdul Ghofur Al-Masyhad",
                 'pic_phone_number' => "62812257906990",
             ],
@@ -138,8 +142,9 @@ class PartnerSeeder extends Seeder
                 'regency' => "Kab. Malang",
                 'province' => "Jawa Timur",
                 'status_id' => 1, // AKTIF
-                'sales_id' => 6,
+                'sales_id' => 5,
                 'account_manager_id' => 11,
+                'period' => 'tahun',
                 'pic' => "Didin",
                 'pic_phone_number' => "6283156969123",
             ],
@@ -154,8 +159,9 @@ class PartnerSeeder extends Seeder
                 'regency' => "Kab. Sarolangun",
                 'province' => "Jambi",
                 'status_id' => 1, // AKTIF
-                'sales_id' => 6,
+                'sales_id' => 5,
                 'account_manager_id' => 11,
+                'period' => 'tahun',
                 'pic' => "Syaidun",
                 'pic_phone_number' => "081325325545",
             ],
@@ -170,8 +176,9 @@ class PartnerSeeder extends Seeder
                 'regency' => "Kab. OKU Timur",
                 'province' => "Sumatera Selatan",
                 'status_id' => 2, // NON AKTIF
-                'sales_id' => 6,
+                'sales_id' => 5,
                 'account_manager_id' => 11,
+                'period' => 'tahun',
                 'pic' => "Admin",
                 'pic_phone_number' => "6282225348894",
             ],
@@ -186,8 +193,9 @@ class PartnerSeeder extends Seeder
                 'regency' => "Kab. Subang",
                 'province' => "Jawa Barat",
                 'status_id' => 2, // NON AKTIF
-                'sales_id' => 6,
+                'sales_id' => 5,
                 'account_manager_id' => 11,
+                'period' => 'tahun',
                 'pic' => "Nasoh",
                 'pic_phone_number' => "6285229963126",
             ],
@@ -201,9 +209,10 @@ class PartnerSeeder extends Seeder
                 'phone_number' => "85182951124",
                 'regency' => 'Kab. Malang',
                 'province' => "Jawa Timur",
-                'status_id' => 2, // NON AKTIF
-                'sales_id' => 6,
+                'status_id' => 1,
+                'sales_id' => 5,
                 'account_manager_id' => 11,
+                'period' => 'tahun',
                 'pic' => "Laelatul Janah",
                 'pic_phone_number' => "6281931805761",
             ],
@@ -217,9 +226,10 @@ class PartnerSeeder extends Seeder
                 'phone_number' => "85182951124",
                 'regency' => "Kab. Labuhan Batu Utara",
                 'province' => "Sumatera Utara",
-                'status_id' => 2, // NON AKTIF
-                'sales_id' => 6,
+                'status_id' => 1,
+                'sales_id' => 5,
                 'account_manager_id' => 11,
+                'period' => 'tahun',
                 'pic' => "Usman",
                 'pic_phone_number' => "6285747541662",
             ],
@@ -233,9 +243,10 @@ class PartnerSeeder extends Seeder
                 'phone_number' => "85182951124",
                 'regency' => "Kab. Sleman",
                 'province' => "DI Yogyakarta",
-                'status_id' => 2, // NON AKTIF
-                'sales_id' => 6,
+                'status_id' => 1,
+                'sales_id' => 5,
                 'account_manager_id' => 11,
+                'period' => 'tahun',
                 'pic' => "Mukhlis",
                 'pic_phone_number' => "6285846904118",
             ],
@@ -249,9 +260,10 @@ class PartnerSeeder extends Seeder
                 'phone_number' => "85182951124",
                 'regency' => "Kab. Aceh Tenggara",
                 'province' => "Aceh",
-                'status_id' => 2, // NON AKTIF
+                'status_id' => 1,
                 'sales_id' => 6,
                 'account_manager_id' => 11,
+                'period' => 'tahun',
                 'pic' => "Titin Maslihah",
                 'pic_phone_number' => "085336517408",
             ],
@@ -265,9 +277,10 @@ class PartnerSeeder extends Seeder
                 'phone_number' => "85182951124",
                 'regency' => "Kab. Banyumas",
                 'province' => "Jawa Tengah",
-                'status_id' => 2, // NON AKTIF
+                'status_id' => 1,
                 'sales_id' => 6,
                 'account_manager_id' => 11,
+                'period' => 'tahun',
                 'pic' => "Ustadz Muhidin",
                 'pic_phone_number' => "089652250908",
             ],
@@ -281,9 +294,10 @@ class PartnerSeeder extends Seeder
                 'phone_number' => "85182951124",
                 'regency' => "Kab. Banjar",
                 'province' => "Kalimantan Selatan",
-                'status_id' => 2, // NON AKTIF
+                'status_id' => 1,
                 'sales_id' => 6,
                 'account_manager_id' => 11,
+                'period' => 'tahun',
                 'pic' => "Ritongua Mountai",
                 'pic_phone_number' => "082217707398",
             ],
@@ -300,6 +314,7 @@ class PartnerSeeder extends Seeder
                 'status_id' => 2, // NON AKTIF
                 'sales_id' => 6,
                 'account_manager_id' => 11,
+                'period' => 'tahun',
                 'pic' => "Anis Fatkhurrohman",
                 'pic_phone_number' => "6285184861411",
             ],
@@ -316,6 +331,7 @@ class PartnerSeeder extends Seeder
                 'status_id' => 2, // NON AKTIF
                 'sales_id' => 6,
                 'account_manager_id' => 11,
+                'period' => 'tahun',
                 'pic' => "Rudi",
                 'pic_phone_number' => "6285694214476",
             ],
@@ -329,9 +345,10 @@ class PartnerSeeder extends Seeder
                 'phone_number' => "85182951124",
                 'regency' => "Kab. Lampung Tengah",
                 'province' => "Lampung",
-                'status_id' => 2, // NON AKTIF
+                'status_id' => 1,
                 'sales_id' => 6,
                 'account_manager_id' => 11,
+                'period' => 'tahun',
                 'pic' => "Fatimah",
                 'pic_phone_number' => "6281284365759",
             ],
@@ -348,6 +365,7 @@ class PartnerSeeder extends Seeder
                 'status_id' => 1, // AKTIF
                 'sales_id' => 6,
                 'account_manager_id' => 11,
+                'period' => 'tahun',
                 'pic' => "Indra",
                 'pic_phone_number' => "6281347602171",
             ],
@@ -364,6 +382,7 @@ class PartnerSeeder extends Seeder
                 'status_id' => 1, // AKTIF
                 'sales_id' => 6,
                 'account_manager_id' => 11,
+                'period' => 'tahun',
                 'pic' => "Umi",
                 'pic_phone_number' => "6281363007860",
             ],
@@ -377,9 +396,10 @@ class PartnerSeeder extends Seeder
                 'phone_number' => "85182951124",
                 'regency' => "Kab. Halmahera Timur",
                 'province' => "Maluku Utara",
-                'status_id' => 2, // NON AKTIF
+                'status_id' => 1, // NON AKTIF
                 'sales_id' => 6,
                 'account_manager_id' => 11,
+                'period' => 'tahun',
                 'pic' => "Siti",
                 'pic_phone_number' => "6282351094297",
             ],
@@ -396,6 +416,7 @@ class PartnerSeeder extends Seeder
                 'status_id' => 1, // AKTIF
                 'sales_id' => 6,
                 'account_manager_id' => 11,
+                'period' => 'tahun',
                 'pic' => "Ridwan",
                 'pic_phone_number' => "6285807044165",
             ],
@@ -409,9 +430,10 @@ class PartnerSeeder extends Seeder
                 'phone_number' => "85182951124",
                 'regency' => "Kab. Grobogan",
                 'province' => "Jawa Tengah",
-                'status_id' => 2, // NON AKTIF
+                'status_id' => 1, // NON AKTIF
                 'sales_id' => 6,
                 'account_manager_id' => 11,
+                'period' => 'tahun',
                 'pic' => "Ruslan",
                 'pic_phone_number' => "6285883120566",
             ],
@@ -425,9 +447,10 @@ class PartnerSeeder extends Seeder
                 'phone_number' => "85182951124",
                 'regency' => "Kab. Brebes",
                 'province' => "Jawa Tengah",
-                'status_id' => 2, // NON AKTIF
+                'status_id' => 1, // NON AKTIF
                 'sales_id' => 6,
                 'account_manager_id' => 11,
+                'period' => 'tahun',
                 'pic' => "Sulis",
                 'pic_phone_number' => "6285899469487",
             ],
@@ -441,9 +464,10 @@ class PartnerSeeder extends Seeder
                 'phone_number' => "85182951124",
                 'regency' => "Kab. Brebes",
                 'province' => "Jawa Tengah",
-                'status_id' => 2, // NON AKTIF
+                'status_id' => 1, // NON AKTIF
                 'sales_id' => 6,
                 'account_manager_id' => 11,
+                'period' => 'tahun',
                 'pic' => "Fitri",
                 'pic_phone_number' => "6285720518919",
             ],
@@ -460,6 +484,7 @@ class PartnerSeeder extends Seeder
                 'status_id' => 1, // AKTIF
                 'sales_id' => 6,
                 'account_manager_id' => 11,
+                'period' => 'tahun',
                 'pic' => "Lina",
                 'pic_phone_number' => "6281378923341",
             ],
@@ -521,7 +546,7 @@ class PartnerSeeder extends Seeder
                 'status_id' => $partner['status_id'],
                 'sales_id' => $partner['sales_id'],
                 'account_manager_id' => $partner['account_manager_id'],
-                'period' => 'bulan',
+                'period' => $partner['period'],
                 'billing_date' => rand(1, 31),
                 'created_by' => 13,
             ]);

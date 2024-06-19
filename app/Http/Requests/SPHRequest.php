@@ -23,7 +23,7 @@ class SPHRequest extends FormRequest
     {
         return [
             'products' => 'required',
-            'partner.name' => 'required',
+            'partner.name' => 'required|unique:sphs,partner_name',
             'partner.province' => 'required',
             'partner.regency' => 'required',
             'partner.pic' => 'required',
@@ -38,6 +38,7 @@ class SPHRequest extends FormRequest
     {
         return [
             'partner.name.required' => 'Lembaga harus diiisi',
+            'partner.name.unique' => 'Lembaga sudah memiliki SPH',
             'partner.province.required' => 'Provinsi harus diiisi',
             'partner.regency.required' => 'Kabupaten harus diiisi',
             'partner.pic.required' => 'PIC harus diiisi',

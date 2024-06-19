@@ -203,10 +203,7 @@ export default function Index({
         partner: {
             uuid: "",
             sales: {},
-            account_manager: {
-                name: null,
-                id: null,
-            },
+            account_manager: {},
             name: "",
             logo: null,
             npwp: null,
@@ -725,33 +722,33 @@ export default function Index({
             },
         },
 
-        {
-            field: "onboarding_age",
-            header: "Umur Onboarding",
-            style: {
-                width: "max-content",
-                whiteSpace: "nowrap",
-            },
-            body: (rowData) => {
-                return rowData.onboarding_age !== null
-                    ? rowData.onboarding_age + " hari"
-                    : "-";
-            },
-        },
+        // {
+        //     field: "onboarding_age",
+        //     header: "Umur Onboarding",
+        //     style: {
+        //         width: "max-content",
+        //         whiteSpace: "nowrap",
+        //     },
+        //     body: (rowData) => {
+        //         return rowData.onboarding_age !== null
+        //             ? rowData.onboarding_age + " hari"
+        //             : "-";
+        //     },
+        // },
 
-        {
-            field: "live_age",
-            header: "Umur Onboarding",
-            style: {
-                width: "max-content",
-                whiteSpace: "nowrap",
-            },
-            body: (rowData) => {
-                return rowData.live_age !== null
-                    ? rowData.live_age + " hari"
-                    : "-";
-            },
-        },
+        // {
+        //     field: "live_age",
+        //     header: "Umur Onboarding",
+        //     style: {
+        //         width: "max-content",
+        //         whiteSpace: "nowrap",
+        //     },
+        //     body: (rowData) => {
+        //         return rowData.live_age !== null
+        //             ? rowData.live_age + " hari"
+        //             : "-";
+        //     },
+        // },
 
         {
             field: "total_members",
@@ -1513,6 +1510,29 @@ export default function Index({
                                     </div>
 
                                     <div className="flex flex-col">
+                                        <label htmlFor="name">NPWP *</label>
+                                        <InputMask
+                                            keyfilter="int"
+                                            value={data.partner.npwp}
+                                            onChange={(e) =>
+                                                setData("partner", {
+                                                    ...data.partner,
+                                                    npwp: e.target.value,
+                                                })
+                                            }
+                                            placeholder="99.999.999.9-999.999"
+                                            mask="99.999.999.9-999.999"
+                                            className="dark:bg-gray-300"
+                                            id="npwp"
+                                            aria-describedby="npwp-help"
+                                        />
+                                        <InputError
+                                            message={errors["partner.npwp"]}
+                                            className="mt-2"
+                                        />
+                                    </div>
+
+                                    <div className="flex flex-col">
                                         <label htmlFor="name">
                                             Jumlah Member *
                                         </label>
@@ -1559,25 +1579,6 @@ export default function Index({
                                     </div>
 
                                     <div className="flex flex-col">
-                                        <label htmlFor="name">NPWP</label>
-                                        <InputMask
-                                            keyfilter="int"
-                                            value={data.partner.npwp}
-                                            onChange={(e) =>
-                                                setData("partner", {
-                                                    ...data.partner,
-                                                    npwp: e.target.value,
-                                                })
-                                            }
-                                            placeholder="99.999.999.9-999.999"
-                                            mask="99.999.999.9-999.999"
-                                            className="dark:bg-gray-300"
-                                            id="npwp"
-                                            aria-describedby="npwp-help"
-                                        />
-                                    </div>
-
-                                    <div className="flex flex-col">
                                         <label htmlFor="name">
                                             Nomor Telepon
                                         </label>
@@ -1598,7 +1599,7 @@ export default function Index({
                                     </div>
 
                                     <div className="flex flex-col">
-                                        <label htmlFor="sales">Sales</label>
+                                        <label htmlFor="sales">Sales *</label>
                                         <Dropdown
                                             value={data.partner.sales}
                                             onChange={(e) =>
@@ -1617,11 +1618,15 @@ export default function Index({
                                             itemTemplate={optionTemplate}
                                             className="w-full md:w-14rem"
                                         />
+                                        <InputError
+                                            message={errors["partner.sales"]}
+                                            className="mt-2"
+                                        />
                                     </div>
 
                                     <div className="flex flex-col">
                                         <label htmlFor="account_manager">
-                                            Account Manager (AM)
+                                            Account Manager (AM) *
                                         </label>
                                         <Dropdown
                                             value={data.partner.account_manager}
@@ -1641,6 +1646,14 @@ export default function Index({
                                             }
                                             itemTemplate={optionTemplate}
                                             className="w-full md:w-14rem"
+                                        />
+                                        <InputError
+                                            message={
+                                                errors[
+                                                    "partner.account_manager"
+                                                ]
+                                            }
+                                            className="mt-2"
                                         />
                                     </div>
 
@@ -1763,7 +1776,7 @@ export default function Index({
 
                                     <div className="flex flex-col">
                                         <label htmlFor="register_date">
-                                            Tanggal Onboarding
+                                            Tanggal Onboarding *
                                         </label>
                                         <Calendar
                                             value={
@@ -1783,6 +1796,14 @@ export default function Index({
                                             }}
                                             showIcon
                                             dateFormat="dd/mm/yy"
+                                        />
+                                        <InputError
+                                            message={
+                                                errors[
+                                                    "partner.onboarding_date"
+                                                ]
+                                            }
+                                            className="mt-2"
                                         />
                                     </div>
 
@@ -1859,7 +1880,7 @@ export default function Index({
                                         />
                                     </div>
 
-                                    <div className="flex flex-col">
+                                    {/* <div className="flex flex-col">
                                         <label htmlFor="name">
                                             Umur Onboarding (hari)
                                         </label>
@@ -1890,11 +1911,12 @@ export default function Index({
                                                     live_age: e.target.value,
                                                 })
                                             }
+                                            disabled
                                             className="dark:bg-gray-300"
                                             id="live_age"
                                             aria-describedby="live_age-help"
                                         />
-                                    </div>
+                                    </div> */}
 
                                     <div className="flex flex-col">
                                         <label htmlFor="live_date">
@@ -1940,7 +1962,7 @@ export default function Index({
 
                                     <div className="flex flex-col">
                                         <label htmlFor="period">
-                                            Periode Langganan
+                                            Periode Langganan *
                                         </label>
                                         <Dropdown
                                             dataKey="name"
@@ -1958,40 +1980,45 @@ export default function Index({
                                                 selectedOptionTemplate
                                             }
                                             itemTemplate={optionTemplate}
-                                            editable
                                             className={`w-full md:w-14rem 
                                         `}
+                                        />
+                                        <InputError
+                                            message={errors["partner.period"]}
+                                            className="mt-2"
                                         />
                                     </div>
 
                                     <div className="flex flex-col">
                                         <label htmlFor="register_date">
-                                            Tanggal Penagihan
+                                            Tanggal Penagihan *
                                         </label>
-                                        <Calendar
-                                            value={
-                                                data.partner.billing_date
-                                                    ? new Date(
-                                                          data.partner.billing_date
-                                                      )
-                                                    : null
-                                            }
-                                            style={{ height: "35px" }}
-                                            onChange={(e) => {
+                                        <InputText
+                                            keyfilter="int"
+                                            value={data.partner.billing_date}
+                                            onChange={(e) =>
                                                 setData("partner", {
                                                     ...data.partner,
                                                     billing_date:
                                                         e.target.value,
-                                                });
-                                            }}
-                                            showIcon
-                                            dateFormat="dd/mm/yy"
+                                                })
+                                            }
+                                            maxLength="2"
+                                            className="dark:bg-gray-300"
+                                            id="billing_date"
+                                            aria-describedby="billing_date-help"
+                                        />
+                                        <InputError
+                                            message={
+                                                errors["partner.billing_date"]
+                                            }
+                                            className="mt-2"
                                         />
                                     </div>
 
                                     <div className="flex flex-col">
                                         <label htmlFor="payment_metode">
-                                            Metode Pembayaran
+                                            Metode Pembayaran *
                                         </label>
                                         <Dropdown
                                             dataKey="name"
@@ -2072,12 +2099,12 @@ export default function Index({
                                             aria-describedby="email-help"
                                         />
                                         <InputError
-                                            message={errors["partner.name"]}
+                                            message={errors["partner.email"]}
                                             className="mt-2"
                                         />
                                     </div>
                                     <div className="flex flex-col">
-                                        <label htmlFor="name">Password</label>
+                                        <label htmlFor="name">Password *</label>
 
                                         <Password
                                             value={data.partner.password}
@@ -2093,6 +2120,10 @@ export default function Index({
                                             tabIndex={1}
                                             toggleMask
                                             style={{ width: "100% !important" }}
+                                        />
+                                        <InputError
+                                            message={errors["partner.password"]}
+                                            className="mt-2"
                                         />
                                     </div>
                                 </div>
@@ -2268,6 +2299,29 @@ export default function Index({
                                     </div>
 
                                     <div className="flex flex-col">
+                                        <label htmlFor="name">NPWP *</label>
+                                        <InputMask
+                                            keyfilter="int"
+                                            value={data.partner.npwp}
+                                            onChange={(e) =>
+                                                setData("partner", {
+                                                    ...data.partner,
+                                                    npwp: e.target.value,
+                                                })
+                                            }
+                                            placeholder="99.999.999.9-999.999"
+                                            mask="99.999.999.9-999.999"
+                                            className="dark:bg-gray-300"
+                                            id="npwp"
+                                            aria-describedby="npwp-help"
+                                        />
+                                        <InputError
+                                            message={errors["partner.npwp"]}
+                                            className="mt-2"
+                                        />
+                                    </div>
+
+                                    <div className="flex flex-col">
                                         <label htmlFor="name">
                                             Jumlah Member *
                                         </label>
@@ -2314,41 +2368,6 @@ export default function Index({
                                     </div>
 
                                     <div className="flex flex-col">
-                                        <label htmlFor="name">NPWP</label>
-                                        <InputMask
-                                            keyfilter="int"
-                                            value={data.partner.npwp}
-                                            onChange={(e) =>
-                                                setData("partner", {
-                                                    ...data.partner,
-                                                    npwp: e.target.value,
-                                                })
-                                            }
-                                            placeholder="99.999.999.9-999.999"
-                                            mask="99.999.999.9-999.999"
-                                            className="dark:bg-gray-300"
-                                            id="npwp"
-                                            aria-describedby="npwp-help"
-                                        />
-                                    </div>
-
-                                    <div className="flex flex-col">
-                                        <label htmlFor="name">Password</label>
-                                        <InputText
-                                            value={data.partner.password}
-                                            onChange={(e) =>
-                                                setData("partner", {
-                                                    ...data.partner,
-                                                    password: e.target.value,
-                                                })
-                                            }
-                                            className="dark:bg-gray-300"
-                                            id="password"
-                                            aria-describedby="password-help"
-                                        />
-                                    </div>
-
-                                    <div className="flex flex-col">
                                         <label htmlFor="name">
                                             Nomor Telepon
                                         </label>
@@ -2369,7 +2388,7 @@ export default function Index({
                                     </div>
 
                                     <div className="flex flex-col">
-                                        <label htmlFor="sales">Sales</label>
+                                        <label htmlFor="sales">Sales *</label>
                                         <Dropdown
                                             value={data.partner.sales}
                                             onChange={(e) =>
@@ -2388,11 +2407,15 @@ export default function Index({
                                             itemTemplate={optionTemplate}
                                             className="w-full md:w-14rem"
                                         />
+                                        <InputError
+                                            message={errors["partner.sales"]}
+                                            className="mt-2"
+                                        />
                                     </div>
 
                                     <div className="flex flex-col">
                                         <label htmlFor="account_manager">
-                                            Account Manager (AM)
+                                            Account Manager (AM) *
                                         </label>
                                         <Dropdown
                                             value={data.partner.account_manager}
@@ -2413,6 +2436,14 @@ export default function Index({
                                             itemTemplate={optionTemplate}
                                             className="w-full md:w-14rem"
                                         />
+                                        <InputError
+                                            message={
+                                                errors[
+                                                    "partner.account_manager"
+                                                ]
+                                            }
+                                            className="mt-2"
+                                        />
                                     </div>
 
                                     <div className="flex flex-col">
@@ -2420,7 +2451,7 @@ export default function Index({
                                             Provinsi *
                                         </label>
                                         <Dropdown
-                                            dataKey="code"
+                                            dataKey="name"
                                             value={
                                                 data.partner.province
                                                     ? JSON.parse(
@@ -2432,7 +2463,7 @@ export default function Index({
                                                 setProvinceName(
                                                     (prev) =>
                                                         (prev =
-                                                            e.target.value.code)
+                                                            e.target.value.name)
                                                 );
                                                 setData("partner", {
                                                     ...data.partner,
@@ -2462,7 +2493,7 @@ export default function Index({
                                             Kabupaten *
                                         </label>
                                         <Dropdown
-                                            dataKey="code"
+                                            dataKey="name"
                                             value={
                                                 data.partner.regency
                                                     ? JSON.parse(
@@ -2504,7 +2535,6 @@ export default function Index({
                                             Kecamatan
                                         </label>
                                         <Dropdown
-                                            dataKey="code"
                                             value={
                                                 data.partner.subdistrict
                                                     ? JSON.parse(
@@ -2535,7 +2565,7 @@ export default function Index({
 
                                     <div className="flex flex-col">
                                         <label htmlFor="register_date">
-                                            Tanggal Onboarding
+                                            Tanggal Onboarding *
                                         </label>
                                         <Calendar
                                             value={
@@ -2555,6 +2585,14 @@ export default function Index({
                                             }}
                                             showIcon
                                             dateFormat="dd/mm/yy"
+                                        />
+                                        <InputError
+                                            message={
+                                                errors[
+                                                    "partner.onboarding_date"
+                                                ]
+                                            }
+                                            className="mt-2"
                                         />
                                     </div>
 
@@ -2631,7 +2669,7 @@ export default function Index({
                                         />
                                     </div>
 
-                                    <div className="flex flex-col">
+                                    {/* <div className="flex flex-col">
                                         <label htmlFor="name">
                                             Umur Onboarding (hari)
                                         </label>
@@ -2662,11 +2700,12 @@ export default function Index({
                                                     live_age: e.target.value,
                                                 })
                                             }
+                                            disabled
                                             className="dark:bg-gray-300"
                                             id="live_age"
                                             aria-describedby="live_age-help"
                                         />
-                                    </div>
+                                    </div> */}
 
                                     <div className="flex flex-col">
                                         <label htmlFor="live_date">
@@ -2712,7 +2751,7 @@ export default function Index({
 
                                     <div className="flex flex-col">
                                         <label htmlFor="period">
-                                            Periode Langganan
+                                            Periode Langganan *
                                         </label>
                                         <Dropdown
                                             dataKey="name"
@@ -2725,45 +2764,51 @@ export default function Index({
                                             }}
                                             options={option_period_subscription}
                                             optionLabel="name"
+                                            optionValue="name"
                                             placeholder="Langganan Per-"
                                             valueTemplate={
                                                 selectedOptionTemplate
                                             }
                                             itemTemplate={optionTemplate}
-                                            editable
                                             className={`w-full md:w-14rem 
                                         `}
+                                        />
+                                        <InputError
+                                            message={errors["partner.period"]}
+                                            className="mt-2"
                                         />
                                     </div>
 
                                     <div className="flex flex-col">
                                         <label htmlFor="register_date">
-                                            Tanggal Penagihan
+                                            Tanggal Penagihan *
                                         </label>
-                                        <Calendar
-                                            value={
-                                                data.partner.billing_date
-                                                    ? new Date(
-                                                          data.partner.billing_date
-                                                      )
-                                                    : null
-                                            }
-                                            style={{ height: "35px" }}
-                                            onChange={(e) => {
+                                        <InputText
+                                            keyfilter="int"
+                                            value={data.partner.billing_date}
+                                            onChange={(e) =>
                                                 setData("partner", {
                                                     ...data.partner,
                                                     billing_date:
                                                         e.target.value,
-                                                });
-                                            }}
-                                            showIcon
-                                            dateFormat="dd/mm/yy"
+                                                })
+                                            }
+                                            maxLength="2"
+                                            className="dark:bg-gray-300"
+                                            id="billing_date"
+                                            aria-describedby="billing_date-help"
+                                        />
+                                        <InputError
+                                            message={
+                                                errors["partner.billing_date"]
+                                            }
+                                            className="mt-2"
                                         />
                                     </div>
 
                                     <div className="flex flex-col">
                                         <label htmlFor="payment_metode">
-                                            Metode Pembayaran
+                                            Metode Pembayaran *
                                         </label>
                                         <Dropdown
                                             dataKey="name"
@@ -2809,7 +2854,6 @@ export default function Index({
                                                     ...data.partner,
                                                     status: e.target.value,
                                                 });
-                                                setModalStatusIsVisible(true);
                                             }}
                                             options={status}
                                             optionLabel="name"

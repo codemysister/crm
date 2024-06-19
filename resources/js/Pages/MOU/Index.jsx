@@ -101,11 +101,15 @@ export default function Index({ auth, usersProp }) {
                 : null,
             body: (rowData) => {
                 if (rowData.lead != undefined) {
-                    return "-";
-                } else {
+                    return rowData.lead?.npwp !== null
+                        ? formatNPWP(rowData.lead.npwp)
+                        : "-";
+                } else if (rowData.partner != undefined) {
                     return rowData.partner?.npwp !== null
                         ? formatNPWP(rowData.partner.npwp)
                         : "-";
+                } else {
+                    return "-";
                 }
             },
         },
@@ -741,8 +745,10 @@ export default function Index({ auth, usersProp }) {
                         className="bg-transparent hover:bg-slate-200 w-full text-slate-500 border-b-2 border-slate-400"
                         onClick={() => {
                             if (
-                                permissions.includes("edit mou") &&
-                                selectedData.created_by.id == currentUser.id
+                                roles.includes("super admin") ||
+                                (permissions.includes("edit mou") &&
+                                    selectedData.created_by.id ==
+                                        currentUser.id)
                             ) {
                                 router.get("/mou/" + selectedData.uuid);
                             } else {
@@ -759,8 +765,10 @@ export default function Index({ auth, usersProp }) {
                         className="bg-transparent hover:bg-slate-200 w-full text-slate-500 border-b-2 border-slate-400"
                         onClick={() => {
                             if (
-                                permissions.includes("hapus mou") &&
-                                selectedData.created_by.id == currentUser.id
+                                roles.includes("super admin") ||
+                                (permissions.includes("hapus mou") &&
+                                    selectedData.created_by.id ==
+                                        currentUser.id)
                             ) {
                                 confirmDeleteMou();
                             } else {

@@ -38,6 +38,7 @@ import LoadingDocument from "@/Components/LoadingDocument";
 import { FilePond, registerPlugin } from "react-filepond";
 import FilePondPluginFileValidateSize from "filepond-plugin-file-validate-size";
 import "filepond/dist/filepond.min.css";
+import { Image } from "primereact/image";
 registerPlugin(FilePondPluginFileValidateSize);
 
 export default function Index({
@@ -588,7 +589,9 @@ export default function Index({
             partner: {
                 ...prev.partner,
                 name: event.data.institution_name,
-                id: event.data.partner.id,
+                id: event.data.partner
+                    ? event.data.partner.id
+                    : event.data.lead.id,
             },
             rest_bill: event.data.rest_of_bill,
         }));
@@ -664,20 +667,28 @@ export default function Index({
                             field="proof_of_transaction"
                             header="Bukti"
                             style={{
-                                width: "max-content",
+                                width: "4rem",
                                 whiteSpace: "nowrap",
                             }}
                             headerClassName="dark:border-none bg-gray-50 dark:bg-transparent dark:text-gray-300"
                             body={(rowData) => {
                                 return (
-                                    <div
-                                        className="w-[100px] h-[100px] bg-no-repeat bg-contain rounded-t-xl"
-                                        style={{
-                                            backgroundImage: `url(${rowData.proof_of_transaction})`,
-                                            backgroundPosition: "center",
-                                            backgroundSize: "contain",
-                                        }}
-                                    ></div>
+                                    // <div
+                                    //     className="w-[100px] h-[100px] bg-no-repeat bg-contain rounded-t-xl"
+                                    //     style={{
+                                    //         backgroundImage: `url(${rowData.proof_of_transaction})`,
+                                    //         backgroundPosition: "center",
+                                    //         backgroundSize: "contain",
+                                    //     }}
+                                    // ></div>
+                                    <Image
+                                        src={rowData.proof_of_transaction}
+                                        alt="Bukti"
+                                        width="50%"
+                                        height="50%"
+                                        preview
+                                        downloadable
+                                    />
                                 );
                             }}
                         ></Column>
@@ -912,11 +923,15 @@ export default function Index({
                 : null,
             body: (rowData) => {
                 if (rowData.lead != undefined) {
-                    return "-";
-                } else {
+                    return rowData.lead?.npwp !== null
+                        ? formatNPWP(rowData.lead.npwp)
+                        : "-";
+                } else if (rowData.partner != undefined) {
                     return rowData.partner?.npwp !== null
                         ? formatNPWP(rowData.partner.npwp)
                         : "-";
+                } else {
+                    return "-";
                 }
             },
         },
@@ -958,6 +973,9 @@ export default function Index({
             style: {
                 width: "max-content",
                 whiteSpace: "nowrap",
+            },
+            body: (rowData) => {
+                return rowData.xendit_link ?? "-";
             },
             editor: (options) => cellEditor(options),
         },

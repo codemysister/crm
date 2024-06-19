@@ -8,6 +8,8 @@ use App\Models\Lead;
 use App\Models\Partner;
 use App\Models\PartnerPIC;
 use App\Models\Status;
+use App\Models\SPH;
+use App\Models\MOU;
 use App\Models\User;
 use Carbon\Carbon;
 use Exception;
@@ -29,7 +31,7 @@ class PartnerController extends Controller
     {
         $uuid = $request->query('detail');
         $usersProp = User::with('roles')->get();
-        $leadOnboardingProp = Lead::with('status', 'sales')->whereHas('status', function ($query) {
+        $leadOnboardingProp = Lead::with('status', 'sales', 'sph', 'mou')->whereHas('status', function ($query) {
             return $query->where('name', 'pengajuan onboarding');
         })->get();
         $partner = null;
@@ -108,6 +110,17 @@ class PartnerController extends Controller
         $imported = Excel::import(new PartnerImport, request()->file('partner.excell'));
     }
 
+    public function rangeBetweenDate($firstDate, $secondDate)
+    {
+        $firstDate = Carbon::create($firstDate);
+        $secondDate = Carbon::create($secondDate);
+
+        $diffInDays = $firstDate->diffInDays($secondDate);
+
+        return $diffInDays;
+    }
+
+
     public function store(PartnerGeneralRequest $request)
     {
         $pathLogo = null;
@@ -118,7 +131,7 @@ class PartnerController extends Controller
             Storage::putFileAs('public/images/logo', $file, $filename);
         }
 
-        $request->merge(['request_method' => 'store']);
+        // $request->merge(['request_method' => 'store']);
 
         DB::beginTransaction();
 
@@ -130,6 +143,7 @@ class PartnerController extends Controller
                 'password' => Hash::make($request['partner']['password']),
             ]);
             $user->assignRole('partner');
+
 
             $partner = Partner::create([
                 'uuid' => Str::uuid(),
@@ -146,8 +160,8 @@ class PartnerController extends Controller
                 'account_manager_id' => $request['partner']['account_manager']['id'] ?? null,
                 'onboarding_date' => $request['partner']['onboarding_date'] !== null ? Carbon::parse($request['partner']['onboarding_date'])->setTimezone('GMT+7')->format('Y-m-d H:i:s') : null,
                 'live_date' => $request['partner']['live_date'] !== null ? Carbon::parse($request['partner']['live_date'])->setTimezone('GMT+7')->format('Y-m-d H:i:s') : null,
-                'onboarding_age' => $request['partner']['onboarding_age'],
-                'live_age' => $request['partner']['live_age'],
+                'onboarding_age' => $request['partner']['live_date'] ? $this->rangeBetweenDate($request['partner']['onboarding_date'], $request['partner']['live_date']) : null,
+                'live_age' => $request['partner']['live_date'] ? $this->rangeBetweenDate($request['partner']['onboarding_date'], Carbon::now()) : null,
                 'monitoring_date_after_3_month_live' => $request['partner']['monitoring_date_after_3_month_live'] !== null ? Carbon::parse($request['partner']['monitoring_date_after_3_month_live'])->setTimezone('GMT+7')->format('Y-m-d H:i:s') : null,
                 'province' => $request['partner']['province'],
                 'regency' => $request['partner']['regency'],
@@ -155,8 +169,22 @@ class PartnerController extends Controller
                 'address' => $request['partner']['address'],
                 'payment_metode' => $request['partner']['payment_metode'],
                 'period' => $request['partner']['period']['name'] ?? $request['partner']['period'],
+                'billing_date' => $request['partner']['billing_date'] ?? null,
                 'created_by' => Auth::user()->id
             ]);
+
+            if ($request['partner']['onboarding']) {
+                $sph = SPH::where('lead_id', $request['partner']['onboarding'])->first();
+                $mou = MOU::where('lead_id', $request['partner']['onboarding'])->first();
+
+                if ($sph) {
+                    $sph->update(['partner_id' => $partner->id]);
+                }
+                if ($mou) {
+                    $mou->update(['partner_id' => $partner->id]);
+                }
+            }
+
             if ($request['partner']['uuid_lead'] && $request['partner']['onboarding']) {
 
                 $leadExist = Lead::with('status')->where('uuid', $request['partner']['uuid_lead'])->first();
@@ -274,8 +302,8 @@ class PartnerController extends Controller
                 'account_manager_id' => $request['partner']['account_manager']['id'] ?? null,
                 'onboarding_date' => $request['partner']['onboarding_date'] !== null ? Carbon::parse($request['partner']['onboarding_date'])->setTimezone('GMT+7')->format('Y-m-d H:i:s') : null,
                 'live_date' => $request['partner']['live_date'] !== null ? Carbon::parse($request['partner']['live_date'])->setTimezone('GMT+7')->format('Y-m-d H:i:s') : null,
-                'onboarding_age' => $request['partner']['onboarding_age'],
-                'live_age' => $request['partner']['live_age'],
+                'onboarding_age' => $request['partner']['live_date'] ? $this->rangeBetweenDate($request['partner']['onboarding_date'], $request['partner']['live_date']) : null,
+                'live_age' => $request['partner']['live_date'] ? $this->rangeBetweenDate($request['partner']['onboarding_date'], Carbon::now()) : null,
                 'monitoring_date_after_3_month_live' => $request['partner']['monitoring_date_after_3_month_live'] !== null ? Carbon::parse($request['partner']['monitoring_date_after_3_month_live'])->setTimezone('GMT+7')->format('Y-m-d H:i:s') : null,
                 'province' => $request['partner']['province'],
                 'regency' => $request['partner']['regency'],
@@ -283,7 +311,7 @@ class PartnerController extends Controller
                 'address' => $request['partner']['address'],
                 'payment_metode' => $request['partner']['payment_metode'],
                 'period' => $request['partner']['period']['name'] ?? $request['partner']['period'],
-                'billing_date' => $request['partner']['billing_date'] != null ? Carbon::parse($request['partner']['billing_date'])->setTimezone('GMT+7')->format('Y-m-d H:i:s') : null,
+                'billing_date' => $request['partner']['billing_date'] ?? null,
                 'note_status' => $request['partner']['note_status'],
                 'created_at' => now()
             ]);
@@ -443,9 +471,21 @@ class PartnerController extends Controller
 
     public function apiGetSubscriptionPartners(Request $request)
     {
-        $partner = Partner::with(['subscription'])->where('period', $request->period['name'])->whereHas('status', function ($query) {
-            return $query->where('name', 'aktif');
-        })->get();
+
+        if ($request->period['name'] == 'tahun') {
+            $partner = Partner::with(['subscription'])
+                ->where('period', $request->period['name'])
+                ->whereHas('status', function ($query) {
+                    return $query->where('name', 'aktif');
+                })
+                ->whereMonth('live_date', now()->month)
+                ->whereYear('live_date', now()->year)
+                ->get();
+        } else {
+            $partner = Partner::with(['subscription'])->where('period', $request->period['name'])->whereHas('status', function ($query) {
+                return $query->where('name', 'aktif');
+            })->get();
+        }
         return response()->json(['partner' => $partner]);
     }
 
@@ -459,9 +499,6 @@ class PartnerController extends Controller
             'subscription',
             'account',
             'bank',
-            'sph' => function ($query) {
-                $query->with(['user', 'products'])->latest();
-            },
             'price_list',
             'createdBy'
 

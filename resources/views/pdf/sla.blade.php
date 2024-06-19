@@ -178,20 +178,7 @@
                 @endif
 
             </div>
-            @if($sla->referral)
-                <div class="w-[30%]" style="width: 30%; height: 30%;">
-                    <p>Pihak Ketiga</p>
-                    @if($sla->referral_signature)
-                        <div style="width: 170px; height: 100px; overflow: hidden;" class="py-2">
-                            <img src='{{ public_path("storage/$sla->referral_signature") }}' alt="" class="min-h-20 w-full"
-                                style="object-fit: fill; width: 100%; height: 100%;" />
-                        </div>
-                    @else
-                        <div style="min-height: 100px"></div>
-                    @endif
-                    <p>{{$sla->referral_name}}</p>
-                </div>
-            @endif
+
         </div>
     </div>
 

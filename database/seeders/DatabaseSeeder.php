@@ -27,6 +27,13 @@ class DatabaseSeeder extends Seeder
         $this->call(DistrictsSeeder::class);
         $this->call(LeadSeeder::class);
         $this->call(PartnerSeeder::class);
+        $this->call(SPHSeeder::class);
+        $this->call(MOUSeeder::class);
+        $this->call(SLASeeder::class);
+        $this->call(InvoiceGeneralSeeder::class);
+        $this->call(InvoiceSubscriptionSeeder::class);
+        $this->call(STPDSeeder::class);
+        $this->call(CardSeeder::class);
         // $this->call(PartnerSeeder::class);
         // $this->call(PartnerPicSeeder::class);
         // $this->call(PartnerBankSeeder::class);

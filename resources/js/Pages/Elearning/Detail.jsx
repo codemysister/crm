@@ -35,6 +35,7 @@ const Detail = ({ playlistProp }) => {
                                 data={video}
                                 title={video.title}
                                 video={video.video}
+                                selectedVideos={selectedVideos}
                                 setSelectedVideo={setSelectedVideos}
                             />
                         );

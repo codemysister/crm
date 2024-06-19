@@ -544,8 +544,10 @@ export default function Index({
                         className="bg-transparent hover:bg-slate-200 w-full text-slate-500 border-b-2 border-slate-400"
                         onClick={() => {
                             if (
-                                permissions.includes("edit lead") &&
-                                selectedLead.created_by.id == currentUser.id
+                                roles.includes("super admin") ||
+                                (permissions.includes("edit lead") &&
+                                    selectedLead.created_by.id ==
+                                        currentUser.id)
                             ) {
                                 handleEditLead(selectedLead);
                             } else {
@@ -561,8 +563,10 @@ export default function Index({
                         className="bg-transparent hover:bg-slate-200 w-full text-slate-500 border-b-2 border-slate-400"
                         onClick={() => {
                             if (
-                                permissions.includes("hapus lead") &&
-                                selectedLead.created_by.id == currentUser.id
+                                roles.includes("super admin") ||
+                                (permissions.includes("hapus lead") &&
+                                    selectedLead.created_by.id ==
+                                        currentUser.id)
                             ) {
                                 confirmDeleteStatus();
                             } else {

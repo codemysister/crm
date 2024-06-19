@@ -41,24 +41,7 @@ export default function ElearningLayout({ user, children }) {
             <header className="z-10 fixed py-5 px-10 top-0 h-[70px] w-full bg-white shadow-md dark:shadow-black/90 dark:bg-transparent">
                 <div className="container flex items-center justify-between h-full px-6 mx-auto text-purple-600 dark:text-purple-300">
                     <h1 className="font-bold text-lg">Cazh - Learning</h1>
-                    <div className="p-inputgroup w-[50%] md:w-[30%] h-full">
-                        <InputText
-                            placeholder="Video..."
-                            style={{ height: "100%", borderRight: "none" }}
-                            className="rounded-l-full"
-                        />
-                        <Button
-                            icon="pi pi-search"
-                            style={{
-                                borderTop: "1px solid rgba(0,0,0,0.38)",
-                                borderRight: "1px solid rgba(0,0,0,0.38)",
-                                borderBottom: "1px solid rgba(0,0,0,0.38)",
-                                borderCollapse: "collapse",
-                                color: "rgba(0,0,0,0.38)",
-                            }}
-                            className="bg-transparent border-collapse border font-bold rounded-r-full"
-                        />
-                    </div>
+
                     <ul className="flex items-center flex-shrink-0 space-x-6">
                         <li className="flex">
                             <button

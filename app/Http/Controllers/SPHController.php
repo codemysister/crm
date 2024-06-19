@@ -47,14 +47,14 @@ class SPHController extends Controller
             unset($user->roles);
             return $user;
         });
-        $partnersProp = Partner::with([
-            'pic',
-            'status'
+        $leadsProp = Lead::with([
+            'status',
+            'sales'
         ])->get();
         $productsProp = Product::all();
         $salesProp = User::role('account executive')->get();
         $signaturesProp = Signature::all();
-        return Inertia::render('SPH/Create', compact('partnersProp', 'usersProp', 'productsProp', 'salesProp', 'signaturesProp'));
+        return Inertia::render('SPH/Create', compact('leadsProp', 'usersProp', 'productsProp', 'salesProp', 'signaturesProp'));
     }
 
     function updateProducts($sph, $oldData, $newData)
@@ -169,13 +169,10 @@ class SPHController extends Controller
             $sph->uuid = Str::uuid();
             $sph->code = $code;
             $sph->date = Carbon::now();
-            if ($request['partner']['type'] == 'partner') {
-                $partnerExist = Partner::where('uuid', $request['partner']["uuid"])->first();
-                $sph->partner_id = $partnerExist->id;
-            } else {
-                $leadExist = Lead::where('uuid', $request['partner']["uuid"])->first();
-                $sph->lead_id = $leadExist->id;
-            }
+
+            $leadExist = Lead::where('uuid', $request['partner']["uuid"])->first();
+            $sph->lead_id = $leadExist->id;
+
             $sph->partner_name = $request['partner']['name'];
             $sph->partner_pic = $request['partner']['pic'];
             $sph->partner_province = $request['partner']['province'];
@@ -226,16 +223,16 @@ class SPHController extends Controller
             unset($user->roles);
             return $user;
         });
-        $partnersProp = Partner::with([
-            'pic',
-            'status'
+        $leadsProp = Lead::with([
+            'status',
+            'sales'
         ])->get();
         $productsProp = Product::all(['uuid', 'name', 'price', 'category']);
         $salesProp = User::role('account executive')->get();
 
         $sph = SPH::with('products', 'partner', 'lead')->where('uuid', '=', $uuid)->first();
         $signaturesProp = Signature::all();
-        return Inertia::render('SPH/Edit', compact('usersProp', 'partnersProp', 'productsProp', 'salesProp', 'sph', 'signaturesProp'));
+        return Inertia::render('SPH/Edit', compact('usersProp', 'leadsProp', 'productsProp', 'salesProp', 'sph', 'signaturesProp'));
     }
 
     public function update(SPHRequest $request, $uuid)
@@ -244,16 +241,8 @@ class SPHController extends Controller
 
         try {
             $sph = SPH::where('uuid', $uuid)->first();
-
-            if ($request['partner']['type'] == 'partner') {
-                $partnerExist = Partner::where('uuid', $request['partner']["uuid"])->first();
-                $sph->partner_id = $partnerExist->id;
-                $sph->lead_id = null;
-            } else {
-                $leadExist = Lead::where('uuid', $request['partner']["uuid"])->first();
-                $sph->lead_id = $leadExist->id;
-                $sph->partner_id = null;
-            }
+            $leadExist = Lead::where('uuid', $request['partner']["uuid"])->first();
+            $sph->lead_id = $leadExist->id;
             $sph->partner_name = $request['partner']['name'];
             $sph->partner_pic = $request['partner']['pic'];
             $sph->partner_province = $request['partner']['province'];
@@ -264,7 +253,6 @@ class SPHController extends Controller
             $sph->signature_name = $request['signature']['name'] ?? null;
             $sph->signature_position = $request['signature']['position'] ?? null;
             $sph->signature_image = $request['signature']['image'] ?? null;
-
             $sph = $this->generateSPH($sph, $request->products);
             $sph->save();
 
@@ -320,7 +308,7 @@ class SPHController extends Controller
             $sph = SPH::where('uuid', '=', $uuid)->first();
             Activity::create([
                 'log_name' => 'deleted',
-                'description' => Auth::user()->name . ' menghapus data sph',
+                'description' => ' menghapus data sph',
                 'subject_type' => get_class($sph),
                 'subject_id' => $sph->id,
                 'causer_type' => get_class(Auth::user()),

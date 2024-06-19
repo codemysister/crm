@@ -26,14 +26,13 @@ import { BlockUI } from "primereact/blockui";
 
 const Edit = ({
     usersProp,
-    partnersProp,
+    leadsProp,
     salesProp,
     productsProp,
     sph,
     signaturesProp,
 }) => {
-    const [partners, setPartners] = useState(partnersProp);
-    const [leads, setLeads] = useState(null);
+    const [leads, setLeads] = useState(leadsProp);
     const [sales, setSales] = useState(salesProp);
     const [signatures, setSignatures] = useState(signaturesProp);
     const [products, setProducts] = useState(productsProp);
@@ -330,7 +329,7 @@ const Edit = ({
                                         />
                                     </div>
 
-                                    <div className="flex flex-col mt-3">
+                                    {/* <div className="flex flex-col mt-3">
                                         <label htmlFor="lembaga">
                                             Lembaga *
                                         </label>
@@ -359,6 +358,67 @@ const Edit = ({
                                         <InputError
                                             message={errors["partner.name"]}
                                             className="mt-2"
+                                        />
+                                    </div> */}
+
+                                    <div className="flex flex-col mt-3">
+                                        <label htmlFor="lembaga">
+                                            Lembaga *
+                                        </label>
+                                        <Dropdown
+                                            value={data.partner}
+                                            dataKey="id"
+                                            onChange={(e) => {
+                                                setData((data) => ({
+                                                    ...data,
+                                                    partner: {
+                                                        ...data.partner,
+                                                        uuid: e.target.value
+                                                            .uuid,
+                                                        id: e.target.value.id,
+                                                        name: e.target.value
+                                                            .name,
+                                                        npwp: e.target.value
+                                                            .npwp,
+                                                        pic:
+                                                            e.target.value
+                                                                ?.pic ?? "",
+                                                    },
+                                                    sales: {
+                                                        name: e.target.value
+                                                            .sales.name,
+                                                        email: e.target.value
+                                                            .sales.email,
+                                                        wa:
+                                                            e.target.value.sales
+                                                                .wa ?? "",
+                                                    },
+                                                }));
+                                            }}
+                                            onFocus={() => {
+                                                triggerInputFocus(
+                                                    animatePartnerNameRef
+                                                );
+                                            }}
+                                            onShow={() => {
+                                                triggerInputFocus(
+                                                    animatePartnerNameRef
+                                                );
+                                            }}
+                                            onHide={() => {
+                                                stopAnimateInputFocus(
+                                                    animatePartnerNameRef
+                                                );
+                                            }}
+                                            options={leads}
+                                            optionLabel="name"
+                                            placeholder="Pilih Lembaga"
+                                            filter
+                                            valueTemplate={
+                                                selectedOptionTemplate
+                                            }
+                                            itemTemplate={optionTemplate}
+                                            className="w-full md:w-14rem"
                                         />
                                     </div>
 
@@ -1091,7 +1151,7 @@ const Edit = ({
                 </div>
             </BlockUI>
 
-            <DialogInstitution
+            {/* <DialogInstitution
                 dialogInstitutionVisible={dialogInstitutionVisible}
                 setDialogInstitutionVisible={setDialogInstitutionVisible}
                 filters={filters}
@@ -1106,7 +1166,7 @@ const Edit = ({
                 setData={setData}
                 reset={reset}
                 setProvinceName={setProvinceName}
-            />
+            /> */}
         </>
     );
 };

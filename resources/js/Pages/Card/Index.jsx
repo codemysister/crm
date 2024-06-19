@@ -102,6 +102,16 @@ const Index = ({ auth, usersProp, partnersProp, statusesProp }) => {
         }
     }, [activeIndexTab]);
 
+    useEffect(() => {
+        if (data.price !== null && data.pcs !== null) {
+            let total = data.price * data.pcs;
+            setData({
+                ...data,
+                total: total,
+            });
+        }
+    }, [data.price, data.pcs]);
+
     const getCards = async () => {
         setIsLoadingData(true);
 
@@ -323,6 +333,25 @@ const Index = ({ auth, usersProp, partnersProp, statusesProp }) => {
                         }}
                     ></Badge>
                 );
+            },
+        },
+
+        {
+            field: "revision",
+            header: "Revisi",
+            frozen: !isMobile,
+            style: !isMobile
+                ? {
+                      width: "max-content",
+                      whiteSpace: "nowrap",
+                  }
+                : null,
+            body: (rowData) => {
+                if (rowData.status.name == "revisi") {
+                    return rowData.revision_detail;
+                } else {
+                    return "-";
+                }
             },
         },
         {
@@ -1080,15 +1109,10 @@ const Index = ({ auth, usersProp, partnersProp, statusesProp }) => {
                                 <InputText
                                     value={data.revision_detail}
                                     onChange={(e) => {
-                                        {
-                                            currentUser.roles[0].name ==
-                                                "account manager" &&
-                                                setData({
-                                                    ...data,
-                                                    revision_detail:
-                                                        e.target.value,
-                                                });
-                                        }
+                                        setData({
+                                            ...data,
+                                            revision_detail: e.target.value,
+                                        });
                                     }}
                                     className="dark:bg-gray-300"
                                     id="revision_detail"

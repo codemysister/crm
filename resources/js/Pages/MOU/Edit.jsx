@@ -32,9 +32,9 @@ registerPlugin(FilePondPluginFileValidateSize);
 
 const BASE_URL = import.meta.env.VITE_BASE_URL;
 
-const Edit = ({ usersProp, partnersProp, mou, signaturesProp }) => {
+const Edit = ({ usersProp, leadsProp, mou, signaturesProp }) => {
     const [users, setUsers] = useState(usersProp);
-    const [partners, setPartners] = useState(partnersProp);
+    const [leads, setLeads] = useState(leadsProp);
     const [provinces, setProvinces] = useState([]);
     const [regencys, setRegencys] = useState([]);
     const [isSignatureBlob, setIsSignatureBlob] = useState(false);
@@ -42,7 +42,6 @@ const Edit = ({ usersProp, partnersProp, mou, signaturesProp }) => {
     const [theme, setTheme] = useState(localStorage.theme);
     const [selectedPartner, setSelectedPartner] = useState(null);
     const [regencyName, setRegencyName] = useState(null);
-    const [leads, setLeads] = useState(null);
     const [dialogInstitutionVisible, setDialogInstitutionVisible] =
         useState(false);
     const [isLoadingData, setIsLoadingData] = useState(false);
@@ -114,8 +113,8 @@ const Edit = ({ usersProp, partnersProp, mou, signaturesProp }) => {
         day: mou.day,
         date: mou.date,
         partner: {
-            id: mou.partner_id,
-            uuid: mou.partner == undefined ? mou.lead.uuid : mou.partner.uuid,
+            id: mou.partner !== undefined ? mou.partner_id : null,
+            lead_id: mou.lead !== undefined ? mou.lead.id : null,
             name: mou.partner_name,
             pic: mou.partner_pic,
             pic_position: mou.partner_pic_position,
@@ -153,8 +152,6 @@ const Edit = ({ usersProp, partnersProp, mou, signaturesProp }) => {
         },
         mou_doc: mou.mou_doc,
     });
-
-    console.log(data.partner.partner_pic_signature);
 
     useEffect(() => {
         if (processing) {
@@ -444,111 +441,24 @@ const Edit = ({ usersProp, partnersProp, mou, signaturesProp }) => {
                                         </label>
                                         <Dropdown
                                             value={data.partner}
-                                            dataKey="id"
+                                            dataKey="name"
                                             onChange={(e) => {
                                                 setData((data) => ({
                                                     ...data,
                                                     partner: {
                                                         ...data.partner,
+                                                        uuid: e.target.value
+                                                            .uuid,
                                                         id: e.target.value.id,
                                                         name: e.target.value
                                                             .name,
-                                                        province:
-                                                            e.target.value
-                                                                .province,
-                                                        regency:
-                                                            e.target.value
-                                                                .regency,
+                                                        npwp: e.target.value
+                                                            .npwp,
                                                         pic:
-                                                            e.target.value.pic
-                                                                ?.name ?? "",
-                                                        pic_position:
-                                                            e.target.value.pic
-                                                                ?.position ??
-                                                            "",
-                                                        bank:
-                                                            e.target.value.bank
-                                                                ?.bank ?? "",
-                                                        account_bank_name:
-                                                            e.target.value.bank
-                                                                ?.account_bank_name ??
-                                                            "",
-                                                        account_bank_number:
-                                                            e.target.value.bank
-                                                                ?.account_bank_number ??
-                                                            "",
-                                                    },
-                                                    url_subdomain:
-                                                        e.target.value.account
-                                                            ?.subdomain ?? "",
-                                                    price_card: e.target.value
-                                                        .price_list?.price_card
-                                                        ? JSON.parse(
-                                                              e.target.value
-                                                                  .price_list
-                                                                  .price_card
-                                                          ).price
-                                                        : "",
-                                                    price_lanyard:
-                                                        e.target.value
-                                                            .price_list
-                                                            ?.price_lanyard ??
-                                                        "",
-                                                    price_subscription_system:
-                                                        e.target.value
-                                                            .price_list
-                                                            ?.price_subscription_system ??
-                                                        "",
-                                                    period_subscription:
-                                                        e.target.value
-                                                            ?.period ?? "",
-                                                    price_training_offline:
-                                                        e.target.value
-                                                            .price_list
-                                                            ?.price_training_offline ??
-                                                        "",
-                                                    price_training_online:
-                                                        e.target.value
-                                                            .price_list
-                                                            ?.price_training_online ??
-                                                        "",
-                                                    fee_qris:
-                                                        e.target.value
-                                                            .price_list
-                                                            ?.fee_qris ?? "",
-                                                    fee_purchase_cazhpoin:
-                                                        e.target.value
-                                                            .price_list
-                                                            ?.fee_purchase_cazhpoin ??
-                                                        "",
-                                                    fee_bill_cazhpoin:
-                                                        e.target.value
-                                                            .price_list
-                                                            ?.fee_bill_cazhpoin ??
-                                                        "",
-                                                    fee_topup_cazhpos:
-                                                        e.target.value
-                                                            .price_list
-                                                            ?.fee_topup_cazhpos ??
-                                                        "",
-                                                    fee_withdraw_cazhpos:
-                                                        e.target.value
-                                                            .price_list
-                                                            ?.fee_withdraw_cazhpos ??
-                                                        "",
-                                                    fee_bill_saldokartu:
-                                                        e.target.value
-                                                            .price_list
-                                                            ?.fee_bill_saldokartu ??
-                                                        "",
-                                                }));
-                                                setProvinceName(
-                                                    (prev) =>
-                                                        JSON.parse(
                                                             e.target.value
-                                                                .province
-                                                        ).name
-                                                );
+                                                                ?.pic ?? "",
+                                                    },
+                                                }));
                                             }}
                                             onFocus={() => {
                                                 triggerInputFocus(
@@ -565,7 +475,7 @@ const Edit = ({ usersProp, partnersProp, mou, signaturesProp }) => {
                                                     animatePartnerNameRef
                                                 );
                                             }}
-                                            options={partners}
+                                            options={leads}
                                             optionLabel="name"
                                             placeholder="Pilih Lembaga"
                                             filter
@@ -576,6 +486,7 @@ const Edit = ({ usersProp, partnersProp, mou, signaturesProp }) => {
                                             className="w-full md:w-14rem"
                                         />
                                     </div>
+
                                     <div className="flex flex-col mt-3">
                                         <label htmlFor="partner_pic">
                                             PIC *
@@ -1534,7 +1445,7 @@ const Edit = ({ usersProp, partnersProp, mou, signaturesProp }) => {
                                         </div>
                                     )}
 
-                                    <div className="flex flex-col mt-3">
+                                    {/* <div className="flex flex-col mt-3">
                                         <label htmlFor="signature">
                                             Tanda Tangan PIC
                                         </label>
@@ -1609,6 +1520,37 @@ const Edit = ({ usersProp, partnersProp, mou, signaturesProp }) => {
                                                     />
                                                 </>
                                             )}
+                                        </div>
+                                    </div> */}
+                                    <div className="flex flex-col mt-3">
+                                        <label htmlFor="signature">
+                                            Tanda Tangan PIC
+                                        </label>
+
+                                        <div className="App">
+                                            <FilePond
+                                                onaddfile={(
+                                                    error,
+                                                    fileItems
+                                                ) => {
+                                                    if (!error) {
+                                                        setData("partner", {
+                                                            ...data.partner,
+                                                            pic_signature:
+                                                                fileItems.file,
+                                                        });
+                                                    }
+                                                }}
+                                                onremovefile={() => {
+                                                    setData("partner", {
+                                                        ...data.partner,
+                                                        pic_signature: null,
+                                                    });
+                                                }}
+                                                maxFileSize="2mb"
+                                                labelMaxFileSizeExceeded="File terlalu besar"
+                                                labelIdle='Drag & Drop your files or <span class="filepond--label-action">Browse</span>'
+                                            />
                                         </div>
                                     </div>
 

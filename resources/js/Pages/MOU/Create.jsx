@@ -28,15 +28,14 @@ import { ProgressSpinner } from "primereact/progressspinner";
 import LoadingDocument from "@/Components/LoadingDocument";
 registerPlugin(FilePondPluginFileValidateSize);
 
-const Create = ({ usersProp, partnersProp, signaturesProp }) => {
+const Create = ({ usersProp, leadsProp, signaturesProp }) => {
     const [users, setUsers] = useState(usersProp);
-    const [partners, setPartners] = useState(partnersProp);
+    const [leads, setLeads] = useState(leadsProp);
     const [selectedPartner, setSelectedPartner] = useState(null);
     const [provinces, setProvinces] = useState([]);
     const [regencys, setRegencys] = useState([]);
     const [regencyName, setRegencyName] = useState(null);
     const [signatures, setSignatures] = useState(signaturesProp);
-    const [leads, setLeads] = useState(null);
     const [dialogInstitutionVisible, setDialogInstitutionVisible] =
         useState(false);
     const [isLoadingData, setIsLoadingData] = useState(false);
@@ -423,105 +422,18 @@ const Create = ({ usersProp, partnersProp, signaturesProp }) => {
                                                     ...data,
                                                     partner: {
                                                         ...data.partner,
+                                                        uuid: e.target.value
+                                                            .uuid,
                                                         id: e.target.value.id,
                                                         name: e.target.value
                                                             .name,
-                                                        province:
-                                                            e.target.value
-                                                                .province,
-                                                        regency:
-                                                            e.target.value
-                                                                .regency,
+                                                        npwp: e.target.value
+                                                            .npwp,
                                                         pic:
-                                                            e.target.value.pic
-                                                                ?.name ?? "",
-                                                        pic_position:
-                                                            e.target.value.pic
-                                                                ?.position ??
-                                                            "",
-                                                        bank:
-                                                            e.target.value.bank
-                                                                ?.bank ?? "",
-                                                        account_bank_name:
-                                                            e.target.value.bank
-                                                                ?.account_bank_name ??
-                                                            "",
-                                                        account_bank_number:
-                                                            e.target.value.bank
-                                                                ?.account_bank_number ??
-                                                            "",
-                                                    },
-                                                    url_subdomain:
-                                                        e.target.value.account
-                                                            ?.subdomain ?? "",
-                                                    price_card: e.target.value
-                                                        .price_list?.price_card
-                                                        ? JSON.parse(
-                                                              e.target.value
-                                                                  .price_list
-                                                                  .price_card
-                                                          ).price
-                                                        : "",
-                                                    price_lanyard:
-                                                        e.target.value
-                                                            .price_list
-                                                            ?.price_lanyard ??
-                                                        "",
-                                                    price_subscription_system:
-                                                        e.target.value
-                                                            ?.period ?? "",
-                                                    period_subscription:
-                                                        e.target.value
-                                                            .price_list
-                                                            ?.period_subscription ??
-                                                        "",
-                                                    price_training_offline:
-                                                        e.target.value
-                                                            .price_list
-                                                            ?.price_training_offline ??
-                                                        "",
-                                                    price_training_online:
-                                                        e.target.value
-                                                            .price_list
-                                                            ?.price_training_online ??
-                                                        "",
-                                                    fee_qris:
-                                                        e.target.value
-                                                            .price_list
-                                                            ?.fee_qris ?? "",
-                                                    fee_purchase_cazhpoin:
-                                                        e.target.value
-                                                            .price_list
-                                                            ?.fee_purchase_cazhpoin ??
-                                                        "",
-                                                    fee_bill_cazhpoin:
-                                                        e.target.value
-                                                            .price_list
-                                                            ?.fee_bill_cazhpoin ??
-                                                        "",
-                                                    fee_topup_cazhpos:
-                                                        e.target.value
-                                                            .price_list
-                                                            ?.fee_topup_cazhpos ??
-                                                        "",
-                                                    fee_withdraw_cazhpos:
-                                                        e.target.value
-                                                            .price_list
-                                                            ?.fee_withdraw_cazhpos ??
-                                                        "",
-                                                    fee_bill_saldokartu:
-                                                        e.target.value
-                                                            .price_list
-                                                            ?.fee_bill_saldokartu ??
-                                                        "",
-                                                }));
-                                                setProvinceName(
-                                                    (prev) =>
-                                                        JSON.parse(
                                                             e.target.value
-                                                                .province
-                                                        ).name
-                                                );
+                                                                ?.pic ?? "",
+                                                    },
+                                                }));
                                             }}
                                             onFocus={() => {
                                                 triggerInputFocus(
@@ -538,7 +450,7 @@ const Create = ({ usersProp, partnersProp, signaturesProp }) => {
                                                     animatePartnerNameRef
                                                 );
                                             }}
-                                            options={partners}
+                                            options={leads}
                                             optionLabel="name"
                                             placeholder="Pilih Lembaga"
                                             filter

@@ -15,7 +15,9 @@ class DashboardController extends Controller
     {
 
         $partners = Partner::with('sales', 'account_manager', 'status')->get();
-        $usersProp = User::all();
+        $usersProp = User::whereHas('roles', function ($query) {
+            $query->where('name', 'account executive')->orWhere('name', 'account manager');
+        })->get();
         $partnersByProvince = DB::table('partners')
             ->select('province->name as province_name', DB::raw('count(*) as total'))
             ->groupBy('province_name')

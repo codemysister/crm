@@ -49,16 +49,13 @@ class MOUController extends Controller
             unset($user->roles);
             return $user;
         });
-        $partnersProp = Partner::with([
-            'pic',
-            'subscription',
-            'price_list',
-            'account',
-            'bank',
-            'status'
+
+        $leadsProp = Lead::with([
+            'status',
+            'sales'
         ])->get();
         $signaturesProp = Signature::all();
-        return Inertia::render('MOU/Create', compact('partnersProp', 'usersProp', 'signaturesProp'));
+        return Inertia::render('MOU/Create', compact('leadsProp', 'usersProp', 'signaturesProp'));
     }
 
     public function generateCode()
@@ -192,7 +189,7 @@ class MOUController extends Controller
             $mou->code = $code;
             $mou->day = $request->day;
             $mou->date = Carbon::parse($request->date)->setTimezone('GMT+7')->format('Y-m-d H:i:s');
-            $mou->partner_id = $request->partner['id'];
+            $mou->lead_id = $request->partner['id'];
             $mou->partner_name = $request->partner['name'];
             $mou->partner_pic = $request->partner['pic'];
             $mou->partner_pic_position = $request->partner['pic_position'];
@@ -253,22 +250,19 @@ class MOUController extends Controller
             unset($user->roles);
             return $user;
         });
-        $partnersProp = Partner::with([
-            'pic',
-            'subscription',
-            'price_list',
-            'account',
-            'bank',
-            'status'
+
+        $leadsProp = Lead::with([
+            'status',
+            'sales'
         ])->get();
-        $mou = MOU::with('partner')->where('uuid', '=', $uuid)->first();
+        $mou = MOU::with('partner', 'lead')->where('uuid', '=', $uuid)->first();
         $signaturesProp = Signature::all();
-        return Inertia::render('MOU/Edit', compact('mou', 'usersProp', 'partnersProp', 'signaturesProp'));
+        return Inertia::render('MOU/Edit', compact('mou', 'usersProp', 'leadsProp', 'signaturesProp'));
     }
 
     public function update(MOURequest $request, $uuid)
     {
-        $mou = MOU::where('uuid', '=', $uuid)->first();
+        $mou = MOU::with('partner', 'lead')->where('uuid', '=', $uuid)->first();
         $pathSignaturePic = null;
         if ($request->hasFile('partner.pic_signature')) {
             $file = $request->file('partner.pic_signature');
@@ -289,17 +283,20 @@ class MOUController extends Controller
             }
         } else {
             if ($mou->partner_pic_signature) {
-                Storage::delete('public/' . $mou->partner_pic_signature);
-                $pathSignaturePic = null;
+                // Storage::delete('public/' . $mou->partner_pic_signature);
+                $pathSignaturePic = $mou->partner_pic_signature;
             }
         }
-
 
         DB::beginTransaction();
         try {
             $mou->day = $request->day;
             $mou->date = Carbon::parse($request->date)->setTimezone('GMT+7')->format('Y-m-d H:i:s');
-            $mou->partner_id = $request->partner['id'];
+            if ($mou->partner) {
+                $mou->partner_id = $request->partner['id'];
+            } else {
+                $mou->lead_id = $request->partner['lead_id'];
+            }
             $mou->partner_name = $request->partner['name'];
             $mou->partner_pic = $request->partner['pic'];
             $mou->partner_pic_position = $request->partner['pic_position'];

@@ -28,14 +28,13 @@ const BASE_URL = import.meta.env.VITE_BASE_URL;
 
 const Create = ({
     usersProp,
-    partnersProp,
+    leadsProp,
     salesProp,
     productsProp,
     signaturesProp,
 }) => {
     const [users, setUsers] = useState(usersProp);
-    const [partners, setPartners] = useState(partnersProp);
-    const [leads, setLeads] = useState(null);
+    const [leads, setLeads] = useState(leadsProp);
     const [sales, setSales] = useState(salesProp);
     const [isLoadingData, setIsLoadingData] = useState(false);
     const [signatures, setSignatures] = useState(signaturesProp);
@@ -340,7 +339,7 @@ const Create = ({
                                         />
                                     </div>
 
-                                    <div className="flex flex-col mt-3">
+                                    {/* <div className="flex flex-col mt-3">
                                         <label htmlFor="lembaga">
                                             Lembaga *
                                         </label>
@@ -365,6 +364,71 @@ const Create = ({
                                             className="dark:bg-gray-300 cursor-pointer"
                                             id="partner"
                                             aria-describedby="partner-help"
+                                        />
+                                        <InputError
+                                            message={errors["partner.name"]}
+                                            className="mt-2"
+                                        />
+                                    </div> */}
+
+                                    <div className="flex flex-col mt-3">
+                                        <label htmlFor="lembaga">
+                                            Lembaga *
+                                        </label>
+                                        <Dropdown
+                                            value={data.partner}
+                                            dataKey="id"
+                                            onChange={(e) => {
+                                                setData((data) => ({
+                                                    ...data,
+                                                    partner: {
+                                                        ...data.partner,
+                                                        uuid: e.target.value
+                                                            .uuid,
+                                                        id: e.target.value.id,
+                                                        name: e.target.value
+                                                            .name,
+                                                        npwp: e.target.value
+                                                            .npwp,
+                                                        pic:
+                                                            e.target.value
+                                                                ?.pic ?? "",
+                                                    },
+                                                    sales: {
+                                                        name: e.target.value
+                                                            .sales.name,
+                                                        email: e.target.value
+                                                            .sales.email,
+                                                        wa:
+                                                            e.target.value.sales
+                                                                .wa ?? "",
+                                                    },
+                                                }));
+                                            }}
+                                            onFocus={() => {
+                                                triggerInputFocus(
+                                                    animatePartnerNameRef
+                                                );
+                                            }}
+                                            onShow={() => {
+                                                triggerInputFocus(
+                                                    animatePartnerNameRef
+                                                );
+                                            }}
+                                            onHide={() => {
+                                                stopAnimateInputFocus(
+                                                    animatePartnerNameRef
+                                                );
+                                            }}
+                                            options={leads}
+                                            optionLabel="name"
+                                            placeholder="Pilih Lembaga"
+                                            filter
+                                            valueTemplate={
+                                                selectedOptionTemplate
+                                            }
+                                            itemTemplate={optionTemplate}
+                                            className="w-full md:w-14rem"
                                         />
                                         <InputError
                                             message={errors["partner.name"]}
@@ -1007,7 +1071,7 @@ const Create = ({
                                 </DataTable>
                             </Dialog>
                         </Dialog>
-
+                        {/* 
                         <DialogInstitution
                             dialogInstitutionVisible={dialogInstitutionVisible}
                             setDialogInstitutionVisible={
@@ -1025,7 +1089,7 @@ const Create = ({
                             setData={setData}
                             reset={reset}
                             setProvinceName={setProvinceName}
-                        />
+                        /> */}
 
                         <div className="md:w-[65%] hidden md:block text-sm h-screen max-h-screen overflow-y-auto p-5">
                             <header>

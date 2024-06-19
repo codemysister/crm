@@ -320,6 +320,37 @@ export default function DashboardLayout({ user, children }) {
                                     </Link>
                                 </li>
                                 <li className="relative px-6 py-3">
+                                    {currentPath == "/cards" && (
+                                        <span className="absolute inset-y-0 left-0 w-1 bg-purple-600 rounded-tr-lg rounded-br-lg"></span>
+                                    )}
+                                    <Link
+                                        className={`inline-flex items-center ${
+                                            currentPath == "/cards"
+                                                ? "text-gray-800 dark:text-gray-100"
+                                                : ""
+                                        } w-full text-sm font-semibold transition-colors duration-150 hover:text-gray-800 dark:hover:text-gray-200 `}
+                                        href={route("cards.view")}
+                                    >
+                                        <svg
+                                            className="w-5 h-5"
+                                            fill="none"
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                            strokeWidth="2"
+                                            viewBox="0 0 24 24"
+                                            stroke="currentColor"
+                                        >
+                                            <path
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 0 0 2.25-2.25V6.75A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25v10.5A2.25 2.25 0 0 0 4.5 19.5Z"
+                                            />
+                                        </svg>
+
+                                        <span className="ml-4">Kartu</span>
+                                    </Link>
+                                </li>
+                                <li className="relative px-6 py-3">
                                     {currentPath == "/invoice_generals" && (
                                         <span className="absolute inset-y-0 left-0 w-1 bg-purple-600 rounded-tr-lg rounded-br-lg"></span>
                                     )}
@@ -596,7 +627,7 @@ export default function DashboardLayout({ user, children }) {
                                             </Link>
                                         </li>
 
-                                        <li className="relative px-2 mt-3">
+                                        {/* <li className="relative px-2 mt-3">
                                             {currentPath == "/cards" && (
                                                 <span className="absolute inset-y-0 left-0 w-1 bg-purple-600 rounded-tr-lg rounded-br-lg"></span>
                                             )}
@@ -628,7 +659,7 @@ export default function DashboardLayout({ user, children }) {
                                                     Kartu
                                                 </span>
                                             </Link>
-                                        </li>
+                                        </li> */}
 
                                         {/* <li className="relative px-2 mt-3">
                                             {currentPath == "/signature" && (

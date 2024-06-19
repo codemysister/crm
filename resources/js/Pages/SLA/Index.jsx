@@ -33,6 +33,9 @@ import { handleSelectedDetailInstitution } from "@/Utils/handleSelectedDetailIns
 import PermissionErrorDialog from "@/Components/PermissionErrorDialog";
 import LogComponent from "@/Components/LogComponent";
 import ArsipComponent from "@/Components/ArsipComponent";
+import LoadingDocument from "@/Components/LoadingDocument";
+import { BlockUI } from "primereact/blockui";
+import { formatNPWP } from "@/Utils/formatNPWP";
 registerPlugin(FilePondPluginFileValidateSize);
 
 export default function Index({ auth }) {
@@ -40,6 +43,7 @@ export default function Index({ auth }) {
     const [users, setUsers] = useState("");
     const [activities, setActivities] = useState(null);
     const [positions, setPositions] = useState("");
+    const [blocked, setBlocked] = useState(false);
     const [activeIndexTab, setActiveIndexTab] = useState(0);
     const [permissionErrorIsVisible, setPermissionErrorIsVisible] =
         useState(false);
@@ -408,6 +412,31 @@ export default function Index({ auth }) {
         },
 
         {
+            field: "npwp",
+            header: "NPWP",
+            frozen: !isMobile,
+            style: !isMobile
+                ? {
+                      width: "max-content",
+                      whiteSpace: "nowrap",
+                  }
+                : null,
+            body: (rowData) => {
+                if (rowData.lead != undefined) {
+                    return rowData.lead?.npwp !== null
+                        ? formatNPWP(rowData.lead.npwp)
+                        : "-";
+                } else if (rowData.partner != undefined) {
+                    return rowData.partner?.npwp !== null
+                        ? formatNPWP(rowData.partner.npwp)
+                        : "-";
+                } else {
+                    return "-";
+                }
+            },
+        },
+
+        {
             field: "sla_doc",
             header: "Dokumen",
             frozen: !isMobile,
@@ -478,12 +507,14 @@ export default function Index({ auth }) {
                 },
             });
         } else {
+            setBlocked(true);
             post(`activity/${data.uuid}`, {
                 onSuccess: () => {
                     showSuccess("Update");
                     setModalEditActivityIsVisible((prev) => false);
                     getSlas();
                     getActivities(data.sla_id);
+                    setBlocked(false);
                     reset();
                 },
                 onError: () => {
@@ -505,295 +536,308 @@ export default function Index({ auth }) {
     }
 
     return (
-        <DashboardLayout auth={auth.user} className="">
-            <Toast ref={toast} />
-            <PermissionErrorDialog
-                dialogIsVisible={permissionErrorIsVisible}
-                setDialogVisible={setPermissionErrorIsVisible}
-            />
+        <BlockUI blocked={blocked} template={LoadingDocument}>
+            <DashboardLayout auth={auth.user} className="">
+                <Toast ref={toast} />
+                <PermissionErrorDialog
+                    dialogIsVisible={permissionErrorIsVisible}
+                    setDialogVisible={setPermissionErrorIsVisible}
+                />
 
-            <HeaderModule title="Service Level Agreement">
-                {permissions.includes("tambah sla") && (
-                    <Link
-                        href="/sla/create"
-                        className="bg-purple-600 block text-white py-2 px-3 font-semibold text-sm shadow-md rounded-lg mr-2"
-                    >
-                        <i
-                            className="pi pi-plus"
-                            style={{ fontSize: "0.7rem", paddingRight: "5px" }}
-                        ></i>
-                        Tambah
-                    </Link>
-                )}
-            </HeaderModule>
-            <Sidebar
-                header="Filter"
-                visible={sidebarFilter}
-                className="w-full md:w-[30%] px-3 dark:glass dark:text-white"
-                position="right"
-                onHide={() => setSidebarFilter(false)}
-            >
-                <form onSubmit={handleFilter}>
-                    <div className="flex flex-col mt-3">
-                        <label htmlFor="name">Berdasarkan penginput</label>
-                        <Dropdown
-                            optionLabel="name"
-                            dataKey="id"
-                            value={dataFilter.user}
-                            onChange={(e) =>
-                                setDataFilter("user", e.target.value)
-                            }
-                            options={users}
-                            placeholder="Pilih User"
-                            filter
-                            showClear
-                            valueTemplate={selectedOptionTemplate}
-                            itemTemplate={optionTemplate}
-                            className="flex justify-center  dark:text-gray-400   "
-                        />
-                    </div>
-
-                    <div className="flex flex-col mt-3">
-                        <label htmlFor="">Tanggal Input</label>
-                        <div className="flex items-center gap-2">
-                            <Calendar
-                                value={
-                                    dataFilter.input_date.start
-                                        ? new Date(dataFilter.input_date.start)
-                                        : null
-                                }
-                                style={{ height: "35px" }}
-                                onChange={(e) => {
-                                    setDataFilter("input_date", {
-                                        ...dataFilter.input_date,
-                                        start: e.target.value,
-                                    });
+                <HeaderModule title="Service Level Agreement">
+                    {permissions.includes("tambah sla") && (
+                        <Link
+                            href="/sla/create"
+                            className="bg-purple-600 block text-white py-2 px-3 font-semibold text-sm shadow-md rounded-lg mr-2"
+                        >
+                            <i
+                                className="pi pi-plus"
+                                style={{
+                                    fontSize: "0.7rem",
+                                    paddingRight: "5px",
                                 }}
-                                placeholder="mulai"
-                                showIcon
-                                dateFormat="dd/mm/yy"
-                            />
-                            <span>-</span>
-                            <Calendar
-                                value={
-                                    dataFilter.input_date.end
-                                        ? new Date(dataFilter.input_date.end)
-                                        : null
+                            ></i>
+                            Tambah
+                        </Link>
+                    )}
+                </HeaderModule>
+                <Sidebar
+                    header="Filter"
+                    visible={sidebarFilter}
+                    className="w-full md:w-[30%] px-3 dark:glass dark:text-white"
+                    position="right"
+                    onHide={() => setSidebarFilter(false)}
+                >
+                    <form onSubmit={handleFilter}>
+                        <div className="flex flex-col mt-3">
+                            <label htmlFor="name">Berdasarkan penginput</label>
+                            <Dropdown
+                                optionLabel="name"
+                                dataKey="id"
+                                value={dataFilter.user}
+                                onChange={(e) =>
+                                    setDataFilter("user", e.target.value)
                                 }
-                                style={{ height: "35px" }}
-                                onChange={(e) => {
-                                    setDataFilter("input_date", {
-                                        ...dataFilter.input_date,
-                                        end: e.target.value,
-                                    });
-                                }}
-                                placeholder="selesai"
-                                showIcon
-                                dateFormat="dd/mm/yy"
+                                options={users}
+                                placeholder="Pilih User"
+                                filter
+                                showClear
+                                valueTemplate={selectedOptionTemplate}
+                                itemTemplate={optionTemplate}
+                                className="flex justify-center  dark:text-gray-400   "
                             />
                         </div>
-                    </div>
 
-                    <div className="flex flex-row mt-5">
-                        <Button
-                            ref={btnFilterRef}
-                            label="Terapkan"
-                            className="bg-purple-600 text-sm shadow-md rounded-lg mr-2"
-                        />
-                        <Button
-                            type="button"
-                            label="Reset"
-                            onClick={(e) => {
-                                resetFilter();
-                                setTimeout(() => {
-                                    btnFilterRef.current.click();
-                                }, 500);
-                            }}
-                            className="outline-purple-600 outline-1 outline-dotted bg-transparent text-slate-700  text-sm shadow-md rounded-lg mr-2"
-                        />
-                    </div>
-                </form>
-            </Sidebar>
-            <TabView
-                activeIndex={activeIndexTab}
-                onTabChange={(e) => {
-                    setActiveIndexTab(e.index);
-                }}
-                className="mt-2"
-            >
-                <TabPanel header="Semua SLA">
-                    {activeIndexTab == 0 && (
-                        <>
-                            <ConfirmDialog />
-                            <ConfirmDialog2
-                                group="declarative"
-                                visible={confirmIsVisible}
-                                onHide={() => setConfirmIsVisible(false)}
-                                message="Konfirmasi kembali jika anda yakin!"
-                                header="Konfirmasi kembali"
-                                icon="pi pi-info-circle"
-                                accept={handleDeleteSla}
-                            />
-
-                            <div className="flex mx-auto flex-col justify-center mt-5 gap-5">
-                                <div className="card p-fluid w-full h-full flex justify-center rounded-lg">
-                                    <DataTable
-                                        loading={isLoadingData}
-                                        className="w-full h-auto rounded-lg dark:glass border-none text-center shadow-md"
-                                        pt={{
-                                            bodyRow:
-                                                "dark:bg-transparent bg-transparent dark:text-gray-300",
-                                            table: "dark:bg-transparent bg-white dark:text-gray-300",
-                                            header: "",
-                                        }}
-                                        paginator
-                                        rowsPerPageOptions={[5, 10, 25, 50]}
-                                        paginatorTemplate="RowsPerPageDropdown FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink"
-                                        currentPageReportTemplate="{first} - {last} dari {totalRecords}"
-                                        filters={filters}
-                                        rows={10}
-                                        emptyMessage="SLA tidak ditemukan."
-                                        paginatorClassName="dark:bg-transparent paginator-custome dark:text-gray-300 rounded-b-lg"
-                                        header={header}
-                                        globalFilterFields={globalFilterFields}
-                                        value={slas}
-                                        dataKey="id"
-                                        scrollable
-                                    >
-                                        <Column
-                                            header="Aksi"
-                                            body={actionBodyTemplate}
-                                            align="center"
-                                            frozen
-                                            style={
-                                                !isMobile
-                                                    ? {
-                                                          width: "max-content",
-                                                          whiteSpace: "nowrap",
-                                                      }
-                                                    : null
-                                            }
-                                            className="dark:border-none text-center lg:w-max bg-white lg:whitespace-nowrap "
-                                            headerClassName="dark:border-none text-center bg-white dark:bg-slate-900 dark:text-gray-300"
-                                        ></Column>
-                                        <Column
-                                            field="uuid"
-                                            hidden
-                                            className="dark:border-none"
-                                            headerClassName="dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300"
-                                            header="Nama"
-                                            align="left"
-                                            style={{
-                                                width: "max-content",
-                                                whiteSpace: "nowrap",
-                                            }}
-                                        ></Column>
-                                        {columns.map((col) => {
-                                            return (
-                                                <Column
-                                                    field={col.field}
-                                                    header={col.header}
-                                                    body={col.body}
-                                                    style={col.style}
-                                                    frozen={col.frozen}
-                                                    align="left"
-                                                    className="dark:border-none bg-white"
-                                                    headerClassName="dark:border-none bg-white dark:bg-slate-900 dark:text-gray-300"
-                                                ></Column>
-                                            );
-                                        })}
-                                        <Column
-                                            header="Diinput Oleh"
-                                            body={(rowData) =>
-                                                rowData.created_by.name
-                                            }
-                                            className="dark:border-none"
-                                            headerClassName="dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300"
-                                            align="left"
-                                            frozen={!isMobile}
-                                            style={{
-                                                width: "max-content",
-                                                whiteSpace: "nowrap",
-                                            }}
-                                        ></Column>
-                                        <Column
-                                            header="Diinput Pada"
-                                            body={(rowData) =>
-                                                formateDate(rowData.created_at)
-                                            }
-                                            className="dark:border-none"
-                                            headerClassName="dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300"
-                                            align="left"
-                                            frozen={!isMobile}
-                                            style={{
-                                                width: "max-content",
-                                                whiteSpace: "nowrap",
-                                            }}
-                                        ></Column>
-                                    </DataTable>
-                                </div>
-                            </div>
-                        </>
-                    )}
-                </TabPanel>
-
-                <TabPanel header="Log">
-                    {activeIndexTab == 1 && (
-                        <LogComponent
-                            auth={auth}
-                            fetchUrl={"/api/sla/logs"}
-                            filterUrl={"/sla/logs/filter"}
-                            deleteUrl={"/sla/logs"}
-                            objectKeyToIndo={objectKeyToIndo}
-                            users={users}
-                            showSuccess={showSuccess}
-                            showError={showError}
-                        />
-                    )}
-                </TabPanel>
-
-                <TabPanel header="Arsip">
-                    {activeIndexTab == 2 && (
-                        <ArsipComponent
-                            auth={auth}
-                            users={users}
-                            fetchUrl={"/api/sla/arsip"}
-                            forceDeleteUrl={"/sla/{id}/force"}
-                            restoreUrl={"/sla/{id}/restore"}
-                            filterUrl={"/sla/arsip/filter"}
-                            columns={columns}
-                            showSuccess={showSuccess}
-                            showError={showError}
-                            globalFilterFields={globalFilterFields}
-                        />
-                    )}
-                </TabPanel>
-            </TabView>
-            <div className="card flex justify-content-center">
-                <Dialog
-                    header="Aktivitas"
-                    headerClassName="dark:glass shadow-md dark:text-white"
-                    className="bg-white w-[80%] md:w-[60%] lg:w-[30%] dark:glass dark:text-white"
-                    contentClassName=" dark:glass dark:text-white"
-                    visible={modalEditActivityIsVisible}
-                    onHide={() => setModalEditActivityIsVisible(false)}
-                >
-                    <form onSubmit={(e) => handleSubmitForm(e, "update")}>
-                        <div className="flex flex-col justify-around gap-4 mt-4">
-                            <div className="flex flex-col">
-                                <label htmlFor="activity">Aktivitas</label>
-                                <InputText
-                                    value={data.activity}
-                                    onChange={(e) =>
-                                        setData("activity", e.target.value)
+                        <div className="flex flex-col mt-3">
+                            <label htmlFor="">Tanggal Input</label>
+                            <div className="flex items-center gap-2">
+                                <Calendar
+                                    value={
+                                        dataFilter.input_date.start
+                                            ? new Date(
+                                                  dataFilter.input_date.start
+                                              )
+                                            : null
                                     }
-                                    disabled
-                                    className="dark:bg-gray-300"
-                                    id="activity"
-                                    aria-describedby="activity-help"
+                                    style={{ height: "35px" }}
+                                    onChange={(e) => {
+                                        setDataFilter("input_date", {
+                                            ...dataFilter.input_date,
+                                            start: e.target.value,
+                                        });
+                                    }}
+                                    placeholder="mulai"
+                                    showIcon
+                                    dateFormat="dd/mm/yy"
+                                />
+                                <span>-</span>
+                                <Calendar
+                                    value={
+                                        dataFilter.input_date.end
+                                            ? new Date(
+                                                  dataFilter.input_date.end
+                                              )
+                                            : null
+                                    }
+                                    style={{ height: "35px" }}
+                                    onChange={(e) => {
+                                        setDataFilter("input_date", {
+                                            ...dataFilter.input_date,
+                                            end: e.target.value,
+                                        });
+                                    }}
+                                    placeholder="selesai"
+                                    showIcon
+                                    dateFormat="dd/mm/yy"
                                 />
                             </div>
-                            {/* <div className="flex flex-col">
+                        </div>
+
+                        <div className="flex flex-row mt-5">
+                            <Button
+                                ref={btnFilterRef}
+                                label="Terapkan"
+                                className="bg-purple-600 text-sm shadow-md rounded-lg mr-2"
+                            />
+                            <Button
+                                type="button"
+                                label="Reset"
+                                onClick={(e) => {
+                                    resetFilter();
+                                    setTimeout(() => {
+                                        btnFilterRef.current.click();
+                                    }, 500);
+                                }}
+                                className="outline-purple-600 outline-1 outline-dotted bg-transparent text-slate-700  text-sm shadow-md rounded-lg mr-2"
+                            />
+                        </div>
+                    </form>
+                </Sidebar>
+                <TabView
+                    activeIndex={activeIndexTab}
+                    onTabChange={(e) => {
+                        setActiveIndexTab(e.index);
+                    }}
+                    className="mt-2"
+                >
+                    <TabPanel header="Semua SLA">
+                        {activeIndexTab == 0 && (
+                            <>
+                                <ConfirmDialog />
+                                <ConfirmDialog2
+                                    group="declarative"
+                                    visible={confirmIsVisible}
+                                    onHide={() => setConfirmIsVisible(false)}
+                                    message="Konfirmasi kembali jika anda yakin!"
+                                    header="Konfirmasi kembali"
+                                    icon="pi pi-info-circle"
+                                    accept={handleDeleteSla}
+                                />
+
+                                <div className="flex mx-auto flex-col justify-center mt-5 gap-5">
+                                    <div className="card p-fluid w-full h-full flex justify-center rounded-lg">
+                                        <DataTable
+                                            loading={isLoadingData}
+                                            className="w-full h-auto rounded-lg dark:glass border-none text-center shadow-md"
+                                            pt={{
+                                                bodyRow:
+                                                    "dark:bg-transparent bg-transparent dark:text-gray-300",
+                                                table: "dark:bg-transparent bg-white dark:text-gray-300",
+                                                header: "",
+                                            }}
+                                            paginator
+                                            rowsPerPageOptions={[5, 10, 25, 50]}
+                                            paginatorTemplate="RowsPerPageDropdown FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink"
+                                            currentPageReportTemplate="{first} - {last} dari {totalRecords}"
+                                            filters={filters}
+                                            rows={10}
+                                            emptyMessage="SLA tidak ditemukan."
+                                            paginatorClassName="dark:bg-transparent paginator-custome dark:text-gray-300 rounded-b-lg"
+                                            header={header}
+                                            globalFilterFields={
+                                                globalFilterFields
+                                            }
+                                            value={slas}
+                                            dataKey="id"
+                                            scrollable
+                                        >
+                                            <Column
+                                                header="Aksi"
+                                                body={actionBodyTemplate}
+                                                align="center"
+                                                frozen
+                                                style={
+                                                    !isMobile
+                                                        ? {
+                                                              width: "max-content",
+                                                              whiteSpace:
+                                                                  "nowrap",
+                                                          }
+                                                        : null
+                                                }
+                                                className="dark:border-none text-center lg:w-max bg-white lg:whitespace-nowrap "
+                                                headerClassName="dark:border-none text-center bg-white dark:bg-slate-900 dark:text-gray-300"
+                                            ></Column>
+                                            <Column
+                                                field="uuid"
+                                                hidden
+                                                className="dark:border-none"
+                                                headerClassName="dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300"
+                                                header="Nama"
+                                                align="left"
+                                                style={{
+                                                    width: "max-content",
+                                                    whiteSpace: "nowrap",
+                                                }}
+                                            ></Column>
+                                            {columns.map((col) => {
+                                                return (
+                                                    <Column
+                                                        field={col.field}
+                                                        header={col.header}
+                                                        body={col.body}
+                                                        style={col.style}
+                                                        frozen={col.frozen}
+                                                        align="left"
+                                                        className="dark:border-none bg-white"
+                                                        headerClassName="dark:border-none bg-white dark:bg-slate-900 dark:text-gray-300"
+                                                    ></Column>
+                                                );
+                                            })}
+                                            <Column
+                                                header="Diinput Oleh"
+                                                body={(rowData) =>
+                                                    rowData.created_by.name
+                                                }
+                                                className="dark:border-none"
+                                                headerClassName="dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300"
+                                                align="left"
+                                                frozen={!isMobile}
+                                                style={{
+                                                    width: "max-content",
+                                                    whiteSpace: "nowrap",
+                                                }}
+                                            ></Column>
+                                            <Column
+                                                header="Diinput Pada"
+                                                body={(rowData) =>
+                                                    formateDate(
+                                                        rowData.created_at
+                                                    )
+                                                }
+                                                className="dark:border-none"
+                                                headerClassName="dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300"
+                                                align="left"
+                                                frozen={!isMobile}
+                                                style={{
+                                                    width: "max-content",
+                                                    whiteSpace: "nowrap",
+                                                }}
+                                            ></Column>
+                                        </DataTable>
+                                    </div>
+                                </div>
+                            </>
+                        )}
+                    </TabPanel>
+
+                    <TabPanel header="Log">
+                        {activeIndexTab == 1 && (
+                            <LogComponent
+                                auth={auth}
+                                fetchUrl={"/api/sla/logs"}
+                                filterUrl={"/sla/logs/filter"}
+                                deleteUrl={"/sla/logs"}
+                                objectKeyToIndo={objectKeyToIndo}
+                                users={users}
+                                showSuccess={showSuccess}
+                                showError={showError}
+                            />
+                        )}
+                    </TabPanel>
+
+                    <TabPanel header="Arsip">
+                        {activeIndexTab == 2 && (
+                            <ArsipComponent
+                                auth={auth}
+                                users={users}
+                                fetchUrl={"/api/sla/arsip"}
+                                forceDeleteUrl={"/sla/{id}/force"}
+                                restoreUrl={"/sla/{id}/restore"}
+                                filterUrl={"/sla/arsip/filter"}
+                                columns={columns}
+                                showSuccess={showSuccess}
+                                showError={showError}
+                                globalFilterFields={globalFilterFields}
+                            />
+                        )}
+                    </TabPanel>
+                </TabView>
+                <div className="card flex justify-content-center">
+                    <Dialog
+                        header="Aktivitas"
+                        headerClassName="dark:glass shadow-md dark:text-white"
+                        className="bg-white w-[80%] md:w-[60%] lg:w-[30%] dark:glass dark:text-white"
+                        contentClassName=" dark:glass dark:text-white"
+                        visible={modalEditActivityIsVisible}
+                        onHide={() => setModalEditActivityIsVisible(false)}
+                    >
+                        <form onSubmit={(e) => handleSubmitForm(e, "update")}>
+                            <div className="flex flex-col justify-around gap-4 mt-4">
+                                <div className="flex flex-col">
+                                    <label htmlFor="activity">Aktivitas</label>
+                                    <InputText
+                                        value={data.activity}
+                                        onChange={(e) =>
+                                            setData("activity", e.target.value)
+                                        }
+                                        disabled
+                                        className="dark:bg-gray-300"
+                                        id="activity"
+                                        aria-describedby="activity-help"
+                                    />
+                                </div>
+                                {/* <div className="flex flex-col">
                                 <label htmlFor="activity">
                                     Penanggungjawab
                                 </label>
@@ -868,334 +912,342 @@ export default function Index({ auth }) {
                                     dateFormat="dd/mm/yy"
                                 />
                             </div> */}
-                            <div className="flex flex-col">
-                                <label htmlFor="realization">
-                                    Bukti (foto)
-                                </label>
-                                <div className="App">
-                                    {data.realization !== null &&
-                                    typeof data.realization == "string" ? (
-                                        <>
-                                            <FilePond
-                                                files={
-                                                    "/storage/" +
-                                                    data.realization
-                                                }
-                                                onaddfile={(
-                                                    error,
-                                                    fileItems
-                                                ) => {
-                                                    if (!error) {
+                                <div className="flex flex-col">
+                                    <label htmlFor="realization">
+                                        Bukti (foto) *
+                                    </label>
+                                    <div className="App">
+                                        {data.realization !== null &&
+                                        typeof data.realization == "string" ? (
+                                            <>
+                                                <FilePond
+                                                    files={
+                                                        "/storage/" +
+                                                        data.realization
+                                                    }
+                                                    onaddfile={(
+                                                        error,
+                                                        fileItems
+                                                    ) => {
+                                                        if (!error) {
+                                                            setData(
+                                                                "realization",
+                                                                fileItems.file
+                                                            );
+                                                        }
+                                                    }}
+                                                    onremovefile={() => {
                                                         setData(
                                                             "realization",
-                                                            fileItems.file
+                                                            null
                                                         );
-                                                    }
-                                                }}
-                                                onremovefile={() => {
-                                                    setData(
-                                                        "realization",
-                                                        null
-                                                    );
-                                                }}
-                                                maxFileSize="2mb"
-                                                labelMaxFileSizeExceeded="File terlalu besar"
-                                                labelIdle='Drag & Drop your files or <span class="filepond--label-action">Browse</span>'
-                                            />
-                                        </>
-                                    ) : (
-                                        <>
-                                            <FilePond
-                                                onaddfile={(
-                                                    error,
-                                                    fileItems
-                                                ) => {
-                                                    if (!error) {
+                                                    }}
+                                                    maxFileSize="2mb"
+                                                    labelMaxFileSizeExceeded="File terlalu besar"
+                                                    labelIdle='Drag & Drop your files or <span class="filepond--label-action">Browse</span>'
+                                                />
+                                            </>
+                                        ) : (
+                                            <>
+                                                <FilePond
+                                                    onaddfile={(
+                                                        error,
+                                                        fileItems
+                                                    ) => {
+                                                        if (!error) {
+                                                            setData(
+                                                                "realization",
+                                                                fileItems.file
+                                                            );
+                                                        }
+                                                    }}
+                                                    onremovefile={() => {
                                                         setData(
                                                             "realization",
-                                                            fileItems.file
+                                                            null
                                                         );
-                                                    }
-                                                }}
-                                                onremovefile={() => {
-                                                    setData(
-                                                        "realization",
-                                                        null
-                                                    );
-                                                }}
-                                                maxFileSize="2mb"
-                                                labelMaxFileSizeExceeded="File terlalu besar"
-                                                labelIdle='Drag & Drop your files or <span class="filepond--label-action">Browse</span>'
-                                            />
-                                        </>
-                                    )}
+                                                    }}
+                                                    maxFileSize="2mb"
+                                                    labelMaxFileSizeExceeded="File terlalu besar"
+                                                    labelIdle='Drag & Drop your files or <span class="filepond--label-action">Browse</span>'
+                                                />
+                                            </>
+                                        )}
+                                    </div>
+                                </div>
+                                <div className="flex flex-col">
+                                    <label htmlFor="information">Catatan</label>
+                                    <InputTextarea
+                                        value={data.information}
+                                        onChange={(e) =>
+                                            setData(
+                                                "information",
+                                                e.target.value
+                                            )
+                                        }
+                                        rows={5}
+                                        cols={30}
+                                    />
                                 </div>
                             </div>
-                            <div className="flex flex-col">
-                                <label htmlFor="information">Catatan</label>
-                                <InputTextarea
-                                    value={data.information}
-                                    onChange={(e) =>
-                                        setData("information", e.target.value)
-                                    }
-                                    rows={5}
-                                    cols={30}
+                            <div className="flex justify-center mt-5">
+                                <Button
+                                    label="Submit"
+                                    disabled={processing}
+                                    className="bg-purple-600 text-sm shadow-md rounded-lg"
                                 />
                             </div>
-                        </div>
-                        <div className="flex justify-center mt-5">
-                            <Button
-                                label="Submit"
-                                disabled={processing}
-                                className="bg-purple-600 text-sm shadow-md rounded-lg"
-                            />
-                        </div>
-                    </form>
-                </Dialog>
-            </div>
-            {/* Tombol Aksi SLA*/}
-            <OverlayPanel
-                className=" shadow-md p-1 dark:bg-slate-900 dark:text-gray-300"
-                ref={action}
-            >
-                <div className="flex flex-col flex-wrap w-full">
-                    <Button
-                        icon="pi pi-check-circle"
-                        label="Aktivitas"
-                        className="bg-transparent hover:bg-slate-200 w-full text-slate-500 border-b-2 border-slate-400"
-                        onClick={(e) => {
-                            setPopupActivities(true);
-                            setActionMode("activity");
-                        }}
-                    />
-
-                    <Button
-                        icon="pi pi-pencil"
-                        label="edit"
-                        className="bg-transparent hover:bg-slate-200 w-full text-slate-500 border-b-2 border-slate-400"
-                        onClick={() => {
-                            if (
-                                permissions.includes("edit sla") &&
-                                selectedSLA.created_by.id == currentUser.id
-                            ) {
-                                router.get("sla/" + selectedSLA.uuid);
-                            } else {
-                                setPermissionErrorIsVisible(
-                                    (prev) => (prev = true)
-                                );
-                            }
-                        }}
-                    />
-                    <Button
-                        icon="pi pi-trash"
-                        label="hapus"
-                        className="bg-transparent hover:bg-slate-200 w-full text-slate-500 border-b-2 border-slate-400"
-                        onClick={() => {
-                            if (
-                                permissions.includes("hapus sla") &&
-                                selectedSLA.created_by.id == currentUser.id
-                            ) {
-                                confirmDeleteSLA();
-                            } else {
-                                setPermissionErrorIsVisible(
-                                    (prev) => (prev = true)
-                                );
-                            }
-                        }}
-                    />
+                        </form>
+                    </Dialog>
                 </div>
-            </OverlayPanel>
-            {/* Tombol Aksi Aktivitas*/}
-            <OverlayPanel
-                className=" shadow-md p-1 dark:bg-slate-900 dark:text-gray-300"
-                ref={actionActivityRef}
-            >
-                <div className="flex flex-col flex-wrap w-full">
-                    <Button
-                        icon="pi pi-pencil"
-                        label="edit"
-                        className="bg-transparent hover:bg-slate-200 w-full text-slate-500 border-b-2 border-slate-400"
-                        onClick={() => {
-                            if (
-                                permissions.includes("edit aktifitas sla") &&
-                                selectedActivity.user_id == currentUser.id
-                            ) {
-                                handleEditActivity(selectedActivity);
-                            } else {
-                                setPermissionErrorIsVisible(
-                                    (prev) => (prev = true)
-                                );
-                            }
-                        }}
-                    />
-                </div>
-            </OverlayPanel>
-            <Dialog
-                header="Aktivitas"
-                visible={popupActivities}
-                maximizable
-                className="w-full lg:w-[70vw]"
-                onHide={() => {
-                    setPopupActivities(false);
-                    setActionMode("sla");
-                }}
-            >
-                <div className="flex mx-auto flex-col justify-center mt-5 gap-5">
-                    <div className="card p-fluid w-full h-full flex justify-center rounded-lg">
-                        <DataTable
-                            loading={isLoadingData}
-                            className="w-full h-auto rounded-lg dark:glass border-none text-center"
-                            pt={{
-                                bodyRow:
-                                    "dark:bg-transparent bg-transparent dark:text-gray-300",
-                                table: "dark:bg-transparent bg-white dark:text-gray-300",
-                                header: "",
+                {/* Tombol Aksi SLA*/}
+                <OverlayPanel
+                    className=" shadow-md p-1 dark:bg-slate-900 dark:text-gray-300"
+                    ref={action}
+                >
+                    <div className="flex flex-col flex-wrap w-full">
+                        <Button
+                            icon="pi pi-check-circle"
+                            label="Aktivitas"
+                            className="bg-transparent hover:bg-slate-200 w-full text-slate-500 border-b-2 border-slate-400"
+                            onClick={(e) => {
+                                setPopupActivities(true);
+                                setActionMode("activity");
                             }}
-                            paginator
-                            rowsPerPageOptions={[10, 25, 50]}
-                            paginatorTemplate="RowsPerPageDropdown FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink"
-                            currentPageReportTemplate="{first} - {last} dari {totalRecords}"
-                            filters={filters}
-                            rows={25}
-                            emptyMessage="SLA tidak ditemukan."
-                            paginatorClassName="dark:bg-transparent paginator-custome dark:text-gray-300 rounded-b-lg"
-                            globalFilterFields={["activity", "cazh_pic"]}
-                            value={activities}
-                            dataKey="id"
-                            scrollable
-                        >
-                            <Column
-                                header="Aksi"
-                                body={actionBodyTemplate}
-                                style={
-                                    !isMobile
-                                        ? {
-                                              width: "max-content",
-                                              whiteSpace: "nowrap",
-                                          }
-                                        : null
-                                }
-                                align="center"
-                                className="dark:border-none lg:w-max bg-white lg:whitespace-nowrap "
-                                headerClassName="dark:border-none bg-white dark:bg-slate-900 dark:text-gray-300"
-                            ></Column>
-                            <Column
-                                field="uuid"
-                                hidden
-                                className="dark:border-none"
-                                headerClassName="dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300"
-                                header="Nama"
-                                align="left"
-                                style={{
-                                    width: "max-content",
-                                    whiteSpace: "nowrap",
-                                }}
-                            ></Column>
-                            <Column
-                                field="activity"
-                                className="dark:border-none"
-                                headerClassName="dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300"
-                                header="Tahapan"
-                                align="left"
-                                style={{
-                                    width: "max-content",
-                                    whiteSpace: "nowrap",
-                                }}
-                            ></Column>
-                            <Column
-                                field="cazh_pic"
-                                className="dark:border-none"
-                                headerClassName="dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300"
-                                header="Penanggungjawab"
-                                align="left"
-                                style={{
-                                    width: "max-content",
-                                    whiteSpace: "nowrap",
-                                }}
-                            ></Column>
-                            <Column
-                                field="duration"
-                                header="Estimasi Waktu"
-                                style={{
-                                    width: "max-content",
-                                    whiteSpace: "nowrap",
-                                }}
-                                headerClassName="dark:border-none bg-white dark:bg-transparent dark:text-gray-300"
-                            ></Column>
-                            <Column
-                                field="estimation_date"
-                                header="Tanggal"
-                                body={(rowData) => {
-                                    return new Date(
-                                        rowData.estimation_date
-                                    ).toLocaleDateString("id");
-                                }}
-                                style={{
-                                    width: "max-content",
-                                    whiteSpace: "nowrap",
-                                }}
-                                headerClassName="dark:border-none bg-white dark:bg-transparent dark:text-gray-300"
-                            ></Column>
-                            <Column
-                                field="realization_date"
-                                header="Realisasi"
-                                body={(rowData) => {
-                                    return rowData.realization_date !== null
-                                        ? new Date(
-                                              rowData.realization_date
-                                          ).toLocaleDateString("id")
-                                        : "-";
-                                }}
-                                style={{
-                                    width: "max-content",
-                                    whiteSpace: "nowrap",
-                                }}
-                                headerClassName="dark:border-none bg-white dark:bg-transparent dark:text-gray-300"
-                            ></Column>
-                            <Column
-                                field="realization"
-                                header="Bukti"
-                                body={(rowData) => {
-                                    return rowData.realization ? (
-                                        <div className="flex justify-center">
-                                            <Image
-                                                src={
-                                                    "/storage/" +
-                                                    rowData.realization
-                                                }
-                                                alt="Bukti"
-                                                width="50%"
-                                                height="50%"
-                                                preview
-                                                downloadable
-                                            />
-                                        </div>
-                                    ) : (
-                                        "-"
+                        />
+
+                        <Button
+                            icon="pi pi-pencil"
+                            label="edit"
+                            className="bg-transparent hover:bg-slate-200 w-full text-slate-500 border-b-2 border-slate-400"
+                            onClick={() => {
+                                if (
+                                    permissions.includes("edit sla") &&
+                                    selectedSLA.created_by.id == currentUser.id
+                                ) {
+                                    router.get("sla/" + selectedSLA.uuid);
+                                } else {
+                                    setPermissionErrorIsVisible(
+                                        (prev) => (prev = true)
                                     );
-                                }}
-                                style={{
-                                    width: "8rem",
-                                    // whiteSpace: "nowrap",
-                                }}
-                                headerClassName="dark:border-none bg-white dark:bg-transparent dark:text-gray-300"
-                            ></Column>
-                            <Column
-                                field="realization"
-                                header="Catatan"
-                                body={(rowData) => {
-                                    return rowData.information ?? "-";
-                                }}
-                                style={{
-                                    width: "max-content",
-                                    whiteSpace: "nowrap",
-                                }}
-                                headerClassName="dark:border-none bg-white dark:bg-transparent dark:text-gray-300"
-                            ></Column>
-                        </DataTable>
+                                }
+                            }}
+                        />
+                        <Button
+                            icon="pi pi-trash"
+                            label="hapus"
+                            className="bg-transparent hover:bg-slate-200 w-full text-slate-500 border-b-2 border-slate-400"
+                            onClick={() => {
+                                if (
+                                    permissions.includes("hapus sla") &&
+                                    selectedSLA.created_by.id == currentUser.id
+                                ) {
+                                    confirmDeleteSLA();
+                                } else {
+                                    setPermissionErrorIsVisible(
+                                        (prev) => (prev = true)
+                                    );
+                                }
+                            }}
+                        />
                     </div>
-                </div>
-            </Dialog>
-        </DashboardLayout>
+                </OverlayPanel>
+                {/* Tombol Aksi Aktivitas*/}
+                <OverlayPanel
+                    className=" shadow-md p-1 dark:bg-slate-900 dark:text-gray-300"
+                    ref={actionActivityRef}
+                >
+                    <div className="flex flex-col flex-wrap w-full">
+                        <Button
+                            icon="pi pi-pencil"
+                            label="edit"
+                            className="bg-transparent hover:bg-slate-200 w-full text-slate-500 border-b-2 border-slate-400"
+                            onClick={() => {
+                                if (
+                                    roles.includes("super admin") ||
+                                    (permissions.includes(
+                                        "edit aktifitas sla"
+                                    ) &&
+                                        selectedActivity.user_id ==
+                                            currentUser.id)
+                                ) {
+                                    handleEditActivity(selectedActivity);
+                                } else {
+                                    setPermissionErrorIsVisible(
+                                        (prev) => (prev = true)
+                                    );
+                                }
+                            }}
+                        />
+                    </div>
+                </OverlayPanel>
+                <Dialog
+                    header="Aktivitas"
+                    visible={popupActivities}
+                    maximizable
+                    className="w-full lg:w-[70vw]"
+                    onHide={() => {
+                        setPopupActivities(false);
+                        setActionMode("sla");
+                    }}
+                >
+                    <div className="flex mx-auto flex-col justify-center mt-5 gap-5">
+                        <div className="card p-fluid w-full h-full flex justify-center rounded-lg">
+                            <DataTable
+                                loading={isLoadingData}
+                                className="w-full h-auto rounded-lg dark:glass border-none text-center"
+                                pt={{
+                                    bodyRow:
+                                        "dark:bg-transparent bg-transparent dark:text-gray-300",
+                                    table: "dark:bg-transparent bg-white dark:text-gray-300",
+                                    header: "",
+                                }}
+                                paginator
+                                rowsPerPageOptions={[10, 25, 50]}
+                                paginatorTemplate="RowsPerPageDropdown FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink"
+                                currentPageReportTemplate="{first} - {last} dari {totalRecords}"
+                                filters={filters}
+                                rows={25}
+                                emptyMessage="SLA tidak ditemukan."
+                                paginatorClassName="dark:bg-transparent paginator-custome dark:text-gray-300 rounded-b-lg"
+                                globalFilterFields={["activity", "cazh_pic"]}
+                                value={activities}
+                                dataKey="id"
+                                scrollable
+                            >
+                                <Column
+                                    header="Aksi"
+                                    body={actionBodyTemplate}
+                                    style={
+                                        !isMobile
+                                            ? {
+                                                  width: "max-content",
+                                                  whiteSpace: "nowrap",
+                                              }
+                                            : null
+                                    }
+                                    align="center"
+                                    className="dark:border-none lg:w-max bg-white lg:whitespace-nowrap "
+                                    headerClassName="dark:border-none bg-white dark:bg-slate-900 dark:text-gray-300"
+                                ></Column>
+                                <Column
+                                    field="uuid"
+                                    hidden
+                                    className="dark:border-none"
+                                    headerClassName="dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300"
+                                    header="Nama"
+                                    align="left"
+                                    style={{
+                                        width: "max-content",
+                                        whiteSpace: "nowrap",
+                                    }}
+                                ></Column>
+                                <Column
+                                    field="activity"
+                                    className="dark:border-none"
+                                    headerClassName="dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300"
+                                    header="Tahapan"
+                                    align="left"
+                                    style={{
+                                        width: "max-content",
+                                        whiteSpace: "nowrap",
+                                    }}
+                                ></Column>
+                                <Column
+                                    field="cazh_pic"
+                                    className="dark:border-none"
+                                    headerClassName="dark:border-none bg-transparent dark:bg-transparent dark:text-gray-300"
+                                    header="Penanggungjawab"
+                                    align="left"
+                                    style={{
+                                        width: "max-content",
+                                        whiteSpace: "nowrap",
+                                    }}
+                                ></Column>
+                                <Column
+                                    field="duration"
+                                    header="Estimasi Waktu"
+                                    style={{
+                                        width: "max-content",
+                                        whiteSpace: "nowrap",
+                                    }}
+                                    headerClassName="dark:border-none bg-white dark:bg-transparent dark:text-gray-300"
+                                ></Column>
+                                <Column
+                                    field="estimation_date"
+                                    header="Tanggal"
+                                    body={(rowData) => {
+                                        return new Date(
+                                            rowData.estimation_date
+                                        ).toLocaleDateString("id");
+                                    }}
+                                    style={{
+                                        width: "max-content",
+                                        whiteSpace: "nowrap",
+                                    }}
+                                    headerClassName="dark:border-none bg-white dark:bg-transparent dark:text-gray-300"
+                                ></Column>
+                                <Column
+                                    field="realization_date"
+                                    header="Realisasi"
+                                    body={(rowData) => {
+                                        return rowData.realization_date !== null
+                                            ? new Date(
+                                                  rowData.realization_date
+                                              ).toLocaleDateString("id")
+                                            : "-";
+                                    }}
+                                    style={{
+                                        width: "max-content",
+                                        whiteSpace: "nowrap",
+                                    }}
+                                    headerClassName="dark:border-none bg-white dark:bg-transparent dark:text-gray-300"
+                                ></Column>
+                                <Column
+                                    field="realization"
+                                    header="Bukti"
+                                    body={(rowData) => {
+                                        return rowData.realization ? (
+                                            <div className="flex justify-center">
+                                                <Image
+                                                    src={
+                                                        "/storage/" +
+                                                        rowData.realization
+                                                    }
+                                                    alt="Bukti"
+                                                    width="50%"
+                                                    height="50%"
+                                                    preview
+                                                    downloadable
+                                                />
+                                            </div>
+                                        ) : (
+                                            "-"
+                                        );
+                                    }}
+                                    style={{
+                                        width: "8rem",
+                                        // whiteSpace: "nowrap",
+                                    }}
+                                    headerClassName="dark:border-none bg-white dark:bg-transparent dark:text-gray-300"
+                                ></Column>
+                                <Column
+                                    field="realization"
+                                    header="Catatan"
+                                    body={(rowData) => {
+                                        return rowData.information ?? "-";
+                                    }}
+                                    style={{
+                                        width: "max-content",
+                                        whiteSpace: "nowrap",
+                                    }}
+                                    headerClassName="dark:border-none bg-white dark:bg-transparent dark:text-gray-300"
+                                ></Column>
+                            </DataTable>
+                        </div>
+                    </div>
+                </Dialog>
+            </DashboardLayout>
+        </BlockUI>
     );
 }

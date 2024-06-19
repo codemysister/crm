@@ -300,11 +300,15 @@ export default function Index({ auth, spdsDefault, usersProp }) {
                 : null,
             body: (rowData) => {
                 if (rowData.lead != undefined) {
-                    return "-";
-                } else {
+                    return rowData.lead?.npwp !== null
+                        ? formatNPWP(rowData.lead.npwp)
+                        : "-";
+                } else if (rowData.partner != undefined) {
                     return rowData.partner?.npwp !== null
                         ? formatNPWP(rowData.partner.npwp)
                         : "-";
+                } else {
+                    return "-";
                 }
             },
         },

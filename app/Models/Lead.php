@@ -18,53 +18,53 @@ class Lead extends Model
     protected static $recordEvents = ['created', 'restored'];
 
 
-    protected static function boot()
-    {
-        parent::boot();
+    // protected static function boot()
+    // {
+    //     parent::boot();
 
-        static::deleting(function ($lead) {
+    //     static::deleting(function ($lead) {
 
-            if ($lead->isForceDeleting()) {
-                $lead->sph()->get()->each(function ($sph) {
-                    unlink($sph->sph_doc);
-                    Activity::create([
-                        'log_name' => 'force',
-                        'description' => 'menghapus permanen data sph',
-                        'subject_type' => get_class($sph),
-                        'subject_id' => $sph->id,
-                        'causer_type' => get_class(Auth::user()),
-                        'causer_id' => Auth::user()->id,
-                        "event" => "force",
-                        'properties' => ["old" => ["code" => $sph->code, "partner_name" => $sph->partner_name, "partner_pic" => $sph->partner_pic, "sales_name" => $sph->sales_name, "sales_wa" => $sph->sales_wa, "sales_email" => $sph->sales_email]]
-                    ]);
-                    $sph->forceDelete();
-                });
+    //         if ($lead->isForceDeleting()) {
+    //             $lead->sph()->get()->each(function ($sph) {
+    //                 unlink($sph->sph_doc);
+    //                 Activity::create([
+    //                     'log_name' => 'force',
+    //                     'description' => 'menghapus permanen data sph',
+    //                     'subject_type' => get_class($sph),
+    //                     'subject_id' => $sph->id,
+    //                     'causer_type' => get_class(Auth::user()),
+    //                     'causer_id' => Auth::user()->id,
+    //                     "event" => "force",
+    //                     'properties' => ["old" => ["code" => $sph->code, "partner_name" => $sph->partner_name, "partner_pic" => $sph->partner_pic, "sales_name" => $sph->sales_name, "sales_wa" => $sph->sales_wa, "sales_email" => $sph->sales_email]]
+    //                 ]);
+    //                 $sph->forceDelete();
+    //             });
 
-                $lead->mou()->get()->each(function ($mou) {
-                    $mou->forceDelete();
-                });
-            } else {
-                $lead->sph()->get()->each(function ($sph) {
-                    Activity::create([
-                        'log_name' => 'deleted',
-                        'description' => 'menghapus data sph',
-                        'subject_type' => get_class($sph),
-                        'subject_id' => $sph->id,
-                        'causer_type' => get_class(Auth::user()),
-                        'causer_id' => Auth::user()->id,
-                        "event" => "deleted",
-                        'properties' => ["old" => ["code" => $sph->code, "partner_name" => $sph->partner_name, "partner_pic" => $sph->partner_pic, "sales_name" => $sph->sales_name, "sales_wa" => $sph->sales_wa, "sales_email" => $sph->sales_email]]
-                    ]);
+    //             $lead->mou()->get()->each(function ($mou) {
+    //                 $mou->forceDelete();
+    //             });
+    //         } else {
+    //             $lead->sph()->get()->each(function ($sph) {
+    //                 Activity::create([
+    //                     'log_name' => 'deleted',
+    //                     'description' => 'menghapus data sph',
+    //                     'subject_type' => get_class($sph),
+    //                     'subject_id' => $sph->id,
+    //                     'causer_type' => get_class(Auth::user()),
+    //                     'causer_id' => Auth::user()->id,
+    //                     "event" => "deleted",
+    //                     'properties' => ["old" => ["code" => $sph->code, "partner_name" => $sph->partner_name, "partner_pic" => $sph->partner_pic, "sales_name" => $sph->sales_name, "sales_wa" => $sph->sales_wa, "sales_email" => $sph->sales_email]]
+    //                 ]);
 
-                    $sph->delete();
-                });
+    //                 $sph->delete();
+    //             });
 
-                $lead->mou()->get()->each(function ($mou) {
-                    $mou->delete();
-                });
-            }
-        });
-    }
+    //             $lead->mou()->get()->each(function ($mou) {
+    //                 $mou->delete();
+    //             });
+    //         }
+    //     });
+    // }
 
 
     public function tapActivity(Activity $activity, string $eventName)
